@@ -24,7 +24,7 @@ import { PolygonHolePage } from './pages/polygon/hole/PolygonHolePage';
 import { PolylineClickPage } from './pages/polyline/click/PolylineClickPage';
 import { RasterLayerPage } from './pages/rasterlayer/RasterLayerPage';
 import { UnsupportedSamplePage } from './pages/unsupported/UnsupportedSamplePage';
-import { DEFAULT_SAMPLE_PAGE, SAMPLE_PAGES, isKnownSamplePage } from './sampleRegistry';
+import { DEFAULT_SAMPLE_PAGE, getSamplePageDefinition, isKnownSamplePage } from './sampleRegistry';
 
 type MapProvider = 'maplibre' | 'google' | 'google-3d';
 
@@ -55,7 +55,7 @@ function pageContent(page: string | undefined) {
     case 'geojson-basic':
     case 'geojson-layer':
     case 'heatmap-layer':
-      return <UnsupportedSamplePage title={SAMPLE_PAGES.find(item => item.id === page)?.label ?? 'Unsupported'} />;
+      return <UnsupportedSamplePage title={getSamplePageDefinition(page)?.label ?? 'Unsupported'} />;
     default: return <MapPage />;
   }
 }
@@ -82,6 +82,8 @@ function App() {
     location.pathname.startsWith('/google-maps-3d') ? 'google-3d' :
     location.pathname.startsWith('/google-maps') ? 'google' :
     null;
+  const currentPage = location.pathname.split('/').filter(Boolean)[1] || DEFAULT_SAMPLE_PAGE;
+  const showProviderSelector = getSamplePageDefinition(currentPage)?.showProviderSelector ?? true;
 
   const switchProvider = (provider: MapProvider) => {
     const pathParts = location.pathname.split('/').filter(Boolean);
@@ -112,17 +114,19 @@ function App() {
             <span />
             <span />
           </button>
-          <label className="provider-control">
-            <span>Provider</span>
-            <select
-              value={currentProvider ?? 'maplibre'}
-              onChange={event => switchProvider(event.target.value as MapProvider)}
-            >
-              <option value="maplibre">MapLibre</option>
-              <option value="google">Google Maps</option>
-              <option value="google-3d">Google Maps 3D</option>
-            </select>
-          </label>
+          {showProviderSelector && (
+            <label className="provider-control">
+              <span>Provider</span>
+              <select
+                value={currentProvider ?? 'maplibre'}
+                onChange={event => switchProvider(event.target.value as MapProvider)}
+              >
+                <option value="maplibre">MapLibre</option>
+                <option value="google">Google Maps</option>
+                <option value="google-3d">Google Maps 3D</option>
+              </select>
+            </label>
+          )}
         </div>
       </header>
 

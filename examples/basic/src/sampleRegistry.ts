@@ -5,6 +5,7 @@ export interface SamplePageDefinition {
   label: string;
   group: string;
   status?: SampleStatus;
+  showProviderSelector?: boolean;
 }
 
 export const SAMPLE_PAGES: SamplePageDefinition[] = [
@@ -13,7 +14,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'fly-to', label: 'Fly To', group: 'Map' },
   { id: 'tilt', label: 'Tilt', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', group: 'Map' },
-  { id: 'camera-sync', label: 'Camera Sync', group: 'Map' },
+  { id: 'camera-sync', label: 'Camera Sync', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', group: 'Marker' },
   { id: 'marker-animation', label: 'Marker Animation', group: 'Marker' },
   { id: 'post-office', label: 'Post Office', group: 'Marker' },
@@ -40,4 +41,8 @@ export const DEFAULT_SAMPLE_PAGE = 'map';
 
 export function isKnownSamplePage(page: string | undefined): boolean {
   return SAMPLE_PAGES.some((item) => item.id === page);
+}
+
+export function getSamplePageDefinition(page: string | undefined): SamplePageDefinition | undefined {
+  return SAMPLE_PAGES.find((item) => item.id === page);
 }
