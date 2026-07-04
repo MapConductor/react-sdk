@@ -22,7 +22,6 @@ interface PostOfficeExtra {
 }
 
 // ─── InfoBubble with zoom-in on click ──────────────────────────────────────────
-// Must be rendered inside MapViewContainer so useMapViewController can find the context.
 function PostOfficeInfoBubble({
   extra,
   marker,
