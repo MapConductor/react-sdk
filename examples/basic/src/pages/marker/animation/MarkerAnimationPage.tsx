@@ -9,24 +9,35 @@ const INIT_CAMERA = { lat: 21.3825, lng: -157.9330, zoom: 14 };
 
 export function MarkerAnimationPage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
-  const [bounce, setBounce] = useState(false);
+  const [animation, setAnimation] = useState<MarkerAnimation | null>(null);
+
+  const triggerAnimation = (nextAnimation: MarkerAnimation) => {
+    setAnimation(nextAnimation);
+    window.setTimeout(() => setAnimation(null), 900);
+  };
+
   const marker = useMemo(() => createMarkerState({
     id: 'animated-marker',
     position: HONOLULU,
-    icon: new ColorDefaultIcon('#e74c3c', { label: bounce ? 'B' : 'M', labelTextColor: '#ffffff' }),
-    animation: bounce ? MarkerAnimation.Bounce : null,
+    icon: new ColorDefaultIcon('#e74c3c', {
+      label: animation === MarkerAnimation.Drop ? 'D' : animation === MarkerAnimation.Bounce ? 'B' : 'M',
+      labelTextColor: '#ffffff',
+    }),
+    animation,
     onClick: state => {
       state.animate(MarkerAnimation.Bounce);
-      setBounce(true);
-      window.setTimeout(() => setBounce(false), 800);
+      triggerAnimation(MarkerAnimation.Bounce);
     },
-  }), [bounce]);
+  }), [animation]);
 
   return (
     <MapViewContainer state={mapViewState}>
       <Marker state={marker} />
       <ControlPanel title="Marker Animation">
-        <button onClick={() => setBounce(true)}>Bounce marker</button>
+        <div className="button-grid">
+          <button onClick={() => triggerAnimation(MarkerAnimation.Drop)}>Drop marker</button>
+          <button onClick={() => triggerAnimation(MarkerAnimation.Bounce)}>Bounce marker</button>
+        </div>
         <p className="control-panel-note">Tap the marker or the button to trigger the sample animation state.</p>
       </ControlPanel>
     </MapViewContainer>

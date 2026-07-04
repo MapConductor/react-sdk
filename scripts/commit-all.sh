@@ -33,7 +33,8 @@ git-claude-commit() {
   if [ -n "$msg" ]; then
     echo -e "\ncommit message:\n$msg\n"
     git commit -m "$msg"
-    git push
+    branch=$(git branch)
+    git push -u origin $branch
   else
     echo "Error: Failed to generate commit message."
     return $FALSE
