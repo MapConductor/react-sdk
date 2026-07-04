@@ -6,12 +6,12 @@ import {
   GoogleMapsView,
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/js-sdk-reactnative-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreView,
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/js-sdk-reactnative-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
 
 type Provider = 'google' | 'maplibre';

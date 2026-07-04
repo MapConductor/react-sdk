@@ -50,10 +50,10 @@ importers:
       '@mapconductor/js-sdk-react':
         specifier: workspace:*
         version: link:../../js-sdk-react
-      '@mapconductor/js-sdk-react-for-googlemaps':
+      '@mapconductor/react-for-googlemaps':
         specifier: workspace:*
         version: link:../../react-for-googlemaps
-      '@mapconductor/js-sdk-react-for-maplibre':
+      '@mapconductor/react-for-maplibre':
         specifier: workspace:*
         version: link:../../react-for-maplibre
       react:
@@ -96,10 +96,10 @@ importers:
       '@mapconductor/js-sdk-reactnative':
         specifier: workspace:*
         version: link:../../js-sdk-reactnative
-      '@mapconductor/js-sdk-reactnative-for-googlemaps':
+      '@mapconductor/reactnative-for-googlemaps':
         specifier: workspace:*
         version: link:../../reactnative-for-googlemaps
-      '@mapconductor/js-sdk-reactnative-for-maplibre':
+      '@mapconductor/reactnative-for-maplibre':
         specifier: workspace:*
         version: link:../../reactnative-for-maplibre
       '@react-native-picker/picker':

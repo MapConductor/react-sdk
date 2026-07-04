@@ -10,8 +10,8 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/js-sdk-react-for-googlemaps';
-import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/js-sdk-react-for-maplibre';
+import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/react-for-googlemaps';
+import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 

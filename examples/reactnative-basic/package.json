@@ -11,8 +11,8 @@
   "dependencies": {
     "@mapconductor/js-sdk-core": "workspace:*",
     "@mapconductor/js-sdk-reactnative": "workspace:*",
-    "@mapconductor/js-sdk-reactnative-for-googlemaps": "workspace:*",
-    "@mapconductor/js-sdk-reactnative-for-maplibre": "workspace:*",
+    "@mapconductor/reactnative-for-googlemaps": "workspace:*",
+    "@mapconductor/reactnative-for-maplibre": "workspace:*",
     "@react-native-picker/picker": "2.11.4",
     "expo": "~57.0.1",
     "expo-status-bar": "~57.0.0",

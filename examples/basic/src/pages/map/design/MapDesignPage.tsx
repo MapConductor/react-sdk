@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
-import { GoogleMapDesign, GoogleMapDesignType } from '@mapconductor/js-sdk-react-for-googlemaps';
-import { MapLibreDesign, MapLibreMapDesignType } from '@mapconductor/js-sdk-react-for-maplibre';
+import { GoogleMapDesign, GoogleMapDesignType } from '@mapconductor/react-for-googlemaps';
+import { MapLibreDesign, MapLibreMapDesignType } from '@mapconductor/react-for-maplibre';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 12 };

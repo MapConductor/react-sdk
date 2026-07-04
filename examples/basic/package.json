@@ -11,8 +11,8 @@
   },
   "dependencies": {
     "@mapconductor/js-sdk-core": "workspace:*",
-    "@mapconductor/js-sdk-react-for-googlemaps": "workspace:*",
-    "@mapconductor/js-sdk-react-for-maplibre": "workspace:*",
+    "@mapconductor/react-for-googlemaps": "workspace:*",
+    "@mapconductor/react-for-maplibre": "workspace:*",
     "@mapconductor/js-sdk-react": "workspace:*",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
