@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": ".",
+    "paths": {
+      "@mapconductor/js-sdk-core": ["../../js-sdk-core/src/index.ts"],
+      "@mapconductor/js-sdk-react": ["../../js-sdk-react/src/index.ts"],
+      "@mapconductor/js-sdk-react-for-googlemaps": ["../../react-for-googlemaps/src/index.ts"],
+      "@mapconductor/js-sdk-react-for-maplibre": ["../../react-for-maplibre/src/index.ts"]
+    }
+  },
+  "include": ["src", "src/vite-env.d.ts", "src/pages/CirclePage.tsx", "src/pages/map/basic/StoreMapPage.tsx", "src/pages/MarkerPage.tsx", "src/pages/PolygonPage.tsx", "src/pages/PolylinePage.tsx"]
+}

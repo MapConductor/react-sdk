@@ -1,0 +1,9 @@
+packages:
+  - 'js-sdk-core'
+  - 'js-sdk-react'
+  - 'js-sdk-reactnative'
+  - 'react-for-googlemaps'
+  - 'react-for-maplibre'
+  - 'reactnative-for-googlemaps'
+  - 'reactnative-for-maplibre'
+  - 'examples/*'

@@ -1,0 +1,56 @@
+{
+  "name": "@mapconductor/react-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Unified mapping library for React - common API for Google Maps, MapLibre, and other map providers",
+  "workspaces": [
+    "js-sdk-core/",
+    "js-sdk-react/",
+    "js-sdk-reactnative/",
+    "react-for-googlemaps/",
+    "react-for-maplibre/",
+    "reactnative-for-googlemaps/",
+    "reactnative-for-maplibre/",
+    "examples/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run build --workspaces --if-present && npm run dev --workspaces --if-present --parallel",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "test": "npm run test --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.61.0",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.9.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MapConductor/react-sdk.git"
+  },
+  "keywords": [
+    "maps",
+    "google-maps",
+    "maplibre",
+    "react",
+    "typescript",
+    "mapping",
+    "unified-api"
+  ],
+  "author": "MapConductor",
+  "license": "MIT"
+}

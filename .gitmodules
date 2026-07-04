@@ -1,0 +1,21 @@
+[submodule "js-sdk-core"]
+	path = js-sdk-core
+	url = ./js-sdk-core
+[submodule "js-sdk-react"]
+	path = js-sdk-react
+	url = ./js-sdk-react
+[submodule "js-sdk-reactnative"]
+	path = js-sdk-reactnative
+	url = ./js-sdk-reactnative
+[submodule "react-for-googlemaps"]
+	path = react-for-googlemaps
+	url = ./react-for-googlemaps
+[submodule "react-for-maplibre"]
+	path = react-for-maplibre
+	url = ./react-for-maplibre
+[submodule "reactnative-for-googlemaps"]
+	path = reactnative-for-googlemaps
+	url = ./reactnative-for-googlemaps
+[submodule "reactnative-for-maplibre"]
+	path = reactnative-for-maplibre
+	url = ./reactnative-for-maplibre

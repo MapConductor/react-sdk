@@ -1,0 +1,30 @@
+{
+  "name": "@mapconductor/example-basic",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Basic example app for MapConductor React SDK",
+  "scripts": {
+    "dev": "vite",
+    "dev:https": "HTTPS=true vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mapconductor/js-sdk-core": "workspace:*",
+    "@mapconductor/js-sdk-react-for-googlemaps": "workspace:*",
+    "@mapconductor/js-sdk-react-for-maplibre": "workspace:*",
+    "@mapconductor/js-sdk-react": "workspace:*",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.18.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.2.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.3.5",
+    "vite-plugin-mkcert": "^2.1.0"
+  }
+}
