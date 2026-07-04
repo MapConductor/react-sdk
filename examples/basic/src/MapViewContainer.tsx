@@ -43,8 +43,8 @@ export function useSampleMapViewState(initialCamera: InitialCamera = DEFAULT_CAM
 function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
   const mapState = state as MapLibreViewState;
 
-  const isActive = useRef(true);
-  useEffect(() => () => { isActive.current = false; }, []);
+  const isActive = useRef(false);
+  useEffect(() => () => { isActive.current = true; }, []);
 
   return (
     <MapLibreView
@@ -73,8 +73,8 @@ function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMo
 function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
   const mapState = state as GoogleMapViewState;
 
-  const isActive = useRef(true);
-  useEffect(() => () => { isActive.current = false; }, []);
+  const isActive = useRef(false);
+  useEffect(() => () => { isActive.current = true; }, []);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   if (!apiKey || apiKey === 'your_api_key_here') {
@@ -118,8 +118,8 @@ function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCame
 function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, state }: MapViewContainerProps) {
   const mapState = state as GoogleMapViewState;
 
-  const isActive = useRef(true);
-  useEffect(() => () => { isActive.current = false; }, []);
+  const isActive = useRef(false);
+  useEffect(() => () => { isActive.current = true; }, []);
 
   const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   if (!apiKey || apiKey === 'your_api_key_here') {
