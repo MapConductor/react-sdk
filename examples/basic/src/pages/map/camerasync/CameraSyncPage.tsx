@@ -46,6 +46,13 @@ interface ProgrammaticMoveState {
   sinceMs: number;
 }
 
+interface PairedFlyToState {
+  active: boolean;
+  untilMs: number;
+  leftEnded: boolean;
+  rightEnded: boolean;
+}
+
 interface PaneState {
   provider: PaneProvider;
   mapState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
@@ -61,6 +68,7 @@ const INITIAL_CAMERA = createMapCameraPosition({
 const PROGRAMMATIC_TTL_MS = 1200;
 const PROGRAMMATIC_GRACE_MS = 250;
 const MOVE_SYNC_INTERVAL_MS = 33;
+const FLY_TO_DURATION_MS = 1000;
 
 function cameraKey(camera: MapCameraPosition): number {
   const latE5 = Math.trunc(camera.position.latitude * 1e5);
@@ -101,6 +109,10 @@ function markProgrammaticMove(
 
 function clearProgrammaticMove(ref: React.MutableRefObject<ProgrammaticMoveState>) {
   ref.current = { key: null, target: null, sinceMs: 0, untilMs: 0 };
+}
+
+function clearPairedFlyTo(ref: React.MutableRefObject<PairedFlyToState>) {
+  ref.current = { active: false, untilMs: 0, leftEnded: false, rightEnded: false };
 }
 
 function isProgrammaticMove(
@@ -404,6 +416,12 @@ export function CameraSyncPage() {
 
   const leftProgrammaticRef = useRef<ProgrammaticMoveState>({ key: null, target: null, sinceMs: 0, untilMs: 0 });
   const rightProgrammaticRef = useRef<ProgrammaticMoveState>({ key: null, target: null, sinceMs: 0, untilMs: 0 });
+  const pairedFlyToRef = useRef<PairedFlyToState>({
+    active: false,
+    untilMs: 0,
+    leftEnded: false,
+    rightEnded: false,
+  });
   const lastLeftMoveSyncAtMs = useRef(0);
   const lastRightMoveSyncAtMs = useRef(0);
 
@@ -422,6 +440,28 @@ export function CameraSyncPage() {
 
   function syncFromPane(source: PaneId, position: MapCameraPosition, fromMove: boolean) {
     const now = performance.now();
+
+    if (pairedFlyToRef.current.active) {
+      if (now > pairedFlyToRef.current.untilMs) {
+        clearPairedFlyTo(pairedFlyToRef);
+        clearProgrammaticMove(leftProgrammaticRef);
+        clearProgrammaticMove(rightProgrammaticRef);
+      } else {
+        setCameraForPane(source, position);
+        if (!fromMove) {
+          if (source === 'left') pairedFlyToRef.current.leftEnded = true;
+          else pairedFlyToRef.current.rightEnded = true;
+
+          if (pairedFlyToRef.current.leftEnded && pairedFlyToRef.current.rightEnded) {
+            clearPairedFlyTo(pairedFlyToRef);
+            clearProgrammaticMove(leftProgrammaticRef);
+            clearProgrammaticMove(rightProgrammaticRef);
+          }
+        }
+        return;
+      }
+    }
+
     const sourceRef = programmaticRefFor(source);
 
     if (sourceRef.current.key != null) {
@@ -458,12 +498,19 @@ export function CameraSyncPage() {
       tilt: 0,
     });
 
-    leftPaneState.mapState.moveCameraTo(position, 1000);
-    rightPaneState.mapState.moveCameraTo(position, 1000);
+    pairedFlyToRef.current = {
+      active: true,
+      untilMs: now + FLY_TO_DURATION_MS + PROGRAMMATIC_TTL_MS,
+      leftEnded: false,
+      rightEnded: false,
+    };
+
+    leftPaneState.mapState.moveCameraTo(position, FLY_TO_DURATION_MS);
+    rightPaneState.mapState.moveCameraTo(position, FLY_TO_DURATION_MS);
     setLeftCameraPosition(position);
     setRightCameraPosition(position);
-    markProgrammaticMove(leftProgrammaticRef, position, now, 1000 + PROGRAMMATIC_TTL_MS);
-    markProgrammaticMove(rightProgrammaticRef, position, now, 1000 + PROGRAMMATIC_TTL_MS);
+    markProgrammaticMove(leftProgrammaticRef, position, now, FLY_TO_DURATION_MS + PROGRAMMATIC_TTL_MS);
+    markProgrammaticMove(rightProgrammaticRef, position, now, FLY_TO_DURATION_MS + PROGRAMMATIC_TTL_MS);
   }
 
   return (
