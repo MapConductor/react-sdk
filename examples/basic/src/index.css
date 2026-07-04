@@ -1,4 +1,5 @@
 @import './pages/map/design/map-design-page.css';
+@import './pages/map/camerasync/camera-sync-page.css';
 
 * {
   margin: 0;

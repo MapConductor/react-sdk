@@ -13,7 +13,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'fly-to', label: 'Fly To', group: 'Map' },
   { id: 'tilt', label: 'Tilt', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', group: 'Map' },
-  { id: 'camera-sync', label: 'Camera Sync', group: 'Map', status: 'unsupported' },
+  { id: 'camera-sync', label: 'Camera Sync', group: 'Map' },
   { id: 'marker', label: 'Marker Icons', group: 'Marker' },
   { id: 'marker-animation', label: 'Marker Animation', group: 'Marker' },
   { id: 'post-office', label: 'Post Office', group: 'Marker' },

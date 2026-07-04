@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { MapLibreDesign, MapLibreView, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
 import { GoogleMapDesign, GoogleMapsView, GoogleMapsView2D, useGoogleMapViewState, type GoogleMapViewState } from '@mapconductor/react-for-googlemaps';
 import { createGeoPoint, createMapCameraPosition, MarkerTilingOptions, type GeoPoint, type MapCameraPosition, type MapViewStateInterface, type MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
@@ -12,6 +12,8 @@ export { DEFAULT_CAMERA };
 interface MapViewContainerProps {
   children?: React.ReactNode;
   onMapClick?: (point: GeoPoint) => void;
+  onCameraMoveStart?: (cam: MapCameraPosition) => void;
+  onCameraMove?: (cam: MapCameraPosition) => void;
   onCameraMoveEnd?: (cam: MapCameraPosition) => void;
   markerTilingOptions?: MarkerTilingOptions;
   state: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
@@ -38,7 +40,7 @@ export function useSampleMapViewState(initialCamera: InitialCamera = DEFAULT_CAM
   return mapLibreState;
 }
 
-function MapLibreContainer({ children, onMapClick, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
+function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
   const mapState = state as MapLibreViewState;
 
   const isActive = useRef(true);
@@ -50,6 +52,14 @@ function MapLibreContainer({ children, onMapClick, onCameraMoveEnd, markerTiling
       projection="globe"
       onMapClick={onMapClick}
       markerTilingOptions={markerTilingOptions}
+      onCameraMoveStart={(newCam: any) => {
+        if (!isActive.current) return;
+        onCameraMoveStart?.(newCam);
+      }}
+      onCameraMove={(newCam: any) => {
+        if (!isActive.current) return;
+        onCameraMove?.(newCam);
+      }}
       onCameraMoveEnd={(newCam: any) => {
         if (!isActive.current) return;
         onCameraMoveEnd?.(newCam);
@@ -60,8 +70,7 @@ function MapLibreContainer({ children, onMapClick, onCameraMoveEnd, markerTiling
   );
 }
 
-function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
-  const navigate = useNavigate();
+function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
   const mapState = state as GoogleMapViewState;
 
   const isActive = useRef(true);
@@ -87,6 +96,14 @@ function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveEnd, markerTi
       mapId={'DEMO_MAP_ID'}
       version='alpha'
       markerTilingOptions={markerTilingOptions}
+      onCameraMoveStart={(newCam: any) => {
+        if (!isActive.current) return;
+        onCameraMoveStart?.(newCam);
+      }}
+      onCameraMove={(newCam: any) => {
+        if (!isActive.current) return;
+        onCameraMove?.(newCam);
+      }}
       onMapClick={onMapClick}
       onCameraMoveEnd={(newCam: any) => {
         if (!isActive.current) return;
@@ -98,7 +115,7 @@ function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveEnd, markerTi
   );
 }
 
-function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveEnd, state }: MapViewContainerProps) {
+function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, state }: MapViewContainerProps) {
   const mapState = state as GoogleMapViewState;
 
   const isActive = useRef(true);
@@ -124,6 +141,14 @@ function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveEnd, state }:
       mapId={'DEMO_MAP_ID'}
       version='alpha'
       onMapClick={onMapClick}
+      onCameraMoveStart={(newCam: any) => {
+        if (!isActive.current) return;
+        onCameraMoveStart?.(newCam);
+      }}
+      onCameraMove={(newCam: any) => {
+        if (!isActive.current) return;
+        onCameraMove?.(newCam);
+      }}
       onCameraMoveEnd={(newCam: any) => {
         if (!isActive.current) return;
         onCameraMoveEnd?.(newCam);
@@ -134,7 +159,7 @@ function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveEnd, state }:
   );
 }
 
-export function MapViewContainer({ children, onMapClick, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
+export function MapViewContainer({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
   const location = useLocation();
   const isGoogle3D = location.pathname.startsWith('/google-maps-3d');
   const isGoogle2D = !isGoogle3D && location.pathname.startsWith('/google-maps');
@@ -142,6 +167,8 @@ export function MapViewContainer({ children, onMapClick, onCameraMoveEnd, marker
   if (isGoogle3D) {
     return <GoogleMapsContainer3D 
             onMapClick={onMapClick}
+            onCameraMoveStart={onCameraMoveStart}
+            onCameraMove={onCameraMove}
             onCameraMoveEnd={onCameraMoveEnd}
             state={state}>
               {children}
@@ -150,6 +177,8 @@ export function MapViewContainer({ children, onMapClick, onCameraMoveEnd, marker
   if (isGoogle2D) {
     return <GoogleMapsContainer2D 
             onMapClick={onMapClick}
+            onCameraMoveStart={onCameraMoveStart}
+            onCameraMove={onCameraMove}
             onCameraMoveEnd={onCameraMoveEnd}
             markerTilingOptions={markerTilingOptions}
             state={state}>
@@ -158,6 +187,8 @@ export function MapViewContainer({ children, onMapClick, onCameraMoveEnd, marker
   }
   return <MapLibreContainer
           onMapClick={onMapClick}
+          onCameraMoveStart={onCameraMoveStart}
+          onCameraMove={onCameraMove}
           onCameraMoveEnd={onCameraMoveEnd}
           markerTilingOptions={markerTilingOptions}
           state={state}>

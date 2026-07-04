@@ -15,6 +15,7 @@ import { MapDesignPage } from './pages/map/design/MapDesignPage';
 import { FlyToPage } from './pages/map/flyto/FlyToPage';
 import { TiltPage } from './pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from './pages/map/visibleregion/VisibleRegionPage';
+import { CameraSyncPage } from './pages/map/camerasync/CameraSyncPage';
 import { MarkerAnimationPage } from './pages/marker/animation/MarkerAnimationPage';
 import { PostOfficePage } from './pages/marker/postoffice/PostOfficePage';
 import { PolygonClickPage } from './pages/polygon/click/PolygonClickPage';
@@ -33,6 +34,7 @@ function pageContent(page: string | undefined) {
     case 'fly-to': return <FlyToPage />;
     case 'tilt': return <TiltPage />;
     case 'visible-region': return <VisibleRegionPage />;
+    case 'camera-sync': return <CameraSyncPage />;
     case 'marker': return <MarkerPage />;
     case 'marker-animation': return <MarkerAnimationPage />;
     case 'post-office': return <PostOfficePage />;
@@ -53,7 +55,6 @@ function pageContent(page: string | undefined) {
     case 'geojson-basic':
     case 'geojson-layer':
     case 'heatmap-layer':
-    case 'camera-sync':
       return <UnsupportedSamplePage title={SAMPLE_PAGES.find(item => item.id === page)?.label ?? 'Unsupported'} />;
     default: return <MapPage />;
   }
