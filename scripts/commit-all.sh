@@ -33,8 +33,13 @@ git-claude-commit() {
   if [ -n "$msg" ]; then
     echo -e "\ncommit message:\n$msg\n"
     git commit -m "$msg"
-    branch=$(git branch)
-    git push -u origin $branch
+    local branch
+    branch=$(git branch --show-current)
+    if [ -z "$branch" ]; then
+      echo "Error: Failed to detect current branch."
+      return $FALSE
+    fi
+    git push -u origin "$branch"
   else
     echo "Error: Failed to generate commit message."
     return $FALSE
