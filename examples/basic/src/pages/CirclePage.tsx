@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { createCircleState } from '@mapconductor/js-sdk-core';
-import { Circle, MarkerFromProps } from '@mapconductor/js-sdk-react';
+import { Circle, Marker } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { CIRCLE_CENTER } from '../data/storeData';
@@ -33,7 +33,7 @@ export function CirclePage() {
   return (
     <MapViewContainer state={mapViewState}>
       <Circle state={circleState} />
-      <MarkerFromProps position={CIRCLE_CENTER} clickable={false} />
+      <Marker position={CIRCLE_CENTER} clickable={false} />
       <ControlPanel title="Circle Example">
         <SliderControl
           label="Radius"
