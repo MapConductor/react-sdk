@@ -26,16 +26,16 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'polygon', label: 'Polygon', group: 'Shape' },
   { id: 'polygon-click', label: 'Polygon Click', group: 'Shape' },
   { id: 'polygon-geodesic', label: 'Polygon Geodesic', group: 'Shape' },
-  { id: 'polygon-hole', label: 'Polygon Hole', group: 'Shape' },
-  { id: 'ground-image', label: 'Ground Image', group: 'Overlay' },
+  { id: 'polygon-hole', label: 'Polygon Hole', group: 'Shape', unavailableProviders: ['google-maps-3d'] },
+  { id: 'ground-image', label: 'Ground Image', group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
   { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
   { id: 'info-bubble-simple', label: 'Simple Bubble', group: 'Info Bubble' },
   { id: 'info-bubble-styled', label: 'Styled Bubble', group: 'Info Bubble' },
   { id: 'info-bubble-multiple', label: 'Multiple Bubbles', group: 'Info Bubble' },
   { id: 'info-bubble-rich', label: 'Rich Bubble', group: 'Info Bubble' },
-  { id: 'geojson-basic', label: 'GeoJSON Basic', group: 'Extensions', status: 'unsupported' },
-  { id: 'geojson-layer', label: 'GeoJSON Layer', group: 'Extensions', status: 'unsupported' },
-  { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions', status: 'unsupported' },
+  { id: 'geojson-basic', label: 'GeoJSON Basic', group: 'Extensions', status: 'unsupported', unavailableProviders: ['google-maps-3d'] },
+  { id: 'geojson-layer', label: 'GeoJSON Layer', group: 'Extensions', status: 'unsupported', unavailableProviders: ['google-maps-3d'] },
+  { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions', status: 'unsupported', unavailableProviders: ['google-maps-3d'] },
 ];
 
 export const DEFAULT_SAMPLE_PAGE = 'map';
