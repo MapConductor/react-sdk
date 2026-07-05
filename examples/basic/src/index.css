@@ -197,6 +197,57 @@ body,
   color: white;
 }
 
+.simple-text-bubble {
+  color: #2563eb;
+  padding: 4px;
+}
+
+.marker-icon-info-bubble {
+  max-width: min(360px, 72vw);
+  white-space: pre-wrap;
+  color: #111827;
+  font: 12px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+}
+
+.right-tail-info-bubble {
+  position: relative;
+  width: max-content;
+  max-width: 220px;
+  padding: 8px;
+  margin-left: 8px;
+  border: 2px solid #000000;
+  border-radius: 4px;
+  background: #ffffff;
+  color: #2563eb;
+  font-size: 13px;
+  line-height: 1.35;
+  box-shadow: 0 3px 14px rgba(15, 23, 42, 0.18);
+}
+
+.right-tail-info-bubble::before,
+.right-tail-info-bubble::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+}
+
+.right-tail-info-bubble::before {
+  left: -10px;
+  border-top: 7px solid transparent;
+  border-bottom: 7px solid transparent;
+  border-right: 10px solid #000000;
+}
+
+.right-tail-info-bubble::after {
+  left: -7px;
+  border-top: 5px solid transparent;
+  border-bottom: 5px solid transparent;
+  border-right: 8px solid #ffffff;
+}
+
 .rich-bubble {
   display: grid;
   gap: 6px;
@@ -207,6 +258,62 @@ body,
   background: white;
   box-shadow: 0 3px 14px rgba(15, 23, 42, 0.22);
   font-size: 13px;
+}
+
+.rich-location-bubble {
+  display: grid;
+  gap: 8px;
+  width: 200px;
+  color: #111827;
+  font-size: 13px;
+}
+
+.rich-location-bubble strong {
+  font-size: 18px;
+  line-height: 1.2;
+}
+
+.rich-location-bubble p {
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+.rating-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+
+.rating-stars {
+  display: flex;
+  gap: 1px;
+}
+
+.rating-stars span {
+  color: #9ca3af;
+}
+
+.rating-stars .filled {
+  color: #facc15;
+}
+
+.multi-bubble-content {
+  display: grid;
+  gap: 2px;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+}
+
+.multi-bubble-content span {
+  color: #6b7280;
+  font-size: 12px;
 }
 
 .map-container {

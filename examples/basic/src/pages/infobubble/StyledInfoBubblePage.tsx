@@ -1,29 +1,52 @@
-import { useState } from 'react';
-import { ColorDefaultIcon, createMarkerState } from '@mapconductor/js-sdk-core';
-import { InfoBubble, Marker } from '@mapconductor/js-sdk-react';
-import { SAPPORO } from '../common/sampleHelpers';
+import { useMemo, useState } from 'react';
+import { ColorDefaultIcon, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
+import { InfoBubbleCustom, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
 
-const INIT_CAMERA = { lat: 43.0642, lng: 141.3469, zoom: 13 };
+const INIT_CAMERA = { lat: 37.7849, lng: -122.4094, zoom: 15 };
 
 export function StyledInfoBubblePage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
-  const [marker] = useState(() => createMarkerState({
-    id: 'styled-bubble',
-    position: SAPPORO,
-    draggable: true,
-    icon: new ColorDefaultIcon('#7c3aed', { label: 'S', labelTextColor: '#ffffff' }),
-  }));
+  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>('marker1');
+  const markers = useMemo(() => {
+    const marker1 = createMarkerState({
+      id: 'marker1',
+      position: createGeoPoint({ latitude: 37.7749, longitude: -122.4194 }),
+      icon: new ColorDefaultIcon('#2563eb', {
+        label: '1',
+        labelTextColor: '#ffffff',
+        infoAnchor: { x: 0.5, y: 0.25 },
+      }),
+      draggable: true,
+      onClick: state => setSelectedMarkerId(state.id),
+      onDragStart: state => console.log(`マーカーのドラッグを開始: ${state.id}`),
+      onDrag: state => console.log('マーカーをドラッグ中:', state.position),
+      onDragEnd: state => console.log(`マーカーのドラッグが終了: ${state.id}`),
+    });
+    const marker2 = createMarkerState({
+      id: 'marker2',
+      position: createGeoPoint({ latitude: 37.7849, longitude: -122.4094 }),
+      icon: new ColorDefaultIcon('#ef4444', {
+        label: '2',
+        labelTextColor: '#ffffff',
+        infoAnchor: { x: 0.5, y: 0.25 },
+      }),
+      onClick: state => setSelectedMarkerId(state.id),
+    });
+    return [marker1, marker2];
+  }, []);
+  const activeMarker = markers.find(marker => marker.id === selectedMarkerId);
 
   return (
-    <MapViewContainer state={mapViewState}>
-      <Marker state={marker} />
-      <InfoBubble marker={marker} bubbleColor="#1f2937" borderColor="#a78bfa" cornerRadius={8}>
-        <div className="bubble-content dark">
-          <strong>Styled bubble</strong>
-          <span>Drag the marker.</span>
-        </div>
-      </InfoBubble>
+    <MapViewContainer state={mapViewState} onMapClick={() => setSelectedMarkerId(null)}>
+      <Markers states={markers} />
+      {activeMarker && (
+        <InfoBubbleCustom marker={activeMarker} tailOffset={{ x: 0, y: 0.5 }}>
+          <div className="right-tail-info-bubble">
+            {activeMarker.position.toUrlValue(6)}
+          </div>
+        </InfoBubbleCustom>
+      )}
     </MapViewContainer>
   );
 }

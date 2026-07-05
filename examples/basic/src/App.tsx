@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 're
 import { PageNav } from './components/PageNav';
 import { CirclePage } from './pages/CirclePage';
 import { MapPage } from './pages/map/basic/StoreMapPage';
-import { MarkerPage } from './pages/MarkerPage';
+import { MarkerIconsPage } from './pages/marker/icons/MarkerIconsPage';
 import { PolygonPage } from './pages/PolygonPage';
 import { PolylinePage } from './pages/PolylinePage';
 import { GroundImagePage } from './pages/groundimage/GroundImagePage';
@@ -54,7 +54,7 @@ function pageContent(page: string | undefined) {
     case 'tilt': return <TiltPage />;
     case 'visible-region': return <VisibleRegionPage />;
     case 'camera-sync': return <CameraSyncPage />;
-    case 'marker': return <MarkerPage />;
+    case 'marker': return <MarkerIconsPage />;
     case 'marker-animation': return <MarkerAnimationPage />;
     case 'post-office': return <PostOfficePage />;
     case 'circle': return <CirclePage />;

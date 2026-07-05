@@ -2,6 +2,7 @@ packages:
   - 'js-sdk-core'
   - 'js-sdk-react'
   - 'js-sdk-reactnative'
+  - 'react-icons'
   - 'react-for-googlemaps'
   - 'react-for-maplibre'
   - 'reactnative-for-googlemaps'
