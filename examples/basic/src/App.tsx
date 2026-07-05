@@ -28,6 +28,25 @@ import { DEFAULT_SAMPLE_PAGE, getSamplePageDefinition, isKnownSamplePage } from 
 
 type MapProvider = 'maplibre' | 'google' | 'google-3d';
 
+function providerRouteId(provider: string | undefined): string {
+  return provider ?? '';
+}
+
+function isPageUnavailableOnProvider(page: string | undefined, provider: string | undefined): boolean {
+  const definition = getSamplePageDefinition(page);
+  return definition?.unavailableProviders?.includes(providerRouteId(provider)) ?? false;
+}
+
+function ProviderUnavailableOverlay() {
+  return (
+    <div className="provider-unavailable-overlay" role="status" aria-live="polite">
+      <div className="provider-unavailable-box">
+        This feature is not available on this provider
+      </div>
+    </div>
+  );
+}
+
 function pageContent(page: string | undefined) {
   switch (page) {
     case 'map-design': return <MapDesignPage />;
@@ -69,7 +88,14 @@ function ProviderPageRoute() {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}`} replace />;
   }
 
-  return pageContent(page);
+  const isUnavailable = isPageUnavailableOnProvider(requestedPage, provider);
+
+  return (
+    <>
+      {isUnavailable ? <MapPage /> : pageContent(page)}
+      {isUnavailable && <ProviderUnavailableOverlay />}
+    </>
+  );
 }
 
 function App() {

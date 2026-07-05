@@ -6,6 +6,7 @@ export interface SamplePageDefinition {
   group: string;
   status?: SampleStatus;
   showProviderSelector?: boolean;
+  unavailableProviders?: string[];
 }
 
 export const SAMPLE_PAGES: SamplePageDefinition[] = [
@@ -17,7 +18,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'camera-sync', label: 'Camera Sync', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', group: 'Marker' },
   { id: 'marker-animation', label: 'Marker Animation', group: 'Marker' },
-  { id: 'post-office', label: 'Post Office', group: 'Marker' },
+  { id: 'post-office', label: 'Post Office', group: 'Marker', unavailableProviders: ['google-maps-3d'] },
   { id: 'post-office-cluster', label: 'Post Office Cluster', group: 'Marker', status: 'unsupported' },
   { id: 'circle', label: 'Circle', group: 'Shape' },
   { id: 'polyline', label: 'Polyline', group: 'Shape' },
@@ -27,7 +28,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'polygon-geodesic', label: 'Polygon Geodesic', group: 'Shape' },
   { id: 'polygon-hole', label: 'Polygon Hole', group: 'Shape' },
   { id: 'ground-image', label: 'Ground Image', group: 'Overlay' },
-  { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay' },
+  { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
   { id: 'info-bubble-simple', label: 'Simple Bubble', group: 'Info Bubble' },
   { id: 'info-bubble-styled', label: 'Styled Bubble', group: 'Info Bubble' },
   { id: 'info-bubble-multiple', label: 'Multiple Bubbles', group: 'Info Bubble' },
