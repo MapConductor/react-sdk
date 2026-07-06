@@ -43,6 +43,7 @@ function mapconductorTileServiceWorker(): Plugin {
 const useHttps = process.env.HTTPS === 'true';
 
 export default defineConfig({
+  base: process.env.VITE_BASE_PATH ?? '/',
   // mkcert() enables server.https itself (with a locally-trusted cert) when present;
   // no separate server.https config is needed.
   plugins: [react(), mapconductorTileServiceWorker(), ...(useHttps ? [mkcert()] : [])],

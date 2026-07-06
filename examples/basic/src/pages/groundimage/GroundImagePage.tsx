@@ -12,8 +12,8 @@ import { Toast, useToast } from '../../components/Toast';
 import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 40.7410, lng: -74.1758, zoom: 11 };
-const GROUND_IMAGE_URL = '/newark_nj_1922_0.webp';
-const CLICKED_GROUND_IMAGE_URL = '/newark_nj_1922_1.webp';
+const GROUND_IMAGE_URL = `${import.meta.env.BASE_URL}newark_nj_1922_0.webp`;
+const CLICKED_GROUND_IMAGE_URL = `${import.meta.env.BASE_URL}newark_nj_1922_1.webp`;
 
 export function GroundImagePage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);

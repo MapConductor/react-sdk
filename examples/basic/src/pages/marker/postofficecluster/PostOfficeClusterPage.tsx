@@ -112,10 +112,10 @@ function PostOfficeClusterPageContent({
   // Load post office data and icons in parallel.
   useEffect(() => {
     Promise.all([
-      fetch('/postoffice/postoffices.json')
+      fetch(`${import.meta.env.BASE_URL}postoffice/postoffices.json`)
         .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<[number, number, string, string][]>; }),
-      loadImage('/postoffice/postoffice.webp'),
-      loadImage('/postoffice/cluster_red.png'),
+      loadImage(`${import.meta.env.BASE_URL}postoffice/postoffice.webp`),
+      loadImage(`${import.meta.env.BASE_URL}postoffice/cluster_red.png`),
     ])
       .then(([data, markerImg, clusterImg]) => {
         setRaw(data);

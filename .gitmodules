@@ -25,6 +25,9 @@
 [submodule "react-heatmap"]
 	path = react-heatmap
 	url = ./react-heatmap
+[submodule "react-icons"]
+	path = react-icons
+	url = ./react-icons
 [submodule "react-marker-clustering"]
 	path = react-marker-clustering
 	url = ./react-marker-clustering

@@ -23,7 +23,7 @@ function HeatmapLayerPageContent({
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/postoffice/postoffices.json')
+    fetch(`${import.meta.env.BASE_URL}postoffice/postoffices.json`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<[number, number, string, string][]>;

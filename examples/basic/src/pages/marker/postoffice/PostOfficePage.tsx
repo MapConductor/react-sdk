@@ -81,14 +81,14 @@ function PostOfficePageContent({
 
   // Load post office data
   useEffect(() => {
-    fetch('/postoffice/postoffices.json')
+    fetch(`${import.meta.env.BASE_URL}postoffice/postoffices.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<[number, number, string, string][]>;
       })
       .then(setRaw)
       .then(() => new Promise<HTMLImageElement>((resolve, reject) => {
-        const url = '/postoffice/postoffice.webp';
+        const url = `${import.meta.env.BASE_URL}postoffice/postoffice.webp`;
         const img = new Image();
         img.onload = () => resolve(img);
         img.onerror = () => reject(new Error(`Failed to load icon: ${url}`));

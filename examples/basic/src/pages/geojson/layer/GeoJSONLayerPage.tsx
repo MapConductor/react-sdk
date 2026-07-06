@@ -48,7 +48,7 @@ export function GeoJSONLayerPage() {
   );
 
   useEffect(() => {
-    fetch('/geojson/sample-railway.geojson')
+    fetch(`${import.meta.env.BASE_URL}geojson/sample-railway.geojson`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.text();
