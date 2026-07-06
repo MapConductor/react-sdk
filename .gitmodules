@@ -19,3 +19,12 @@
 [submodule "reactnative-for-maplibre"]
 	path = reactnative-for-maplibre
 	url = ./reactnative-for-maplibre
+[submodule "react-geojson-layer"]
+	path = react-geojson-layer
+	url = ./react-geojson-layer
+[submodule "react-heatmap"]
+	path = react-heatmap
+	url = ./react-heatmap
+[submodule "react-marker-clustering"]
+	path = react-marker-clustering
+	url = ./react-marker-clustering
