@@ -13,10 +13,10 @@ import { StoreInfoView } from './StoreInfoView';
 const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 10 };
 
 const STORE_ICON_URLS: Record<string, string> = {
-  coffee_bean: '/store-icons/coffee_bean.webp',
-  honolulu_coffee: '/store-icons/honolulu_coffee.webp',
-  coffee_extra: '/store-icons/coffee_extra.webp',
-  starbucks: '/store-icons/starbucks.webp',
+  coffee_bean: `${import.meta.env.BASE_URL}store-icons/coffee_bean.webp`,
+  honolulu_coffee: `${import.meta.env.BASE_URL}store-icons/honolulu_coffee.webp`,
+  coffee_extra: `${import.meta.env.BASE_URL}store-icons/coffee_extra.webp`,
+  starbucks: `${import.meta.env.BASE_URL}store-icons/starbucks.webp`,
 };
 
 export function MapPage() {

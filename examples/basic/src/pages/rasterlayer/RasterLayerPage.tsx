@@ -5,6 +5,7 @@ import { ControlPanel, SliderControl } from '../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 5 };
+const OSM_TILE_SIZE = 256;
 
 export function RasterLayerPage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
@@ -13,7 +14,7 @@ export function RasterLayerPage() {
     id: 'osm-raster',
     source: RasterLayerSource.UrlTemplate({
       template: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-      tileSize: RasterLayerSource.DEFAULT_TILE_SIZE,
+      tileSize: OSM_TILE_SIZE,
       attribution: '© OpenStreetMap contributors',
     }),
     opacity,

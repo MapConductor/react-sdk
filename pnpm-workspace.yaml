@@ -2,8 +2,14 @@ packages:
   - 'js-sdk-core'
   - 'js-sdk-react'
   - 'js-sdk-reactnative'
+  - 'react-icons'
   - 'react-for-googlemaps'
   - 'react-for-maplibre'
+  - 'react-geojson-layer'
+  - 'react-heatmap'
+  - 'react-marker-clustering'
   - 'reactnative-for-googlemaps'
   - 'reactnative-for-maplibre'
   - 'examples/*'
+allowBuilds:
+  esbuild: true

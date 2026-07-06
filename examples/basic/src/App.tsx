@@ -3,7 +3,7 @@ import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 're
 import { PageNav } from './components/PageNav';
 import { CirclePage } from './pages/CirclePage';
 import { MapPage } from './pages/map/basic/StoreMapPage';
-import { MarkerPage } from './pages/MarkerPage';
+import { MarkerIconsPage } from './pages/marker/icons/MarkerIconsPage';
 import { PolygonPage } from './pages/PolygonPage';
 import { PolylinePage } from './pages/PolylinePage';
 import { GroundImagePage } from './pages/groundimage/GroundImagePage';
@@ -15,17 +15,40 @@ import { MapDesignPage } from './pages/map/design/MapDesignPage';
 import { FlyToPage } from './pages/map/flyto/FlyToPage';
 import { TiltPage } from './pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from './pages/map/visibleregion/VisibleRegionPage';
+import { CameraSyncPage } from './pages/map/camerasync/CameraSyncPage';
 import { MarkerAnimationPage } from './pages/marker/animation/MarkerAnimationPage';
 import { PostOfficePage } from './pages/marker/postoffice/PostOfficePage';
+import { PostOfficeClusterPage } from './pages/marker/postofficecluster/PostOfficeClusterPage';
 import { PolygonClickPage } from './pages/polygon/click/PolygonClickPage';
 import { PolygonGeodesicPage } from './pages/polygon/geodesic/PolygonGeodesicPage';
 import { PolygonHolePage } from './pages/polygon/hole/PolygonHolePage';
 import { PolylineClickPage } from './pages/polyline/click/PolylineClickPage';
 import { RasterLayerPage } from './pages/rasterlayer/RasterLayerPage';
-import { UnsupportedSamplePage } from './pages/unsupported/UnsupportedSamplePage';
-import { DEFAULT_SAMPLE_PAGE, SAMPLE_PAGES, isKnownSamplePage } from './sampleRegistry';
+import { HeatmapLayerPage } from './pages/heatmaplayer/HeatmapLayerPage';
+import { BasicGeoJSONPage } from './pages/geojson/basic/BasicGeoJSONPage';
+import { GeoJSONLayerPage } from './pages/geojson/layer/GeoJSONLayerPage';
+import { DEFAULT_SAMPLE_PAGE, getSamplePageDefinition, isKnownSamplePage } from './sampleRegistry';
 
 type MapProvider = 'maplibre' | 'google' | 'google-3d';
+
+function providerRouteId(provider: string | undefined): string {
+  return provider ?? '';
+}
+
+function isPageUnavailableOnProvider(page: string | undefined, provider: string | undefined): boolean {
+  const definition = getSamplePageDefinition(page);
+  return definition?.unavailableProviders?.includes(providerRouteId(provider)) ?? false;
+}
+
+function ProviderUnavailableOverlay() {
+  return (
+    <div className="provider-unavailable-overlay" role="status" aria-live="polite">
+      <div className="provider-unavailable-box">
+        This feature is not available on this provider
+      </div>
+    </div>
+  );
+}
 
 function pageContent(page: string | undefined) {
   switch (page) {
@@ -33,7 +56,8 @@ function pageContent(page: string | undefined) {
     case 'fly-to': return <FlyToPage />;
     case 'tilt': return <TiltPage />;
     case 'visible-region': return <VisibleRegionPage />;
-    case 'marker': return <MarkerPage />;
+    case 'camera-sync': return <CameraSyncPage />;
+    case 'marker': return <MarkerIconsPage />;
     case 'marker-animation': return <MarkerAnimationPage />;
     case 'post-office': return <PostOfficePage />;
     case 'circle': return <CirclePage />;
@@ -49,12 +73,10 @@ function pageContent(page: string | undefined) {
     case 'info-bubble-styled': return <StyledInfoBubblePage />;
     case 'info-bubble-multiple': return <MultipleBubblesPage />;
     case 'info-bubble-rich': return <RichContentBubblePage />;
-    case 'post-office-cluster':
-    case 'geojson-basic':
-    case 'geojson-layer':
-    case 'heatmap-layer':
-    case 'camera-sync':
-      return <UnsupportedSamplePage title={SAMPLE_PAGES.find(item => item.id === page)?.label ?? 'Unsupported'} />;
+    case 'post-office-cluster': return <PostOfficeClusterPage />;
+    case 'heatmap-layer': return <HeatmapLayerPage />;
+    case 'geojson-basic': return <BasicGeoJSONPage />;
+    case 'geojson-layer': return <GeoJSONLayerPage />;
     default: return <MapPage />;
   }
 }
@@ -68,7 +90,14 @@ function ProviderPageRoute() {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}`} replace />;
   }
 
-  return pageContent(page);
+  const isUnavailable = isPageUnavailableOnProvider(requestedPage, provider);
+
+  return (
+    <>
+      {isUnavailable ? <MapPage /> : pageContent(page)}
+      {isUnavailable && <ProviderUnavailableOverlay />}
+    </>
+  );
 }
 
 function App() {
@@ -81,6 +110,8 @@ function App() {
     location.pathname.startsWith('/google-maps-3d') ? 'google-3d' :
     location.pathname.startsWith('/google-maps') ? 'google' :
     null;
+  const currentPage = location.pathname.split('/').filter(Boolean)[1] || DEFAULT_SAMPLE_PAGE;
+  const showProviderSelector = getSamplePageDefinition(currentPage)?.showProviderSelector ?? true;
 
   const switchProvider = (provider: MapProvider) => {
     const pathParts = location.pathname.split('/').filter(Boolean);
@@ -111,17 +142,19 @@ function App() {
             <span />
             <span />
           </button>
-          <label className="provider-control">
-            <span>Provider</span>
-            <select
-              value={currentProvider ?? 'maplibre'}
-              onChange={event => switchProvider(event.target.value as MapProvider)}
-            >
-              <option value="maplibre">MapLibre</option>
-              <option value="google">Google Maps</option>
-              <option value="google-3d">Google Maps 3D</option>
-            </select>
-          </label>
+          {showProviderSelector && (
+            <label className="provider-control">
+              <span>Provider</span>
+              <select
+                value={currentProvider ?? 'maplibre'}
+                onChange={event => switchProvider(event.target.value as MapProvider)}
+              >
+                <option value="maplibre">MapLibre</option>
+                <option value="google">Google Maps</option>
+                <option value="google-3d">Google Maps 3D</option>
+              </select>
+            </label>
+          )}
         </div>
       </header>
 

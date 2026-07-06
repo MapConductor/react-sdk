@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
+  ImageIcon,
   MarkerTilingOptions,
   createGeoPoint,
   createMapCameraPosition,
@@ -22,7 +23,6 @@ interface PostOfficeExtra {
 }
 
 // ─── InfoBubble with zoom-in on click ──────────────────────────────────────────
-// Must be rendered inside MapViewContainer so useMapViewController can find the context.
 function PostOfficeInfoBubble({
   extra,
   marker,
@@ -63,9 +63,7 @@ const INIT_CAMERA_POSITION = createMapCameraPosition({
 const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
   ...MarkerTilingOptions.Default,
   iconScaleCallback: (_state, zoom) => {
-    if (zoom > 12) return 2.0;
-    if (zoom > 10) return 1.0;
-    if (zoom > 8)  return 0.8;
+    if (zoom > 10)  return 0.8;
     if (zoom > 5)  return 0.5;
     return 0.2;
   },
@@ -79,15 +77,24 @@ function PostOfficePageContent({
   const [raw, setRaw] = useState<[number, number, string, string][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<MarkerState | null>(null);
+  const [icon, setIcon] = useState<ImageIcon | null>(null);
 
   // Load post office data
   useEffect(() => {
-    fetch('/postoffice/postoffices.json')
+    fetch(`${import.meta.env.BASE_URL}postoffice/postoffices.json`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json() as Promise<[number, number, string, string][]>;
       })
       .then(setRaw)
+      .then(() => new Promise<HTMLImageElement>((resolve, reject) => {
+        const url = `${import.meta.env.BASE_URL}postoffice/postoffice.webp`;
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(`Failed to load icon: ${url}`));
+        img.src = url;
+      }))
+      .then((img) => setIcon(new ImageIcon(img)))
       .catch((err) => setError(String(err)));
   }, []);
 
@@ -99,11 +106,14 @@ function PostOfficePageContent({
           id: `po-${i}`,
           position: createGeoPoint({ latitude: lat, longitude: lng }),
           extra: { name, address } satisfies PostOfficeExtra,
+          icon,
           onClick: (state) => setSelected(state),
         }),
       ),
-    [raw],
+    [icon],
   );
+
+  const clearSelect = useCallback(() => setSelected(null), [])
 
   if (error) {
     return (
@@ -117,6 +127,7 @@ function PostOfficePageContent({
     <MapViewContainer
       state={mapViewState}
       markerTilingOptions={MARKER_TILING_OPTIONS}
+      onMapClick={clearSelect}
     >
       <Markers states={markerStates} />
 

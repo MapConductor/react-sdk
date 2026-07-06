@@ -1,49 +1,160 @@
-import { useMemo, useState } from 'react';
-import { createCircleState } from '@mapconductor/js-sdk-core';
-import { Circle, MarkerFromProps } from '@mapconductor/js-sdk-react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ColorDefaultIcon,
+  Spherical,
+  calculatePositionAtDistance,
+  computeDistanceBetween,
+  createCircleState,
+  createGeoPoint,
+  type GeoPoint,
+  type MarkerState,
+  type Offset,
+} from '@mapconductor/js-sdk-core';
+import { Circle, Marker, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
-import { CIRCLE_CENTER } from '../data/storeData';
 import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
 
-const INIT_CAMERA = { lat: 21.3825, lng: -157.9330, zoom: 12 };
+const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
+const INIT_CAMERA = { lat: CIRCLE_CENTER.latitude, lng: CIRCLE_CENTER.longitude, zoom: 12 };
+const INITIAL_RADIUS_METERS = 1000;
+const SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS = 300;
+const CIRCLE_COLORS = ['#0000ff', '#ff0000', '#008000', '#00ffff', '#d3d3d3', '#ff00ff'];
+
+function rgba(hex: string, alpha: number): string {
+  const value = hex.replace('#', '');
+  const r = parseInt(value.slice(0, 2), 16);
+  const g = parseInt(value.slice(2, 4), 16);
+  const b = parseInt(value.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function radiusLabelPosition(
+  center: GeoPoint,
+  edge: GeoPoint,
+  mapViewState: ReturnType<typeof useSampleMapViewState>,
+): Offset | null | Promise<Offset | null> {
+  const holder = mapViewState.getMapViewHolder();
+  if (!holder) return null;
+  const midpoint = Spherical.linearInterpolate({ from: center, to: edge, fraction: 0.5 });
+  return holder.toScreenOffset(midpoint);
+}
 
 export function CirclePage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
-  const [radius, setRadius] = useState(1000);
+  const [edgePosition, setEdgePosition] = useState(() =>
+    calculatePositionAtDistance({
+      center: CIRCLE_CENTER,
+      distanceMeters: INITIAL_RADIUS_METERS,
+      bearingDegrees: 90,
+    }),
+  );
+  const [colorIndex, setColorIndex] = useState(0);
   const [fillOpacity, setFillOpacity] = useState(0.3);
   const [strokeWidth, setStrokeWidth] = useState(3);
+  const [labelOffset, setLabelOffset] = useState<Offset | null>(null);
+  const [cameraTick, setCameraTick] = useState(0);
+  const suppressCircleClickUntilRef = useRef(0);
   const { messages, showToast, dismissToast } = useToast();
+  const radius = useMemo(
+    () => computeDistanceBetween(CIRCLE_CENTER, edgePosition),
+    [edgePosition],
+  );
+
+  const updateLabelPosition = useCallback(() => {
+    const next = radiusLabelPosition(CIRCLE_CENTER, edgePosition, mapViewState);
+    if (next instanceof Promise) {
+      next.then(setLabelOffset).catch(() => setLabelOffset(null));
+    } else {
+      setLabelOffset(next);
+    }
+  }, [edgePosition, mapViewState]);
+
+  useEffect(() => {
+    updateLabelPosition();
+    const raf = requestAnimationFrame(updateLabelPosition);
+    return () => cancelAnimationFrame(raf);
+  }, [cameraTick, updateLabelPosition]);
+
+  const handleMarkerMove = useCallback((dragged: MarkerState) => {
+    setEdgePosition(dragged.position);
+  }, []);
+
+  const handleMarkerDragEnd = useCallback((dragged: MarkerState) => {
+    suppressCircleClickUntilRef.current =
+      Date.now() + SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS;
+    setEdgePosition(dragged.position);
+  }, []);
 
   const circleState = useMemo(
     () =>
       createCircleState({
-        id: 'demo-circle',
+        id: 'circle',
         center: CIRCLE_CENTER,
         radiusMeters: radius,
-        fillColor: `rgba(0, 100, 255, ${fillOpacity})`,
-        strokeColor: '#0064ff',
+        fillColor: rgba(CIRCLE_COLORS[colorIndex], fillOpacity),
+        strokeColor: 'rgba(0, 0, 255, 0.5)',
         strokeWidth,
         clickable: true,
-        onClick: () => showToast(`Circle clicked - radius: ${radius.toFixed(0)}m`),
+        onClick: () => {
+          if (Date.now() < suppressCircleClickUntilRef.current) return;
+          setColorIndex((index) => (index + 1) % CIRCLE_COLORS.length);
+          showToast(`Circle clicked - Radius: ${radius.toFixed(0)}m`);
+        },
       }),
-    [radius, fillOpacity, strokeWidth, showToast]
+    [colorIndex, fillOpacity, radius, showToast, strokeWidth],
+  );
+
+  const centerIcon = useMemo(
+    () => new ColorDefaultIcon('#ff0000', { strokeColor: '#ffffff', label: 'C' }),
+    [],
+  );
+  const edgeIcon = useMemo(
+    () => new ColorDefaultIcon('#008000', { strokeColor: '#ffffff', label: 'E' }),
+    [],
   );
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer
+      state={mapViewState}
+      onCameraMove={() => setCameraTick((tick) => tick + 1)}
+      onCameraMoveEnd={() => setCameraTick((tick) => tick + 1)}
+    >
       <Circle state={circleState} />
-      <MarkerFromProps position={CIRCLE_CENTER} clickable={false} />
+      <Polyline
+        id="circle-radius-line"
+        points={[CIRCLE_CENTER, edgePosition]}
+        strokeColor="#ffffff"
+        strokeWidth={3}
+      />
+      <Marker
+        id="center_marker"
+        position={CIRCLE_CENTER}
+        icon={centerIcon}
+        clickable={false}
+        draggable={false}
+      />
+      <Marker
+        id="edge_marker"
+        position={edgePosition}
+        icon={edgeIcon}
+        draggable
+        onDragStart={handleMarkerMove}
+        onDrag={handleMarkerMove}
+        onDragEnd={handleMarkerDragEnd}
+      />
+      {labelOffset && (
+        <div
+          className="circle-radius-label"
+          style={{
+            left: labelOffset.x,
+            top: labelOffset.y,
+          }}
+        >
+          {radius.toFixed(0)} m
+        </div>
+      )}
       <ControlPanel title="Circle Example">
-        <SliderControl
-          label="Radius"
-          value={radius}
-          min={100}
-          max={5000}
-          step={50}
-          format={value => `${value.toFixed(0)}m`}
-          onChange={setRadius}
-        />
         <SliderControl
           label="Fill Opacity"
           value={fillOpacity}
@@ -56,7 +167,7 @@ export function CirclePage() {
           value={strokeWidth}
           min={1}
           max={10}
-          step={0.5}
+          step={0.1}
           format={value => `${value.toFixed(1)}px`}
           onChange={setStrokeWidth}
         />
