@@ -18,12 +18,15 @@ import { VisibleRegionPage } from './pages/map/visibleregion/VisibleRegionPage';
 import { CameraSyncPage } from './pages/map/camerasync/CameraSyncPage';
 import { MarkerAnimationPage } from './pages/marker/animation/MarkerAnimationPage';
 import { PostOfficePage } from './pages/marker/postoffice/PostOfficePage';
+import { PostOfficeClusterPage } from './pages/marker/postofficecluster/PostOfficeClusterPage';
 import { PolygonClickPage } from './pages/polygon/click/PolygonClickPage';
 import { PolygonGeodesicPage } from './pages/polygon/geodesic/PolygonGeodesicPage';
 import { PolygonHolePage } from './pages/polygon/hole/PolygonHolePage';
 import { PolylineClickPage } from './pages/polyline/click/PolylineClickPage';
 import { RasterLayerPage } from './pages/rasterlayer/RasterLayerPage';
-import { UnsupportedSamplePage } from './pages/unsupported/UnsupportedSamplePage';
+import { HeatmapLayerPage } from './pages/heatmaplayer/HeatmapLayerPage';
+import { BasicGeoJSONPage } from './pages/geojson/basic/BasicGeoJSONPage';
+import { GeoJSONLayerPage } from './pages/geojson/layer/GeoJSONLayerPage';
 import { DEFAULT_SAMPLE_PAGE, getSamplePageDefinition, isKnownSamplePage } from './sampleRegistry';
 
 type MapProvider = 'maplibre' | 'google' | 'google-3d';
@@ -70,11 +73,10 @@ function pageContent(page: string | undefined) {
     case 'info-bubble-styled': return <StyledInfoBubblePage />;
     case 'info-bubble-multiple': return <MultipleBubblesPage />;
     case 'info-bubble-rich': return <RichContentBubblePage />;
-    case 'post-office-cluster':
-    case 'geojson-basic':
-    case 'geojson-layer':
-    case 'heatmap-layer':
-      return <UnsupportedSamplePage title={getSamplePageDefinition(page)?.label ?? 'Unsupported'} />;
+    case 'post-office-cluster': return <PostOfficeClusterPage />;
+    case 'heatmap-layer': return <HeatmapLayerPage />;
+    case 'geojson-basic': return <BasicGeoJSONPage />;
+    case 'geojson-layer': return <GeoJSONLayerPage />;
     default: return <MapPage />;
   }
 }

@@ -19,7 +19,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'marker', label: 'Marker Icons', group: 'Marker' },
   { id: 'marker-animation', label: 'Marker Animation', group: 'Marker' },
   { id: 'post-office', label: 'Post Office', group: 'Marker', unavailableProviders: ['google-maps-3d'] },
-  { id: 'post-office-cluster', label: 'Post Office Cluster', group: 'Marker', status: 'unsupported' },
+  { id: 'post-office-cluster', label: 'Post Office Cluster', group: 'Marker' },
   { id: 'circle', label: 'Circle', group: 'Shape' },
   { id: 'polyline', label: 'Polyline', group: 'Shape' },
   { id: 'polyline-click', label: 'Polyline Click', group: 'Shape' },
@@ -33,9 +33,9 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'info-bubble-styled', label: 'Styled Bubble', group: 'Info Bubble' },
   { id: 'info-bubble-multiple', label: 'Multiple Bubbles', group: 'Info Bubble' },
   { id: 'info-bubble-rich', label: 'Rich Bubble', group: 'Info Bubble' },
-  { id: 'geojson-basic', label: 'GeoJSON Basic', group: 'Extensions', status: 'unsupported', unavailableProviders: ['google-maps-3d'] },
-  { id: 'geojson-layer', label: 'GeoJSON Layer', group: 'Extensions', status: 'unsupported', unavailableProviders: ['google-maps-3d'] },
-  { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions', status: 'unsupported', unavailableProviders: ['google-maps-3d'] },
+  { id: 'geojson-basic', label: 'GeoJSON Basic', group: 'Extensions', unavailableProviders: ['google-maps-3d'] },
+  { id: 'geojson-layer', label: 'GeoJSON Layer', group: 'Extensions', unavailableProviders: ['google-maps-3d'] },
+  { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions', unavailableProviders: ['google-maps-3d'] },
 ];
 
 export const DEFAULT_SAMPLE_PAGE = 'map';

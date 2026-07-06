@@ -50,8 +50,8 @@ function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMo
     <MapLibreView
       state={mapState}
       projection="globe"
-      onMapClick={onMapClick}
       markerTilingOptions={markerTilingOptions}
+      onMapClick={onMapClick}
       onCameraMoveStart={(newCam: any) => {
         if (!isActive.current) return;
         onCameraMoveStart?.(newCam);
@@ -95,6 +95,7 @@ function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCame
       apiKey={apiKey}
       mapId={'DEMO_MAP_ID'}
       version='alpha'
+      libraries={'map3d'} // for demo
       markerTilingOptions={markerTilingOptions}
       onCameraMoveStart={(newCam: any) => {
         if (!isActive.current) return;

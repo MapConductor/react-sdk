@@ -14,7 +14,10 @@
     "@mapconductor/react-for-googlemaps": "workspace:*",
     "@mapconductor/react-for-maplibre": "workspace:*",
     "@mapconductor/react-icons": "workspace:*",
+    "@mapconductor/react-marker-clustering": "workspace:*",
     "@mapconductor/js-sdk-react": "workspace:*",
+    "@mapconductor/react-geojson-layer": "workspace:*",
+    "@mapconductor/react-heatmap": "workspace:*",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0"
