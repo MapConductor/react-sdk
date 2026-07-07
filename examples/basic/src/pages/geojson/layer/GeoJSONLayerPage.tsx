@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
+import { ZipReaderStream } from '@zip.js/zip.js';
 import { createGeoPoint, type GeoPoint } from '@mapconductor/js-sdk-core';
 import { InfoBubbleAtPosition } from '@mapconductor/js-sdk-react';
 import {
@@ -12,6 +13,8 @@ import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 35.68, lng: 139.77, zoom: 13 };
+
+const GEOJSON_ASSET = 'geojson/N02-22_GML.zip';
 
 interface SelectedFeature {
   position: GeoPoint;
@@ -48,28 +51,33 @@ export function GeoJSONLayerPage() {
   );
 
   useEffect(() => {
-    fetch(`${import.meta.env.BASE_URL}geojson/sample-railway.geojson`)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.text();
-      })
-      .then(text => {
+    const abort = new AbortController();
+    (async () => {
+      try {
+        const response = await fetch(`${import.meta.env.BASE_URL}${GEOJSON_ASSET}`, {
+          signal: abort.signal,
+        });
+        if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
+        const text = await readFirstGeoJSONEntry(response.body);
+        if (abort.signal.aborted) return;
         setFeatures(GeoJSONParser.parseFeatures(text));
-        setIsLoading(false);
-      })
-      .catch(err => {
-        setError(String(err));
-        setIsLoading(false);
-      });
+      } catch (err) {
+        console.log(err);
+        if (!abort.signal.aborted) setError(String(err));
+      } finally {
+        if (!abort.signal.aborted) setIsLoading(false);
+      }
+    })();
   }, []);
 
   const handleMapClick = useCallback(
     (point: GeoPoint) => {
-      if (!layerState.processClick(point)) {
+      const zoom = mapViewState.cameraPosition.zoom;
+      if (!layerState.processClick(point, 10, zoom)) {
         setSelected(null);
       }
     },
-    [layerState],
+    [layerState, mapViewState],
   );
 
   if (error) {
@@ -101,6 +109,28 @@ export function GeoJSONLayerPage() {
       </ControlPanel>
     </MapViewContainer>
   );
+}
+
+async function readFirstGeoJSONEntry(stream: ReadableStream<Uint8Array>): Promise<string> {
+  const entries = stream.pipeThrough(new ZipReaderStream()).getReader();
+  try {
+    for (;;) {
+      const { done, value: entry } = await entries.read();
+      if (done) throw new Error('No .geojson entry found in zip');
+      if (
+        entry.readable &&
+        !entry.directory &&
+        !entry.filename.startsWith('__MACOSX/') &&
+        entry.filename.toLowerCase().endsWith('.geojson')
+      ) {
+        return await new Response(entry.readable).text();
+      }
+      // Skipped entries must still be drained so the zip stream can advance.
+      if (entry.readable) await new Response(entry.readable).arrayBuffer();
+    }
+  } finally {
+    await entries.cancel().catch(() => {});
+  }
 }
 
 function PropertyTable({ properties }: { properties: Record<string, unknown> }) {
