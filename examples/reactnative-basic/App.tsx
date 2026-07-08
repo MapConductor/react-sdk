@@ -1,5 +1,6 @@
 import React from 'react';
-import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { StatusBar, StyleSheet } from 'react-native';
 import { MapScreen } from './src/screens/MapScreen';
 
 export default function App() {
