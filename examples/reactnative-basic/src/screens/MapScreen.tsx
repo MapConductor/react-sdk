@@ -1,6 +1,6 @@
 import React from 'react';
-import { CameraSyncPage } from '../pages/map/camerasync/CameraSyncPage';
+import { FlyToPage } from '../pages/map/flyto/FlyToPage';
 
 export function MapScreen() {
-  return <CameraSyncPage />;
+  return <FlyToPage />;
 }
