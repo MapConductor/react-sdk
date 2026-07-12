@@ -8,6 +8,7 @@ import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
 import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
 import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
+import { PostOfficePage } from 'src/pages/marker/postoffice/PostOfficePage';
 
 export type { MapProvider };
 
@@ -39,6 +40,8 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <CameraSyncPage />;
     case 'marker-animation':
       return <MarkerAnimationPage provider={provider} />;
+    case 'post-office':
+      return <PostOfficePage provider={provider} />;
     default:
       return <UnsupportedPage page={page} />;
   }

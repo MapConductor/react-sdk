@@ -32,7 +32,7 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'camera-sync', label: 'Camera Sync', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', group: 'Marker', status: 'unsupported' },
   { id: 'marker-animation', label: 'Marker Animation', group: 'Marker' },
-  { id: 'post-office', label: 'Post Office', group: 'Marker', status: 'unsupported' },
+  { id: 'post-office', label: 'Post Office', group: 'Marker' },
   { id: 'post-office-cluster', label: 'Post Office Cluster', group: 'Marker', status: 'unsupported' },
   { id: 'circle', label: 'Circle', group: 'Shape', status: 'unsupported' },
   { id: 'polyline', label: 'Polyline', group: 'Shape', status: 'unsupported' },
