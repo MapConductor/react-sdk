@@ -14,8 +14,8 @@ import {
 import { Polygon, Polyline } from '@mapconductor/js-sdk-react';
 import {
   GoogleMapDesign,
-  GoogleMapsView,
-  GoogleMapsView2D,
+  GoogleMapView,
+  GoogleMapView2D,
   useGoogleMapViewState,
   type GoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
@@ -285,7 +285,7 @@ function CameraSyncMapView({
 
     if (paneState.provider === 'google-maps-3d') {
       return (
-        <GoogleMapsView
+        <GoogleMapView
           state={paneState.mapState as GoogleMapViewState}
           apiKey={apiKey}
           mapId="DEMO_MAP_ID"
@@ -294,12 +294,12 @@ function CameraSyncMapView({
           onCameraMoveEnd={onCameraMoveEnd}
         >
           {children}
-        </GoogleMapsView>
+        </GoogleMapView>
       );
     }
 
     return (
-      <GoogleMapsView2D
+      <GoogleMapView2D
         state={paneState.mapState as GoogleMapViewState}
         apiKey={apiKey}
         mapId="DEMO_MAP_ID"
@@ -308,7 +308,7 @@ function CameraSyncMapView({
         onCameraMoveEnd={onCameraMoveEnd}
       >
         {children}
-      </GoogleMapsView2D>
+      </GoogleMapView2D>
     );
   }
 

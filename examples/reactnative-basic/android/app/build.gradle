@@ -3,21 +3,59 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
+def resolveNodeExecutable = {
+    def properties = new Properties()
+    def localPropertiesFiles = [
+        new File(rootDir, "local.properties"),
+        new File(rootDir.parentFile, "local.properties"),
+        new File(rootDir.parentFile.parentFile, "local.properties"),
+    ]
+    localPropertiesFiles.findAll { it.exists() }.each { file ->
+        file.withInputStream { properties.load(it) }
+    }
+
+    def nodeExecutable = properties.getProperty("NODE_BINARY") ?:
+        properties.getProperty("nodeExecutable") ?:
+        System.getenv("NODE_BINARY")
+
+    return nodeExecutable ?: "node"
+}
+def nodeExecutable = resolveNodeExecutable()
+def nodeCommand = { String expression ->
+    return [nodeExecutable, "--print", expression].execute(null, rootDir).text.trim()
+}
+def loadGoogleMapsApiKey = {
+    def properties = new Properties()
+    def localPropertiesFiles = [
+        new File(rootDir, "local.properties"),
+        new File(rootDir.parentFile, "local.properties"),
+        new File(rootDir.parentFile.parentFile, "local.properties"),
+    ]
+    localPropertiesFiles.findAll { it.exists() }.each { file ->
+        file.withInputStream { properties.load(it) }
+    }
+
+    return properties.getProperty("GOOGLE_MAPS_API_KEY")
+        ?: findProperty("GOOGLE_MAPS_API_KEY")
+        ?: System.getenv("GOOGLE_MAPS_API_KEY")
+        ?: ""
+}
+def googleMapsApiKey = loadGoogleMapsApiKey()
 
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
 react {
-    entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
-    reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('hermes-compiler/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/hermesc/%OS-BIN%/hermesc"
-    codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
+    entryFile = file([nodeExecutable, "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
+    reactNativeDir = new File(nodeCommand("require.resolve('react-native/package.json')")).getParentFile().getAbsoluteFile()
+    hermesCommand = new File(nodeCommand("require.resolve('hermes-compiler/package.json', { paths: [require.resolve('react-native/package.json')] })")).getParentFile().getAbsolutePath() + "/hermesc/%OS-BIN%/hermesc"
+    codegenDir = new File(nodeCommand("require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })")).getParentFile().getAbsoluteFile()
 
     enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
     // Use Expo CLI to bundle the app, this ensures the Metro config
     // works correctly with Expo projects.
-    cliFile = new File(["node", "--print", "require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"].execute(null, rootDir).text.trim())
+    cliFile = new File(nodeCommand("require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })"))
     bundleCommand = "export:embed"
 
     /* Folders */
@@ -96,6 +134,7 @@ android {
         versionName "1.0.0"
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
+        manifestPlaceholders["googleMapsApiKey"] = googleMapsApiKey
     }
     signingConfigs {
         debug {
@@ -155,6 +194,8 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    implementation project(':mapconductor_react-for-googlemaps')
+    implementation project(':mapconductor_react-for-maplibre')
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

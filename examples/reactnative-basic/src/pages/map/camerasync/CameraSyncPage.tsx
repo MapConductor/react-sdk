@@ -19,16 +19,16 @@ import {
 } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapDesign,
-  GoogleMapsView,
+  GoogleMapView,
   useGoogleMapViewState,
   type GoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
+} from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
   MapLibreView,
   useMapLibreViewState,
   type MapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+} from '@mapconductor/react-for-maplibre';
 
 type PaneId = 'left' | 'right';
 type PaneProvider = 'maplibre' | 'google-maps';
@@ -216,7 +216,7 @@ function CameraSyncMapView({
 }) {
   if (paneState.provider === 'google-maps') {
     return (
-      <GoogleMapsView
+      <GoogleMapView
         state={paneState.mapState as GoogleMapViewState}
         style={styles.map}
         onCameraMove={onCameraMove}
@@ -285,12 +285,12 @@ export function CameraSyncPage() {
 
   const leftMapLibreState = useMapLibreViewState({
     id: 'camera-sync-left-maplibre',
-    mapDesignType: MapLibreDesign.OsmBright,
+    mapDesignType: MapLibreDesign.OpenMapTiles,
     cameraPosition: INITIAL_CAMERA,
   });
   const rightMapLibreState = useMapLibreViewState({
     id: 'camera-sync-right-maplibre',
-    mapDesignType: MapLibreDesign.OsmBright,
+    mapDesignType: MapLibreDesign.OpenMapTiles,
     cameraPosition: INITIAL_CAMERA,
   });
   const leftGoogleState = useGoogleMapViewState({
@@ -486,7 +486,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f7f8fb',
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0,
   },
   toolbar: {
     paddingHorizontal: 10,
@@ -549,6 +548,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(148, 163, 184, 0.7)',
     borderRadius: 6,
     backgroundColor: 'rgba(255, 255, 255, 0.94)',
+    display: 'none',
   },
   providerLabel: {
     color: '#1f2937',

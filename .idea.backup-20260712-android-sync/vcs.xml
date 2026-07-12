@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="VcsDirectoryMappings">
+    <mapping directory="" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/js-sdk-core" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/js-sdk-react" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/react-for-googlemaps" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/react-for-maplibre" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/react-geojson-layer" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/react-heatmap" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/react-icons" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/react-marker-clustering" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/reactnative-for-googlemaps" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/reactnative-for-maplibre" vcs="Git" />
+  </component>
+</project>

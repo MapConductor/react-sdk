@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { MapLibreDesign, MapLibreView, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
-import { GoogleMapDesign, GoogleMapsView, GoogleMapsView2D, useGoogleMapViewState, type GoogleMapViewState } from '@mapconductor/react-for-googlemaps';
+import { GoogleMapDesign, GoogleMapView, GoogleMapView2D, useGoogleMapViewState, type GoogleMapViewState } from '@mapconductor/react-for-googlemaps';
 import { createGeoPoint, createMapCameraPosition, MarkerTilingOptions, type GeoPoint, type MapCameraPosition, type MapViewStateInterface, type MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
 import '@mapconductor/react-for-maplibre/style.css';
 import { type InitialCamera, DEFAULT_CAMERA } from './common';
@@ -20,6 +20,7 @@ interface MapViewContainerProps {
 }
 
 export function useSampleMapViewState(initialCamera: InitialCamera = DEFAULT_CAMERA) {
+
   const location = useLocation();
   const cameraPosition = createMapCameraPosition({
     position: createGeoPoint({ latitude: initialCamera.lat, longitude: initialCamera.lng }),
@@ -27,17 +28,24 @@ export function useSampleMapViewState(initialCamera: InitialCamera = DEFAULT_CAM
     bearing: initialCamera.bearing ?? 0,
     tilt: initialCamera.pitch ?? 0,
   });
-  const mapLibreState = useMapLibreViewState({
-    mapDesignType: MapLibreDesign.OsmBrightJa,
-    cameraPosition,
-  });
-  const googleMapState = useGoogleMapViewState({
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition,
-  });
 
-  if (location.pathname.startsWith('/google-maps')) return googleMapState;
-  return mapLibreState;
+  if (location.pathname.startsWith('/google-maps')) {
+    const googleMapState = useGoogleMapViewState({
+      mapDesignType: GoogleMapDesign.Normal,
+      cameraPosition,
+    });
+    return googleMapState;
+  }
+
+  if (location.pathname.startsWith('/maplibre')) {
+    const mapLibreState = useMapLibreViewState({
+      mapDesignType: MapLibreDesign.OsmBrightJa,
+      cameraPosition,
+    });
+    return mapLibreState;
+  }
+
+  throw `No mapViewState is available for : ${location.pathname}`;
 }
 
 function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
@@ -70,7 +78,7 @@ function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMo
   );
 }
 
-function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
+function GoogleMapContainer2D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
   const mapState = state as GoogleMapViewState;
 
   const isActive = useRef(false);
@@ -90,7 +98,7 @@ function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCame
   }
 
   return (
-    <GoogleMapsView2D
+    <GoogleMapView2D
       state={mapState}
       apiKey={apiKey}
       mapId={'DEMO_MAP_ID'}
@@ -112,11 +120,11 @@ function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCame
       }}
     >
       {children}
-    </GoogleMapsView2D>
+    </GoogleMapView2D>
   );
 }
 
-function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, state }: MapViewContainerProps) {
+function GoogleMapContainer3D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, state }: MapViewContainerProps) {
   const mapState = state as GoogleMapViewState;
 
   const isActive = useRef(false);
@@ -136,7 +144,7 @@ function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveStart, onCame
   }
 
   return (
-    <GoogleMapsView
+    <GoogleMapView
       state={mapState}
       apiKey={apiKey}
       mapId={'DEMO_MAP_ID'}
@@ -156,7 +164,7 @@ function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveStart, onCame
       }}
     >
       {children}
-    </GoogleMapsView>
+    </GoogleMapView>
   );
 }
 
@@ -166,17 +174,17 @@ export function MapViewContainer({ children, onMapClick, onCameraMoveStart, onCa
   const isGoogle2D = !isGoogle3D && location.pathname.startsWith('/google-maps');
 
   if (isGoogle3D) {
-    return <GoogleMapsContainer3D 
+    return <GoogleMapContainer3D 
             onMapClick={onMapClick}
             onCameraMoveStart={onCameraMoveStart}
             onCameraMove={onCameraMove}
             onCameraMoveEnd={onCameraMoveEnd}
             state={state}>
               {children}
-            </GoogleMapsContainer3D>;
+            </GoogleMapContainer3D>;
   }
   if (isGoogle2D) {
-    return <GoogleMapsContainer2D 
+    return <GoogleMapContainer2D 
             onMapClick={onMapClick}
             onCameraMoveStart={onCameraMoveStart}
             onCameraMove={onCameraMove}
@@ -184,7 +192,7 @@ export function MapViewContainer({ children, onMapClick, onCameraMoveStart, onCa
             markerTilingOptions={markerTilingOptions}
             state={state}>
               {children}
-            </GoogleMapsContainer2D>;
+            </GoogleMapContainer2D>;
   }
   return <MapLibreContainer
           onMapClick={onMapClick}

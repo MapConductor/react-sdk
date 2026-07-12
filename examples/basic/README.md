@@ -6,7 +6,7 @@ This example demonstrates how to use the MapConductor React SDK with both MapLib
 
 1. **Install dependencies:**
    ```bash
-   pnpm install
+   npm install
    ```
 
 2. **Configure environment variables:**
@@ -27,19 +27,19 @@ This example demonstrates how to use the MapConductor React SDK with both MapLib
 
 ### Development mode:
 ```bash
-pnpm run dev
+npm run dev
 ```
 
 The app will be available at `http://localhost:3000`.
 
 ### Production build:
 ```bash
-pnpm run build
+npm run build
 ```
 
 ### Preview production build:
 ```bash
-pnpm run preview
+npm run preview
 ```
 
 ## Environment Variables

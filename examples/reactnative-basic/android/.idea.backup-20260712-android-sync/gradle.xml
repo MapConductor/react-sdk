@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GradleMigrationSettings" migrationVersion="1" />
+  <component name="GradleSettings">
+    <option name="linkedExternalProjectsSettings">
+      <GradleProjectSettings>
+        <option name="testRunner" value="CHOOSE_PER_TEST" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@expo+log-box@57.0.0_@expo+dom-webview@57.0.0_expo@57.0.1_react-native@0.86.0_@babel+co_ed2725dee87675a2b2a4ecbf87b015ea/node_modules/@expo/log-box/android" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@react-native+gradle-plugin@0.86.0/node_modules/@react-native/gradle-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@react-native+gradle-plugin@0.86.0/node_modules/@react-native/gradle-plugin/react-native-gradle-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@react-native+gradle-plugin@0.86.0/node_modules/@react-native/gradle-plugin/settings-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@react-native+gradle-plugin@0.86.0/node_modules/@react-native/gradle-plugin/shared" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@react-native+gradle-plugin@0.86.0/node_modules/@react-native/gradle-plugin/shared-testutil" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/@react-native-picker+picker@2.11.4_react-native@0.86.0_@babel+core@7.29.7_@types+react@_93b4b88b617db63d4590a46c01512f4d/node_modules/@react-native-picker/picker/android" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-constants@57.0.2_expo@57.0.1_react-native@0.86.0_@babel+core@7.29.7_@types+react@19.2.17_react@19.2.3_/node_modules/expo-constants/android" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-autolinking@57.0.3_typescript@6.0.3/node_modules/expo-modules-autolinking/android/expo-gradle-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-autolinking@57.0.3_typescript@6.0.3/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-autolinking@57.0.3_typescript@6.0.3/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-plugin-shared" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-autolinking@57.0.3_typescript@6.0.3/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-autolinking-settings-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-autolinking@57.0.3_typescript@6.0.3/node_modules/expo-modules-autolinking/android/expo-gradle-plugin/expo-max-sdk-override-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-core@57.0.1_react-native@0.86.0_@babel+core@7.29.7_@types+react@19.2.17_react@19.2.3__react@19.2.3/node_modules/expo-modules-core/android" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo-modules-core@57.0.1_react-native@0.86.0_@babel+core@7.29.7_@types+react@19.2.17_react@19.2.3__react@19.2.3/node_modules/expo-modules-core/expo-module-gradle-plugin" />
+            <option value="$PROJECT_DIR$/../../../node_modules/.pnpm/expo@57.0.1_@babel+core@7.29.7_@expo+dom-webview@57.0.0_react-dom@19.2.7_react@19.2.3___426bdf523670374adc3274002f7ea3eb/node_modules/expo/android" />
+            <option value="$PROJECT_DIR$/../../../reactnative-for-googlemaps/android" />
+            <option value="$PROJECT_DIR$/../../../reactnative-for-maplibre/android" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+    </option>
+  </component>
+</project>

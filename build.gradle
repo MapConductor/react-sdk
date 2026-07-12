@@ -1,0 +1,4 @@
+tasks.register("openReactNativeBasicAndroid") {
+  group = "mapconductor"
+  description = "Placeholder root task. Open the included Gradle build 'MapConductor Basic' to run the Android app."
+}

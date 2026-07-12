@@ -286,17 +286,14 @@ function MarkerLayer({ locations }) {
 
 **Important**: This project uses a monorepo structure with local package dependencies. See [SETUP.md](./SETUP.md) for detailed setup instructions.
 
-Quick start with pnpm (recommended):
+Quick start with npm:
 
 ```bash
-# Install pnpm
-npm install -g pnpm
-
 # Install and link all packages
-pnpm install
+npm install
 
 # Build all packages
-pnpm run build
+npm run build
 ```
 
 ### Building the Project
@@ -312,13 +309,10 @@ npm run lint
 npm run test
 ```
 
-**Note**: If you encounter errors with npm, please refer to [SETUP.md](./SETUP.md) for alternative setup methods using pnpm or yarn.
-
 ### Running the Example App
 
 ```bash
 cd examples/basic
-npm install
 npm run dev
 ```
 

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager" inherit-compiler-output="true">
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <excludeFolder url="file://$MODULE_DIR$/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/.pnpm-store" />
+      <excludeFolder url="file://$MODULE_DIR$/.git" />
+      <excludeFolder url="file://$MODULE_DIR$/.gradle" />
+      <excludeFolder url="file://$MODULE_DIR$/build" />
+      <excludeFolder url="file://$MODULE_DIR$/test-results" />
+      <excludeFolder url="file://$MODULE_DIR$/js-sdk-core" />
+      <excludeFolder url="file://$MODULE_DIR$/js-sdk-react" />
+      <excludeFolder url="file://$MODULE_DIR$/react-geojson-layer" />
+      <excludeFolder url="file://$MODULE_DIR$/react-heatmap" />
+      <excludeFolder url="file://$MODULE_DIR$/react-icons" />
+      <excludeFolder url="file://$MODULE_DIR$/react-for-maplibre/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/react-for-maplibre/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/react-for-googlemaps/node_modules" />
+      <excludeFolder url="file://$MODULE_DIR$/react-for-googlemaps/dist" />
+      <excludeFolder url="file://$MODULE_DIR$/react-marker-clustering" />
+      <excludeFolder url="file://$MODULE_DIR$/reactnative-for-googlemaps" />
+      <excludeFolder url="file://$MODULE_DIR$/reactnative-for-maplibre" />
+      <excludeFolder url="file://$MODULE_DIR$/examples/basic" />
+      <excludeFolder url="file://$USER_HOME$/.gradle" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>

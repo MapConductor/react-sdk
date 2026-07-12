@@ -1,18 +1,18 @@
 {
-  "name": "mapconductor-rn-basic-example",
+  "name": "@mapconductor/example-rn-basic",
   "version": "0.0.1",
   "private": true,
   "main": "index.js",
   "scripts": {
-    "start": "expo start",
-    "android": "expo run:android",
-    "ios": "expo run:ios"
+    "expo:start": "expo start",
+    "expo:android": "expo run:android",
+    "expo:ios": "expo run:ios"
   },
   "dependencies": {
-    "@mapconductor/js-sdk-core": "workspace:*",
-    "@mapconductor/js-sdk-reactnative": "workspace:*",
-    "@mapconductor/reactnative-for-googlemaps": "workspace:*",
-    "@mapconductor/reactnative-for-maplibre": "workspace:*",
+    "@mapconductor/js-sdk-core": "0.1.0",
+    "@mapconductor/js-sdk-react": "0.1.0",
+    "@mapconductor/react-for-googlemaps": "0.1.0",
+    "@mapconductor/react-for-maplibre": "0.1.0",
     "@react-native-picker/picker": "2.11.4",
     "expo": "~57.0.1",
     "expo-status-bar": "~57.0.0",
