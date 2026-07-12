@@ -27,7 +27,7 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map', label: 'Store Map', group: 'Map' },
   { id: 'map-design', label: 'Map Design', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', group: 'Map' },
-  { id: 'tilt', label: 'Tilt', group: 'Map', status: 'unsupported' },
+  { id: 'tilt', label: 'Tilt', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', group: 'Map' },
   { id: 'camera-sync', label: 'Camera Sync', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', group: 'Marker', status: 'unsupported' },

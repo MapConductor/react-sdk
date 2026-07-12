@@ -5,6 +5,7 @@ import { MapPage } from 'src/pages/map/basic/StoreMapPage';
 import { CameraSyncPage } from 'src/pages/map/camerasync/CameraSyncPage';
 import { MapDesignPage, type MapProvider } from 'src/pages/map/design/MapDesignPage';
 import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
+import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
 import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
 
@@ -30,6 +31,8 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <MapDesignPage provider={provider} />;
     case 'fly-to':
       return <FlyToPage provider={provider} />;
+    case 'tilt':
+      return <TiltPage provider={provider} />;
     case 'visible-region':
       return <VisibleRegionPage provider={provider} />;
     case 'camera-sync':
