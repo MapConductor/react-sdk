@@ -57,8 +57,17 @@ expoAutolinking.useExpoVersionCatalog()
 include ':app'
 includeBuild(expoAutolinking.reactNativeGradlePlugin)
 
+include ':mapconductor_js-sdk-react'
+project(':mapconductor_js-sdk-react').projectDir = new File(rootDir, '../../../js-sdk-react/android')
+
 include ':mapconductor_react-for-googlemaps'
 project(':mapconductor_react-for-googlemaps').projectDir = new File(rootDir, '../../../react-for-googlemaps/android')
 
 include ':mapconductor_react-for-maplibre'
 project(':mapconductor_react-for-maplibre').projectDir = new File(rootDir, '../../../react-for-maplibre/android')
+
+include ':mapconductor_react-marker-clustering'
+project(':mapconductor_react-marker-clustering').projectDir = new File(rootDir, '../../../react-marker-clustering/android')
+
+include ':mapconductor_react-heatmap'
+project(':mapconductor_react-heatmap').projectDir = new File(rootDir, '../../../react-heatmap/android')

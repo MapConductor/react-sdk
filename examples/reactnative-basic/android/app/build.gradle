@@ -196,6 +196,8 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation project(':mapconductor_react-for-googlemaps')
     implementation project(':mapconductor_react-for-maplibre')
+    implementation project(':mapconductor_react-marker-clustering')
+    implementation project(':mapconductor_react-heatmap')
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";
     def isWebpEnabled = (findProperty('expo.webp.enabled') ?: "") == "true";

@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   Modal,
   Pressable,
@@ -33,13 +33,13 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'marker', label: 'Marker Icons', group: 'Marker', status: 'unsupported' },
   { id: 'marker-animation', label: 'Marker Animation', group: 'Marker' },
   { id: 'post-office', label: 'Post Office', group: 'Marker' },
-  { id: 'post-office-cluster', label: 'Post Office Cluster', group: 'Marker', status: 'unsupported' },
+  { id: 'post-office-cluster', label: 'Post Office Cluster', group: 'Marker' },
   { id: 'circle', label: 'Circle', group: 'Shape', status: 'unsupported' },
   { id: 'polyline', label: 'Polyline', group: 'Shape', status: 'unsupported' },
   { id: 'polygon', label: 'Polygon', group: 'Shape', status: 'unsupported' },
   { id: 'ground-image', label: 'Ground Image', group: 'Overlay', status: 'unsupported' },
-  { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay', status: 'unsupported' },
-  { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions', status: 'unsupported' },
+  { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay' },
+  { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions' },
 ];
 
 function Header({
@@ -155,9 +155,19 @@ function Header({
 
 function Sidebar({ activePageId, onSelectPage }: { activePageId: string; onSelectPage: (pageId: string) => void }) {
   const groups = useMemo(() => Array.from(new Set(SAMPLE_PAGES.map((page) => page.group))), []);
+  const insets = useSafeAreaInsets();
 
   return (
-    <ScrollView style={styles.sidebar} contentContainerStyle={styles.sidebarContent}>
+    <ScrollView
+      style={styles.sidebar}
+      contentContainerStyle={[
+        styles.sidebarContent,
+        {
+          paddingTop: Math.max(insets.top, 16),
+          paddingBottom: Math.max(insets.bottom, 16),
+        },
+      ]}
+    >
       <Text style={styles.sidebarTitle}>Samples</Text>
       {groups.map((group) => (
         <View key={group} style={styles.sidebarGroup}>
@@ -202,36 +212,38 @@ export default function App() {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
-      <StatusBar barStyle="dark-content" />
-      <Header
-        provider={provider}
-        showProviderSelector={showProviderSelector}
-        showTitle={showTitle}
-        onOpenMenu={() => setIsMenuOpen(true)}
-        onProviderChange={setProvider}
-      />
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <StatusBar barStyle="dark-content" />
+        <Header
+          provider={provider}
+          showProviderSelector={showProviderSelector}
+          showTitle={showTitle}
+          onOpenMenu={() => setIsMenuOpen(true)}
+          onProviderChange={setProvider}
+        />
 
-      <View style={styles.body}>
-        <View style={styles.content}>
-          <MapScreen provider={provider} page={activePage ?? SAMPLE_PAGES[0]} />
-        </View>
-      </View>
-
-      <Modal
-        visible={isMenuOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setIsMenuOpen(false)}
-      >
-        <View style={styles.modalRoot}>
-          <Pressable style={styles.scrim} onPress={() => setIsMenuOpen(false)} />
-          <View style={styles.drawer}>
-            <Sidebar activePageId={activePageId} onSelectPage={selectPage} />
+        <View style={styles.body}>
+          <View style={styles.content}>
+            <MapScreen provider={provider} page={activePage ?? SAMPLE_PAGES[0]} />
           </View>
         </View>
-      </Modal>
-    </SafeAreaView>
+
+        <Modal
+          visible={isMenuOpen}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setIsMenuOpen(false)}
+        >
+          <View style={styles.modalRoot}>
+            <Pressable style={styles.scrim} onPress={() => setIsMenuOpen(false)} />
+            <View style={styles.drawer}>
+              <Sidebar activePageId={activePageId} onSelectPage={selectPage} />
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
@@ -351,11 +363,11 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   sidebar: {
+    flex: 1,
     width: 260,
     backgroundColor: '#111827',
   },
   sidebarContent: {
-    paddingVertical: 18,
     paddingHorizontal: 14,
   },
   sidebarTitle: {

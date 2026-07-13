@@ -7,8 +7,11 @@ import { MapDesignPage, type MapProvider } from 'src/pages/map/design/MapDesignP
 import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
 import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
+import { HeatmapLayerPage } from 'src/pages/heatmaplayer/HeatmapLayerPage';
+import { RasterLayerPage } from 'src/pages/rasterlayer/RasterLayerPage';
 import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
 import { PostOfficePage } from 'src/pages/marker/postoffice/PostOfficePage';
+import { PostOfficeClusterPage } from 'src/pages/marker/postofficecluster/PostOfficeClusterPage';
 
 export type { MapProvider };
 
@@ -42,6 +45,12 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <MarkerAnimationPage provider={provider} />;
     case 'post-office':
       return <PostOfficePage provider={provider} />;
+    case 'post-office-cluster':
+      return <PostOfficeClusterPage provider={provider} />;
+    case 'heatmap-layer':
+      return <HeatmapLayerPage provider={provider} />;
+    case 'raster-layer':
+      return <RasterLayerPage provider={provider} />;
     default:
       return <UnsupportedPage page={page} />;
   }
