@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -35,6 +35,7 @@ const OSM_SOURCE = RasterLayerSource.UrlTemplate({
 
 export function RasterLayerPage({ provider }: { provider: MapProvider }) {
   const [opacity, setOpacity] = useState(0.75);
+  const [mapReady, setMapReady] = useState(false);
   const mapLibreState = useMapLibreViewState({
     id: 'raster-layer-maplibre',
     mapDesignType: MapLibreDesign.DemoTiles,
@@ -46,22 +47,32 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
     cameraPosition: INIT_CAMERA,
   });
 
-  const rasterLayer = (
+  useEffect(() => {
+    setMapReady(false);
+  }, [provider]);
+  
+  const rasterLayer =  mapReady ? (
     <RasterLayer
       id="osm-raster"
       source={OSM_SOURCE}
       opacity={opacity}
     />
-  );
+  ) : null;
 
   return (
     <View style={styles.mapContainer}>
       {provider === 'google-maps' ? (
-        <GoogleMapView state={googleState} style={styles.map}>
+        <GoogleMapView
+          state={googleState}
+          style={styles.map}
+          onMapLoaded={() => {setMapReady(true)} }>
           {rasterLayer}
         </GoogleMapView>
       ) : (
-        <MapLibreView state={mapLibreState} style={styles.map}>
+        <MapLibreView
+          state={mapLibreState}
+          style={styles.map}
+          onMapLoaded={() => setMapReady(true)}>
           {rasterLayer}
         </MapLibreView>
       )}
