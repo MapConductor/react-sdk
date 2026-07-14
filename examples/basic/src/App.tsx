@@ -28,6 +28,7 @@ import { HeatmapLayerPage } from './pages/heatmaplayer/HeatmapLayerPage';
 import { BasicGeoJSONPage } from './pages/geojson/basic/BasicGeoJSONPage';
 import { GeoJSONLayerPage } from './pages/geojson/layer/GeoJSONLayerPage';
 import { DEFAULT_SAMPLE_PAGE, getSamplePageDefinition, isKnownSamplePage } from './sampleRegistry';
+import { SingletonGoogleMapsProvider } from './SingletonGoogleMaps';
 
 type MapProvider = 'maplibre' | 'google' | 'google-3d';
 
@@ -168,11 +169,13 @@ function App() {
           <PageNav onNavigate={() => setIsMenuOpen(false)} />
         </div>
         <main className="map-container">
-          <Routes>
-            <Route path="/" element={<Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}`} replace />} />
-            <Route path="/:provider" element={<Navigate to={DEFAULT_SAMPLE_PAGE} replace />} />
-            <Route path="/:provider/:page" element={<ProviderPageRoute />} />
-          </Routes>
+          <SingletonGoogleMapsProvider>
+            <Routes>
+              <Route path="/" element={<Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}`} replace />} />
+              <Route path="/:provider" element={<Navigate to={DEFAULT_SAMPLE_PAGE} replace />} />
+              <Route path="/:provider/:page" element={<ProviderPageRoute />} />
+            </Routes>
+          </SingletonGoogleMapsProvider>
         </main>
       </div>
     </div>

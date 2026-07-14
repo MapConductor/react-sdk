@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createGeoPoint, createMapCameraPosition } from '@mapconductor/js-sdk-core';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/react-for-googlemaps';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
 import { MapViewContainer } from '../../MapViewContainer';
 import type { MapDesignTypeInterface, MapViewStateInterface } from '@mapconductor/js-sdk-core';
+import { useSingletonGoogleMapViewState } from '../../SingletonGoogleMaps';
 
 const INIT_CAMERA_POSITION = createMapCameraPosition({
   position: createGeoPoint({ latitude: 35.68049, longitude: 139.76669 }),
@@ -72,10 +72,7 @@ function HeatmapLayerPageContent({
 }
 
 function GoogleHeatmapLayerPage() {
-  const mapViewState = useGoogleMapViewState({
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA_POSITION,
-  });
+  const mapViewState = useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
   return <HeatmapLayerPageContent mapViewState={mapViewState} />;
 }
 

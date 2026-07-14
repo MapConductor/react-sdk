@@ -10,7 +10,6 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble } from '@mapconductor/js-sdk-react';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/react-for-googlemaps';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
 import {
   MarkerClusterGroup,
@@ -19,6 +18,7 @@ import {
 } from '@mapconductor/react-marker-clustering';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
+import { useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
 
 // ─── Data types ────────────────────────────────────────────────────────────────
 interface PostOfficeExtra {
@@ -137,7 +137,7 @@ function PostOfficeClusterPageContent({
           onClick: (state) => setSelected(state),
         }),
       ),
-    [markerIcon],
+    [markerIcon, raw],
   );
 
   // Fast O(1) lookup for cluster-click zoom.
@@ -231,10 +231,7 @@ function loadImage(url: string): Promise<HTMLImageElement> {
 
 // ─── Provider-specific wrappers ────────────────────────────────────────────────
 function GooglePostOfficeClusterPage() {
-  const mapViewState = useGoogleMapViewState({
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA_POSITION,
-  });
+  const mapViewState = useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
   return <PostOfficeClusterPageContent mapViewState={mapViewState} />;
 }
 

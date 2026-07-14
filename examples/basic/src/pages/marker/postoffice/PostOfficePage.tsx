@@ -11,10 +11,10 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/react-for-googlemaps';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
+import { useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
 
 // ─── Data types ────────────────────────────────────────────────────────────────
 interface PostOfficeExtra {
@@ -110,7 +110,7 @@ function PostOfficePageContent({
           onClick: (state) => setSelected(state),
         }),
       ),
-    [icon],
+    [icon, raw],
   );
 
   const clearSelect = useCallback(() => setSelected(null), [])
@@ -153,10 +153,7 @@ function PostOfficePageContent({
 }
 
 function GooglePostOfficePage() {
-  const mapViewState = useGoogleMapViewState({
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA_POSITION,
-  });
+  const mapViewState = useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
 
   return <PostOfficePageContent mapViewState={mapViewState} />;
 }
