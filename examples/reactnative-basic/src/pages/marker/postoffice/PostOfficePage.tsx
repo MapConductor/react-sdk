@@ -50,7 +50,13 @@ const INIT_CAMERA = MapCameraPosition.from({
 
 const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
   ...MarkerTilingOptions.Default,
-  iconScaleCallback: null,
+  iconScaleCallback: (_state, zoom) => {
+    if (zoom > 12)  return 1.3;
+    if (zoom > 10)  return 1.0;
+    if (zoom > 8)  return 0.8;
+    if (zoom > 5)  return 0.5;
+    return 0.2;
+  },
 };
 
 function PostOfficeInfoView({
@@ -82,10 +88,7 @@ function PostOfficeMarkers({ onSelectMarker }: { onSelectMarker: (marker: Marker
   const icon = useMemo(
     () =>
       Platform.OS === 'android'
-        ? new ReactNativeImageIcon(POST_OFFICE_ICON_URI, {
-            scale: 0.4,
-            infoAnchor: { x: 0.5, y: 0 },
-          })
+        ? new ReactNativeImageIcon(POST_OFFICE_ICON_URI, { scale: 0.5 })
         : null,
     []
   );
@@ -178,7 +181,7 @@ export function PostOfficePage({ provider }: { provider: MapProvider }) {
   }, [provider]);
 
   const handleMapLoaded = useCallback(() => {
-    setMapReady(true);
+    setTimeout(() => setMapReady(true), 10000);
   }, []);
 
   const mapLibreState = useMapLibreViewState({
