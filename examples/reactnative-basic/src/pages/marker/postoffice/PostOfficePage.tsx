@@ -83,7 +83,7 @@ function PostOfficeMarkers({ onSelectMarker }: { onSelectMarker: (marker: Marker
     () =>
       Platform.OS === 'android'
         ? new ReactNativeImageIcon(POST_OFFICE_ICON_URI, {
-            scale: 0.5,
+            scale: 0.4,
             infoAnchor: { x: 0.5, y: 0 },
           })
         : null,
@@ -102,7 +102,7 @@ function PostOfficeMarkers({ onSelectMarker }: { onSelectMarker: (marker: Marker
             onClick: onSelectMarker,
           })
       ),
-    [icon, onSelectMarker]
+    [onSelectMarker]
   );
 
   return <Markers states={markers} />;
@@ -113,7 +113,6 @@ function PostOfficeMap({
   mapLibreState,
   googleState,
   selectedMarker,
-  mapReady,
   onMapLoaded,
   onMapClick,
   onSelectMarker,
@@ -123,7 +122,6 @@ function PostOfficeMap({
   mapLibreState: ReturnType<typeof useMapLibreViewState>;
   googleState: ReturnType<typeof useGoogleMapViewState>;
   selectedMarker: MarkerState | null;
-  mapReady: boolean;
   onMapLoaded: () => void;
   onMapClick: () => void;
   onSelectMarker: (marker: MarkerState) => void;
@@ -138,10 +136,7 @@ function PostOfficeMap({
       />
     </InfoBubble>
   ) : null;
-  // Markers are only mounted once the map has finished loading so that the
-  // 24k-marker ingestion doesn't compete with map initialization on the same
-  // frame budget.
-  const markers = mapReady ? <PostOfficeMarkers onSelectMarker={onSelectMarker} /> : null;
+  const markers = <PostOfficeMarkers onSelectMarker={onSelectMarker} />;
 
   if (provider === 'google-maps') {
     return (
@@ -220,7 +215,6 @@ export function PostOfficePage({ provider }: { provider: MapProvider }) {
         mapLibreState={mapLibreState}
         googleState={googleState}
         selectedMarker={selectedMarker}
-        mapReady={mapReady}
         onMapLoaded={handleMapLoaded}
         onMapClick={() => setSelectedMarker(null)}
         onSelectMarker={setSelectedMarker}

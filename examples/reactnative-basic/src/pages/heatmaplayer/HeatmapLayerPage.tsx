@@ -66,11 +66,11 @@ export function HeatmapLayerPage({ provider }: { provider: MapProvider }) {
     []
   );
 
-  const heatmap = mapReady ? (
+  const heatmap = (
     <HeatmapOverlay>
       <HeatmapPoints states={heatmapPoints} />
     </HeatmapOverlay>
-  ) : null;
+  );
 
   return (
     <View style={styles.mapContainer}>
