@@ -125,7 +125,6 @@ ask-to-commit() {
 
 ask-to-commit "${ROOT_DIR}/js-sdk-core"
 ask-to-commit "${ROOT_DIR}/js-sdk-react"
-ask-to-commit "${ROOT_DIR}/js-sdk-reactnative"
 ask-to-commit "${ROOT_DIR}/react-for-googlemaps"
 ask-to-commit "${ROOT_DIR}/react-for-maplibre"
 ask-to-commit "${ROOT_DIR}/"
