@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   StyleSheet,
   Text,
@@ -60,15 +60,14 @@ function MarkerAnimationMap({
 }
 
 export function MarkerAnimationPage({ provider }: { provider: MapProvider }) {
-  const marker = useMemo(
+  const [marker] = useState(
     () =>
       createMarkerState({
         id: 'animated-marker',
         position: HONOLULU,
         clickable: true,
         onClick: (state) => triggerAnimation(state, MarkerAnimation.Bounce),
-      }),
-    []
+      })
   );
 
   const mapLibreState = useMapLibreViewState({

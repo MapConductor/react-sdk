@@ -1,8 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 
-import { GeoPoint, MapCameraPosition, type PolylineEvent } from '@mapconductor/js-sdk-core';
+import {
+  GeoPoint,
+  MapCameraPosition,
+  createPolylineState,
+  type PolylineEvent,
+} from '@mapconductor/js-sdk-core';
 import { Polyline } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
@@ -45,29 +50,38 @@ export function PolylinePage({ provider }: { provider: MapProvider }) {
     cameraPosition: INIT_CAMERA,
   });
 
-  const onPolylineClick = useCallback((event: PolylineEvent) => {
-    setClickedText(
-      `${event.clicked.latitude.toFixed(5)}, ${event.clicked.longitude.toFixed(5)}`
-    );
-  }, []);
-
-  const route = (
-    <Polyline
-      id="tokyo-route"
-      points={ROUTE_POINTS}
-      strokeColor="rgba(220, 38, 38, 0.85)"
-      strokeWidth={strokeWidth}
-      geodesic={geodesic}
-      zIndex={10}
-      onClick={onPolylineClick}
-    />
+  const [polylineState] = useState(
+    () =>
+      createPolylineState({
+        id: 'tokyo-route',
+        points: ROUTE_POINTS,
+        strokeColor: 'rgba(220, 38, 38, 0.85)',
+        strokeWidth: 8,
+        geodesic: false,
+        zIndex: 10,
+        onClick: (event: PolylineEvent) => {
+          setClickedText(
+            `${event.clicked.latitude.toFixed(5)}, ${event.clicked.longitude.toFixed(5)}`
+          );
+        },
+      })
   );
   const state = provider === 'google-maps' ? googleState : mapLibreState;
+
+  const handleStrokeWidthChange = (value: number) => {
+    polylineState.strokeWidth = value;
+    setStrokeWidth(value);
+  };
+
+  const handleGeodesicChange = (value: boolean) => {
+    polylineState.geodesic = value;
+    setGeodesic(value);
+  };
 
   return (
     <View style={styles.mapContainer}>
       <MapViewContainer state={state} style={styles.map}>
-        {route}
+        <Polyline state={polylineState} />
       </MapViewContainer>
 
       <View style={styles.controlPanel}>
@@ -85,11 +99,11 @@ export function PolylinePage({ provider }: { provider: MapProvider }) {
           minimumTrackTintColor="#dc2626"
           maximumTrackTintColor="#cbd5e1"
           thumbTintColor="#dc2626"
-          onValueChange={setStrokeWidth}
+          onValueChange={handleStrokeWidthChange}
         />
         <View style={styles.switchRow}>
           <Text style={styles.label}>Geodesic</Text>
-          <Switch value={geodesic} onValueChange={setGeodesic} />
+          <Switch value={geodesic} onValueChange={handleGeodesicChange} />
         </View>
         <Text style={styles.clicked}>Clicked: {clickedText}</Text>
       </View>

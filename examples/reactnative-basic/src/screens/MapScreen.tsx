@@ -9,6 +9,7 @@ import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
 import { HeatmapLayerPage } from 'src/pages/heatmaplayer/HeatmapLayerPage';
 import { RasterLayerPage } from 'src/pages/rasterlayer/RasterLayerPage';
+import { GroundImagePage } from 'src/pages/groundimage/GroundImagePage';
 import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
 import { PostOfficePage } from 'src/pages/marker/postoffice/PostOfficePage';
 import { PostOfficeClusterPage } from 'src/pages/marker/postofficecluster/PostOfficeClusterPage';
@@ -60,6 +61,8 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <HeatmapLayerPage provider={provider} />;
     case 'raster-layer':
       return <RasterLayerPage provider={provider} />;
+    case 'ground-image':
+      return <GroundImagePage provider={provider} />;
     default:
       return <UnsupportedPage page={page} />;
   }

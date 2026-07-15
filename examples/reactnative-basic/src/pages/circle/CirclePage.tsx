@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -10,7 +10,10 @@ import {
   createGeoPoint,
   createMapCameraPosition,
   createMarkerState,
+  createPolylineState,
+  type CircleState,
   type MarkerState,
+  type PolylineState,
 } from '@mapconductor/js-sdk-core';
 import {
   Circle,
@@ -35,6 +38,11 @@ const INIT_CAMERA = createMapCameraPosition({
     zoom: 12,
   });
 const INITIAL_RADIUS_METERS = 1000;
+const INITIAL_EDGE_POSITION = calculatePositionAtDistance({
+  center: CIRCLE_CENTER,
+  distanceMeters: INITIAL_RADIUS_METERS,
+  bearingDegrees: 90,
+});
 const SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS = 300;
 const CIRCLE_COLORS = ['#0000ff', '#ff0000', '#008000', '#00ffff', '#d3d3d3', '#ff00ff'];
 
@@ -47,24 +55,24 @@ function rgba(hex: string, alpha: number): string {
 }
 
 export function CirclePage({ provider }: { provider: MapProvider }) {
-  const [edgePosition, setEdgePosition] = useState(() =>
-    calculatePositionAtDistance({
-      center: CIRCLE_CENTER,
-      distanceMeters: INITIAL_RADIUS_METERS,
-      bearingDegrees: 90,
-    }),
-  );
   const [colorIndex, setColorIndex] = useState(0);
   const [fillOpacity, setFillOpacity] = useState(0.3);
   const [strokeWidth, setStrokeWidth] = useState(3);
   const suppressCircleClickUntilRef = useRef(0);
-  const radius = useMemo(
-    () => computeDistanceBetween(CIRCLE_CENTER, edgePosition),
-    [edgePosition],
-  );
+  const fillOpacityRef = useRef(fillOpacity);
+  const circleStateRef = useRef<CircleState | null>(null);
+  const radiusLineStateRef = useRef<PolylineState | null>(null);
 
   const handleMarkerMove = useCallback((dragged: MarkerState) => {
-    setEdgePosition(dragged.position);
+    if (circleStateRef.current) {
+      circleStateRef.current.radiusMeters = computeDistanceBetween(
+        CIRCLE_CENTER,
+        dragged.position
+      );
+    }
+    if (radiusLineStateRef.current) {
+      radiusLineStateRef.current.points = [CIRCLE_CENTER, dragged.position];
+    }
   }, []);
 
   const handleMarkerDragEnd = useCallback((dragged: MarkerState) => {
@@ -73,37 +81,72 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
       Date.now() + SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS;
   }, [handleMarkerMove]);
 
-  const circleState = useMemo(() =>
-    createCircleState({
-      id: 'circle',
-      center: CIRCLE_CENTER,
-      radiusMeters: radius,
-
-      fillColor: rgba(CIRCLE_COLORS[colorIndex], fillOpacity),
-      strokeColor: 'rgba(0, 0, 255, 0.5)',
-      strokeWidth,
-      clickable: true,
-      onClick: () => {
-        if (Date.now() < suppressCircleClickUntilRef.current) return;
-        setColorIndex((index) => (index + 1) % CIRCLE_COLORS.length);
-        // showToast(`Circle clicked - Radius: ${radius.toFixed(0)}m`);
-      },
-    }),
-
-    [colorIndex, fillOpacity, radius, strokeWidth],
+  const [circleState] = useState(
+    () =>
+      createCircleState({
+        id: 'circle',
+        center: CIRCLE_CENTER,
+        radiusMeters: INITIAL_RADIUS_METERS,
+        fillColor: rgba(CIRCLE_COLORS[0], 0.3),
+        strokeColor: 'rgba(0, 0, 255, 0.5)',
+        strokeWidth: 3,
+        clickable: true,
+        onClick: () => {
+          if (Date.now() < suppressCircleClickUntilRef.current) return;
+          setColorIndex((index) => {
+            const nextIndex = (index + 1) % CIRCLE_COLORS.length;
+            if (circleStateRef.current) {
+              circleStateRef.current.fillColor = rgba(
+                CIRCLE_COLORS[nextIndex],
+                fillOpacityRef.current
+              );
+            }
+            return nextIndex;
+          });
+        },
+      })
   );
-  const edgeMarkerState = useRef(createMarkerState({
-    id: "edge_marker",
-    position: edgePosition,
-    icon: new ColorDefaultIcon('#008000', {
-      strokeColor: '#FFFFFF',
-      label: 'E',
-    }),
-    draggable: true,
-    onDragStart: handleMarkerMove,
-    onDrag: handleMarkerMove,
-    onDragEnd: handleMarkerDragEnd,
-  }))
+  circleStateRef.current = circleState;
+
+  const [radiusLineState] = useState(
+    () =>
+      createPolylineState({
+        id: 'circle-radius-line',
+        points: [CIRCLE_CENTER, INITIAL_EDGE_POSITION],
+        strokeColor: '#ffffff',
+        strokeWidth: 3,
+      })
+  );
+  radiusLineStateRef.current = radiusLineState;
+
+  const [centerMarkerState] = useState(
+    () =>
+      createMarkerState({
+        id: 'center_marker',
+        position: CIRCLE_CENTER,
+        icon: new ColorDefaultIcon('#FF0000', {
+          strokeColor: '#FFFFFF',
+          label: 'C',
+        }),
+        clickable: false,
+        draggable: false,
+      })
+  );
+  const [edgeMarkerState] = useState(
+    () =>
+      createMarkerState({
+        id: 'edge_marker',
+        position: INITIAL_EDGE_POSITION,
+        icon: new ColorDefaultIcon('#008000', {
+          strokeColor: '#FFFFFF',
+          label: 'E',
+        }),
+        draggable: true,
+        onDragStart: handleMarkerMove,
+        onDrag: handleMarkerMove,
+        onDragEnd: handleMarkerDragEnd,
+      })
+  );
 
   const mapLibreState = useMapLibreViewState({
     id: 'circle-maplibre',
@@ -117,36 +160,24 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
   });
   const state = provider === 'google-maps' ? googleState : mapLibreState;
 
-  const centerIcon = useMemo(
-    () =>
-      new ColorDefaultIcon('#FF0000', {
-        strokeColor: '#FFFFFF',
-        label: 'C',
-      }),
-    []
-  );
+  const handleFillOpacityChange = (value: number) => {
+    fillOpacityRef.current = value;
+    circleState.fillColor = rgba(CIRCLE_COLORS[colorIndex], value);
+    setFillOpacity(value);
+  };
+
+  const handleStrokeWidthChange = (value: number) => {
+    circleState.strokeWidth = value;
+    setStrokeWidth(value);
+  };
 
   return (
     <View style={styles.mapContainer}>
-      
-      <MapViewContainer state={state}>
-        <>
-          <Circle state={circleState} />
-          <Polyline
-            id="circle-radius-line"
-            points={[CIRCLE_CENTER, edgePosition]}
-            strokeColor="#ffffff"
-            strokeWidth={3}
-          />
-          <Marker
-            id="center_marker"
-            position={CIRCLE_CENTER}
-            icon={centerIcon}
-            clickable={false}
-            draggable={false}
-          />
-          <Marker state={edgeMarkerState.current}  />
-        </>
+      <MapViewContainer state={state} style={styles.map}>
+        <Circle state={circleState} />
+        <Polyline state={radiusLineState} />
+        <Marker state={centerMarkerState} />
+        <Marker state={edgeMarkerState} />
       </MapViewContainer>
       <View style={styles.controlPanel}>
         <Text style={styles.title}>Circle Example</Text>
@@ -159,7 +190,7 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
           minimumTrackTintColor="#2563eb"
           maximumTrackTintColor="#cbd5e1"
           thumbTintColor="#2563eb"
-          onValueChange={setFillOpacity}
+          onValueChange={handleFillOpacityChange}
         />
         <Text style={styles.label}>Stroke Width: {strokeWidth.toFixed(1)}dp</Text>
         <Slider
@@ -170,7 +201,7 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
           minimumTrackTintColor="#2563eb"
           maximumTrackTintColor="#cbd5e1"
           thumbTintColor="#2563eb"
-          onValueChange={setStrokeWidth}
+          onValueChange={handleStrokeWidthChange}
         />
       </View>
     </View>
@@ -186,14 +217,6 @@ const styles = StyleSheet.create({
   },
   map: {
     flex: 1,
-  },
-  radiusLabel: {
-    color: '#FF0000',
-    fontSize: 14,
-    fontWeight: '700',
-    textShadowColor: '#FFFFFF',
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 3,
   },
   controlPanel: {
     position: 'absolute',
@@ -225,18 +248,5 @@ const styles = StyleSheet.create({
   slider: {
     width: '100%',
     height: 38,
-  },
-  toast: {
-    position: 'absolute',
-    alignSelf: 'center',
-    top: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 6,
-    backgroundColor: 'rgba(31, 41, 55, 0.92)',
-  },
-  toastText: {
-    color: '#FFFFFF',
-    fontSize: 14,
   },
 });

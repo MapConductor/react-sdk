@@ -6,6 +6,7 @@ import {
   GeoPoint,
   MapCameraPosition,
   RasterLayerSource,
+  createRasterLayerState,
 } from '@mapconductor/js-sdk-core';
 import { RasterLayer } from '@mapconductor/js-sdk-react/native';
 import {
@@ -21,19 +22,26 @@ import type { MapProvider } from '../../screens/MapScreen';
 import { MapViewContainer } from '../MapViewContainer';
 
 const INIT_CAMERA = MapCameraPosition.from({
-  position: GeoPoint.from({ latitude: 35.6812, longitude: 139.7671, altitude: 0 }),
-  zoom: 5,
+  position: GeoPoint.from({ latitude: 21.382314, longitude: -157.933097, altitude: 0 }),
+  zoom: 12,
   bearing: 0,
   tilt: 0,
 });
 const OSM_SOURCE = RasterLayerSource.UrlTemplate({
   template: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
   tileSize: 256,
-  attribution: '© OpenStreetMap contributors',
 });
 
 export function RasterLayerPage({ provider }: { provider: MapProvider }) {
-  const [opacity, setOpacity] = useState(0.75);
+  const [opacity, setOpacity] = useState(1);
+  const [rasterLayerState] = useState(
+    () =>
+      createRasterLayerState({
+        id: 'rasterLayer',
+        source: OSM_SOURCE,
+        opacity: 1,
+      })
+  );
   const mapLibreState = useMapLibreViewState({
     id: 'raster-layer-maplibre',
     mapDesignType: MapLibreDesign.DemoTiles,
@@ -45,25 +53,23 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
     cameraPosition: INIT_CAMERA,
   });
 
-  const rasterLayer = (
-    <RasterLayer
-      id="osm-raster"
-      source={OSM_SOURCE}
-      opacity={opacity}
-    />
-  );
   const state = provider === 'google-maps' ? googleState : mapLibreState;
+
+  const handleOpacityChange = (value: number) => {
+    rasterLayerState.opacity = value;
+    setOpacity(value);
+  };
 
   return (
     <View style={styles.mapContainer}>
       <MapViewContainer state={state} style={styles.map}>
-        {rasterLayer}
+        <RasterLayer state={rasterLayerState} />
       </MapViewContainer>
 
       <View style={styles.controlPanel}>
         <View style={styles.titleRow}>
-          <Text style={styles.controlPanelTitle}>Raster Layer</Text>
-          <Text style={styles.opacityValue}>{opacity.toFixed(2)}</Text>
+          <Text style={styles.controlPanelTitle}>Raster Layer Example</Text>
+          <Text style={styles.opacityValue}>{opacity.toFixed(1)}</Text>
         </View>
         <Text style={styles.label}>Opacity</Text>
         <Slider
@@ -74,9 +80,8 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
           minimumTrackTintColor="#2563eb"
           maximumTrackTintColor="#cbd5e1"
           thumbTintColor="#2563eb"
-          onValueChange={setOpacity}
+          onValueChange={handleOpacityChange}
         />
-        <Text style={styles.attribution}>© OpenStreetMap contributors</Text>
       </View>
     </View>
   );
@@ -131,10 +136,5 @@ const styles = StyleSheet.create({
   slider: {
     width: '100%',
     height: 36,
-  },
-  attribution: {
-    color: '#64748b',
-    fontSize: 11,
-    textAlign: 'right',
   },
 });

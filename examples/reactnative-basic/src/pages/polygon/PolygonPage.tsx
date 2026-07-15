@@ -1,8 +1,13 @@
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import Slider from '@react-native-community/slider';
 import { StyleSheet, Switch, Text, View } from 'react-native';
 
-import { GeoPoint, MapCameraPosition, type PolygonEvent } from '@mapconductor/js-sdk-core';
+import {
+  GeoPoint,
+  MapCameraPosition,
+  createPolygonState,
+  type PolygonEvent,
+} from '@mapconductor/js-sdk-core';
 import { Polygon } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
@@ -53,31 +58,40 @@ export function PolygonPage({ provider }: { provider: MapProvider }) {
     cameraPosition: INIT_CAMERA,
   });
 
-  const onPolygonClick = useCallback((event: PolygonEvent) => {
-    setClickedText(
-      `${event.clicked.latitude.toFixed(5)}, ${event.clicked.longitude.toFixed(5)}`
-    );
-  }, []);
-
-  const polygon = (
-    <Polygon
-      id="tokyo-polygon"
-      points={OUTER_RING}
-      holes={POLYGON_HOLES}
-      strokeColor="#1d4ed8"
-      strokeWidth={4}
-      fillColor={`rgba(37, 99, 235, ${fillOpacity})`}
-      geodesic={geodesic}
-      zIndex={10}
-      onClick={onPolygonClick}
-    />
+  const [polygonState] = useState(
+    () =>
+      createPolygonState({
+        id: 'tokyo-polygon',
+        points: OUTER_RING,
+        holes: POLYGON_HOLES,
+        strokeColor: '#1d4ed8',
+        strokeWidth: 4,
+        fillColor: 'rgba(37, 99, 235, 0.45)',
+        geodesic: false,
+        zIndex: 10,
+        onClick: (event: PolygonEvent) => {
+          setClickedText(
+            `${event.clicked.latitude.toFixed(5)}, ${event.clicked.longitude.toFixed(5)}`
+          );
+        },
+      })
   );
   const state = provider === 'google-maps' ? googleState : mapLibreState;
+
+  const handleFillOpacityChange = (value: number) => {
+    polygonState.fillColor = `rgba(37, 99, 235, ${value})`;
+    setFillOpacity(value);
+  };
+
+  const handleGeodesicChange = (value: boolean) => {
+    polygonState.geodesic = value;
+    setGeodesic(value);
+  };
 
   return (
     <View style={styles.mapContainer}>
       <MapViewContainer state={state} style={styles.map}>
-        {polygon}
+        <Polygon state={polygonState} />
       </MapViewContainer>
 
       <View style={styles.controlPanel}>
@@ -94,11 +108,11 @@ export function PolygonPage({ provider }: { provider: MapProvider }) {
           minimumTrackTintColor="#2563eb"
           maximumTrackTintColor="#cbd5e1"
           thumbTintColor="#2563eb"
-          onValueChange={setFillOpacity}
+          onValueChange={handleFillOpacityChange}
         />
         <View style={styles.switchRow}>
           <Text style={styles.label}>Geodesic</Text>
-          <Switch value={geodesic} onValueChange={setGeodesic} />
+          <Switch value={geodesic} onValueChange={handleGeodesicChange} />
         </View>
         <Text style={styles.clicked}>Clicked: {clickedText}</Text>
       </View>

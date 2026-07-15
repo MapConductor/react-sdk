@@ -37,7 +37,7 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'circle', label: 'Circle', group: 'Shape' },
   { id: 'polyline', label: 'Polyline', group: 'Shape' },
   { id: 'polygon', label: 'Polygon', group: 'Shape' },
-  { id: 'ground-image', label: 'Ground Image', group: 'Overlay', status: 'unsupported' },
+  { id: 'ground-image', label: 'Ground Image', group: 'Overlay' },
   { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay' },
   { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions' },
 ];
