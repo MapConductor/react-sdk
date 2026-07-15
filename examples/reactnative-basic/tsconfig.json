@@ -4,7 +4,6 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@mapconductor/js-sdk-reactnative": ["../../js-sdk-reactnative/src/index.ts"],
       "@mapconductor/react-for-googlemaps": ["../../react-for-googlemaps/src/react-native/index.ts"],
       "@mapconductor/react-for-maplibre": ["../../react-for-maplibre/src/react-native/index.ts"]
     }

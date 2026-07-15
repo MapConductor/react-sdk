@@ -1,8 +1,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
-  Platform,
   ScrollView,
-  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -19,16 +17,15 @@ import {
 } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
   type GoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
   type MapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
+import { MapViewContainer } from '../../MapViewContainer';
 
 type PaneId = 'left' | 'right';
 type PaneProvider = 'maplibre' | 'google-maps';
@@ -214,20 +211,9 @@ function CameraSyncMapView({
   onCameraMove: (camera: MapCameraPosition) => void;
   onCameraMoveEnd: (camera: MapCameraPosition) => void;
 }) {
-  if (paneState.provider === 'google-maps') {
-    return (
-      <GoogleMapView
-        state={paneState.mapState as GoogleMapViewState}
-        style={styles.map}
-        onCameraMove={onCameraMove}
-        onCameraMoveEnd={onCameraMoveEnd}
-      />
-    );
-  }
-
   return (
-    <MapLibreView
-      state={paneState.mapState as MapLibreViewState}
+    <MapViewContainer
+      state={paneState.mapState}
       style={styles.map}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}

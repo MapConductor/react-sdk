@@ -14,19 +14,22 @@ import {
   createMarkerState,
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
-import { InfoBubble, Markers, ReactNativeImageDefaultIcon } from '@mapconductor/js-sdk-react/native';
+import {
+  InfoBubble,
+  Markers,
+  ReactNativeImageDefaultIcon,
+} from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 
 import { STORES, type StoreInfo } from '../../../data/storeData';
+import { MapViewContainer } from '../../MapViewContainer';
 
 type MapProvider = 'maplibre' | 'google-maps';
 
@@ -135,20 +138,12 @@ function StoreMap({
     </InfoBubble>
   ) : null;
 
-  if (provider === 'google-maps') {
-    return (
-      <GoogleMapView state={googleState} style={styles.map} onMapClick={onMapClick}>
-        <StoreMarkers onSelectMarker={onSelectMarker} />
-        {overlay}
-      </GoogleMapView>
-    );
-  }
-
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
   return (
-    <MapLibreView state={mapLibreState} style={styles.map} onMapClick={onMapClick}>
+    <MapViewContainer state={state} style={styles.map} onMapClick={onMapClick}>
       <StoreMarkers onSelectMarker={onSelectMarker} />
       {overlay}
-    </MapLibreView>
+    </MapViewContainer>
   );
 }
 

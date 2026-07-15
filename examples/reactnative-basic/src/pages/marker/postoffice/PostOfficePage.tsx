@@ -18,16 +18,15 @@ import {
 import { InfoBubble, Markers, ReactNativeImageIcon } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 
 import postOfficesJson from '../../../data/postoffice/postoffices.json';
+import { MapViewContainer } from '../../MapViewContainer';
 
 type MapProvider = 'maplibre' | 'google-maps';
 type PostOfficeRow = [number, number, string, string];
@@ -105,7 +104,7 @@ function PostOfficeMarkers({ onSelectMarker }: { onSelectMarker: (marker: Marker
             onClick: onSelectMarker,
           })
       ),
-    [onSelectMarker]
+    [icon, onSelectMarker]
   );
 
   return <Markers states={markers} />;
@@ -141,24 +140,10 @@ function PostOfficeMap({
   ) : null;
   const markers = <PostOfficeMarkers onSelectMarker={onSelectMarker} />;
 
-  if (provider === 'google-maps') {
-    return (
-      <GoogleMapView
-        state={googleState}
-        style={styles.map}
-        markerTilingOptions={MARKER_TILING_OPTIONS}
-        onMapLoaded={onMapLoaded}
-        onMapClick={onMapClick}
-      >
-        {markers}
-        {overlay}
-      </GoogleMapView>
-    );
-  }
-
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
   return (
-    <MapLibreView
-      state={mapLibreState}
+    <MapViewContainer
+      state={state}
       style={styles.map}
       markerTilingOptions={MARKER_TILING_OPTIONS}
       onMapLoaded={onMapLoaded}
@@ -166,7 +151,7 @@ function PostOfficeMap({
     >
       {markers}
       {overlay}
-    </MapLibreView>
+    </MapViewContainer>
   );
 }
 

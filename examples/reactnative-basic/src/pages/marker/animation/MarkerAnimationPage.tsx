@@ -16,14 +16,13 @@ import {
 import { Marker } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
+import { MapViewContainer } from '../../MapViewContainer';
 
 type MapProvider = 'maplibre' | 'google-maps';
 
@@ -52,18 +51,11 @@ function MarkerAnimationMap({
   googleState: ReturnType<typeof useGoogleMapViewState>;
   marker: MarkerState;
 }) {
-  if (provider === 'google-maps') {
-    return (
-      <GoogleMapView state={googleState} style={styles.map}>
-        <Marker state={marker} />
-      </GoogleMapView>
-    );
-  }
-
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
   return (
-    <MapLibreView state={mapLibreState} style={styles.map}>
+    <MapViewContainer state={state} style={styles.map}>
       <Marker state={marker} />
-    </MapLibreView>
+    </MapViewContainer>
   );
 }
 

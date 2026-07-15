@@ -9,14 +9,13 @@ import {
 } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
+import { MapViewContainer } from '../../MapViewContainer';
 
 type MapProvider = 'maplibre' | 'google-maps';
 
@@ -84,20 +83,10 @@ function VisibleRegionMap({
   googleState: ReturnType<typeof useGoogleMapViewState>;
   onCameraMove: (camera: MapCameraPosition) => void;
 }) {
-  if (provider === 'google-maps') {
-    return (
-      <GoogleMapView
-        state={googleState}
-        style={styles.map}
-        onCameraMove={onCameraMove}
-        onCameraMoveEnd={onCameraMove}
-      />
-    );
-  }
-
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
   return (
-    <MapLibreView
-      state={mapLibreState}
+    <MapViewContainer
+      state={state}
       style={styles.map}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMove}

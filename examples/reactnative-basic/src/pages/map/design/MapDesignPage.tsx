@@ -1,7 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
-  Platform,
-  StatusBar,
   StyleSheet,
   Text,
   View,
@@ -15,16 +13,15 @@ import {
 } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
   type GoogleMapDesignType,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
   type MapLibreMapDesignType,
 } from '@mapconductor/react-for-maplibre';
+import { MapViewContainer } from '../../MapViewContainer';
 
 export type MapProvider = 'maplibre' | 'google-maps';
 
@@ -77,11 +74,8 @@ function DesignMap({
   mapLibreState: ReturnType<typeof useMapLibreViewState>;
   googleState: ReturnType<typeof useGoogleMapViewState>;
 }) {
-  if (provider === 'google-maps') {
-    return <GoogleMapView state={googleState} style={styles.map} />;
-  }
-
-  return <MapLibreView state={mapLibreState} style={styles.map} />;
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
+  return <MapViewContainer state={state} style={styles.map} />;
 }
 
 export function MapDesignPage({ provider }: { provider: MapProvider }) {

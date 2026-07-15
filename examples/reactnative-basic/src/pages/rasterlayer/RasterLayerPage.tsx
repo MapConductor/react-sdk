@@ -10,16 +10,15 @@ import {
 import { RasterLayer } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 
 import type { MapProvider } from '../../screens/MapScreen';
+import { MapViewContainer } from '../MapViewContainer';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 35.6812, longitude: 139.7671, altitude: 0 }),
@@ -53,18 +52,13 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
       opacity={opacity}
     />
   );
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
 
   return (
     <View style={styles.mapContainer}>
-      {provider === 'google-maps' ? (
-        <GoogleMapView state={googleState} style={styles.map}>
-          {rasterLayer}
-        </GoogleMapView>
-      ) : (
-        <MapLibreView state={mapLibreState} style={styles.map}>
-          {rasterLayer}
-        </MapLibreView>
-      )}
+      <MapViewContainer state={state} style={styles.map}>
+        {rasterLayer}
+      </MapViewContainer>
 
       <View style={styles.controlPanel}>
         <View style={styles.titleRow}>

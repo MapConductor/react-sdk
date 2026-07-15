@@ -9,12 +9,10 @@ import {
 import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 import {
@@ -24,6 +22,7 @@ import {
 } from '@mapconductor/react-heatmap';
 
 import postOfficesJson from '../../data/postoffice/postoffices.json';
+import { MapViewContainer } from '../MapViewContainer';
 
 type MapProvider = 'maplibre' | 'google-maps';
 type PostOfficeRow = [number, number, string, string];
@@ -71,26 +70,17 @@ export function HeatmapLayerPage({ provider }: { provider: MapProvider }) {
       <HeatmapPoints states={heatmapPoints} />
     </HeatmapOverlay>
   );
+  const state = provider === 'google-maps' ? googleState : mapLibreState;
 
   return (
     <View style={styles.mapContainer}>
-      {provider === 'google-maps' ? (
-        <GoogleMapView
-          state={googleState}
-          style={styles.map}
-          onMapLoaded={() => setMapReady(true)}
-        >
-          {heatmap}
-        </GoogleMapView>
-      ) : (
-        <MapLibreView
-          state={mapLibreState}
-          style={styles.map}
-          onMapLoaded={() => setMapReady(true)}
-        >
-          {heatmap}
-        </MapLibreView>
-      )}
+      <MapViewContainer
+        state={state}
+        style={styles.map}
+        onMapLoaded={() => setMapReady(true)}
+      >
+        {heatmap}
+      </MapViewContainer>
 
       {!mapReady ? (
         <View style={styles.loadingOverlay} pointerEvents="none">

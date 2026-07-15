@@ -12,6 +12,9 @@ import { RasterLayerPage } from 'src/pages/rasterlayer/RasterLayerPage';
 import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
 import { PostOfficePage } from 'src/pages/marker/postoffice/PostOfficePage';
 import { PostOfficeClusterPage } from 'src/pages/marker/postofficecluster/PostOfficeClusterPage';
+import { PolylinePage } from 'src/pages/polyline/PolylinePage';
+import { PolygonPage } from 'src/pages/polygon/PolygonPage';
+import { CirclePage } from 'src/pages/circle/CirclePage';
 
 export type { MapProvider };
 
@@ -47,6 +50,12 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <PostOfficePage provider={provider} />;
     case 'post-office-cluster':
       return <PostOfficeClusterPage provider={provider} />;
+    case 'circle':
+      return <CirclePage provider={provider} />;
+    case 'polyline':
+      return <PolylinePage provider={provider} />;
+    case 'polygon':
+      return <PolygonPage provider={provider} />;
     case 'heatmap-layer':
       return <HeatmapLayerPage provider={provider} />;
     case 'raster-layer':

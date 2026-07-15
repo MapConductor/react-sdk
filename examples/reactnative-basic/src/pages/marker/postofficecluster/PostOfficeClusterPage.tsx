@@ -18,12 +18,10 @@ import {
 import { InfoBubble, ReactNativeImageIcon } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
-  GoogleMapView,
   useGoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
   MapLibreDesign,
-  MapLibreView,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 import {
@@ -31,7 +29,7 @@ import {
   type MarkerCluster,
   type ClusterIconProvider,
 } from '@mapconductor/react-marker-clustering';
-
+import { MapViewContainer } from '../../MapViewContainer';
 import postOfficesJson from '../../../data/postoffice/postoffices.json';
 
 type MapProvider = 'maplibre' | 'google-maps';
@@ -205,49 +203,33 @@ export function PostOfficeClusterPage({ provider }: { provider: MapProvider }) {
     [activeMapState]
   );
 
-  const overlays = (
-    <>
-      {mapReady ? (
-        <ClusteredPostOffices
-          markers={markers}
-          debugHullPolygons={debugHullPolygons}
-          onClusterClick={handleClusterClick}
-        />
-      ) : null}
-      {selectedMarker ? (
-        <InfoBubble marker={selectedMarker} bubbleColor="#ffffff" borderColor="#ef4444">
-          <PostOfficeInfoView
-            info={selectedMarker.extra as unknown as PostOfficeExtra}
-            marker={selectedMarker}
-            onZoom={handleZoomMarker}
-          />
-        </InfoBubble>
-      ) : null}
-    </>
-  );
-
   return (
     <View style={styles.mapContainer}>
-      {provider === 'google-maps' ? (
-        <GoogleMapView
-          state={googleState}
+      <MapViewContainer
+          state={activeMapState}
           style={styles.map}
           onMapLoaded={() => setMapReady(true)}
-          onMapClick={() => setSelectedMarker(null)}
-        >
-          {overlays}
-        </GoogleMapView>
-      ) : (
-        <MapLibreView
-          state={mapLibreState}
-          style={styles.map}
-          onMapLoaded={() => setMapReady(true)}
-          onMapClick={() => setSelectedMarker(null)}
-        >
-          {overlays}
-        </MapLibreView>
-      )}
+          onMapClick={() => setSelectedMarker(null)}>
 
+          {mapReady ? (
+            // Waits until map is ready to improve user experience.
+            <ClusteredPostOffices
+              markers={markers}
+              debugHullPolygons={debugHullPolygons}
+              onClusterClick={handleClusterClick}
+            />
+          ) : null}
+          {selectedMarker ? (
+            <InfoBubble marker={selectedMarker} bubbleColor="#ffffff" borderColor="#ef4444">
+              <PostOfficeInfoView
+                info={selectedMarker.extra as unknown as PostOfficeExtra}
+                marker={selectedMarker}
+                onZoom={handleZoomMarker}
+              />
+            </InfoBubble>
+          ) : null}
+
+      </MapViewContainer>
       {!mapReady ? (
         <View style={styles.loadingOverlay} pointerEvents="none">
           <ActivityIndicator size="large" color="#ef4444" />
