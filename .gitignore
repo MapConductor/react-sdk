@@ -54,8 +54,6 @@ dist/*.d.ts
 dist/
 test-results/
 AUDIT_REPORT.md
-AGENTS.md
 CLAUDE.md
-AGENTS.md
 .gradle/
 .pnpm-store

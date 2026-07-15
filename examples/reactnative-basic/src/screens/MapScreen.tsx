@@ -14,7 +14,11 @@ import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationP
 import { PostOfficePage } from 'src/pages/marker/postoffice/PostOfficePage';
 import { PostOfficeClusterPage } from 'src/pages/marker/postofficecluster/PostOfficeClusterPage';
 import { PolylinePage } from 'src/pages/polyline/PolylinePage';
+import { PolylineClickPage } from 'src/pages/polyline/PolylineClickPage';
 import { PolygonPage } from 'src/pages/polygon/PolygonPage';
+import { PolygonClickPage } from 'src/pages/polygon/PolygonClickPage';
+import { PolygonGeodesicPage } from 'src/pages/polygon/PolygonGeodesicPage';
+import { PolygonHolePage } from 'src/pages/polygon/PolygonHolePage';
 import { CirclePage } from 'src/pages/circle/CirclePage';
 
 export type { MapProvider };
@@ -55,8 +59,16 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <CirclePage provider={provider} />;
     case 'polyline':
       return <PolylinePage provider={provider} />;
+    case 'polyline-click':
+      return <PolylineClickPage provider={provider} />;
     case 'polygon':
       return <PolygonPage provider={provider} />;
+    case 'polygon-click':
+      return <PolygonClickPage provider={provider} />;
+    case 'polygon-geodesic':
+      return <PolygonGeodesicPage provider={provider} />;
+    case 'polygon-hole':
+      return <PolygonHolePage provider={provider} />;
     case 'heatmap-layer':
       return <HeatmapLayerPage provider={provider} />;
     case 'raster-layer':
