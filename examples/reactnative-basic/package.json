@@ -13,6 +13,7 @@
     "@mapconductor/js-sdk-react": "0.1.0",
     "@mapconductor/react-for-googlemaps": "0.1.0",
     "@mapconductor/react-for-maplibre": "0.1.0",
+    "@mapconductor/react-geojson-layer": "0.1.0",
     "@mapconductor/react-heatmap": "0.1.0",
     "@mapconductor/react-marker-clustering": "0.1.0",
     "@react-native-community/slider": "^5.2.0",

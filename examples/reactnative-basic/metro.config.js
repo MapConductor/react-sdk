@@ -6,6 +6,10 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
+if (!config.resolver.assetExts.includes('zip')) {
+  config.resolver.assetExts.push('zip');
+}
+
 config.watchFolders = [workspaceRoot];
 config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),

@@ -8,6 +8,8 @@ import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
 import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
 import { HeatmapLayerPage } from 'src/pages/heatmaplayer/HeatmapLayerPage';
+import { BasicGeoJSONPage } from 'src/pages/geojson/basic/BasicGeoJSONPage';
+import { GeoJSONLayerPage } from 'src/pages/geojson/layer/GeoJSONLayerPage';
 import { RasterLayerPage } from 'src/pages/rasterlayer/RasterLayerPage';
 import { GroundImagePage } from 'src/pages/groundimage/GroundImagePage';
 import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
@@ -71,6 +73,10 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <PolygonHolePage provider={provider} />;
     case 'heatmap-layer':
       return <HeatmapLayerPage provider={provider} />;
+    case 'geojson-basic':
+      return <BasicGeoJSONPage provider={provider} />;
+    case 'geojson-layer':
+      return <GeoJSONLayerPage provider={provider} />;
     case 'raster-layer':
       return <RasterLayerPage provider={provider} />;
     case 'ground-image':

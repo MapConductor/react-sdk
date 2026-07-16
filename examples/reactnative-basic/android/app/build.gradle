@@ -197,6 +197,7 @@ dependencies {
     implementation project(':mapconductor_react-for-googlemaps')
     implementation project(':mapconductor_react-for-maplibre')
     implementation project(':mapconductor_react-marker-clustering')
+    implementation project(':mapconductor_react-geojson-layer')
     implementation project(':mapconductor_react-heatmap')
 
     def isGifEnabled = (findProperty('expo.gif.enabled') ?: "") == "true";

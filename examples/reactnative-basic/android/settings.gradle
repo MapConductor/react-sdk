@@ -69,5 +69,8 @@ project(':mapconductor_react-for-maplibre').projectDir = new File(rootDir, '../.
 include ':mapconductor_react-marker-clustering'
 project(':mapconductor_react-marker-clustering').projectDir = new File(rootDir, '../../../react-marker-clustering/android')
 
+include ':mapconductor_react-geojson-layer'
+project(':mapconductor_react-geojson-layer').projectDir = new File(rootDir, '../../../react-geojson-layer/android')
+
 include ':mapconductor_react-heatmap'
 project(':mapconductor_react-heatmap').projectDir = new File(rootDir, '../../../react-heatmap/android')

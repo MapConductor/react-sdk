@@ -43,6 +43,8 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'polygon-hole', label: 'Polygon with Holes', group: 'Shape' },
   { id: 'ground-image', label: 'Ground Image', group: 'Overlay' },
   { id: 'raster-layer', label: 'Raster Layer', group: 'Overlay' },
+  { id: 'geojson-basic', label: 'GeoJSON Basic', group: 'Extensions' },
+  { id: 'geojson-layer', label: 'GeoJSON Layer', group: 'Extensions' },
   { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions' },
 ];
 
