@@ -22,11 +22,18 @@ interface SelectedFeature {
 }
 
 const PROPERTY_LABELS: Record<string, string> = {
-  N02_002: '鉄道区分',
-  N02_003: '事業者種別',
-  N02_004: '路線名',
-  N02_005: '運営会社',
+  N02_001: '鉄道区分',
+  N02_002: '事業者種別',
+  N02_003: '路線名',
+  N02_004: '運営会社',
 };
+
+interface RailroadStyleEntry {
+  company: {
+    name: string;
+    lines: Array<{ name: string; color: string }>;
+  };
+}
 
 export function GeoJSONLayerPage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
@@ -40,6 +47,11 @@ export function GeoJSONLayerPage() {
       new GeoJSONLayerState({
         strokeColor: colorArgb(200, 250, 36, 29),
         strokeWidth: 6,
+        onLoadStart: () => setIsLoading(true),
+        onLoadComplete: (loadError) => {
+          setIsLoading(false);
+          setError(loadError?.message ?? null);
+        },
         onClick: (feature, position) => {
           setSelected({
             position: createGeoPoint({ latitude: position.latitude, longitude: position.longitude }),
@@ -53,22 +65,26 @@ export function GeoJSONLayerPage() {
   useEffect(() => {
     const abort = new AbortController();
     (async () => {
+      layerState.onLoadStart?.();
       try {
         const response = await fetch(`${import.meta.env.BASE_URL}${GEOJSON_ASSET}`, {
           signal: abort.signal,
         });
         if (!response.ok || !response.body) throw new Error(`HTTP ${response.status}`);
-        const text = await readFirstGeoJSONEntry(response.body);
+        const archive = await readGeoJSONArchive(response.body);
         if (abort.signal.aborted) return;
-        setFeatures(GeoJSONParser.parseFeatures(text));
+        const parsedFeatures = GeoJSONParser.parseFeatures(archive.geoJSON);
+        if (parsedFeatures.length === 0) throw new Error('No GeoJSON features found');
+        setFeatures(applyRailroadStyles(parsedFeatures, archive.styles));
+        layerState.onLoadComplete?.(null);
       } catch (err) {
-        console.log(err);
-        if (!abort.signal.aborted) setError(String(err));
-      } finally {
-        if (!abort.signal.aborted) setIsLoading(false);
+        if (!abort.signal.aborted) {
+          const loadError = err instanceof Error ? err : new Error(String(err));
+          layerState.onLoadComplete?.(loadError);
+        }
       }
     })();
-  }, []);
+  }, [layerState]);
 
   const handleMapClick = useCallback(
     (point: GeoPoint) => {
@@ -111,26 +127,74 @@ export function GeoJSONLayerPage() {
   );
 }
 
-async function readFirstGeoJSONEntry(stream: ReadableStream<Uint8Array>): Promise<string> {
+async function readGeoJSONArchive(stream: ReadableStream<Uint8Array>): Promise<{
+  geoJSON: string;
+  styles: RailroadStyleEntry[];
+}> {
   const entries = stream.pipeThrough(new ZipReaderStream()).getReader();
+  let geoJSON: string | null = null;
+  let styleJSON: string | null = null;
   try {
     for (;;) {
       const { done, value: entry } = await entries.read();
-      if (done) throw new Error('No .geojson entry found in zip');
-      if (
-        entry.readable &&
-        !entry.directory &&
-        !entry.filename.startsWith('__MACOSX/') &&
-        entry.filename.toLowerCase().endsWith('.geojson')
-      ) {
-        return await new Response(entry.readable).text();
+      if (done) break;
+      if (!entry.readable) continue;
+
+      const filename = entry.filename.toLowerCase();
+      const isUsableFile = !entry.directory && !entry.filename.startsWith('__MACOSX/');
+      if (isUsableFile && filename.endsWith('railroadsection.geojson')) {
+        geoJSON = await new Response(entry.readable).text();
+      } else if (isUsableFile && filename.endsWith('railroadsection.style.json')) {
+        styleJSON = await new Response(entry.readable).text();
+      } else {
+        // Every skipped entry must be consumed before ZipReaderStream can advance.
+        await new Response(entry.readable).arrayBuffer();
       }
-      // Skipped entries must still be drained so the zip stream can advance.
-      if (entry.readable) await new Response(entry.readable).arrayBuffer();
     }
   } finally {
     await entries.cancel().catch(() => {});
   }
+
+  if (geoJSON == null) throw new Error('No RailroadSection.geojson entry found in zip');
+  if (styleJSON == null) throw new Error('No RailroadSection.style.json entry found in zip');
+  const styles: unknown = JSON.parse(styleJSON);
+  if (!Array.isArray(styles)) throw new Error('Railroad style JSON must be an array');
+  return { geoJSON, styles: styles as RailroadStyleEntry[] };
+}
+
+function applyRailroadStyles(
+  features: GeoJSONFeatureData[],
+  styles: RailroadStyleEntry[],
+): GeoJSONFeatureData[] {
+  const routeColors = new Map<string, number>();
+  for (const entry of styles) {
+    const company = entry.company;
+    if (!company || typeof company.name !== 'string' || !Array.isArray(company.lines)) continue;
+    for (const line of company.lines) {
+      const color = parseHexColor(line.color);
+      if (typeof line.name === 'string' && color != null) {
+        routeColors.set(routeKey(company.name, line.name), color);
+      }
+    }
+  }
+
+  return features.map((feature) => {
+    const companyName = feature.properties.N02_004;
+    const lineName = feature.properties.N02_003;
+    if (typeof companyName !== 'string' || typeof lineName !== 'string') return feature;
+    const strokeColor = routeColors.get(routeKey(companyName, lineName));
+    return strokeColor == null ? feature : { ...feature, strokeColor };
+  });
+}
+
+function routeKey(companyName: string, lineName: string): string {
+  return `${companyName}\u0000${lineName}`;
+}
+
+function parseHexColor(value: unknown): number | null {
+  if (typeof value !== 'string' || !/^#[0-9a-f]{6}$/i.test(value)) return null;
+  const rgb = Number.parseInt(value.slice(1), 16);
+  return colorArgb(255, (rgb >>> 16) & 0xff, (rgb >>> 8) & 0xff, rgb & 0xff);
 }
 
 function PropertyTable({ properties }: { properties: Record<string, unknown> }) {

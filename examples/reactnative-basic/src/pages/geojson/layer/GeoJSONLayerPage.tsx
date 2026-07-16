@@ -25,7 +25,8 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
   const states = useGeoJSONMapStates('geojson-layer', LAYER_INIT_CAMERA);
   const state = resolveGeoJSONMapState(provider, states);
   const [sourceUri, setSourceUri] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [isSourceLoading, setIsSourceLoading] = useState(true);
+  const [isLayerLoading, setIsLayerLoading] = useState(false);
   const [selectedFeature, setSelectedFeature] = useState<GeoJSONFeatureData | null>(null);
   const [tappedPosition, setTappedPosition] = useState<GeoPoint | null>(null);
 
@@ -34,6 +35,9 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
       new GeoJSONLayerState({
         strokeColor: 0x7ffa241d,
         strokeWidth: 6,
+        styleProviderId: 'example-n02-route',
+        onLoadStart: () => setIsLayerLoading(true),
+        onLoadComplete: () => setIsLayerLoading(false),
         onClick: (feature, position) => {
           setSelectedFeature(feature);
           setTappedPosition(GeoPoint.from(position));
@@ -44,7 +48,7 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
+    setIsSourceLoading(true);
     setSelectedFeature(null);
     setTappedPosition(null);
     void loadGeoJSONZipAsset(GEOJSON_ZIP_ASSET)
@@ -52,7 +56,7 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
         if (!cancelled) setSourceUri(uri);
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setIsSourceLoading(false);
       });
     return () => {
       cancelled = true;
@@ -77,10 +81,14 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
         ) : null}
       </MapViewContainer>
 
-      {loading ? (
+      {isSourceLoading || isLayerLoading ? (
         <View style={styles.loadingOverlay} pointerEvents="none">
           <ActivityIndicator size="large" color="#ef4444" />
-          <Text style={styles.loadingText}>Parsing {GEOJSON_ZIP_NAME}...</Text>
+          <Text style={styles.loadingText}>
+            {isSourceLoading
+              ? `Copying ${GEOJSON_ZIP_NAME}...`
+              : `Parsing ${GEOJSON_ZIP_NAME}...`}
+          </Text>
         </View>
       ) : null}
 
