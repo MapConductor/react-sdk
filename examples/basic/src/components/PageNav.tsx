@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { SAMPLE_PAGES } from '../sampleRegistry';
+import { resolveProviderForPage, SAMPLE_PAGES } from '../sampleRegistry';
 
 export function PageNav({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
@@ -7,6 +7,7 @@ export function PageNav({ onNavigate }: { onNavigate?: () => void }) {
   const pathParts = location.pathname.split('/').filter(Boolean);
   const provider = pathParts[0] || 'maplibre';
   const activePage = pathParts[1] || 'map';
+  const language = pathParts[2] === 'ja' ? 'ja' : 'en';
 
   return (
     <aside className="sidebar">
@@ -23,7 +24,8 @@ export function PageNav({ onNavigate }: { onNavigate?: () => void }) {
                 page.status === 'unsupported' ? 'unsupported' : '',
               ].filter(Boolean).join(' ')}
               onClick={() => {
-                navigate(`/${provider}/${page.id}${location.search}`);
+                const targetProvider = resolveProviderForPage(provider, page.id);
+                navigate(`/${targetProvider}/${page.id}/${language}`);
                 onNavigate?.();
               }}
             >

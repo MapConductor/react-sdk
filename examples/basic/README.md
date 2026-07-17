@@ -30,7 +30,7 @@ This example demonstrates how to use the MapConductor React SDK with both MapLib
 npm run dev
 ```
 
-The app will be available at `http://localhost:3000`.
+The app will be available at `http://localhost:4000`.
 
 ### Production build:
 ```bash

@@ -86,11 +86,14 @@ function MissingGoogleMapsApiKey() {
 }
 
 export function SingletonGoogleMapsProvider({ children }: { children: ReactNode }) {
+  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const google2DState = useGoogleMapViewState({
+    apiKey,
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: DEFAULT_CAMERA,
   });
   const google3DState = useGoogleMapViewState({
+    apiKey,
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: DEFAULT_CAMERA,
   });
@@ -126,7 +129,6 @@ export function SingletonGoogleMapsProvider({ children }: { children: ReactNode 
     unregister,
   }), [google2DState, google3DState, register, unregister]);
 
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const hasApiKey = Boolean(apiKey && apiKey !== 'your_api_key_here');
 
   return (
@@ -136,10 +138,9 @@ export function SingletonGoogleMapsProvider({ children }: { children: ReactNode 
           {hasApiKey ? (
             <GoogleMapView2D
               state={google2DState}
-              apiKey={apiKey}
               mapId="DEMO_MAP_ID"
               version="alpha"
-              libraries="map3d"
+              libraries="maps3d"
               markerTilingOptions={SINGLETON_MARKER_TILING_OPTIONS}
               onMapClick={google2DContent?.onMapClick}
               onCameraMoveStart={google2DContent?.onCameraMoveStart}
@@ -161,7 +162,6 @@ export function SingletonGoogleMapsProvider({ children }: { children: ReactNode 
           {hasApiKey ? (
             <GoogleMapView
               state={google3DState}
-              apiKey={apiKey}
               mapId="DEMO_MAP_ID"
               version="alpha"
               markerTilingOptions={SINGLETON_MARKER_TILING_OPTIONS}

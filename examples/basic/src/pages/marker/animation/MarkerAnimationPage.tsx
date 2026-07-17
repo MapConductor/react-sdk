@@ -4,10 +4,12 @@ import { Marker } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { HONOLULU } from '../../common/sampleHelpers';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 21.3825, lng: -157.9330, zoom: 14 };
 
 export function MarkerAnimationPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [animation, setAnimation] = useState<MarkerAnimation | null>(null);
 
@@ -33,12 +35,17 @@ export function MarkerAnimationPage() {
   return (
     <MapViewContainer state={mapViewState}>
       <Marker state={marker} />
-      <ControlPanel title="Marker Animation">
+      <ControlPanel title={t('Marker Animation', 'マーカーアニメーション')}>
         <div className="button-grid">
-          <button onClick={() => triggerAnimation(MarkerAnimation.Drop)}>Drop marker</button>
-          <button onClick={() => triggerAnimation(MarkerAnimation.Bounce)}>Bounce marker</button>
+          <button onClick={() => triggerAnimation(MarkerAnimation.Drop)}>{t('Drop marker', 'ドロップ')}</button>
+          <button onClick={() => triggerAnimation(MarkerAnimation.Bounce)}>{t('Bounce marker', 'バウンド')}</button>
         </div>
-        <p className="control-panel-note">Tap the marker or the button to trigger the sample animation state.</p>
+        <p className="control-panel-note">
+          {t(
+            'Tap the marker or a button to trigger an animation.',
+            'マーカーまたはボタンをタップしてアニメーションを実行します。',
+          )}
+        </p>
       </ControlPanel>
     </MapViewContainer>
   );

@@ -50,9 +50,12 @@ export default defineConfig({
   resolve: {
     dedupe: ['react', 'react-dom', '@mapconductor/js-sdk-core'],
   },
+  ssr: {
+    noExternal: ['prism-react-renderer'],
+  },
   server: {
     host: '0.0.0.0',
-    port: 3000,
+    port: 4000,
   },
   build: {
     sourcemap: true,

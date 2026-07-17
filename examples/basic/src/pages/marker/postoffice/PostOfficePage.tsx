@@ -12,9 +12,11 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
+import { useSampleI18n } from '../../../i18n';
 
 // ─── Data types ────────────────────────────────────────────────────────────────
 interface PostOfficeExtra {
@@ -74,6 +76,7 @@ function PostOfficePageContent({
 }: {
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 }) {
+  const { t } = useSampleI18n();
   const [raw, setRaw] = useState<[number, number, string, string][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<MarkerState | null>(null);
@@ -139,12 +142,15 @@ function PostOfficePageContent({
         />
       )}
 
-      <ControlPanel title="Post Office (24,526件)">
+      <ControlPanel title={t('Post Offices (24,526 markers)', '郵便局（24,526件）')}>
         {!raw ? (
-          <p className="control-panel-note">データ読み込み中...</p>
+          <p className="control-panel-note">{t('Loading data…', 'データを読み込んでいます…')}</p>
         ) : (
           <p className="control-panel-note">
-            マーカーをクリックすると郵便局情報が表示されます。
+            {t(
+              'Click a marker to display postal-office information.',
+              'マーカーをクリックすると郵便局情報が表示されます。',
+            )}
           </p>
         )}
       </ControlPanel>
@@ -167,10 +173,18 @@ function MapLibrePostOfficePage() {
   return <PostOfficePageContent mapViewState={mapViewState} />;
 }
 
+function LeafletPostOfficePage() {
+  const mapViewState = useLeafletMapViewState({
+    mapDesignType: LeafletDesign.OpenStreetMap,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <PostOfficePageContent mapViewState={mapViewState} />;
+}
+
 // ─── Page component ─────────────────────────────────────────────────────────────
 export function PostOfficePage() {
   const location = useLocation();
-  return location.pathname.startsWith('/google-maps')
-    ? <GooglePostOfficePage />
-    : <MapLibrePostOfficePage />;
+  if (location.pathname.startsWith('/google-maps')) return <GooglePostOfficePage />;
+  if (location.pathname.startsWith('/leaflet')) return <LeafletPostOfficePage />;
+  return <MapLibrePostOfficePage />;
 }

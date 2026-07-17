@@ -9,6 +9,7 @@
     "react-icons/",
     "react-for-googlemaps/",
     "react-for-maplibre/",
+    "react-for-leaflet/",
     "react-geojson-layer/",
     "react-heatmap/",
     "react-marker-clustering/",
@@ -19,7 +20,10 @@
     "dev": "npm run build && (npm run dev:packages & npm run dev:examples & wait)",
     "dev:rn": "npm run build && (npm run dev:packages & npm run dev:rn:examples & wait)",
     "dev:rn:android": "npm run build && npm run expo:android --workspace @mapconductor/example-rn-basic",
-    "dev:packages": "(npm run dev --workspace @mapconductor/js-sdk-core -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/js-sdk-react -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-icons -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-googlemaps -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-maplibre -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-geojson-layer -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-heatmap -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-marker-clustering -- --tsconfig ../tsconfig.dev.json & wait)",
+    "dev:rn:ios": "npm run build && npm run ios:frameworks:sync && npm run expo:prebuild:ios --workspace @mapconductor/example-rn-basic && npm run expo:ios --workspace @mapconductor/example-rn-basic",
+    "ios:frameworks": "../ios-sdk/scripts/build-xcframeworks.sh && scripts/sync-ios-xcframeworks.sh",
+    "ios:frameworks:sync": "scripts/sync-ios-xcframeworks.sh",
+    "dev:packages": "(npm run dev --workspace @mapconductor/js-sdk-core -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/js-sdk-react -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-icons -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-googlemaps -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-maplibre -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-leaflet -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-geojson-layer -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-heatmap -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-marker-clustering -- --tsconfig ../tsconfig.dev.json & wait)",
     "dev:examples": "npm run dev --workspace @mapconductor/example-basic",
     "dev:rn:examples": "npm run expo:start --workspace @mapconductor/example-rn-basic -- --clear",
     "lint": "eslint . --ext .ts,.tsx",
@@ -34,6 +38,7 @@
     "@types/react-dom": "^19.2.0",
     "@typescript-eslint/eslint-plugin": "^6.15.0",
     "@typescript-eslint/parser": "^6.15.0",
+    "esbuild": "0.28.1",
     "eslint": "^8.56.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
@@ -43,6 +48,12 @@
   "engines": {
     "node": ">=18.0.0",
     "npm": ">=9.0.0"
+  },
+  "overrides": {
+    "esbuild": "0.28.1",
+    "tsup": {
+      "esbuild": "0.28.1"
+    }
   },
   "repository": {
     "type": "git",

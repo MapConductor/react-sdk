@@ -3,9 +3,22 @@ import { useLocation } from 'react-router-dom';
 import type { MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
 import { GoogleMapDesign, GoogleMapDesignType } from '@mapconductor/react-for-googlemaps';
 import { MapLibreDesign, MapLibreMapDesignType } from '@mapconductor/react-for-maplibre';
+import { LeafletDesign, LeafletMapDesignType } from '@mapconductor/react-for-leaflet';
+import { GSI_STANDARD_ATTRIBUTION_RULES } from '../../../gsiAttributions';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 12 };
+
+const GSI_STANDARD_DESIGN = new LeafletDesign({
+  id: 'gsi-standard',
+  tileUrl: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+  tileOptions: {
+    minZoom: 5,
+    maxZoom: 18,
+    tileSize: 256,
+  },
+  attributionRules: GSI_STANDARD_ATTRIBUTION_RULES,
+});
 
 interface MapDesignOption {
   label: string;
@@ -37,6 +50,12 @@ const MAPLIBRE_DESIGNS: MapDesignOption[] = [
   { label: 'OpenMapTiles', design: MapLibreDesign.OpenMapTiles },
 ];
 
+const LEAFLET_DESIGNS: MapDesignOption[] = [
+  { label: 'OpenStreetMap', design: LeafletDesign.OpenStreetMap },
+  { label: 'GSI Standard', design: GSI_STANDARD_DESIGN },
+  { label: 'None', design: LeafletDesign.None },
+];
+
 export function MapDesignPage() {
   const location = useLocation();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
@@ -52,7 +71,10 @@ export function MapDesignPage() {
       case 'google-maps-3d':
         return GOOGLE_MAP_DESIGNS;
       case 'maplibre':
+      case 'maplibre-3d':
         return MAPLIBRE_DESIGNS;
+      case 'leaflet':
+        return LEAFLET_DESIGNS;
       default:
         throw new Error(`[debug] Not defined MapTypeDesign for ${mapProviderName}`);
     }
@@ -67,7 +89,7 @@ export function MapDesignPage() {
     const option = mapDesignOptions.find(item => item.design.id === designId);
     if (!option) return;
 
-    mapViewState.mapDesignType = option.design as GoogleMapDesignType | MapLibreMapDesignType;
+    mapViewState.mapDesignType = option.design as GoogleMapDesignType | MapLibreMapDesignType | LeafletMapDesignType;
     setSelectedDesignId(mapViewState.mapDesignType.id);
   };
 

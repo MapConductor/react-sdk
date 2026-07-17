@@ -1,12 +1,12 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Linking,
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Asset } from 'expo-asset';
 
 import {
   GeoPoint,
@@ -40,14 +40,39 @@ const INIT_CAMERA = MapCameraPosition.from({
   tilt: 0,
 });
 
-const ANDROID_PACKAGE = 'com.mapconductor.basic';
-
-const STORE_ICON_URIS: Record<string, string> = {
-  coffee_bean: `android.resource://${ANDROID_PACKAGE}/drawable/coffee_bean`,
-  honolulu_coffee: `android.resource://${ANDROID_PACKAGE}/drawable/honolulu_coffee`,
-  coffee_extra: `android.resource://${ANDROID_PACKAGE}/drawable/coffee_extra`,
-  starbucks: `android.resource://${ANDROID_PACKAGE}/drawable/starbucks`,
+const STORE_ICON_ASSETS: Record<string, number> = {
+  coffee_bean: require('../../../../assets/images/coffee_bean.png'),
+  honolulu_coffee: require('../../../../assets/images/honolulu_coffee.png'),
+  coffee_extra: require('../../../../assets/images/coffee_extra.png'),
+  starbucks: require('../../../../assets/images/starbucks.png'),
 };
+
+function useStoreIconUris(): Record<string, string> | null {
+  const [uris, setUris] = useState<Record<string, string> | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    const entries = Object.entries(STORE_ICON_ASSETS);
+
+    void Asset.loadAsync(entries.map(([, source]) => source))
+      .then((assets) => {
+        if (!active) return;
+        setUris(Object.fromEntries(
+          assets.map((asset, index) => [entries[index][0], asset.localUri ?? asset.uri])
+        ));
+      })
+      .catch((error: unknown) => {
+        console.warn('Failed to load store marker icons', error);
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  return uris;
+}
+
 function StoreInfoView({ info }: { info: StoreInfo }) {
   const openDirections = () => {
     const destination = encodeURIComponent(info.address);
@@ -89,29 +114,29 @@ function StoreInfoView({ info }: { info: StoreInfo }) {
 }
 
 function StoreMarkers({ onSelectMarker }: { onSelectMarker: (marker: MarkerState) => void }) {
+  const iconUris = useStoreIconUris();
   const markers = useMemo(
-    () =>
-      STORES.map(({ lat, lng, ...info }) =>
+    () => {
+      if (!iconUris) return [];
+      return STORES.map(({ lat, lng, ...info }) =>
         createMarkerState({
           id: `${info.store}-${lat}-${lng}`,
           position: GeoPoint.from({ latitude: lat, longitude: lng, altitude: 0 }),
           extra: info,
-          icon:
-            Platform.OS === 'android'
-              ? new ReactNativeImageDefaultIcon(
-                  STORE_ICON_URIS[info.store] ?? STORE_ICON_URIS.starbucks,
-                  {
-                    scale: 1,
-                    infoAnchor: { x: 0.5, y: 0 },
-                  }
-                )
-              : null,
+          icon: new ReactNativeImageDefaultIcon(
+            iconUris[info.store] ?? iconUris.starbucks,
+            {
+              scale: 1,
+              infoAnchor: { x: 0.5, y: 0 },
+            }
+          ),
           clickable: true,
           draggable: true,
           onClick: onSelectMarker,
         })
-      ),
-    [onSelectMarker]
+      );
+    },
+    [iconUris, onSelectMarker]
   );
 
   return <Markers states={markers} />;

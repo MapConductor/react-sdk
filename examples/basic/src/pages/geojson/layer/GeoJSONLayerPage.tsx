@@ -11,6 +11,7 @@ import {
 import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 35.68, lng: 139.77, zoom: 13 };
 
@@ -36,6 +37,7 @@ interface RailroadStyleEntry {
 }
 
 export function GeoJSONLayerPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -114,12 +116,12 @@ export function GeoJSONLayerPage() {
         </InfoBubbleAtPosition>
       )}
 
-      <ControlPanel title="GeoJSON Layer">
+      <ControlPanel title={t('GeoJSON Layer', 'GeoJSON レイヤー')}>
         {isLoading ? (
-          <p className="control-panel-note">GeoJSON 読み込み中...</p>
+          <p className="control-panel-note">{t('Loading GeoJSON…', 'GeoJSONを読み込んでいます…')}</p>
         ) : (
           <p className="control-panel-note">
-            路線をタップするとプロパティが表示されます。
+            {t('Tap a railway line to display its properties.', '路線をタップするとプロパティが表示されます。')}
           </p>
         )}
       </ControlPanel>

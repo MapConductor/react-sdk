@@ -8,6 +8,7 @@ import {
 import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 25.255377, lng: 55.3089185, zoom: 13 };
 
@@ -52,6 +53,7 @@ const BASIC_GEOJSON = `{
 }`;
 
 export function BasicGeoJSONPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
 
   const layerState = useMemo(
@@ -73,9 +75,9 @@ export function BasicGeoJSONPage() {
   return (
     <MapViewContainer state={mapViewState}>
       <GeoJSONLayer state={layerState} features={features} />
-      <ControlPanel title="GeoJSON Basic">
+      <ControlPanel title={t('GeoJSON Basic', 'GeoJSON 基本')}>
         <p className="control-panel-note">
-          GeoJSON ポリゴン（ホール付き）を表示しています。
+          {t('A GeoJSON polygon with a hole is displayed.', 'GeoJSONポリゴン（穴付き）を表示しています。')}
         </p>
       </ControlPanel>
     </MapViewContainer>

@@ -11,6 +11,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble } from '@mapconductor/js-sdk-react';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
 import {
   MarkerClusterGroup,
   type ClusterIconProvider,
@@ -19,6 +20,7 @@ import {
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
+import { useSampleI18n } from '../../../i18n';
 
 // ─── Data types ────────────────────────────────────────────────────────────────
 interface PostOfficeExtra {
@@ -102,6 +104,7 @@ function PostOfficeClusterPageContent({
 }: {
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 }) {
+  const { t } = useSampleI18n();
   const [raw, setRaw] = useState<[number, number, string, string][] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<MarkerState | null>(null);
@@ -198,21 +201,24 @@ function PostOfficeClusterPageContent({
         />
       )}
 
-      <ControlPanel title="Post Office Cluster (24,526件)">
+      <ControlPanel title={t('Post Office Clusters (24,526 markers)', '郵便局クラスタリング（24,526件）')}>
         <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px' }}>
           <input
             type="checkbox"
             checked={debugHullPolygons}
             onChange={e => setDebugHullPolygons(e.target.checked)}
           />
-          debug hull polygons
+          {t('Show debug hull polygons', 'デバッグ用の外周ポリゴンを表示')}
         </label>
         {!raw ? (
-          <p className="control-panel-note">データ読み込み中...</p>
+          <p className="control-panel-note">{t('Loading data…', 'データを読み込んでいます…')}</p>
         ) : (
           <p className="control-panel-note">
-            クラスターをクリックするとズームインします。<br />
-            個別マーカーをクリックすると郵便局情報が表示されます。
+            {t('Click a cluster to zoom in.', 'クラスターをクリックするとズームインします。')}<br />
+            {t(
+              'Click an individual marker to display postal-office information.',
+              '個別マーカーをクリックすると郵便局情報が表示されます。',
+            )}
           </p>
         )}
       </ControlPanel>
@@ -243,10 +249,18 @@ function MapLibrePostOfficeClusterPage() {
   return <PostOfficeClusterPageContent mapViewState={mapViewState} />;
 }
 
+function LeafletPostOfficeClusterPage() {
+  const mapViewState = useLeafletMapViewState({
+    mapDesignType: LeafletDesign.OpenStreetMap,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <PostOfficeClusterPageContent mapViewState={mapViewState} />;
+}
+
 // ─── Page export ───────────────────────────────────────────────────────────────
 export function PostOfficeClusterPage() {
   const location = useLocation();
-  return location.pathname.startsWith('/google-maps')
-    ? <GooglePostOfficeClusterPage />
-    : <MapLibrePostOfficeClusterPage />;
+  if (location.pathname.startsWith('/google-maps')) return <GooglePostOfficeClusterPage />;
+  if (location.pathname.startsWith('/leaflet')) return <LeafletPostOfficeClusterPage />;
+  return <MapLibrePostOfficeClusterPage />;
 }

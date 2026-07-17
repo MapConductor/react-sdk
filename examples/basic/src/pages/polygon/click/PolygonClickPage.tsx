@@ -12,6 +12,7 @@ import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
 import { california } from './California';
+import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 37.2, lng: -119.6, zoom: 5 };
 
@@ -22,6 +23,7 @@ interface ClickedMarker {
 }
 
 export function PolygonClickPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const polygons = useMemo(
     () => california.map((points, index) =>
@@ -101,8 +103,10 @@ export function PolygonClickPage() {
           </InfoBubble>
         </>
       )}
-      <ControlPanel title="Polygon Click">
-        <p className="control-panel-note">Tap inside or outside California.</p>
+      <ControlPanel title={t('Polygon Click', 'ポリゴンのクリック')}>
+        <p className="control-panel-note">
+          {t('Tap inside or outside California.', 'カリフォルニア州の内側または外側をタップしてください。')}
+        </p>
       </ControlPanel>
     </MapViewContainer>
   );

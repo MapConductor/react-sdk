@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import Slider from '@react-native-community/slider';
+import { Picker } from '@react-native-picker/picker';
 import { StyleSheet, Text, View } from 'react-native';
 
 import {
@@ -20,28 +21,24 @@ import {
 
 import type { MapProvider } from '../../screens/MapScreen';
 import { MapViewContainer } from '../MapViewContainer';
+import {
+  GSI_RELIEF_ATTRIBUTION_RULES,
+  GSI_STANDARD_ATTRIBUTION_RULES,
+} from '../../gsiAttributions';
 
 const INIT_CAMERA = MapCameraPosition.from({
-  position: GeoPoint.from({ latitude: 21.382314, longitude: -157.933097, altitude: 0 }),
-  zoom: 12,
+  position: GeoPoint.from({ latitude: 35.6812, longitude: 139.7671, altitude: 0 }),
+  zoom: 5,
   bearing: 0,
   tilt: 0,
 });
-const OSM_SOURCE = RasterLayerSource.UrlTemplate({
-  template: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-  tileSize: 256,
-});
+const TILE_SIZE = 256;
+
+type GsiLayer = 'relief' | 'standard';
 
 export function RasterLayerPage({ provider }: { provider: MapProvider }) {
-  const [opacity, setOpacity] = useState(1);
-  const [rasterLayerState] = useState(
-    () =>
-      createRasterLayerState({
-        id: 'rasterLayer',
-        source: OSM_SOURCE,
-        opacity: 1,
-      })
-  );
+  const [selectedLayer, setSelectedLayer] = useState<GsiLayer>('relief');
+  const [opacity, setOpacity] = useState(0.75);
   const mapLibreState = useMapLibreViewState({
     id: 'raster-layer-maplibre',
     mapDesignType: MapLibreDesign.DemoTiles,
@@ -54,11 +51,25 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
   });
 
   const state = provider === 'google-maps' ? googleState : mapLibreState;
-
-  const handleOpacityChange = (value: number) => {
-    rasterLayerState.opacity = value;
-    setOpacity(value);
-  };
+  const rasterLayerState = useMemo(() => createRasterLayerState({
+    id: 'gsi-raster',
+    source: selectedLayer === 'relief'
+      ? RasterLayerSource.UrlTemplate({
+          template: 'https://cyberjapandata.gsi.go.jp/xyz/relief/{z}/{x}/{y}.png',
+          tileSize: TILE_SIZE,
+          minZoom: 5,
+          maxZoom: 15,
+          attributionRules: [...GSI_RELIEF_ATTRIBUTION_RULES],
+        })
+      : RasterLayerSource.UrlTemplate({
+          template: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
+          tileSize: TILE_SIZE,
+          minZoom: 5,
+          maxZoom: 18,
+          attributionRules: [...GSI_STANDARD_ATTRIBUTION_RULES],
+        }),
+    opacity,
+  }), [opacity, selectedLayer]);
 
   return (
     <View style={styles.mapContainer}>
@@ -68,8 +79,21 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
 
       <View style={styles.controlPanel}>
         <View style={styles.titleRow}>
-          <Text style={styles.controlPanelTitle}>Raster Layer Example</Text>
+          <Text style={styles.controlPanelTitle}>Raster Layer</Text>
           <Text style={styles.opacityValue}>{opacity.toFixed(1)}</Text>
+        </View>
+        <Text style={styles.label}>GSI layer / 国土地理院レイヤー</Text>
+        <View style={styles.pickerContainer}>
+          <Picker<GsiLayer>
+            selectedValue={selectedLayer}
+            onValueChange={setSelectedLayer}
+            style={styles.picker}
+            dropdownIconColor="#111827"
+            mode="dropdown"
+          >
+            <Picker.Item label="Relief map / 色別標高図" value="relief" />
+            <Picker.Item label="Standard map / 標準地図" value="standard" />
+          </Picker>
         </View>
         <Text style={styles.label}>Opacity</Text>
         <Slider
@@ -80,7 +104,7 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
           minimumTrackTintColor="#2563eb"
           maximumTrackTintColor="#cbd5e1"
           thumbTintColor="#2563eb"
-          onValueChange={handleOpacityChange}
+          onValueChange={setOpacity}
         />
       </View>
     </View>
@@ -101,7 +125,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 16,
     right: 16,
-    bottom: 20,
+    top: 20,
     maxWidth: 380,
     paddingHorizontal: 16,
     paddingVertical: 12,
@@ -132,6 +156,18 @@ const styles = StyleSheet.create({
     marginTop: 10,
     color: '#475569',
     fontSize: 13,
+  },
+  pickerContainer: {
+    marginTop: 4,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#cbd5e1',
+    borderRadius: 6,
+    overflow: 'hidden',
+    backgroundColor: '#ffffff',
+  },
+  picker: {
+    height: 50,
+    color: '#111827',
   },
   slider: {
     width: '100%',

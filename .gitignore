@@ -49,6 +49,7 @@ dist/*
 *.mts
 *.map
 *.mjs
+!examples/basic/server.mjs
 *.cjs
 dist/*.d.ts
 dist/

@@ -25,9 +25,15 @@ import {
   useMapLibreViewState,
   type MapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
+import {
+  LeafletDesign,
+  LeafletMapView,
+  useLeafletMapViewState,
+  type LeafletMapViewState,
+} from '@mapconductor/react-for-leaflet';
 
 type PaneId = 'left' | 'right';
-type PaneProvider = 'maplibre' | 'google-maps' | 'google-maps-3d';
+type PaneProvider = 'maplibre' | 'leaflet' | 'google-maps' | 'google-maps-3d';
 
 interface CameraLocationInfo {
   name: string;
@@ -229,6 +235,7 @@ function referenceRectangles(locations: CameraLocationInfo[]): PolygonState[] {
 function usePaneState(
   provider: PaneProvider,
   mapLibreState: MapLibreViewState,
+  leafletState: LeafletMapViewState,
   google2DState: GoogleMapViewState,
   google3DState: GoogleMapViewState,
 ): PaneState {
@@ -238,12 +245,16 @@ function usePaneState(
   if (provider === 'google-maps-3d') {
     return { provider, mapState: google3DState as MapViewStateInterface<MapDesignTypeInterface<unknown>> };
   }
+  if (provider === 'leaflet') {
+    return { provider, mapState: leafletState as MapViewStateInterface<MapDesignTypeInterface<unknown>> };
+  }
   return { provider, mapState: mapLibreState as MapViewStateInterface<MapDesignTypeInterface<unknown>> };
 }
 
 function providerLabel(provider: PaneProvider): string {
   if (provider === 'google-maps') return 'Google Maps';
   if (provider === 'google-maps-3d') return 'Google Maps 3D';
+  if (provider === 'leaflet') return 'Leaflet';
   return 'MapLibre';
 }
 
@@ -273,7 +284,8 @@ function CameraSyncMapView({
   onCameraMoveEnd: (camera: MapCameraPosition) => void;
 }) {
   if (paneState.provider === 'google-maps' || paneState.provider === 'google-maps-3d') {
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
+    const googleMapState = paneState.mapState as GoogleMapViewState;
+    const apiKey = googleMapState.apiKey;
     if (!apiKey || apiKey === 'your_api_key_here') {
       return (
         <div className="camera-sync-missing-key">
@@ -287,7 +299,6 @@ function CameraSyncMapView({
       return (
         <GoogleMapView
           state={paneState.mapState as GoogleMapViewState}
-          apiKey={apiKey}
           mapId="DEMO_MAP_ID"
           version="alpha"
           onCameraMove={onCameraMove}
@@ -301,7 +312,6 @@ function CameraSyncMapView({
     return (
       <GoogleMapView2D
         state={paneState.mapState as GoogleMapViewState}
-        apiKey={apiKey}
         mapId="DEMO_MAP_ID"
         version="alpha"
         onCameraMove={onCameraMove}
@@ -309,6 +319,18 @@ function CameraSyncMapView({
       >
         {children}
       </GoogleMapView2D>
+    );
+  }
+
+  if (paneState.provider === 'leaflet') {
+    return (
+      <LeafletMapView
+        state={paneState.mapState as LeafletMapViewState}
+        onCameraMove={onCameraMove}
+        onCameraMoveEnd={onCameraMoveEnd}
+      >
+        {children}
+      </LeafletMapView>
     );
   }
 
@@ -360,6 +382,7 @@ function CameraSyncMapPane({
         <span>{label}</span>
         <select value={selectedProvider} onChange={event => onProviderChange(event.target.value as PaneProvider)}>
           <option value="maplibre">MapLibre</option>
+          <option value="leaflet">Leaflet</option>
           <option value="google-maps">Google Maps</option>
           <option value="google-maps-3d">Google Maps 3D</option>
         </select>
@@ -371,6 +394,7 @@ function CameraSyncMapPane({
 }
 
 export function CameraSyncPage() {
+  const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const locations = useMemo(defaultLocations, []);
   const boundsPolylines = useMemo(() => locations.map(boundsPolyline), [locations]);
   const rectangles = useMemo(() => referenceRectangles(locations), [locations]);
@@ -385,23 +409,37 @@ export function CameraSyncPage() {
     mapDesignType: MapLibreDesign.MapTilerBasicJa,
     cameraPosition: INITIAL_CAMERA,
   });
+  const leftLeafletState = useLeafletMapViewState({
+    id: 'camera-sync-left-leaflet',
+    mapDesignType: LeafletDesign.OpenStreetMap,
+    cameraPosition: INITIAL_CAMERA,
+  });
+  const rightLeafletState = useLeafletMapViewState({
+    id: 'camera-sync-right-leaflet',
+    mapDesignType: LeafletDesign.OpenStreetMap,
+    cameraPosition: INITIAL_CAMERA,
+  });
   const leftGoogle2DState = useGoogleMapViewState({
     id: 'camera-sync-left-google-2d',
+    apiKey: googleMapsApiKey,
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: INITIAL_CAMERA,
   });
   const rightGoogle2DState = useGoogleMapViewState({
     id: 'camera-sync-right-google-2d',
+    apiKey: googleMapsApiKey,
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: INITIAL_CAMERA,
   });
   const leftGoogle3DState = useGoogleMapViewState({
     id: 'camera-sync-left-google-3d',
+    apiKey: googleMapsApiKey,
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: INITIAL_CAMERA,
   });
   const rightGoogle3DState = useGoogleMapViewState({
     id: 'camera-sync-right-google-3d',
+    apiKey: googleMapsApiKey,
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: INITIAL_CAMERA,
   });
@@ -411,8 +449,20 @@ export function CameraSyncPage() {
   const [leftCameraPosition, setLeftCameraPosition] = useState(INITIAL_CAMERA);
   const [rightCameraPosition, setRightCameraPosition] = useState(INITIAL_CAMERA);
 
-  const leftPaneState = usePaneState(leftProvider, leftMapLibreState, leftGoogle2DState, leftGoogle3DState);
-  const rightPaneState = usePaneState(rightProvider, rightMapLibreState, rightGoogle2DState, rightGoogle3DState);
+  const leftPaneState = usePaneState(
+    leftProvider,
+    leftMapLibreState,
+    leftLeafletState,
+    leftGoogle2DState,
+    leftGoogle3DState,
+  );
+  const rightPaneState = usePaneState(
+    rightProvider,
+    rightMapLibreState,
+    rightLeafletState,
+    rightGoogle2DState,
+    rightGoogle3DState,
+  );
 
   const leftProgrammaticRef = useRef<ProgrammaticMoveState>({ key: null, target: null, sinceMs: 0, untilMs: 0 });
   const rightProgrammaticRef = useRef<ProgrammaticMoveState>({ key: null, target: null, sinceMs: 0, untilMs: 0 });
