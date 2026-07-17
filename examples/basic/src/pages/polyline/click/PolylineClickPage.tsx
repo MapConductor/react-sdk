@@ -1,49 +1,62 @@
 import { useMemo, useState } from 'react';
-import { ColorDefaultIcon, createGeoPoint, createMarkerState, createPolylineState, type MarkerState } from '@mapconductor/js-sdk-core';
+import {
+  ColorDefaultIcon,
+  MarkerAnimation,
+  createGeoPoint,
+  createMarkerState,
+  createPolylineState,
+  type MarkerState,
+} from '@mapconductor/js-sdk-core';
 import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { Toast, useToast } from '../../../components/Toast';
-import { HONOLULU } from '../../common/sampleHelpers';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { useSampleI18n } from '../../../i18n';
 
-const INIT_CAMERA = { lat: 21.3823, lng: -157.9331, zoom: 14 };
+const INIT_CAMERA = { lat: 35.548852, lng: 139.784086, zoom: 4 };
 
 export function PolylineClickPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
-  const { messages, showToast, dismissToast } = useToast();
   const [markers, setMarkers] = useState<MarkerState[]>([]);
   const points = useMemo(() => [
-    HONOLULU,
-    createGeoPoint({ latitude: 21.385314, longitude: -157.930097 }),
-    createGeoPoint({ latitude: 21.387314, longitude: -157.935097 }),
-    createGeoPoint({ latitude: 21.380314, longitude: -157.937097 }),
-    createGeoPoint({ latitude: 21.378314, longitude: -157.930097 }),
+    createGeoPoint({ latitude: 35.548852, longitude: 139.784086 }), // HND
+    createGeoPoint({ latitude: 37.615223, longitude: -122.389979 }), // SFO
+    createGeoPoint({ latitude: 21.324513, longitude: -157.925074 }), // HNL
   ], []);
   const polyline = useMemo(() => createPolylineState({
-    id: 'click-polyline',
+    id: 'example_polyline',
     points,
-    strokeColor: '#e74c3c',
-    strokeWidth: 5,
+    strokeColor: '#ff0000',
+    strokeWidth: 4,
     geodesic: true,
     onClick: event => {
-      if (!event.clicked) return;
-      showToast(`Polyline clicked near ${event.clicked.toUrlValue(5)}`);
       setMarkers(prev => [...prev, createMarkerState({
         id: `polyline-click-${prev.length}`,
         position: event.clicked,
-        icon: new ColorDefaultIcon('#f59e0b', { label: `${prev.length + 1}` }),
+        animation: MarkerAnimation.Drop,
+        icon: new ColorDefaultIcon(event.state.strokeColor),
       })]);
     },
-  }), [points, showToast]);
+  }), [points]);
+  const straightPolyline = useMemo(() => polyline.copy({
+    id: `${polyline.id}-straight`,
+    geodesic: false,
+    strokeColor: '#0000ff',
+  }), [polyline]);
 
   return (
     <MapViewContainer state={mapViewState}>
       <Polyline state={polyline} />
+      <Polyline state={straightPolyline} />
       <Markers states={markers} />
-      <ControlPanel title="Polyline Click">
-        <p className="control-panel-note">Tap the curved polyline. A marker is placed near the clicked point.</p>
+      <ControlPanel title={t('Description', '説明')}>
+        <p className="control-panel-note">
+          {t(
+            'Tap the curved polyline. A marker is placed at the tapped position.',
+            '曲線のポリラインをタップすると、タップした位置にマーカーが追加されます。',
+          )}
+        </p>
       </ControlPanel>
-      <Toast messages={messages} onDismiss={dismissToast} />
     </MapViewContainer>
   );
 }

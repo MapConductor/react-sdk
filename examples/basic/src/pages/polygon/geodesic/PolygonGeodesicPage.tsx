@@ -11,6 +11,7 @@ import {
 import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 30.0, lng: 20.0, zoom: 2 };
 
@@ -22,6 +23,7 @@ interface ClickedPolygon {
 }
 
 export function PolygonGeodesicPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [clickedPolygon, setClickedPolygon] = useState<ClickedPolygon | null>(null);
   const points = useMemo(() => [
@@ -85,8 +87,13 @@ export function PolygonGeodesicPage() {
           </InfoBubble>
         </>
       )}
-      <ControlPanel title="Polygon Geodesic">
-        <p className="control-panel-note">Blue uses straight screen-space edges. Orange uses geodesic interpolation.</p>
+      <ControlPanel title={t('Polygon Geodesic', '測地線ポリゴン')}>
+        <p className="control-panel-note">
+          {t(
+            'Blue uses straight screen-space edges. Orange uses geodesic interpolation.',
+            '青は画面上の直線、オレンジは測地線補間を使用します。',
+          )}
+        </p>
       </ControlPanel>
     </MapViewContainer>
   );

@@ -10,10 +10,12 @@ import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { POLYGON_VERTICES } from '../data/storeData';
 import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
+import { useSampleI18n } from '../i18n';
 
 const INIT_CAMERA = { lat: 41.7969, lng: 140.7569, zoom: 16 };
 
 export function PolygonPage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [vertices, setVertices] = useState<GeoPoint[]>(POLYGON_VERTICES);
   const [fillOpacity, setFillOpacity] = useState(0.3);
@@ -68,9 +70,9 @@ export function PolygonPage() {
     <MapViewContainer state={mapViewState}>
       <Polygon state={polygonState} />
       <Markers states={vertexMarkers} />
-      <ControlPanel title="Polygon Example">
+      <ControlPanel title={t('Polygon Example', 'ポリゴンのサンプル')}>
         <SliderControl
-          label="Fill Opacity"
+          label={t('Fill Opacity', '塗りの透明度')}
           value={fillOpacity}
           min={0}
           max={1}
@@ -78,7 +80,7 @@ export function PolygonPage() {
           onChange={setFillOpacity}
         />
         <SliderControl
-          label="Stroke Width"
+          label={t('Stroke Width', '線の太さ')}
           value={strokeWidth}
           min={1}
           max={10}
@@ -86,7 +88,9 @@ export function PolygonPage() {
           format={value => `${value.toFixed(1)}px`}
           onChange={setStrokeWidth}
         />
-        <p className="control-panel-note">Drag vertex markers to reshape the polygon.</p>
+        <p className="control-panel-note">
+          {t('Drag vertex markers to reshape the polygon.', '頂点マーカーをドラッグしてポリゴンの形を変更できます。')}
+        </p>
       </ControlPanel>
       <Toast messages={messages} onDismiss={dismissToast} />
     </MapViewContainer>

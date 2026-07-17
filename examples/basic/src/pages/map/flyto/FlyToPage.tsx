@@ -8,10 +8,12 @@ import { Markers } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { cityMarker } from '../../common/sampleHelpers';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 35.0, lng: 0.0, zoom: 3 };
 
 function FlyToContent({ mapViewState }: { mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>> }) {
+  const { t } = useSampleI18n();
   const markers = useMemo(() => [
     cityMarker('tokyo', 'Tokyo', 35.6812, 139.7671),
     cityMarker('sapporo', 'Sapporo', 43.0642, 141.3469),
@@ -22,7 +24,7 @@ function FlyToContent({ mapViewState }: { mapViewState: MapViewStateInterface<Ma
   return (
     <>
       <Markers states={markers} />
-      <ControlPanel title="Fly To">
+      <ControlPanel title={t('Fly To', 'カメラ移動')}>
         <div className="button-grid">
           {markers.map(marker => (
             <button

@@ -1,126 +1,124 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import type { SamplePageDefinition } from '../../App';
+import { MapPage } from 'src/pages/map/basic/StoreMapPage';
+import { CameraSyncPage } from 'src/pages/map/camerasync/CameraSyncPage';
+import { MapDesignPage, type MapProvider } from 'src/pages/map/design/MapDesignPage';
+import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
+import { TiltPage } from 'src/pages/map/tilt/TiltPage';
+import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
+import { HeatmapLayerPage } from 'src/pages/heatmaplayer/HeatmapLayerPage';
+import { BasicGeoJSONPage } from 'src/pages/geojson/basic/BasicGeoJSONPage';
+import { GeoJSONLayerPage } from 'src/pages/geojson/layer/GeoJSONLayerPage';
+import { RasterLayerPage } from 'src/pages/rasterlayer/RasterLayerPage';
+import { GroundImagePage } from 'src/pages/groundimage/GroundImagePage';
+import { MarkerAnimationPage } from 'src/pages/marker/animation/MarkerAnimationPage';
+import { PostOfficePage } from 'src/pages/marker/postoffice/PostOfficePage';
+import { PostOfficeClusterPage } from 'src/pages/marker/postofficecluster/PostOfficeClusterPage';
+import { PolylinePage } from 'src/pages/polyline/PolylinePage';
+import { PolylineClickPage } from 'src/pages/polyline/PolylineClickPage';
+import { PolygonPage } from 'src/pages/polygon/PolygonPage';
+import { PolygonClickPage } from 'src/pages/polygon/PolygonClickPage';
+import { PolygonGeodesicPage } from 'src/pages/polygon/PolygonGeodesicPage';
+import { PolygonHolePage } from 'src/pages/polygon/PolygonHolePage';
+import { CirclePage } from 'src/pages/circle/CirclePage';
 
-import {
-  GoogleMapsView,
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreView,
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
-import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
+export type { MapProvider };
 
-type Provider = 'google' | 'maplibre';
-
-const INITIAL_CAMERA = MapCameraPosition.from({
-  position: GeoPoint.fromLatLng(35.6812, 139.7671),
-  zoom: 12,
-  bearing: 0,
-  tilt: 0,
-});
-
-export function MapScreen() {
-  const [provider, setProvider] = useState<Provider>('google');
-  const [statusText, setStatusText] = useState('');
-
-  const googleState = useGoogleMapViewState({
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INITIAL_CAMERA,
-  });
-
-  const maplibreState = useMapLibreViewState({
-    mapDesignType: MapLibreDesign.OsmBright,
-    cameraPosition: INITIAL_CAMERA,
-  });
-
+function UnsupportedPage({ page }: { page: SamplePageDefinition }) {
   return (
-    <View style={styles.container}>
-      <View style={styles.toolbar}>
-        <Text style={styles.label}>Provider</Text>
-        <Picker<Provider>
-          selectedValue={provider}
-          onValueChange={(value) => setProvider(value)}
-          style={styles.picker}
-          dropdownIconColor="#333"
-        >
-          <Picker.Item label="Google Maps" value="google" />
-          <Picker.Item label="MapLibre" value="maplibre" />
-        </Picker>
-      </View>
-
-      {statusText !== '' && (
-        <View style={styles.statusBar}>
-          <Text style={styles.statusText}>{statusText}</Text>
-        </View>
-      )}
-
-      <View style={styles.mapContainer}>
-        {provider === 'google' ? (
-          <GoogleMapsView
-            state={googleState}
-            apiKey=""
-            style={styles.map}
-            onMapLoaded={() => setStatusText('Google Maps loaded')}
-            onMapClick={(point) =>
-              setStatusText(`Clicked: ${point.latitude.toFixed(4)}, ${point.longitude.toFixed(4)}`)
-            }
-          />
-        ) : (
-          <MapLibreView
-            state={maplibreState}
-            style={styles.map}
-            onMapLoaded={() => setStatusText('MapLibre loaded')}
-            onMapClick={(point) =>
-              setStatusText(`Clicked: ${point.latitude.toFixed(4)}, ${point.longitude.toFixed(4)}`)
-            }
-          />
-        )}
+    <View style={styles.unsupportedRoot}>
+      <View style={styles.unsupportedPanel}>
+        <Text style={styles.unsupportedGroup}>{page.group}</Text>
+        <Text style={styles.unsupportedTitle}>{page.label}</Text>
+        <Text style={styles.unsupportedText}>This sample is not implemented yet.</Text>
       </View>
     </View>
   );
 }
 
+export function MapScreen({ provider, page }: { provider: MapProvider; page: SamplePageDefinition }) {
+  switch (page.id) {
+    case 'map':
+      return <MapPage provider={provider} />;
+    case 'map-design':
+      return <MapDesignPage provider={provider} />;
+    case 'fly-to':
+      return <FlyToPage provider={provider} />;
+    case 'tilt':
+      return <TiltPage provider={provider} />;
+    case 'visible-region':
+      return <VisibleRegionPage provider={provider} />;
+    case 'camera-sync':
+      return <CameraSyncPage />;
+    case 'marker-animation':
+      return <MarkerAnimationPage provider={provider} />;
+    case 'post-office':
+      return <PostOfficePage provider={provider} />;
+    case 'post-office-cluster':
+      return <PostOfficeClusterPage provider={provider} />;
+    case 'circle':
+      return <CirclePage provider={provider} />;
+    case 'polyline':
+      return <PolylinePage provider={provider} />;
+    case 'polyline-click':
+      return <PolylineClickPage provider={provider} />;
+    case 'polygon':
+      return <PolygonPage provider={provider} />;
+    case 'polygon-click':
+      return <PolygonClickPage provider={provider} />;
+    case 'polygon-geodesic':
+      return <PolygonGeodesicPage provider={provider} />;
+    case 'polygon-hole':
+      return <PolygonHolePage provider={provider} />;
+    case 'heatmap-layer':
+      return <HeatmapLayerPage provider={provider} />;
+    case 'geojson-basic':
+      return <BasicGeoJSONPage provider={provider} />;
+    case 'geojson-layer':
+      return <GeoJSONLayerPage provider={provider} />;
+    case 'raster-layer':
+      return <RasterLayerPage provider={provider} />;
+    case 'ground-image':
+      return <GroundImagePage provider={provider} />;
+    default:
+      return <UnsupportedPage page={page} />;
+  }
+}
+
 const styles = StyleSheet.create({
-  container: {
+  unsupportedRoot: {
     flex: 1,
-    backgroundColor: '#fff',
-  },
-  toolbar: {
-    flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    backgroundColor: '#f5f5f5',
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
+    justifyContent: 'center',
+    padding: 24,
+    backgroundColor: '#f3f4f6',
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#333',
-    marginRight: 8,
+  unsupportedPanel: {
+    width: '100%',
+    maxWidth: 420,
+    padding: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#cbd5e1',
+    borderRadius: 8,
+    backgroundColor: '#ffffff',
   },
-  picker: {
-    flex: 1,
-    height: 44,
-  },
-  statusBar: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    backgroundColor: '#e8f4f8',
-  },
-  statusText: {
+  unsupportedGroup: {
+    marginBottom: 6,
+    color: '#64748b',
     fontSize: 12,
-    color: '#555',
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
-  mapContainer: {
-    flex: 1,
+  unsupportedTitle: {
+    color: '#111827',
+    fontSize: 22,
+    fontWeight: '700',
   },
-  map: {
-    flex: 1,
+  unsupportedText: {
+    marginTop: 10,
+    color: '#475569',
+    fontSize: 14,
+    lineHeight: 20,
   },
 });

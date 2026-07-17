@@ -1,33 +1,30 @@
 [submodule "js-sdk-core"]
 	path = js-sdk-core
-	url = git@github.com:MapConductor/js-sdk-core.git
+	url = https://github.com/mapconductor/js-sdk-core.git
 [submodule "js-sdk-react"]
 	path = js-sdk-react
-	url = git@github.com:MapConductor/js-sdk-react.git
-[submodule "js-sdk-reactnative"]
-	path = js-sdk-reactnative
-	url = git@github.com:MapConductor/js-sdk-reactnative.git
+	url = https://github.com/mapconductor/js-sdk-react.git
 [submodule "react-for-googlemaps"]
 	path = react-for-googlemaps
-	url = git@github.com:MapConductor/react-for-googlemaps.git
+	url = https://github.com/mapconductor/react-for-googlemaps.git
 [submodule "react-for-maplibre"]
 	path = react-for-maplibre
-	url = git@github.com:MapConductor/react-for-maplibre.git
+	url = https://github.com/mapconductor/react-for-maplibre.git
 [submodule "reactnative-for-googlemaps"]
 	path = reactnative-for-googlemaps
-	url = git@github.com:MapConductor/reactnative-for-googlemaps.git
+	url = https://github.com/mapconductor/reactnative-for-googlemaps.git
 [submodule "reactnative-for-maplibre"]
 	path = reactnative-for-maplibre
-	url = git@github.com:MapConductor/reactnative-for-maplibre.git
+	url = https://github.com/mapconductor/reactnative-for-maplibre.git
 [submodule "react-geojson-layer"]
 	path = react-geojson-layer
-	url = git@github.com:MapConductor/react-geojson-layer.git
+	url = https://github.com/mapconductor/react-geojson-layer.git
 [submodule "react-heatmap"]
 	path = react-heatmap
-	url = git@github.com:MapConductor/react-heatmap.git
+	url = https://github.com/mapconductor/react-heatmap.git
 [submodule "react-icons"]
 	path = react-icons
-	url = git@github.com:MapConductor/react-icons.git
+	url = https://github.com/mapconductor/react-icons.git
 [submodule "react-marker-clustering"]
 	path = react-marker-clustering
-	url = git@github.com:MapConductor/react-marker-clustering.git
+	url = https://github.com/mapconductor/react-marker-clustering.git

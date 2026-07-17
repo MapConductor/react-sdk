@@ -1,10 +1,33 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { MapLibreDesign, MapLibreView, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
-import { GoogleMapDesign, GoogleMapsView, GoogleMapsView2D, useGoogleMapViewState, type GoogleMapViewState } from '@mapconductor/react-for-googlemaps';
-import { createGeoPoint, createMapCameraPosition, MarkerTilingOptions, type GeoPoint, type MapCameraPosition, type MapViewStateInterface, type MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
+import {
+  MapLibreDesign,
+  MapLibreView,
+  useMapLibreViewState,
+  type MapLibreViewState,
+} from '@mapconductor/react-for-maplibre';
+import {
+  LeafletDesign,
+  LeafletMapView,
+  useLeafletMapViewState,
+  type LeafletMapViewState,
+} from '@mapconductor/react-for-leaflet';
+import {
+  createGeoPoint,
+  createMapCameraPosition,
+  MarkerTilingOptions,
+  type GeoPoint,
+  type MapCameraPosition,
+  type MapViewStateInterface,
+  type MapDesignTypeInterface,
+} from '@mapconductor/js-sdk-core';
 import '@mapconductor/react-for-maplibre/style.css';
+import '@mapconductor/react-for-leaflet/style.css';
 import { type InitialCamera, DEFAULT_CAMERA } from './common';
+import {
+  SingletonGoogleMapSlot,
+  useSingletonGoogleMapViewState,
+} from './SingletonGoogleMaps';
 
 export type { InitialCamera };
 export { DEFAULT_CAMERA };
@@ -12,57 +35,104 @@ export { DEFAULT_CAMERA };
 interface MapViewContainerProps {
   children?: React.ReactNode;
   onMapClick?: (point: GeoPoint) => void;
-  onCameraMoveStart?: (cam: MapCameraPosition) => void;
-  onCameraMove?: (cam: MapCameraPosition) => void;
-  onCameraMoveEnd?: (cam: MapCameraPosition) => void;
+  onCameraMoveStart?: (camera: MapCameraPosition) => void;
+  onCameraMove?: (camera: MapCameraPosition) => void;
+  onCameraMoveEnd?: (camera: MapCameraPosition) => void;
   markerTilingOptions?: MarkerTilingOptions;
   state: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 }
 
+type MapLibreContainerProps = MapViewContainerProps & {
+  projection: 'mercator' | 'globe';
+};
+
 export function useSampleMapViewState(initialCamera: InitialCamera = DEFAULT_CAMERA) {
   const location = useLocation();
-  const cameraPosition = createMapCameraPosition({
+  const cameraPosition = useMemo(() => createMapCameraPosition({
     position: createGeoPoint({ latitude: initialCamera.lat, longitude: initialCamera.lng }),
     zoom: initialCamera.zoom,
     bearing: initialCamera.bearing ?? 0,
     tilt: initialCamera.pitch ?? 0,
-  });
+  }), [
+    initialCamera.lat,
+    initialCamera.lng,
+    initialCamera.zoom,
+    initialCamera.bearing,
+    initialCamera.pitch,
+  ]);
+  const googleMapState = useSingletonGoogleMapViewState(cameraPosition);
   const mapLibreState = useMapLibreViewState({
     mapDesignType: MapLibreDesign.OsmBrightJa,
     cameraPosition,
   });
-  const googleMapState = useGoogleMapViewState({
-    mapDesignType: GoogleMapDesign.Normal,
+  const leafletState = useLeafletMapViewState({
+    mapDesignType: LeafletDesign.OpenStreetMap,
     cameraPosition,
   });
 
   if (location.pathname.startsWith('/google-maps')) return googleMapState;
-  return mapLibreState;
+  if (location.pathname.startsWith('/maplibre')) return mapLibreState;
+  if (location.pathname.startsWith('/leaflet')) return leafletState;
+  throw new Error(`No mapViewState is available for: ${location.pathname}`);
 }
 
-function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
-  const mapState = state as MapLibreViewState;
+function LeafletContainer({
+  children,
+  onMapClick,
+  onCameraMoveStart,
+  onCameraMove,
+  onCameraMoveEnd,
+  markerTilingOptions,
+  state,
+}: MapViewContainerProps) {
+  return (
+    <LeafletMapView
+      state={state as LeafletMapViewState}
+      markerTilingOptions={markerTilingOptions}
+      onMapClick={onMapClick}
+      onCameraMoveStart={onCameraMoveStart}
+      onCameraMove={onCameraMove}
+      onCameraMoveEnd={onCameraMoveEnd}
+    >
+      {children}
+    </LeafletMapView>
+  );
+}
 
+function MapLibreContainer({
+  children,
+  onMapClick,
+  onCameraMoveStart,
+  onCameraMove,
+  onCameraMoveEnd,
+  markerTilingOptions,
+  projection,
+  state,
+}: MapLibreContainerProps) {
+  const mapState = state as MapLibreViewState;
   const isActive = useRef(false);
-  useEffect(() => () => { isActive.current = true; }, []);
+
+  useEffect(() => {
+    isActive.current = true;
+    return () => {
+      isActive.current = false;
+    };
+  }, []);
 
   return (
     <MapLibreView
       state={mapState}
-      projection="globe"
+      projection={projection}
       markerTilingOptions={markerTilingOptions}
       onMapClick={onMapClick}
-      onCameraMoveStart={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMoveStart?.(newCam);
+      onCameraMoveStart={(camera: MapCameraPosition) => {
+        if (isActive.current) onCameraMoveStart?.(camera);
       }}
-      onCameraMove={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMove?.(newCam);
+      onCameraMove={(camera: MapCameraPosition) => {
+        if (isActive.current) onCameraMove?.(camera);
       }}
-      onCameraMoveEnd={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMoveEnd?.(newCam);
+      onCameraMoveEnd={(camera: MapCameraPosition) => {
+        if (isActive.current) onCameraMoveEnd?.(camera);
       }}
     >
       {children}
@@ -70,129 +140,78 @@ function MapLibreContainer({ children, onMapClick, onCameraMoveStart, onCameraMo
   );
 }
 
-function GoogleMapsContainer2D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
-  const mapState = state as GoogleMapViewState;
-
-  const isActive = useRef(false);
-  useEffect(() => () => { isActive.current = true; }, []);
-
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-  if (!apiKey || apiKey === 'your_api_key_here') {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h2>Google Maps API Key is Missing</h2>
-        <p>To use the Google Maps provider, you need to provide an API key.</p>
-        <p>1. Create a <code>.env</code> file in the <code>examples/basic</code> directory.</p>
-        <p>2. Add your API key to the file:</p>
-        <pre>VITE_GOOGLE_MAPS_API_KEY=your_api_key_here</pre>
-      </div>
-    );
-  }
-
-  return (
-    <GoogleMapsView2D
-      state={mapState}
-      apiKey={apiKey}
-      mapId={'DEMO_MAP_ID'}
-      version='alpha'
-      libraries={'map3d'} // for demo
-      markerTilingOptions={markerTilingOptions}
-      onCameraMoveStart={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMoveStart?.(newCam);
-      }}
-      onCameraMove={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMove?.(newCam);
-      }}
-      onMapClick={onMapClick}
-      onCameraMoveEnd={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMoveEnd?.(newCam);
-      }}
-    >
-      {children}
-    </GoogleMapsView2D>
-  );
-}
-
-function GoogleMapsContainer3D({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, state }: MapViewContainerProps) {
-  const mapState = state as GoogleMapViewState;
-
-  const isActive = useRef(false);
-  useEffect(() => () => { isActive.current = true; }, []);
-
-  const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
-  if (!apiKey || apiKey === 'your_api_key_here') {
-    return (
-      <div style={{ padding: '2rem', textAlign: 'center' }}>
-        <h2>Google Maps API Key is Missing</h2>
-        <p>To use the Google Maps provider, you need to provide an API key.</p>
-        <p>1. Create a <code>.env</code> file in the <code>examples/basic</code> directory.</p>
-        <p>2. Add your API key to the file:</p>
-        <pre>VITE_GOOGLE_MAPS_API_KEY=your_api_key_here</pre>
-      </div>
-    );
-  }
-
-  return (
-    <GoogleMapsView
-      state={mapState}
-      apiKey={apiKey}
-      mapId={'DEMO_MAP_ID'}
-      version='alpha'
-      onMapClick={onMapClick}
-      onCameraMoveStart={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMoveStart?.(newCam);
-      }}
-      onCameraMove={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMove?.(newCam);
-      }}
-      onCameraMoveEnd={(newCam: any) => {
-        if (!isActive.current) return;
-        onCameraMoveEnd?.(newCam);
-      }}
-    >
-      {children}
-    </GoogleMapsView>
-  );
-}
-
-export function MapViewContainer({ children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, markerTilingOptions, state }: MapViewContainerProps) {
+export function MapViewContainer({
+  children,
+  onMapClick,
+  onCameraMoveStart,
+  onCameraMove,
+  onCameraMoveEnd,
+  markerTilingOptions,
+  state,
+}: MapViewContainerProps) {
   const location = useLocation();
   const isGoogle3D = location.pathname.startsWith('/google-maps-3d');
   const isGoogle2D = !isGoogle3D && location.pathname.startsWith('/google-maps');
+  const isLeaflet = location.pathname.startsWith('/leaflet');
+  const isMapLibre3D = location.pathname.startsWith('/maplibre-3d');
+  const isMapLibre2D = !isMapLibre3D && location.pathname.startsWith('/maplibre');
 
-  if (isGoogle3D) {
-    return <GoogleMapsContainer3D 
-            onMapClick={onMapClick}
-            onCameraMoveStart={onCameraMoveStart}
-            onCameraMove={onCameraMove}
-            onCameraMoveEnd={onCameraMoveEnd}
-            state={state}>
-              {children}
-            </GoogleMapsContainer3D>;
-  }
-  if (isGoogle2D) {
-    return <GoogleMapsContainer2D 
-            onMapClick={onMapClick}
-            onCameraMoveStart={onCameraMoveStart}
-            onCameraMove={onCameraMove}
-            onCameraMoveEnd={onCameraMoveEnd}
-            markerTilingOptions={markerTilingOptions}
-            state={state}>
-              {children}
-            </GoogleMapsContainer2D>;
-  }
-  return <MapLibreContainer
+  switch(true) {
+    case isGoogle3D || isGoogle2D: {
+      // Google Maps marker tiling is fixed at the singleton-host level because
+      // it is constructor configuration. MapLibre can still configure it per page.
+      void markerTilingOptions;
+      void state;
+      return (
+        <SingletonGoogleMapSlot
+          mode={isGoogle3D ? '3d' : '2d'}
+          onMapClick={onMapClick}
+          onCameraMoveStart={onCameraMoveStart}
+          onCameraMove={onCameraMove}
+          onCameraMoveEnd={onCameraMoveEnd}
+        >
+          {children}
+        </SingletonGoogleMapSlot>
+      );
+    }
+
+    case isLeaflet: {
+      return (
+        <LeafletContainer
           onMapClick={onMapClick}
           onCameraMoveStart={onCameraMoveStart}
           onCameraMove={onCameraMove}
           onCameraMoveEnd={onCameraMoveEnd}
           markerTilingOptions={markerTilingOptions}
-          state={state}>
-            {children}
-          </MapLibreContainer>;
+          state={state}
+        >
+          {children}
+        </LeafletContainer>
+      );
+    }
+
+    case isMapLibre3D || isMapLibre2D: {
+
+      return (
+        <MapLibreContainer
+          onMapClick={onMapClick}
+          onCameraMoveStart={onCameraMoveStart}
+          onCameraMove={onCameraMove}
+          onCameraMoveEnd={onCameraMoveEnd}
+          markerTilingOptions={markerTilingOptions}
+          projection={isMapLibre3D ? 'globe' : 'mercator'}
+          state={state}
+        >
+          {children}
+        </MapLibreContainer>
+      );
+    }
+
+    default: {
+      return (
+        <div>No provider can be detected</div>
+      );
+    }
+  }
+
 }

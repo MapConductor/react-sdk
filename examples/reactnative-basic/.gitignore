@@ -7,3 +7,4 @@ android/app/build/
 ios/build/
 *.jks
 *.keystore
+.env.local

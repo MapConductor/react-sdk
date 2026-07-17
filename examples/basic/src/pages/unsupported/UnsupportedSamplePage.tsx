@@ -1,13 +1,18 @@
 import { ControlPanel } from '../../components/ControlPanel';
 import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
+import { useSampleI18n } from '../../i18n';
 
-export function UnsupportedSamplePage({ title }: { title: string }) {
+export function UnsupportedSamplePage({ title, titleJa = title }: { title: string; titleJa?: string }) {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState();
   return (
     <MapViewContainer state={mapViewState}>
-      <ControlPanel title={title}>
+      <ControlPanel title={t(title, titleJa)}>
         <p className="control-panel-note">
-          This Android sample depends on an extension package that is not present in this React SDK workspace yet.
+          {t(
+            'This sample depends on an extension package that is not available in this React SDK workspace yet.',
+            'このサンプルが必要とする拡張パッケージは、まだReact SDKワークスペースで利用できません。',
+          )}
         </p>
       </ControlPanel>
     </MapViewContainer>

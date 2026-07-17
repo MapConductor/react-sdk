@@ -6,22 +6,26 @@
   "scripts": {
     "dev": "vite",
     "dev:https": "HTTPS=true vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/generate-static.mjs",
+    "preview": "vite preview --port 4000",
+    "start": "vite preview --host 0.0.0.0 --port 4000"
   },
   "dependencies": {
-    "@mapconductor/js-sdk-core": "workspace:*",
-    "@mapconductor/js-sdk-react": "workspace:*",
-    "@mapconductor/react-for-googlemaps": "workspace:*",
-    "@mapconductor/react-for-maplibre": "workspace:*",
-    "@mapconductor/react-geojson-layer": "workspace:*",
-    "@mapconductor/react-heatmap": "workspace:*",
-    "@mapconductor/react-icons": "workspace:*",
-    "@mapconductor/react-marker-clustering": "workspace:*",
+    "@mapconductor/js-sdk-core": "0.1.0",
+    "@mapconductor/js-sdk-react": "0.1.0",
+    "@mapconductor/react-for-googlemaps": "0.1.0",
+    "@mapconductor/react-for-leaflet": "0.1.0",
+    "@mapconductor/react-for-maplibre": "0.1.0",
+    "@mapconductor/react-geojson-layer": "0.1.0",
+    "@mapconductor/react-heatmap": "0.1.0",
+    "@mapconductor/react-icons": "0.1.0",
+    "@mapconductor/react-marker-clustering": "0.1.0",
     "@zip.js/zip.js": "^2.8.26",
+    "prism-react-renderer": "^2.4.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
-    "react-router-dom": "^7.18.0"
+    "react-router-dom": "^7.18.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

@@ -49,8 +49,12 @@ dist/*
 *.mts
 *.map
 *.mjs
+!examples/basic/server.mjs
 *.cjs
 dist/*.d.ts
 dist/
 test-results/
 AUDIT_REPORT.md
+CLAUDE.md
+.gradle/
+.pnpm-store

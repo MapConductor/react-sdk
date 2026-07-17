@@ -14,6 +14,7 @@ import { Circle, Marker, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
+import { useSampleI18n } from '../i18n';
 
 const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
 const INIT_CAMERA = { lat: CIRCLE_CENTER.latitude, lng: CIRCLE_CENTER.longitude, zoom: 12 };
@@ -41,6 +42,7 @@ function radiusLabelPosition(
 }
 
 export function CirclePage() {
+  const { t } = useSampleI18n();
   const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [edgePosition, setEdgePosition] = useState(() =>
     calculatePositionAtDistance({
@@ -95,6 +97,7 @@ export function CirclePage() {
         fillColor: rgba(CIRCLE_COLORS[colorIndex], fillOpacity),
         strokeColor: 'rgba(0, 0, 255, 0.5)',
         strokeWidth,
+        zIndex: 0,
         clickable: true,
         onClick: () => {
           if (Date.now() < suppressCircleClickUntilRef.current) return;
@@ -126,6 +129,7 @@ export function CirclePage() {
         points={[CIRCLE_CENTER, edgePosition]}
         strokeColor="#ffffff"
         strokeWidth={3}
+        zIndex={1}
       />
       <Marker
         id="center_marker"
@@ -154,16 +158,16 @@ export function CirclePage() {
           {radius.toFixed(0)} m
         </div>
       )}
-      <ControlPanel title="Circle Example">
+      <ControlPanel title={t('Circle Example', '円のサンプル')}>
         <SliderControl
-          label="Fill Opacity"
+          label={t('Fill Opacity', '塗りの透明度')}
           value={fillOpacity}
           min={0}
           max={1}
           onChange={setFillOpacity}
         />
         <SliderControl
-          label="Stroke Width"
+          label={t('Stroke Width', '線の太さ')}
           value={strokeWidth}
           min={1}
           max={10}

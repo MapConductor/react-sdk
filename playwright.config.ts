@@ -10,6 +10,6 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
-  // Dev server must be running manually: pnpm dev (in examples/basic)
+  // Dev server must be running manually: npm run dev (in examples/basic)
   webServer: undefined,
 });
