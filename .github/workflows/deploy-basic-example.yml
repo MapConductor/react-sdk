@@ -24,21 +24,24 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v6
-        with:
-          version: 11.10.0
-
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          cache: pnpm
+          node-version: 22
+
+      - name: Cache node_modules
+        id: node-modules-cache
+        uses: actions/cache@v6
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package.json') }}
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        if: steps.node-modules-cache.outputs.cache-hit != 'true'
+        run: npm ci
 
       - name: Build basic example
-        run: pnpm --filter @mapconductor/example-basic... build
+        run: npm run build
         env:
           VITE_BASE_PATH: /
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
