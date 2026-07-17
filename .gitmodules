@@ -28,3 +28,6 @@
 [submodule "react-marker-clustering"]
 	path = react-marker-clustering
 	url = git@github.com:mapconductor/react-marker-clustering.git
+[submodule "react-for-leaflet"]
+	path = react-for-leaflet
+	url = git@github.com:mapconductor/react-for-leaflet.git
