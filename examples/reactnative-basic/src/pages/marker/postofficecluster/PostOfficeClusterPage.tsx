@@ -19,11 +19,11 @@ import { InfoBubble, ReactNativeImageIcon } from '@mapconductor/js-sdk-react/nat
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 import {
   MarkerClusterGroup,
   type MarkerCluster,
@@ -42,8 +42,12 @@ interface PostOfficeExtra {
 
 const POST_OFFICES = postOfficesJson as PostOfficeRow[];
 const ANDROID_PACKAGE = 'com.mapconductor.basic';
-const POST_OFFICE_ICON_URI = `android.resource://${ANDROID_PACKAGE}/drawable/postoffice`;
-const CLUSTER_ICON_URI = `android.resource://${ANDROID_PACKAGE}/drawable/cluster_red`;
+const POST_OFFICE_ICON_URI = Platform.OS === 'ios'
+  ? 'bundle://postoffice'
+  : `android.resource://${ANDROID_PACKAGE}/drawable/postoffice`;
+const CLUSTER_ICON_URI = Platform.OS === 'ios'
+  ? 'bundle://cluster_red'
+  : `android.resource://${ANDROID_PACKAGE}/drawable/cluster_red`;
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 35.68049, longitude: 139.76669, altitude: 0 }),
@@ -126,12 +130,10 @@ export function PostOfficeClusterPage({ provider }: { provider: MapProvider }) {
 
   const icon = useMemo(
     () =>
-      Platform.OS === 'android'
-        ? new ReactNativeImageIcon(POST_OFFICE_ICON_URI, {
-            scale: 0.5,
-            infoAnchor: { x: 0.5, y: 0 },
-          })
-        : null,
+      new ReactNativeImageIcon(POST_OFFICE_ICON_URI, {
+        scale: 0.4,
+        infoAnchor: { x: 0.5, y: 0 },
+      }),
     []
   );
 

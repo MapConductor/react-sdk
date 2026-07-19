@@ -14,11 +14,11 @@ import { InfoBubbleAtPosition, Marker, Polygon } from '@mapconductor/js-sdk-reac
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 
 import type { MapProvider } from '../../screens/MapScreen';
 import { MapViewContainer } from '../MapViewContainer';

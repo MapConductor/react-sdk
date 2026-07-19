@@ -7,11 +7,11 @@ import type { MapViewBaseProps } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapView,
   GoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreView,
   MapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 
 type CommonMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 type MapViewContainerProps = MapViewBaseProps<CommonMapViewState> & {

@@ -3,7 +3,7 @@ import { ColorDefaultIcon, createGeoPoint, createMarkerState } from '@mapconduct
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
 
-const INIT_CAMERA = { lat: 37.7749, lng: -122.4194, zoom: 15, pitch: 45 };
+const INIT_CAMERA = { lat: 37.7749, lng: -122.4194, zoom: 15, tilt: 45 };
 
 export function MultipleBubblesPage() {
   const mapViewState = useSampleMapViewState(INIT_CAMERA);

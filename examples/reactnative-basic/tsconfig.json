@@ -4,8 +4,8 @@
     "strict": true,
     "baseUrl": ".",
     "paths": {
-      "@mapconductor/react-for-googlemaps": ["../../react-for-googlemaps/src/react-native/index.ts"],
-      "@mapconductor/react-for-maplibre": ["../../react-for-maplibre/src/react-native/index.ts"]
+      "@mapconductor/reactnative-for-googlemaps": ["../../reactnative-for-googlemaps/src/index.ts"],
+      "@mapconductor/reactnative-for-maplibre": ["../../reactnative-for-maplibre/src/index.ts"]
     }
   }
 }

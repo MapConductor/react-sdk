@@ -37,6 +37,11 @@ export default {
     version: '1.0.0',
     orientation: 'portrait',
     platforms: ['ios', 'android'],
+    // Include the marker images in standalone/native builds.  Metro's `require`
+    // references are still used by the page, while expo-asset copies these
+    // files into the application bundle at build time so native map providers
+    // can resolve their local URI on iOS and Android.
+    assetBundlePatterns: ['assets/**/*'],
     android: {
       package: 'com.mapconductor.basic',
       config: {
@@ -49,6 +54,11 @@ export default {
         googleMapsApiKey: process.env.IOS_GOOGLE_MAPS_API_KEY,
       },
     },
-    plugins: [withGoogleMapsApiKeys],
+    plugins: [
+      withGoogleMapsApiKeys,
+      // Link marker images as native resources. iOS resolves their asset-catalog
+      // names through bundle:// URIs; Android can keep using expo-asset file URIs.
+      ['expo-asset', { assets: ['./assets/images'] }],
+    ],
   },
 };

@@ -16,20 +16,22 @@ import { GroundImage, Marker } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 
 import type { MapProvider } from '../../screens/MapScreen';
 import { MapViewContainer } from '../MapViewContainer';
 
 const ANDROID_PACKAGE = 'com.mapconductor.basic';
-const DEFAULT_IMAGE_URI =
-  `android.resource://${ANDROID_PACKAGE}/drawable/newark_nj_1922_0`;
-const CLICKED_IMAGE_URI =
-  `android.resource://${ANDROID_PACKAGE}/drawable/newark_nj_1922_1`;
+const DEFAULT_IMAGE_URI = Platform.OS === 'ios'
+  ? 'bundle://newark_nj_1922_0'
+  : `android.resource://${ANDROID_PACKAGE}/drawable/newark_nj_1922_0`;
+const CLICKED_IMAGE_URI = Platform.OS === 'ios'
+  ? 'bundle://newark_nj_1922_1'
+  : `android.resource://${ANDROID_PACKAGE}/drawable/newark_nj_1922_1`;
 
 const INITIAL_SOUTH_WEST = createGeoPoint({
   latitude: 40.712216,

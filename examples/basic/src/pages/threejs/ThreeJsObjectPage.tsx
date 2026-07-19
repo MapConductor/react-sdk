@@ -9,7 +9,7 @@ const TOKYO_STATION_CAMERA = {
   lat: 35.6812,
   lng: 139.7671,
   zoom: 16,
-  pitch: 45,
+  tilt: 45,
 };
 
 export function ThreeJsObjectPage() {

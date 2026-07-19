@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 
@@ -11,11 +11,11 @@ import {
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 
 type MapProvider = 'maplibre' | 'google-maps';
@@ -45,21 +45,22 @@ function TiltMap({
 
 function moveTilt(
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>,
+  cameraPosition: MapCameraPosition,
   tilt: number,
   durationMillis: number
 ) {
-  mapViewState.moveCameraTo(
-    mapViewState.cameraPosition.copy({ tilt }),
-    durationMillis
-  );
+  const nextCameraPosition = cameraPosition.copy({ tilt });
+  mapViewState.moveCameraTo(nextCameraPosition, durationMillis);
+  return nextCameraPosition;
 }
 
 export function TiltPage({ provider }: { provider: MapProvider }) {
   const [tilt, setTilt] = useState(0);
+  const cameraPositionRef = useRef(INIT_CAMERA);
 
   const mapLibreState = useMapLibreViewState({
     id: 'tilt-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
+    mapDesignType: MapLibreDesign.OsmBright,
     cameraPosition: INIT_CAMERA,
   });
   const googleState = useGoogleMapViewState({
@@ -75,7 +76,12 @@ export function TiltPage({ provider }: { provider: MapProvider }) {
   const setCameraTilt = (nextTilt: number, durationMillis = 0) => {
     const clampedTilt = Math.max(-60, Math.min(60, nextTilt));
     setTilt(clampedTilt);
-    moveTilt(currentState, clampedTilt, durationMillis);
+    cameraPositionRef.current = moveTilt(
+      currentState,
+      cameraPositionRef.current,
+      clampedTilt,
+      durationMillis
+    );
   };
 
   return (

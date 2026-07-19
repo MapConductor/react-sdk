@@ -1,4 +1,5 @@
 internal import Expo
+import MapConductorReactGeoJSONLayer
 import React
 import ReactAppDependencyProvider
 
@@ -13,6 +14,11 @@ class AppDelegate: ExpoAppDelegate {
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
   ) -> Bool {
+    GeoJSONStyleProviderRegistry.register(id: "example-n02-route") { sourceUri in
+      guard let sourceUri else { throw GeoJSONStyleRegistrationError.missingSourceUri }
+      return try ExampleGeoJSONStyler.fromZip(sourceUri: sourceUri)
+    }
+
     let delegate = ReactNativeDelegate()
     let factory = ExpoReactNativeFactory(delegate: delegate)
     delegate.dependencyProvider = RCTAppDependencyProvider()
@@ -49,6 +55,10 @@ class AppDelegate: ExpoAppDelegate {
     let result = RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
     return super.application(application, continue: userActivity, restorationHandler: restorationHandler) || result
   }
+}
+
+private enum GeoJSONStyleRegistrationError: Error {
+  case missingSourceUri
 }
 
 class ReactNativeDelegate: ExpoReactNativeFactoryDelegate {

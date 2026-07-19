@@ -92,7 +92,10 @@ PODS:
     - MapConductorReactNativeCore
     - React-Core
   - MapConductorReactNativeCore (0.1.0):
+    - React-callinvoker
     - React-Core
+    - React-jsi
+    - React-NativeModulesApple
   - MapLibre (6.27.0)
   - RCTDeprecation (0.86.0)
   - RCTRequired (0.86.0)
@@ -2363,10 +2366,10 @@ SPEC CHECKSUMS:
   hermes-engine: fb6a0b9dffad1faa9bfb366cf22f07e33cee658b
   MapConductorReactForGoogleMaps: 88785ba0a9e1e904db246edea459464915332b27
   MapConductorReactForMapLibre: 0c87fe6a1dd667a65f0e27266b6c3ea7c654a09e
-  MapConductorReactGeoJSONLayer: 9af06cb55f2e05f9b645a788d6fcd34d5a4954c3
+  MapConductorReactGeoJSONLayer: b23c82de7d102e0690a24ea7a292b96da11ee81c
   MapConductorReactHeatmap: 30e57d9ec6518f72caafcbf5975a5deb5d07e0a5
   MapConductorReactMarkerClustering: ab2941d76d1481a4613d5da4ee9a272944ce64e7
-  MapConductorReactNativeCore: 7286986cf048ee6b021a241f7c30a609a9f0f6b2
+  MapConductorReactNativeCore: 22713bbf85452c17fa483b9ca86c06cae38093fa
   MapLibre: 96726270455ffd183688cf0bd2a3881b0212a57e
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0

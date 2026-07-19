@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Linking,
+  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -22,11 +23,11 @@ import {
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 
 import { STORES, type StoreInfo } from '../../../data/storeData';
 import { MapViewContainer } from '../../MapViewContainer';
@@ -48,9 +49,17 @@ const STORE_ICON_ASSETS: Record<string, number> = {
 };
 
 function useStoreIconUris(): Record<string, string> | null {
-  const [uris, setUris] = useState<Record<string, string> | null>(null);
+  const [uris, setUris] = useState<Record<string, string> | null>(() =>
+    Platform.OS === 'ios'
+      ? Object.fromEntries(
+          Object.keys(STORE_ICON_ASSETS).map(name => [name, `bundle://${name}`])
+        )
+      : null
+  );
 
   useEffect(() => {
+    if (Platform.OS === 'ios') return;
+
     let active = true;
     const entries = Object.entries(STORE_ICON_ASSETS);
 

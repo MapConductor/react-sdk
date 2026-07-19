@@ -15,12 +15,12 @@ import {
   GoogleMapDesign,
   useGoogleMapViewState,
   type GoogleMapDesignType,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
   type MapLibreMapDesignType,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 
 export type MapProvider = 'maplibre' | 'google-maps';

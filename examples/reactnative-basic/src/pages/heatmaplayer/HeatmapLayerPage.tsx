@@ -10,14 +10,13 @@ import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 import {
   HeatmapOverlay,
-  HeatmapPoints,
   HeatmapPointState,
 } from '@mapconductor/react-heatmap';
 
@@ -65,11 +64,7 @@ export function HeatmapLayerPage({ provider }: { provider: MapProvider }) {
     []
   );
 
-  const heatmap = (
-    <HeatmapOverlay>
-      <HeatmapPoints states={heatmapPoints} />
-    </HeatmapOverlay>
-  );
+  const heatmap = <HeatmapOverlay points={heatmapPoints} />;
   const state = provider === 'google-maps' ? googleState : mapLibreState;
 
   return (

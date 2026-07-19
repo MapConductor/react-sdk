@@ -11,8 +11,8 @@ import {
   type PolylineEvent,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubbleAtPosition, Marker, Polyline } from '@mapconductor/js-sdk-react/native';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/react-for-googlemaps';
-import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/reactnative-for-googlemaps';
+import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/reactnative-for-maplibre';
 
 import type { MapProvider } from '../../screens/MapScreen';
 import { MapViewContainer } from '../MapViewContainer';

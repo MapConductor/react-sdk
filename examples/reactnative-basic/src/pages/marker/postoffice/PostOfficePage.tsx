@@ -19,11 +19,11 @@ import { InfoBubble, Markers, ReactNativeImageIcon } from '@mapconductor/js-sdk-
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
-} from '@mapconductor/react-for-googlemaps';
+} from '@mapconductor/reactnative-for-googlemaps';
 import {
   MapLibreDesign,
   useMapLibreViewState,
-} from '@mapconductor/react-for-maplibre';
+} from '@mapconductor/reactnative-for-maplibre';
 
 import postOfficesJson from '../../../data/postoffice/postoffices.json';
 import { MapViewContainer } from '../../MapViewContainer';
@@ -38,7 +38,10 @@ interface PostOfficeExtra {
 
 const POST_OFFICES = postOfficesJson as PostOfficeRow[];
 const ANDROID_PACKAGE = 'com.mapconductor.basic';
-const POST_OFFICE_ICON_URI = `android.resource://${ANDROID_PACKAGE}/drawable/postoffice`;
+const POST_OFFICE_ICON_URI = Platform.select({
+  android: `android.resource://${ANDROID_PACKAGE}/drawable/postoffice`,
+  ios: 'bundle://postoffice',
+});
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 35.68049, longitude: 139.76669, altitude: 0 }),
@@ -50,10 +53,10 @@ const INIT_CAMERA = MapCameraPosition.from({
 const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
   ...MarkerTilingOptions.Default,
   iconScaleCallback: (_state, zoom) => {
-    if (zoom > 12)  return 1.3;
-    if (zoom > 10)  return 1.0;
-    if (zoom > 8)  return 0.8;
-    if (zoom > 5)  return 0.5;
+    if (zoom > 12) return 1.3;
+    if (zoom > 10) return 1.0;
+    if (zoom > 8) return 0.8;
+    if (zoom > 5) return 0.5;
     return 0.2;
   },
 };
@@ -86,8 +89,8 @@ function PostOfficeInfoView({
 function PostOfficeMarkers({ onSelectMarker }: { onSelectMarker: (marker: MarkerState) => void }) {
   const icon = useMemo(
     () =>
-      Platform.OS === 'android'
-        ? new ReactNativeImageIcon(POST_OFFICE_ICON_URI, { scale: 0.5 })
+      POST_OFFICE_ICON_URI
+        ? new ReactNativeImageIcon(POST_OFFICE_ICON_URI, { scale: 0.4 })
         : null,
     []
   );

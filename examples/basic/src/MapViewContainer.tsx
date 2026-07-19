@@ -52,13 +52,13 @@ export function useSampleMapViewState(initialCamera: InitialCamera = DEFAULT_CAM
     position: createGeoPoint({ latitude: initialCamera.lat, longitude: initialCamera.lng }),
     zoom: initialCamera.zoom,
     bearing: initialCamera.bearing ?? 0,
-    tilt: initialCamera.pitch ?? 0,
+    tilt: initialCamera.tilt ?? 0,
   }), [
     initialCamera.lat,
     initialCamera.lng,
     initialCamera.zoom,
     initialCamera.bearing,
-    initialCamera.pitch,
+    initialCamera.tilt,
   ]);
   const googleMapState = useSingletonGoogleMapViewState(cameraPosition);
   const mapLibreState = useMapLibreViewState({

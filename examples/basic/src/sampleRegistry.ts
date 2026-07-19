@@ -14,7 +14,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map', label: 'Store Map', labelJa: '店舗マップ', group: 'Map' },
   { id: 'map-design', label: 'Map Design', labelJa: '地図デザイン', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', labelJa: 'カメラ移動', group: 'Map' },
-  { id: 'tilt', label: 'Tilt', labelJa: '傾き', group: 'Map', unavailableProviders: ['leaflet'] },
+  { id: 'tilt', label: 'Tilt', labelJa: '傾き', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', labelJa: '表示領域', group: 'Map' },
   { id: 'camera-sync', label: 'Camera Sync', labelJa: 'カメラ同期', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', labelJa: 'マーカーアイコン', group: 'Marker' },

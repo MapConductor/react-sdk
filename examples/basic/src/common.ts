@@ -5,7 +5,7 @@ export interface CameraState {
   lng: number;
   zoom: number;
   bearing?: number;
-  pitch?: number;
+  tilt?: number;
 }
 
 export interface InitialCamera {
@@ -13,7 +13,7 @@ export interface InitialCamera {
   lng: number;
   zoom: number;
   bearing?: number;
-  pitch?: number;
+  tilt?: number;
 }
 
 export const DEFAULT_CAMERA: InitialCamera = { lat: 21.3069, lng: -157.8583, zoom: 10 };
@@ -30,8 +30,8 @@ export function updateCameraInURL(
   if (camera.bearing !== undefined) {
     params.set('bearing', camera.bearing.toFixed(2));
   }
-  if (camera.pitch !== undefined) {
-    params.set('pitch', camera.pitch.toFixed(2));
+  if (camera.tilt !== undefined) {
+    params.set('tilt', camera.tilt.toFixed(2));
   }
   navigate({ search: `?${params.toString()}` }, { replace: true });
 }
