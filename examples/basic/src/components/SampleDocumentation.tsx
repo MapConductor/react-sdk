@@ -14,16 +14,26 @@ export function SampleDocumentation({
   const documentation = getSampleDocumentation(page, provider);
   const providerView = provider === 'leaflet'
     ? 'LeafletMapView'
+    : provider === 'mapbox'
+      ? 'MapboxView'
     : provider === 'google-maps-3d'
       ? 'GoogleMapView'
       : provider === 'google-maps'
         ? 'GoogleMapView2D'
-        : 'MapLibreView';
+        : provider === 'arcgis'
+          ? 'ArcGISMapView2D'
+          : provider === 'arcgis-3d'
+            ? 'ArcGISMapView'
+            : 'MapLibreView';
   const providerHook = provider === 'leaflet'
     ? 'useLeafletMapViewState'
+    : provider === 'mapbox'
+      ? 'useMapboxViewState'
     : provider === 'google-maps' || provider === 'google-maps-3d'
       ? 'useGoogleMapViewState'
-      : 'useMapLibreViewState';
+      : provider === 'arcgis' || provider === 'arcgis-3d'
+        ? 'useArcGISViewState'
+        : 'useMapLibreViewState';
   const stateExplanation = (() => {
     if (['marker', 'marker-animation', 'post-office', 'post-office-cluster', 'map'].includes(page)) {
       return language === 'ja'

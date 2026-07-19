@@ -6,6 +6,11 @@
   background: #f7f8fb;
 }
 
+.camera-sync-page:fullscreen {
+  width: 100vw;
+  height: 100vh;
+}
+
 .camera-sync-toolbar {
   display: grid;
   gap: 10px;
@@ -20,6 +25,84 @@
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.2;
+}
+
+.camera-sync-toolbar-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.camera-sync-fullscreen-button {
+  min-height: 32px;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.camera-sync-fullscreen-button:hover {
+  background: #e2e8f0;
+}
+
+.camera-sync-fullscreen-button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.camera-sync-overlay-toggle {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #1f2937;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
+
+.camera-sync-overlay-toggle input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.camera-sync-switch {
+  display: flex;
+  align-items: center;
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+  border-radius: 999px;
+  background: #94a3b8;
+  transition: background 160ms ease;
+}
+
+.camera-sync-switch-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.25);
+  transition: transform 160ms ease;
+}
+
+.camera-sync-overlay-toggle input:checked + .camera-sync-switch {
+  background: #2563eb;
+}
+
+.camera-sync-overlay-toggle input:checked + .camera-sync-switch .camera-sync-switch-thumb {
+  transform: translateX(16px);
+}
+
+.camera-sync-overlay-toggle input:focus-visible + .camera-sync-switch {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
 }
 
 .camera-sync-location-list {
@@ -47,6 +130,18 @@
   background: #e2e8f0;
 }
 
+.camera-sync-location-select {
+  display: none;
+  min-height: 32px;
+  min-width: 0;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #f8fafc;
+  color: #1f2937;
+  font-size: 0.82rem;
+}
+
 .camera-sync-grid {
   min-height: 0;
   display: grid;
@@ -64,6 +159,7 @@
 }
 
 .camera-sync-pane > .maplibregl-map,
+.camera-sync-pane > .mapboxgl-map,
 .camera-sync-pane > div:first-child {
   width: 100%;
   height: 100%;
@@ -158,6 +254,15 @@
 }
 
 @media (max-width: 560px) {
+  .camera-sync-location-list {
+    display: none;
+  }
+
+  .camera-sync-location-select {
+    display: block;
+    width: 100%;
+  }
+
   .camera-sync-provider {
     width: min(86%, 300px);
   }

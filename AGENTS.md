@@ -2,7 +2,7 @@
 
 ## Project Structure & Module Organization
 
-This is a pnpm workspace for the MapConductor React SDK. Core shared logic lives in `js-sdk-core/src`. Shared React and React Native bindings live in `js-sdk-react/src`, with platform entry points such as `index.native.ts`, `Marker.native.tsx`, and `MapViewScope.native.tsx`. Provider packages are `react-for-googlemaps/` and `react-for-maplibre/`; their React Native TypeScript implementations use `*.native.ts`/`*.native.tsx`, and their Android bridges live under each package's `android/` directory. The older `reactnative-for-googlemaps/` and `reactnative-for-maplibre/` packages have been folded into these `react-for-*` providers, so do not add new work to the old packages. Extension packages include `react-icons/`, `react-heatmap/`, and `react-marker-clustering/`. Examples live under `examples/basic` for web and `examples/reactnative-basic` for React Native. End-to-end and integration tests belong in `tests/`; generated output such as `dist/`, `build/`, and `test-results/` should not be edited manually.
+This is a npm workspace for the MapConductor React SDK. Core shared logic lives in `js-sdk-core/src`. Shared React and React Native bindings live in `js-sdk-react/src`, with platform entry points such as `index.native.ts`, `Marker.native.tsx`, and `MapViewScope.native.tsx`. `react-for-*` packages (`react-for-googlemaps/`, `react-for-maplibre/`, `react-for-arcgis/`, `react-for-leaflet/`, `react-for-openlayers/`) are the web/React DOM providers only. Each non-web platform gets its own sibling package instead of being folded into the `react-for-*` package: React Native bridges live in `reactnative-for-*/` (`reactnative-for-googlemaps/`, `reactnative-for-maplibre/`, `reactnative-for-arcgis/`), and future platforms (e.g. Cordova) should follow the same convention (`cordova-for-*/`) rather than growing a `react-for-*` package's `android/`/`ios/` directories. A `reactnative-for-*` package's TypeScript uses `*.native.ts`/`*.native.tsx`, re-exports what it can from its `react-for-*` sibling (design/state types, web-agnostic core re-exports), and its native Android/iOS bridge code lives under that package's own `android/`/`ios/` directories, thinly wrapping the corresponding native SDK module from the sibling `android-sdk`/`ios-sdk` repos (e.g. `com.mapconductor:for-arcgis`, `MapConductorForArcGIS`). This repo previously experimented with folding React Native code into the `react-for-*` packages; that approach was abandoned specifically because it doesn't generalize to non-RN platforms, so do not repeat it. Extension packages include `react-icons/`, `react-heatmap/`, and `react-marker-clustering/`. Examples live under `examples/basic` for web and `examples/reactnative-basic` for React Native. End-to-end and integration tests belong in `tests/`; generated output such as `dist/`, `build/`, and `test-results/` should not be edited manually.
 
 ## React Native Android Architecture
 
@@ -54,6 +54,7 @@ The React Native Android packages consume the sibling Android SDK through MavenL
 
 - `com.mapconductor:for-googlemaps:1.2.0`
 - `com.mapconductor:for-maplibre:1.2.0`
+- `com.mapconductor:for-arcgis:1.2.0`
 - `com.mapconductor:heatmap:1.0.2`
 - `com.mapconductor:marker-clustering:1.0.2`
 
@@ -65,19 +66,19 @@ Use the equivalent module tasks for Google Maps, heatmap, or marker clustering. 
 
 ## Build, Test, and Development Commands
 
-- `pnpm run build`: builds all workspace packages with a `build` script.
-- `pnpm run dev`: builds once, then starts package watch builds and the web example.
-- `pnpm run dev:packages`: watches core/provider packages for development.
-- `pnpm run dev:examples`: starts example apps that define a dev script.
-- `pnpm run lint`: runs ESLint over TypeScript and TSX files.
-- `pnpm run lint:fix`: applies ESLint fixes.
-- `pnpm run test`: runs workspace tests where present.
+- `npm run build`: builds all workspace packages with a `build` script.
+- `npm run dev`: builds once, then starts package watch builds and the web example.
+- `npm run dev:packages`: watches core/provider packages for development.
+- `npm run dev:examples`: starts example apps that define a dev script.
+- `npm run lint`: runs ESLint over TypeScript and TSX files.
+- `npm run lint:fix`: applies ESLint fixes.
+- `npm run test`: runs workspace tests where present.
 - `./gradlew :android:app:compileDebugKotlin`: from the repo root, verifies the React Native Android example when configured.
 - `git -C <package> diff --check`: checks nested package repositories, because provider and shared SDK directories may be separate Git worktrees/submodules from the workspace root.
 
 ## Coding Style & Naming Conventions
 
-Use TypeScript for SDK packages and Kotlin for Android native modules. Follow existing local style: two-space indentation in TS/TSX, concise named exports, `PascalCase` for React components and classes, `camelCase` for functions and variables, and package-specific folders by feature (`marker`, `polyline`, `react-native`). Prefer typed APIs and existing abstractions over ad hoc objects. Run `pnpm run lint` before submitting broad changes.
+Use TypeScript for SDK packages and Kotlin for Android native modules. Follow existing local style: two-space indentation in TS/TSX, concise named exports, `PascalCase` for React components and classes, `camelCase` for functions and variables, and package-specific folders by feature (`marker`, `polyline`, `react-native`). Prefer typed APIs and existing abstractions over ad hoc objects. Run `npm run lint` before submitting broad changes.
 
 ## Testing Guidelines
 

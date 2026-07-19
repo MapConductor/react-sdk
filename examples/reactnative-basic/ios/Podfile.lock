@@ -70,10 +70,18 @@ PODS:
     - ExpoModulesCore
     - ExpoModulesJSI
   - FBLazyVector (0.86.0)
+  - GoogleMaps (10.15.0):
+    - GoogleMaps/Maps (= 10.15.0)
+  - GoogleMaps/Maps (10.15.0)
   - hermes-engine (250829098.0.14):
     - hermes-engine/Pre-built (= 250829098.0.14)
   - hermes-engine/Pre-built (250829098.0.14)
+  - MapConductorCore (1.1.4)
+  - MapConductorForGoogleMaps (1.1.4):
+    - GoogleMaps (~> 10.0)
+    - MapConductorCore
   - MapConductorReactForGoogleMaps (0.1.0):
+    - MapConductorForGoogleMaps
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
@@ -92,6 +100,7 @@ PODS:
     - MapConductorReactNativeCore
     - React-Core
   - MapConductorReactNativeCore (0.1.0):
+    - MapConductorCore
     - React-callinvoker
     - React-Core
     - React-jsi
@@ -2069,8 +2078,10 @@ DEPENDENCIES:
   - ExpoModulesWorklets (from `../../../node_modules/expo-modules-core/ExpoModulesWorklets.podspec`)
   - FBLazyVector (from `../../../node_modules/react-native/Libraries/FBLazyVector`)
   - hermes-engine (from `../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
-  - MapConductorReactForGoogleMaps (from `../../../react-for-googlemaps`)
-  - MapConductorReactForMapLibre (from `../../../react-for-maplibre`)
+  - MapConductorCore (from `../../../../ios-sdk/ios-sdk-core`)
+  - MapConductorForGoogleMaps (from `../../../../ios-sdk/ios-for-googlemaps`)
+  - MapConductorReactForGoogleMaps (from `../../../reactnative-for-googlemaps`)
+  - MapConductorReactForMapLibre (from `../../../reactnative-for-maplibre`)
   - MapConductorReactGeoJSONLayer (from `../../../react-geojson-layer`)
   - MapConductorReactHeatmap (from `../../../react-heatmap`)
   - MapConductorReactMarkerClustering (from `../../../react-marker-clustering`)
@@ -2155,6 +2166,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - GoogleMaps
     - MapLibre
 
 EXTERNAL SOURCES:
@@ -2185,10 +2197,14 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../../../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-v250829098.0.14
+  MapConductorCore:
+    :path: "../../../../ios-sdk/ios-sdk-core"
+  MapConductorForGoogleMaps:
+    :path: "../../../../ios-sdk/ios-for-googlemaps"
   MapConductorReactForGoogleMaps:
-    :path: "../../../react-for-googlemaps"
+    :path: "../../../reactnative-for-googlemaps"
   MapConductorReactForMapLibre:
-    :path: "../../../react-for-maplibre"
+    :path: "../../../reactnative-for-maplibre"
   MapConductorReactGeoJSONLayer:
     :path: "../../../react-geojson-layer"
   MapConductorReactHeatmap:
@@ -2363,13 +2379,16 @@ SPEC CHECKSUMS:
   ExpoModulesJSI: 0fad44a0464a4469b83a06e34e529c13043f2f69
   ExpoModulesWorklets: f6b71b8ddeb8dceb2ce3504544ecfbd708ba79a2
   FBLazyVector: b3e7ad108f0d882e30445c5527d774e3fd432f3d
+  GoogleMaps: 306f6ea18af2dc9ef85d98b0d1b41bc7d506df5f
   hermes-engine: fb6a0b9dffad1faa9bfb366cf22f07e33cee658b
-  MapConductorReactForGoogleMaps: 88785ba0a9e1e904db246edea459464915332b27
-  MapConductorReactForMapLibre: 0c87fe6a1dd667a65f0e27266b6c3ea7c654a09e
+  MapConductorCore: 6f74894391e0a17d96e20da516ff0e1d47bd2343
+  MapConductorForGoogleMaps: cd9e553c17e69928b9d128f5382b24e5589e828c
+  MapConductorReactForGoogleMaps: 7aa6e9fffbeb9468cef3a14d8a4b3cc75fd4b008
+  MapConductorReactForMapLibre: aab6ccfa26623f6deb8fc0c774e49db1838a55a8
   MapConductorReactGeoJSONLayer: b23c82de7d102e0690a24ea7a292b96da11ee81c
   MapConductorReactHeatmap: 30e57d9ec6518f72caafcbf5975a5deb5d07e0a5
   MapConductorReactMarkerClustering: ab2941d76d1481a4613d5da4ee9a272944ce64e7
-  MapConductorReactNativeCore: 22713bbf85452c17fa483b9ca86c06cae38093fa
+  MapConductorReactNativeCore: 334cda6a2d91e88a4dd5876fd5351efb0d28f3b3
   MapLibre: 96726270455ffd183688cf0bd2a3881b0212a57e
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0
@@ -2448,6 +2467,6 @@ SPEC CHECKSUMS:
   RNCPicker: d74667bdfc08ed389a2a277d95b8faf2349290a9
   Yoga: fe50ab299e578f397fef753cf309c6703a4db29b
 
-PODFILE CHECKSUM: 2afdc83b4fe03d97cad563ce666305adcaa2e87f
+PODFILE CHECKSUM: fbc71276242949d6e309296fbaa865ba84e749cc
 
 COCOAPODS: 1.17.0

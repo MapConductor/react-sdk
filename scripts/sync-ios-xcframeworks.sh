@@ -21,36 +21,15 @@ copy_framework() {
   cp -R "$source" "$destination"
 }
 
-copy_framework MapConductorCore js-sdk-react
 copy_framework MapConductorGeoJSON react-geojson-layer
 copy_framework MapConductorHeatmap react-heatmap
 copy_framework MapConductorMarkerCluster react-marker-clustering
-copy_framework MapConductorForGoogleMaps react-for-googlemaps
 copy_framework MapConductorForMapLibre react-for-maplibre
 
-google_maps_bundle_source="$(find "$IOS_SDK_DIR/build/xcframeworks/derived/MapConductorForGoogleMaps-iOS" \
-  -path '*/UninstalledProducts/iphoneos/GoogleMaps_GoogleMapsTarget.bundle/GoogleMaps.bundle' \
-  -type d -print -quit)"
-if [[ -z "$google_maps_bundle_source" ]]; then
-  echo "Missing GoogleMaps.bundle. Rebuild the Google Maps iOS SDK archive first." >&2
-  exit 1
-fi
-rm -rf "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMaps.bundle"
-cp -R "$google_maps_bundle_source" "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMaps.bundle"
-
-google_maps_headers_source="$(find "$IOS_SDK_DIR/build/xcframeworks/derived/MapConductorForGoogleMaps-Simulator" \
-  -path '*/GoogleMaps.xcframework/ios-arm64_x86_64-simulator/Headers/GoogleMaps' \
-  -type d -print -quit)"
-if [[ -z "$google_maps_headers_source" ]]; then
-  echo "Missing Google Maps headers. Rebuild the Google Maps iOS SDK archive first." >&2
-  exit 1
-fi
-rm -rf "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMapsHeaders"
-mkdir -p "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMapsHeaders/GoogleMaps.framework/Headers"
-mkdir -p "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMapsHeaders/GoogleMaps.framework/Modules"
-cp -R "$google_maps_headers_source/." \
-  "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMapsHeaders/GoogleMaps.framework/Headers"
-cp "$ROOT_DIR/react-for-googlemaps/ios/GoogleMaps.modulemap" \
-  "$ROOT_DIR/react-for-googlemaps/ios/Frameworks/GoogleMapsHeaders/GoogleMaps.framework/Modules/module.modulemap"
+# MapConductorCore (js-sdk-react's MapConductorReactNativeCore pod) and MapConductorForGoogleMaps
+# (reactnative-for-googlemaps's pod) are no longer vendored/prebuilt here - both now ship as
+# CocoaPods source pods (see ios-sdk-core/MapConductorCore.podspec and
+# ios-for-googlemaps/MapConductorForGoogleMaps.podspec) so GoogleMaps' own real pod gets installed
+# by CocoaPods directly instead of being statically embedded into a prebuilt xcframework.
 
 echo "iOS XCFrameworks synchronized from $SOURCE_DIR"

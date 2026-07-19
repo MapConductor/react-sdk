@@ -45,6 +45,13 @@ target 'MapConductorBasic' do
 
   config = use_native_modules!(config_command)
 
+  # MapConductorCore and MapConductorForGoogleMaps live in the sibling ios-sdk repo and are
+  # consumed as CocoaPods source pods (not vendored prebuilt xcframeworks), so the real GoogleMaps
+  # pod gets installed fresh by CocoaPods instead of being statically embedded by us - autolinking
+  # only covers npm packages, so these path pods must be declared explicitly.
+  pod 'MapConductorCore', :path => '../../../../ios-sdk/ios-sdk-core'
+  pod 'MapConductorForGoogleMaps', :path => '../../../../ios-sdk/ios-for-googlemaps'
+
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
 

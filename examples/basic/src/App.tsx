@@ -11,8 +11,22 @@ import {
 import { SamplePageLayout } from './components/SamplePageLayout';
 import { getLanguageFromPath } from './i18n';
 
-type MapProvider = 'maplibre' | 'leaflet' | 'google' | 'google-3d';
+type MapProvider = 'maplibre' | 'mapbox' | 'leaflet' | 'openlayers' | 'google' | 'google-3d' | 'arcgis' | 'arcgis-3d' | 'cesium';
 const ClientMapRoutes = lazy(() => import('./ClientMapRoutes'));
+const providers = new Map<string, MapProvider>([
+  ['/maplibre', 'maplibre'],
+  ['/maplibre-3d', 'maplibre'],
+  ['/mapbox', 'mapbox'],
+  ['/leaflet', 'leaflet'],
+  ['/openlayers', 'openlayers'],
+  ['/google-maps', 'google'],
+  ['/google', 'google'],
+  ['/google-maps-3d', 'google-3d'],
+  ['/google-3d', 'google-3d'],
+  ['/arcgis', 'arcgis'],
+  ['/arcgis-3d', 'arcgis-3d'],
+  ['/cesium', 'cesium'],
+]);
 
 function SeoProviderPageRoute() {
   const { provider, page, language: languageParam } = useParams<{ provider: string; page: string; language: string }>();
@@ -23,7 +37,7 @@ function SeoProviderPageRoute() {
   if (requestedPage !== page || (languageParam !== 'en' && languageParam !== 'ja')) {
     return <Navigate to={`/${provider ?? 'maplibre'}/${requestedPage}/${language}`} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'leaflet' && provider !== 'google-maps' && provider !== 'google-maps-3d') {
+  if (!provider || !providers.has(`/${provider}`)) {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 
@@ -51,6 +65,7 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mapsEnabled, setMapsEnabled] = useState(false);
   const language = getLanguageFromPath(location.pathname);
 
@@ -60,15 +75,10 @@ function App() {
   useEffect(() => {
     setMapsEnabled(true);
   }, []);
-
-  const currentProvider: MapProvider | null =
-    location.pathname.startsWith('/maplibre-3d') ? 'maplibre' :
-    location.pathname.startsWith('/maplibre') ? 'maplibre' :
-    location.pathname.startsWith('/leaflet') ? 'leaflet' :
-    location.pathname.startsWith('/google-maps-3d') ? 'google-3d' :
-    location.pathname.startsWith('/google-maps') ? 'google' :
-    null;
-  const currentPage = location.pathname.split('/').filter(Boolean)[1] || DEFAULT_SAMPLE_PAGE;
+  const pathParts = location.pathname.split('/').filter(Boolean);
+  const currentProviderPath = pathParts[0] || 'maplibre';
+  const currentPage = pathParts[1] || DEFAULT_SAMPLE_PAGE;
+  const currentProvider: MapProvider | null = providers.get(`/${currentProviderPath}`) ?? null;
   const showProviderSelector = getSamplePageDefinition(currentPage)?.showProviderSelector ?? true;
 
   useEffect(() => {
@@ -102,6 +112,21 @@ function App() {
         }
         case 'leaflet': {
           return '/leaflet';
+        }
+        case 'mapbox': {
+          return '/mapbox';
+        }
+        case 'openlayers': {
+          return '/openlayers';
+        }
+        case 'arcgis': {
+          return '/arcgis';
+        }
+        case 'arcgis-3d': {
+          return '/arcgis-3d';
+        }
+        case 'cesium': {
+          return '/cesium';
         }
         case 'google-3d': {
           return '/google-maps-3d';
@@ -142,7 +167,12 @@ function App() {
                 onChange={event => switchProvider(event.target.value as MapProvider)}
               >
                 <option value="maplibre">MapLibre</option>
+                <option value="mapbox">Mapbox</option>
                 <option value="leaflet">Leaflet</option>
+                <option value="openlayers">OpenLayers</option>
+                <option value="arcgis">ArcGIS 2D</option>
+                <option value="arcgis-3d">ArcGIS 3D</option>
+                <option value="cesium">Cesium</option>
                 <option value="google">Google Maps</option>
                 <option value="google-3d">Google Maps 3D</option>
               </select>
@@ -162,7 +192,19 @@ function App() {
       </header>
 
       <div className="app-body">
-        <PageNav />
+        <div className={['desktop-sidebar', isSidebarOpen ? 'open' : 'closed'].join(' ')}>
+          {isSidebarOpen ? <PageNav /> : null}
+          <button
+            type="button"
+            className="sidebar-toggle"
+            aria-label={isSidebarOpen ? 'Close samples sidebar' : 'Open samples sidebar'}
+            aria-expanded={isSidebarOpen}
+            title={isSidebarOpen ? 'Close samples sidebar' : 'Open samples sidebar'}
+            onClick={() => setIsSidebarOpen(open => !open)}
+          >
+            {isSidebarOpen ? '‹' : '›'}
+          </button>
+        </div>
         <div
           className={['mobile-menu-scrim', isMenuOpen ? 'open' : ''].filter(Boolean).join(' ')}
           onClick={() => setIsMenuOpen(false)}

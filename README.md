@@ -6,10 +6,10 @@ The iOS native SDK is consumed as XCFrameworks. Build and synchronize the defaul
 Core, extension, Google Maps, and MapLibre artifacts from the sibling `ios-sdk` repo:
 
 ```shell
-pnpm run ios:frameworks
+npm run ios:frameworks
 ```
 
-Use `pnpm run ios:frameworks:sync` when the XCFrameworks have already been built.
+Use `npm run ios:frameworks:sync` when the XCFrameworks have already been built.
 
 MapConductor provides a shared TypeScript and React API for Google Maps and MapLibre. The same core geometry, state, overlay, and controller abstractions are used by the web and React Native packages.
 

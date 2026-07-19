@@ -45,6 +45,7 @@ jobs:
         env:
           VITE_BASE_PATH: /
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
+          VITE_ARCGIS_API_KEY: ${{ secrets.VITE_ARCGIS_API_KEY }}
 
       - name: Add SPA fallback
         run: cp examples/basic/dist/index.html examples/basic/dist/404.html

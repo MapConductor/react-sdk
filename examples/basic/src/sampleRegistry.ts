@@ -14,13 +14,13 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map', label: 'Store Map', labelJa: '店舗マップ', group: 'Map' },
   { id: 'map-design', label: 'Map Design', labelJa: '地図デザイン', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', labelJa: 'カメラ移動', group: 'Map' },
-  { id: 'tilt', label: 'Tilt', labelJa: '傾き', group: 'Map' },
+  { id: 'tilt', label: 'Tilt', labelJa: '傾き', group: 'Map', unavailableProviders: ['google-maps'] },
   { id: 'visible-region', label: 'Visible Region', labelJa: '表示領域', group: 'Map' },
   { id: 'camera-sync', label: 'Camera Sync', labelJa: 'カメラ同期', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', labelJa: 'マーカーアイコン', group: 'Marker' },
-  { id: 'marker-animation', label: 'Marker Animation', labelJa: 'マーカーアニメーション', group: 'Marker' },
+  { id: 'marker-animation', label: 'Marker Animation', labelJa: 'マーカーアニメーション', group: 'Marker', unavailableProviders: ['cesium'] },
   { id: 'post-office', label: 'Post Office', labelJa: '郵便局', group: 'Marker', unavailableProviders: ['google-maps-3d'] },
-  { id: 'post-office-cluster', label: 'Post Office Cluster', labelJa: '郵便局クラスタリング', group: 'Marker' },
+  { id: 'post-office-cluster', label: 'Post Office Cluster', labelJa: '郵便局クラスタリング', group: 'Marker', unavailableProviders: ['cesium'] },
   { id: 'circle', label: 'Circle', labelJa: '円', group: 'Shape' },
   { id: 'polyline', label: 'Polyline', labelJa: 'ポリライン', group: 'Shape' },
   { id: 'polyline-click', label: 'Polyline Click', labelJa: 'ポリラインのクリック', group: 'Shape' },
@@ -34,10 +34,10 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'info-bubble-styled', label: 'Styled Bubble', labelJa: 'スタイル付き吹き出し', group: 'Info Bubble' },
   { id: 'info-bubble-multiple', label: 'Multiple Bubbles', labelJa: '複数の吹き出し', group: 'Info Bubble' },
   { id: 'info-bubble-rich', label: 'Rich Bubble', labelJa: 'リッチ吹き出し', group: 'Info Bubble' },
-  { id: 'geojson-basic', label: 'GeoJSON Basic', labelJa: 'GeoJSON 基本', group: 'Extensions', unavailableProviders: ['google-maps-3d'] },
-  { id: 'geojson-layer', label: 'GeoJSON Layer', labelJa: 'GeoJSON レイヤー', group: 'Extensions', unavailableProviders: ['google-maps-3d'] },
-  { id: 'heatmap-layer', label: 'Heatmap Layer', labelJa: 'ヒートマップレイヤー', group: 'Extensions', unavailableProviders: ['google-maps-3d'] },
-  { id: 'threejs-object', label: 'Three.js Object', labelJa: 'Three.js オブジェクト', group: 'Extensions' },
+  { id: 'geojson-basic', label: 'GeoJSON Basic', labelJa: 'GeoJSON 基本', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
+  { id: 'geojson-layer', label: 'GeoJSON Layer', labelJa: 'GeoJSON レイヤー', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
+  { id: 'heatmap-layer', label: 'Heatmap Layer', labelJa: 'ヒートマップレイヤー', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
+  { id: 'threejs-object', label: 'Three.js Object', labelJa: 'Three.js オブジェクト', group: 'Extensions', unavailableProviders: ['cesium'] },
 ];
 
 export const DEFAULT_SAMPLE_PAGE = 'map';
@@ -57,9 +57,14 @@ export function resolveProviderForPage(provider: string, page: string): string {
 export function getProviderLabel(provider: string | undefined): string {
   switch (provider) {
     case 'maplibre-3d': return 'MapLibre 3D';
+    case 'mapbox': return 'Mapbox';
     case 'google-maps': return 'Google Maps';
     case 'google-maps-3d': return 'Google Maps 3D';
     case 'leaflet': return 'Leaflet';
+    case 'openlayers': return 'OpenLayers';
+    case 'arcgis': return 'ArcGIS 2D';
+    case 'arcgis-3d': return 'ArcGIS 3D';
+    case 'cesium': return 'Cesium';
     default: return 'MapLibre';
   }
 }

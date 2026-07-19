@@ -30,7 +30,7 @@ export function getDocumentMetadata(url: string): {
 }
 
 export function getStaticPaths(): string[] {
-  const providers = ['leaflet', 'google-maps', 'google-maps-3d'];
+  const providers = ['mapbox', 'leaflet', 'openlayers', 'arcgis', 'arcgis-3d', 'cesium', 'google-maps', 'google-maps-3d'];
   const languages = ['en', 'ja'];
   return SAMPLE_PAGES.flatMap(page => {
     const mapLibreProvider = resolveProviderForPage('maplibre', page.id);

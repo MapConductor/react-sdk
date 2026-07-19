@@ -12,7 +12,10 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, useMapboxViewState } from '@mapconductor/react-for-mapbox';
 import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import { OpenLayersDesign, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import { ArcGISDesign, useArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
@@ -173,9 +176,35 @@ function MapLibrePostOfficePage() {
   return <PostOfficePageContent mapViewState={mapViewState} />;
 }
 
+function MapboxPostOfficePage() {
+  const mapViewState = useMapboxViewState({
+    mapDesignType: MapboxDesign.Streets,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+
+  return <PostOfficePageContent mapViewState={mapViewState} />;
+}
+
 function LeafletPostOfficePage() {
   const mapViewState = useLeafletMapViewState({
     mapDesignType: LeafletDesign.OpenStreetMap,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <PostOfficePageContent mapViewState={mapViewState} />;
+}
+
+function OpenLayersPostOfficePage() {
+  const mapViewState = useOpenLayersMapViewState({
+    mapDesignType: OpenLayersDesign.OpenStreetMap,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <PostOfficePageContent mapViewState={mapViewState} />;
+}
+
+function ArcGISPostOfficePage() {
+  const mapViewState = useArcGISViewState({
+    apiKey: import.meta.env.VITE_ARCGIS_API_KEY ?? '',
+    mapDesignType: ArcGISDesign.Streets,
     cameraPosition: INIT_CAMERA_POSITION,
   });
   return <PostOfficePageContent mapViewState={mapViewState} />;
@@ -185,6 +214,9 @@ function LeafletPostOfficePage() {
 export function PostOfficePage() {
   const location = useLocation();
   if (location.pathname.startsWith('/google-maps')) return <GooglePostOfficePage />;
+  if (location.pathname.startsWith('/mapbox')) return <MapboxPostOfficePage />;
   if (location.pathname.startsWith('/leaflet')) return <LeafletPostOfficePage />;
+  if (location.pathname.startsWith('/openlayers')) return <OpenLayersPostOfficePage />;
+  if (location.pathname.startsWith('/arcgis')) return <ArcGISPostOfficePage />;
   return <MapLibrePostOfficePage />;
 }

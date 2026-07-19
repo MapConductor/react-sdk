@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createGeoPoint, createMapCameraPosition } from '@mapconductor/js-sdk-core';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, useMapboxViewState } from '@mapconductor/react-for-mapbox';
 import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import { OpenLayersDesign, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import { ArcGISDesign, useArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
 import { MapViewContainer } from '../../MapViewContainer';
@@ -87,6 +90,14 @@ function MapLibreHeatmapLayerPage() {
   return <HeatmapLayerPageContent mapViewState={mapViewState} />;
 }
 
+function MapboxHeatmapLayerPage() {
+  const mapViewState = useMapboxViewState({
+    mapDesignType: MapboxDesign.Light,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+}
+
 function LeafletHeatmapLayerPage() {
   const mapViewState = useLeafletMapViewState({
     mapDesignType: LeafletDesign.OpenStreetMap,
@@ -95,9 +106,29 @@ function LeafletHeatmapLayerPage() {
   return <HeatmapLayerPageContent mapViewState={mapViewState} />;
 }
 
+function OpenLayersHeatmapLayerPage() {
+  const mapViewState = useOpenLayersMapViewState({
+    mapDesignType: OpenLayersDesign.OpenStreetMap,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+}
+
+function ArcGISHeatmapLayerPage() {
+  const mapViewState = useArcGISViewState({
+    apiKey: import.meta.env.VITE_ARCGIS_API_KEY ?? '',
+    mapDesignType: ArcGISDesign.Streets,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+}
+
 export function HeatmapLayerPage() {
   const location = useLocation();
   if (location.pathname.startsWith('/google-maps')) return <GoogleHeatmapLayerPage />;
+  if (location.pathname.startsWith('/mapbox')) return <MapboxHeatmapLayerPage />;
   if (location.pathname.startsWith('/leaflet')) return <LeafletHeatmapLayerPage />;
+  if (location.pathname.startsWith('/openlayers')) return <OpenLayersHeatmapLayerPage />;
+  if (location.pathname.startsWith('/arcgis')) return <ArcGISHeatmapLayerPage />;
   return <MapLibreHeatmapLayerPage />;
 }

@@ -1,8 +1,47 @@
 import { defineConfig, type Plugin, type ViteDevServer } from 'vite';
 import react from '@vitejs/plugin-react';
 import mkcert from 'vite-plugin-mkcert';
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
+import { cpSync, existsSync, readFileSync, statSync } from 'node:fs';
+import { extname, join, resolve } from 'node:path';
+
+const cesiumSource = resolve(__dirname, '../../node_modules/cesium/Build/Cesium');
+const basePath = process.env.VITE_BASE_PATH ?? '/';
+const cesiumStaticPath = `${basePath.endsWith('/') ? basePath : `${basePath}/`}cesiumStatic/`;
+
+function cesiumStaticAssets(): Plugin {
+  return {
+    name: 'cesium-static-assets',
+    configureServer(server) {
+      server.middlewares.use(cesiumStaticPath, (req, res, next) => {
+        const relativePath = decodeURIComponent((req.url ?? '/').split('?')[0]).replace(/^\/+/, '');
+        const filePath = resolve(cesiumSource, relativePath);
+        if (!filePath.startsWith(`${cesiumSource}/`) || !existsSync(filePath) || !statSync(filePath).isFile()) {
+          next();
+          return;
+        }
+        const contentTypes: Record<string, string> = {
+          '.css': 'text/css',
+          '.gif': 'image/gif',
+          '.jpg': 'image/jpeg',
+          '.js': 'text/javascript',
+          '.json': 'application/json',
+          '.png': 'image/png',
+          '.svg': 'image/svg+xml',
+          '.wasm': 'application/wasm',
+          '.webp': 'image/webp',
+        };
+        res.setHeader('Content-Type', contentTypes[extname(filePath)] ?? 'application/octet-stream');
+        res.end(readFileSync(filePath));
+      });
+    },
+    writeBundle(options) {
+      if (!options.dir) return;
+      for (const directory of ['Assets', 'ThirdParty', 'Workers', 'Widgets']) {
+        cpSync(join(cesiumSource, directory), join(options.dir, 'cesiumStatic', directory), { recursive: true });
+      }
+    },
+  };
+}
 
 function mapconductorTileServiceWorker(): Plugin {
   const tileServiceWorkerPath = resolve(__dirname, '../../js-sdk-core/src/tileserver/tile-sw.js');
@@ -43,10 +82,13 @@ function mapconductorTileServiceWorker(): Plugin {
 const useHttps = process.env.HTTPS === 'true';
 
 export default defineConfig({
-  base: process.env.VITE_BASE_PATH ?? '/',
+  base: basePath,
   // mkcert() enables server.https itself (with a locally-trusted cert) when present;
   // no separate server.https config is needed.
-  plugins: [react(), mapconductorTileServiceWorker(), ...(useHttps ? [mkcert()] : [])],
+  define: {
+    CESIUM_BASE_URL: JSON.stringify(cesiumStaticPath),
+  },
+  plugins: [react(), cesiumStaticAssets(), mapconductorTileServiceWorker(), ...(useHttps ? [mkcert()] : [])],
   resolve: {
     dedupe: ['react', 'react-dom', '@mapconductor/js-sdk-core'],
   },

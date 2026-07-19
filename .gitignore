@@ -2,6 +2,7 @@
 node_modules/
 /.pnp
 .pnp.js
+.pnpm-store
 
 # Testing
 /coverage
@@ -58,3 +59,5 @@ AUDIT_REPORT.md
 CLAUDE.md
 .gradle/
 .pnpm-store
+.pnpm-lock.yaml
+qiita.md

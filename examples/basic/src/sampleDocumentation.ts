@@ -412,6 +412,19 @@ function initialCameraCode(): string {
 function providerCode(provider: string | undefined): ProviderCode {
   const camera = initialCameraCode();
   switch (provider) {
+    case 'arcgis':
+    case 'arcgis-3d':
+      return {
+        component: provider === 'arcgis' ? 'ArcGISMapView2D' : 'ArcGISMapView',
+        openingProps: '',
+        stateSetup: `${camera}
+
+const mapViewState = useArcGISViewState({
+  apiKey: import.meta.env.VITE_ARCGIS_API_KEY,
+  mapDesignType: ArcGISDesign.Streets,
+  cameraPosition: initialCamera,
+});`,
+      };
     case 'leaflet':
       return {
         component: 'LeafletMapView',
@@ -420,6 +433,17 @@ function providerCode(provider: string | undefined): ProviderCode {
 
 const mapViewState = useLeafletMapViewState({
   mapDesignType: LeafletDesign.OpenStreetMap,
+  cameraPosition: initialCamera,
+});`,
+      };
+    case 'mapbox':
+      return {
+        component: 'MapboxView',
+        openingProps: ' accessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}',
+        stateSetup: `${camera}
+
+const mapViewState = useMapboxViewState({
+  mapDesignType: MapboxDesign.Streets,
   cameraPosition: initialCamera,
 });`,
       };
@@ -723,6 +747,10 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   {
     source: '@mapconductor/react-for-maplibre',
     values: ['MapLibreDesign', 'MapLibreView', 'useMapLibreViewState'],
+  },
+  {
+    source: '@mapconductor/react-for-mapbox',
+    values: ['MapboxDesign', 'MapboxView', 'useMapboxViewState'],
   },
   {
     source: '@mapconductor/react-geojson-layer',

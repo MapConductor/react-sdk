@@ -3,7 +3,11 @@ import { useLocation } from 'react-router-dom';
 import type { MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
 import { GoogleMapDesign, GoogleMapDesignType } from '@mapconductor/react-for-googlemaps';
 import { MapLibreDesign, MapLibreMapDesignType } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, type MapboxMapDesignType } from '@mapconductor/react-for-mapbox';
 import { LeafletDesign, LeafletMapDesignType } from '@mapconductor/react-for-leaflet';
+import { OpenLayersDesign, type OpenLayersMapDesignType } from '@mapconductor/react-for-openlayers';
+import { ArcGISDesign, type ArcGISDesignType } from '@mapconductor/react-for-arcgis';
+import { CesiumDesign, type CesiumMapDesignType } from '@mapconductor/react-for-cesium';
 import { GSI_STANDARD_ATTRIBUTION_RULES } from '../../../gsiAttributions';
 import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
 
@@ -50,10 +54,43 @@ const MAPLIBRE_DESIGNS: MapDesignOption[] = [
   { label: 'OpenMapTiles', design: MapLibreDesign.OpenMapTiles },
 ];
 
+const MAPBOX_DESIGNS: MapDesignOption[] = [
+  { label: 'Streets', design: MapboxDesign.Streets },
+  { label: 'Outdoors', design: MapboxDesign.Outdoors },
+  { label: 'Light', design: MapboxDesign.Light },
+  { label: 'Dark', design: MapboxDesign.Dark },
+  { label: 'Satellite Streets', design: MapboxDesign.SatelliteStreets },
+  { label: 'OsmBright', design: MapboxDesign.OsmBright },
+  { label: 'OsmBrightJa', design: MapboxDesign.OsmBrightJa },
+  { label: 'OpenMapTiles', design: MapboxDesign.OpenMapTiles },
+];
+
 const LEAFLET_DESIGNS: MapDesignOption[] = [
   { label: 'OpenStreetMap', design: LeafletDesign.OpenStreetMap },
   { label: 'GSI Standard', design: GSI_STANDARD_DESIGN },
   { label: 'None', design: LeafletDesign.None },
+];
+
+const OPENLAYERS_DESIGNS: MapDesignOption[] = [
+  { label: 'OpenStreetMap', design: OpenLayersDesign.OpenStreetMap },
+  { label: 'None', design: OpenLayersDesign.None },
+];
+
+const ARCGIS_DESIGNS: MapDesignOption[] = [
+  { label: 'Streets', design: ArcGISDesign.Streets },
+  { label: 'Imagery', design: ArcGISDesign.Imagery },
+  { label: 'Imagery Labels', design: ArcGISDesign.ImageryLabels },
+  { label: 'Topographic', design: ArcGISDesign.Topographic },
+  { label: 'Light Gray', design: ArcGISDesign.LightGray },
+  { label: 'Dark Gray', design: ArcGISDesign.DarkGray },
+  { label: 'Oceans', design: ArcGISDesign.Oceans },
+  { label: 'Navigation', design: ArcGISDesign.Navigation },
+  { label: 'OpenStreetMap', design: ArcGISDesign.OsmStandard },
+];
+
+const CESIUM_DESIGNS: MapDesignOption[] = [
+  { label: 'OpenStreetMap', design: CesiumDesign.Default },
+  { label: 'None', design: CesiumDesign.None },
 ];
 
 export function MapDesignPage() {
@@ -73,8 +110,17 @@ export function MapDesignPage() {
       case 'maplibre':
       case 'maplibre-3d':
         return MAPLIBRE_DESIGNS;
+      case 'mapbox':
+        return MAPBOX_DESIGNS;
       case 'leaflet':
         return LEAFLET_DESIGNS;
+      case 'openlayers':
+        return OPENLAYERS_DESIGNS;
+      case 'arcgis':
+      case 'arcgis-3d':
+        return ARCGIS_DESIGNS;
+      case 'cesium':
+        return CESIUM_DESIGNS;
       default:
         throw new Error(`[debug] Not defined MapTypeDesign for ${mapProviderName}`);
     }
@@ -89,7 +135,14 @@ export function MapDesignPage() {
     const option = mapDesignOptions.find(item => item.design.id === designId);
     if (!option) return;
 
-    mapViewState.mapDesignType = option.design as GoogleMapDesignType | MapLibreMapDesignType | LeafletMapDesignType;
+    mapViewState.mapDesignType = option.design as
+      | GoogleMapDesignType
+      | MapLibreMapDesignType
+      | MapboxMapDesignType
+      | LeafletMapDesignType
+      | OpenLayersMapDesignType
+      | ArcGISDesignType
+      | CesiumMapDesignType;
     setSelectedDesignId(mapViewState.mapDesignType.id);
   };
 

@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:https": "HTTPS=true vite",
-    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/generate-static.mjs",
+    "build": "NODE_OPTIONS=--max-old-space-size=6144 vite build && NODE_OPTIONS=--max-old-space-size=6144 vite build --ssr src/entry-server.tsx --outDir dist/server && node scripts/generate-static.mjs",
     "preview": "vite preview --port 4000",
     "start": "vite preview --host 0.0.0.0 --port 4000"
   },
@@ -14,8 +14,12 @@
     "@mapconductor/js-sdk-core": "0.1.0",
     "@mapconductor/js-sdk-react": "0.1.0",
     "@mapconductor/react-for-googlemaps": "0.1.0",
-    "@mapconductor/react-for-leaflet": "0.1.0",
+    "@mapconductor/react-for-leaflet": "0.1.1",
+    "@mapconductor/react-for-mapbox": "0.1.0",
     "@mapconductor/react-for-maplibre": "0.1.0",
+    "@mapconductor/react-for-openlayers": "0.1.1",
+    "@mapconductor/react-for-arcgis": "0.1.0",
+    "@mapconductor/react-for-cesium": "0.1.0",
     "@mapconductor/react-geojson-layer": "0.1.0",
     "@mapconductor/react-heatmap": "0.1.0",
     "@mapconductor/react-icons": "0.1.0",

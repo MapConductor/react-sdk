@@ -89,7 +89,7 @@ function ProviderPageRoute() {
   if (requestedPage !== page || (language !== 'en' && language !== 'ja')) {
     return <Navigate to={`/${provider ?? 'maplibre'}/${requestedPage}/${language === 'ja' ? 'ja' : 'en'}`} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'leaflet' && provider !== 'google-maps' && provider !== 'google-maps-3d') {
+  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'cesium') {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 
