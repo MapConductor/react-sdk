@@ -1,16 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createGeoPoint, createMapCameraPosition } from '@mapconductor/js-sdk-core';
-import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
-import { MapboxDesign, useMapboxViewState } from '@mapconductor/react-for-mapbox';
-import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
-import { OpenLayersDesign, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
-import { ArcGISDesign, useArcGISViewState } from '@mapconductor/react-for-arcgis';
+import { MapLibreDesign, MapLibreView, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, MapboxView, useMapboxViewState, type MapboxViewState } from '@mapconductor/react-for-mapbox';
+import { LeafletDesign, LeafletMapView, useLeafletMapViewState, type LeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState, type OpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
-import { MapViewContainer } from '../../MapViewContainer';
-import type { MapDesignTypeInterface, MapViewStateInterface } from '@mapconductor/js-sdk-core';
-import { useSingletonGoogleMapViewState } from '../../SingletonGoogleMaps';
+import { SingletonGoogleMapSlot, useSingletonGoogleMapViewState } from '../../SingletonGoogleMaps';
 import { useSampleI18n } from '../../i18n';
 
 const INIT_CAMERA_POSITION = createMapCameraPosition({
@@ -19,9 +17,9 @@ const INIT_CAMERA_POSITION = createMapCameraPosition({
 });
 
 function HeatmapLayerPageContent({
-  mapViewState,
+  renderMapView,
 }: {
-  mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+  renderMapView: (children: ReactNode) => ReactNode;
 }) {
   const { t } = useSampleI18n();
   const [heatmapPoints, setHeatmapPoints] = useState<HeatmapPointState[]>([]);
@@ -58,8 +56,8 @@ function HeatmapLayerPageContent({
     );
   }
 
-  return (
-    <MapViewContainer state={mapViewState}>
+  return renderMapView(
+    <>
       <HeatmapOverlay>
         <HeatmapPoints states={heatmapPoints} />
       </HeatmapOverlay>
@@ -73,13 +71,17 @@ function HeatmapLayerPageContent({
           </p>
         )}
       </ControlPanel>
-    </MapViewContainer>
+    </>,
   );
 }
 
 function GoogleHeatmapLayerPage() {
-  const mapViewState = useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
-  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+  useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <SingletonGoogleMapSlot mode="2d">{children}</SingletonGoogleMapSlot>}
+    />
+  );
 }
 
 function MapLibreHeatmapLayerPage() {
@@ -87,7 +89,11 @@ function MapLibreHeatmapLayerPage() {
     mapDesignType: MapLibreDesign.MapTilerTonerEn,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <MapLibreView state={mapViewState as MapLibreViewState} projection="mercator">{children}</MapLibreView>}
+    />
+  );
 }
 
 function MapboxHeatmapLayerPage() {
@@ -95,7 +101,12 @@ function MapboxHeatmapLayerPage() {
     mapDesignType: MapboxDesign.Light,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <MapboxView state={mapViewState as MapboxViewState} accessToken={accessToken}>{children}</MapboxView>}
+    />
+  );
 }
 
 function LeafletHeatmapLayerPage() {
@@ -103,7 +114,11 @@ function LeafletHeatmapLayerPage() {
     mapDesignType: LeafletDesign.OpenStreetMap,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <LeafletMapView state={mapViewState as LeafletMapViewState}>{children}</LeafletMapView>}
+    />
+  );
 }
 
 function OpenLayersHeatmapLayerPage() {
@@ -111,7 +126,11 @@ function OpenLayersHeatmapLayerPage() {
     mapDesignType: OpenLayersDesign.OpenStreetMap,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <OpenLayersMapView state={mapViewState as OpenLayersMapViewState}>{children}</OpenLayersMapView>}
+    />
+  );
 }
 
 function ArcGISHeatmapLayerPage() {
@@ -120,7 +139,11 @@ function ArcGISHeatmapLayerPage() {
     mapDesignType: ArcGISDesign.Streets,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <HeatmapLayerPageContent mapViewState={mapViewState} />;
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <ArcGISMapView2D state={mapViewState as ArcGISViewState}>{children}</ArcGISMapView2D>}
+    />
+  );
 }
 
 export function HeatmapLayerPage() {

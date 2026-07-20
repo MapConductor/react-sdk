@@ -10,7 +10,7 @@ import {
 import { GroundImage, Markers } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../../components/ControlPanel';
 import { Toast, useToast } from '../../components/Toast';
-import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
+import { MapViewContainer } from '../../MapViewContainer';
 import { useSampleI18n } from '../../i18n';
 
 const INIT_CAMERA = { lat: 40.7410, lng: -74.1758, zoom: 11 };
@@ -19,7 +19,6 @@ const CLICKED_GROUND_IMAGE_URL = `${import.meta.env.BASE_URL}newark_nj_1922_1.we
 
 export function GroundImagePage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const { messages, showToast, dismissToast } = useToast();
   const [southWest, setSouthWest] = useState(createGeoPoint({ latitude: 40.712216, longitude: -74.22655 }));
   const [northEast, setNorthEast] = useState(createGeoPoint({ latitude: 40.773941, longitude: -74.12544 }));
@@ -81,7 +80,7 @@ export function GroundImagePage() {
   ], [northEast, southWest, updateNorthEast, updateSouthWest]);
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <GroundImage state={image} />
       <Markers states={markers} />
       <ControlPanel title={t('Ground Image', '地表画像')}>

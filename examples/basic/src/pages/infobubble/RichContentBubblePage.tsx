@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { ColorDefaultIcon, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Marker } from '@mapconductor/js-sdk-react';
-import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
+import { MapViewContainer } from '../../MapViewContainer';
 
 interface LocationInfo extends Record<string, unknown> {
   name: string;
@@ -12,7 +12,6 @@ interface LocationInfo extends Record<string, unknown> {
 const INIT_CAMERA = { lat: 37.7749, lng: -122.4194, zoom: 10 };
 
 export function RichContentBubblePage() {
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>('golden-gate-park');
   const marker = useMemo(() => {
     const locationInfo: LocationInfo = {
@@ -31,7 +30,7 @@ export function RichContentBubblePage() {
   const info = marker.extra as LocationInfo;
 
   return (
-    <MapViewContainer state={mapViewState} onMapClick={() => setSelectedMarkerId(null)}>
+    <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelectedMarkerId(null)}>
       <Marker state={marker} />
       {selectedMarkerId === marker.id && (
         <InfoBubble

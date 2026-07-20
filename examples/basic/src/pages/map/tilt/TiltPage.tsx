@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import type { MapDesignTypeInterface, MapViewStateInterface } from '@mapconductor/js-sdk-core';
 import { ControlPanel, SliderControl } from '../../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 21.3069, lng: -157.8583, zoom: 14 };
@@ -32,10 +32,10 @@ function TiltContent({ mapViewState }: { mapViewState: MapViewStateInterface<Map
 }
 
 export function TiltPage() {
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
+  const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   return (
-    <MapViewContainer state={mapViewState}>
-      <TiltContent mapViewState={mapViewState} />
+    <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={setMapViewState}>
+      {mapViewState && <TiltContent mapViewState={mapViewState} />}
     </MapViewContainer>
   );
 }

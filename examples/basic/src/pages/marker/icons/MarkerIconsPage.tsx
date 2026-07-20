@@ -11,7 +11,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { CircleIcon, FlagIcon, RightTailInfoBubbleIcon, RoundInfoBubbleIcon } from '@mapconductor/react-icons';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 0.014, lng: 0.008, zoom: 15 };
 
@@ -59,7 +59,6 @@ interface MarkerDefinition {
 }
 
 export function MarkerIconsPage() {
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const weatherImage = useLoadedImage(WEATHER_ICON_URL);
   const humanImage = useLoadedImage(HUMAN_ICON_URL);
   const launcherImage = useLoadedImage(LAUNCHER_ICON_URL);
@@ -278,7 +277,7 @@ export function MarkerIconsPage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState} onMapClick={() => setSelected(null)}>
+    <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelected(null)}>
       <Markers states={markers} />
       {typeof selected?.extra === 'string' && (
         <InfoBubble marker={selected} bubbleColor="#ffffff">

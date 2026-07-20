@@ -2,7 +2,7 @@ import { useMemo, useRef } from 'react';
 import { createGeoPoint, createMarkerState, type MarkerState } from '@mapconductor/js-sdk-core';
 import { Markers } from '@mapconductor/js-sdk-react';
 import { Toast, useToast } from '../components/Toast';
-import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
+import { MapViewContainer } from '../MapViewContainer';
 
 const INIT_CAMERA = { lat: 21.2910, lng: -157.8380, zoom: 12 };
 
@@ -13,7 +13,6 @@ const MARKER_DATA = [
 ];
 
 export function MarkerPage() {
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const { messages, showToast, dismissToast } = useToast();
   const showToastRef = useRef(showToast);
   showToastRef.current = showToast;
@@ -34,7 +33,7 @@ export function MarkerPage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <Markers states={markers} />
       <Toast messages={messages} onDismiss={dismissToast} />
     </MapViewContainer>

@@ -10,7 +10,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 30.0, lng: 20.0, zoom: 2 };
@@ -24,7 +24,6 @@ interface ClickedPolygon {
 
 export function PolygonGeodesicPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [clickedPolygon, setClickedPolygon] = useState<ClickedPolygon | null>(null);
   const points = useMemo(() => [
     GeoPoint.fromLongLat(23.66, 56.42, 5000),
@@ -77,7 +76,7 @@ export function PolygonGeodesicPage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       {polygons.map(polygon => <Polygon key={polygon.id} state={polygon} />)}
       {marker && (
         <>

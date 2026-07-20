@@ -9,7 +9,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { Markers, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 43.0602, lng: 141.3195, zoom: 11 };
@@ -41,7 +41,6 @@ const HOLE_MARKER_COLORS = ['#2563eb', '#f97316'];
 
 export function PolygonHolePage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [holes, setHoles] = useState<GeoPoint[][]>(() => INITIAL_HOLES.map(hole => [...hole]));
   const setHolesRef = useRef(setHoles);
   setHolesRef.current = setHoles;
@@ -95,7 +94,7 @@ export function PolygonHolePage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polygon state={state} />
       <Markers states={vertexMarkers} />
       <ControlPanel title={t('Polygon with Holes', '穴付きポリゴン')}>

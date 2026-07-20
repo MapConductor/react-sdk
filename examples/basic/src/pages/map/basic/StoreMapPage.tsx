@@ -3,11 +3,13 @@ import {
   ImageDefaultIcon,
   createGeoPoint,
   createMarkerState,
+  type MapDesignTypeInterface,
+  type MapViewStateInterface,
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { STORES, type StoreInfo } from '../../../data/storeData';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { StoreInfoView } from './StoreInfoView';
 
 const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 10 };
@@ -21,7 +23,7 @@ const STORE_ICON_URLS: Record<string, string> = {
 
 export function MapPage() {
   // Gets the mapViewState for controll map view.
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
+  const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   // Holds the selected marker state.
   const [selectedMarker, setSelectedMarker] = useState<MarkerState | null>(null);
   // Holds icon images.
@@ -73,7 +75,7 @@ export function MapPage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState} onMapClick={() => setSelectedMarker(null)}>
+    <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={setMapViewState} onMapClick={() => setSelectedMarker(null)}>
       <Markers states={markers} />
       {selectedMarker && (
         <InfoBubble marker={selectedMarker} bubbleColor="#ffffff">

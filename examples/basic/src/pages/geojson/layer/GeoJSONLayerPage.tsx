@@ -1,6 +1,11 @@
 import { useCallback, useMemo, useState, useEffect } from 'react';
 import { ZipReaderStream } from '@zip.js/zip.js';
-import { createGeoPoint, type GeoPoint } from '@mapconductor/js-sdk-core';
+import {
+  createGeoPoint,
+  type GeoPoint,
+  type MapDesignTypeInterface,
+  type MapViewStateInterface,
+} from '@mapconductor/js-sdk-core';
 import { InfoBubbleAtPosition } from '@mapconductor/js-sdk-react';
 import {
   GeoJSONLayer,
@@ -10,7 +15,7 @@ import {
 } from '@mapconductor/react-geojson-layer';
 import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 35.68, lng: 139.77, zoom: 13 };
@@ -38,7 +43,7 @@ interface RailroadStyleEntry {
 
 export function GeoJSONLayerPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
+  const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +95,7 @@ export function GeoJSONLayerPage() {
 
   const handleMapClick = useCallback(
     (point: GeoPoint) => {
+      if (!mapViewState) return;
       const zoom = mapViewState.cameraPosition.zoom;
       if (!layerState.processClick(point, 10, zoom)) {
         setSelected(null);
@@ -107,7 +113,7 @@ export function GeoJSONLayerPage() {
   }
 
   return (
-    <MapViewContainer state={mapViewState} onMapClick={handleMapClick}>
+    <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={setMapViewState} onMapClick={handleMapClick}>
       <GeoJSONLayer state={layerState} features={features} />
 
       {selected && (

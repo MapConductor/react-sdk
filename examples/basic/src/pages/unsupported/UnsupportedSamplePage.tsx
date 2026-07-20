@@ -1,12 +1,11 @@
 import { ControlPanel } from '../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
+import { MapViewContainer } from '../../MapViewContainer';
 import { useSampleI18n } from '../../i18n';
 
 export function UnsupportedSamplePage({ title, titleJa = title }: { title: string; titleJa?: string }) {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState();
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer>
       <ControlPanel title={t(title, titleJa)}>
         <p className="control-panel-note">
           {t(

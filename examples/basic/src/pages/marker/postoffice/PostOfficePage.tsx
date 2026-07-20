@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   ImageIcon,
@@ -11,14 +11,13 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
-import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
-import { MapboxDesign, useMapboxViewState } from '@mapconductor/react-for-mapbox';
-import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
-import { OpenLayersDesign, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
-import { ArcGISDesign, useArcGISViewState } from '@mapconductor/react-for-arcgis';
+import { MapLibreDesign, MapLibreView, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, MapboxView, useMapboxViewState, type MapboxViewState } from '@mapconductor/react-for-mapbox';
+import { LeafletDesign, LeafletMapView, useLeafletMapViewState, type LeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState, type OpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { MapViewContainer } from '../../../MapViewContainer';
-import { useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
+import { SingletonGoogleMapSlot, useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
 import { useSampleI18n } from '../../../i18n';
 
 // ─── Data types ────────────────────────────────────────────────────────────────
@@ -76,8 +75,10 @@ const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
 
 function PostOfficePageContent({
   mapViewState,
+  renderMapView,
 }: {
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+  renderMapView: (children: ReactNode, onMapClick: () => void) => ReactNode;
 }) {
   const { t } = useSampleI18n();
   const [raw, setRaw] = useState<[number, number, string, string][] | null>(null);
@@ -129,12 +130,8 @@ function PostOfficePageContent({
     );
   }
 
-  return (
-    <MapViewContainer
-      state={mapViewState}
-      markerTilingOptions={MARKER_TILING_OPTIONS}
-      onMapClick={clearSelect}
-    >
+  return renderMapView(
+    <>
       <Markers states={markerStates} />
 
       {selected && (
@@ -157,14 +154,22 @@ function PostOfficePageContent({
           </p>
         )}
       </ControlPanel>
-    </MapViewContainer>
+    </>,
+    clearSelect,
   );
 }
 
 function GooglePostOfficePage() {
   const mapViewState = useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
 
-  return <PostOfficePageContent mapViewState={mapViewState} />;
+  return (
+    <PostOfficePageContent
+      mapViewState={mapViewState}
+      renderMapView={(children, onMapClick) => (
+        <SingletonGoogleMapSlot mode="2d" onMapClick={onMapClick}>{children}</SingletonGoogleMapSlot>
+      )}
+    />
+  );
 }
 
 function MapLibrePostOfficePage() {
@@ -173,7 +178,16 @@ function MapLibrePostOfficePage() {
     cameraPosition: INIT_CAMERA_POSITION,
   });
 
-  return <PostOfficePageContent mapViewState={mapViewState} />;
+  return (
+    <PostOfficePageContent
+      mapViewState={mapViewState}
+      renderMapView={(children, onMapClick) => (
+        <MapLibreView state={mapViewState as MapLibreViewState} projection="mercator" markerTilingOptions={MARKER_TILING_OPTIONS} onMapClick={onMapClick}>
+          {children}
+        </MapLibreView>
+      )}
+    />
+  );
 }
 
 function MapboxPostOfficePage() {
@@ -181,8 +195,18 @@ function MapboxPostOfficePage() {
     mapDesignType: MapboxDesign.Streets,
     cameraPosition: INIT_CAMERA_POSITION,
   });
+  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
 
-  return <PostOfficePageContent mapViewState={mapViewState} />;
+  return (
+    <PostOfficePageContent
+      mapViewState={mapViewState}
+      renderMapView={(children, onMapClick) => (
+        <MapboxView state={mapViewState as MapboxViewState} accessToken={accessToken} markerTilingOptions={MARKER_TILING_OPTIONS} onMapClick={onMapClick}>
+          {children}
+        </MapboxView>
+      )}
+    />
+  );
 }
 
 function LeafletPostOfficePage() {
@@ -190,7 +214,16 @@ function LeafletPostOfficePage() {
     mapDesignType: LeafletDesign.OpenStreetMap,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <PostOfficePageContent mapViewState={mapViewState} />;
+  return (
+    <PostOfficePageContent
+      mapViewState={mapViewState}
+      renderMapView={(children, onMapClick) => (
+        <LeafletMapView state={mapViewState as LeafletMapViewState} markerTilingOptions={MARKER_TILING_OPTIONS} onMapClick={onMapClick}>
+          {children}
+        </LeafletMapView>
+      )}
+    />
+  );
 }
 
 function OpenLayersPostOfficePage() {
@@ -198,7 +231,16 @@ function OpenLayersPostOfficePage() {
     mapDesignType: OpenLayersDesign.OpenStreetMap,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <PostOfficePageContent mapViewState={mapViewState} />;
+  return (
+    <PostOfficePageContent
+      mapViewState={mapViewState}
+      renderMapView={(children, onMapClick) => (
+        <OpenLayersMapView state={mapViewState as OpenLayersMapViewState} markerTilingOptions={MARKER_TILING_OPTIONS} onMapClick={onMapClick}>
+          {children}
+        </OpenLayersMapView>
+      )}
+    />
+  );
 }
 
 function ArcGISPostOfficePage() {
@@ -207,7 +249,16 @@ function ArcGISPostOfficePage() {
     mapDesignType: ArcGISDesign.Streets,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  return <PostOfficePageContent mapViewState={mapViewState} />;
+  return (
+    <PostOfficePageContent
+      mapViewState={mapViewState}
+      renderMapView={(children, onMapClick) => (
+        <ArcGISMapView2D state={mapViewState as ArcGISViewState} markerTilingOptions={MARKER_TILING_OPTIONS} onMapClick={onMapClick}>
+          {children}
+        </ArcGISMapView2D>
+      )}
+    />
+  );
 }
 
 // ─── Page component ─────────────────────────────────────────────────────────────

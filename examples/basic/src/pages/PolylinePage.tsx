@@ -9,14 +9,13 @@ import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { POLYLINE_POINTS } from '../data/storeData';
-import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
+import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../i18n';
 
 const INIT_CAMERA = { lat: 21.3069, lng: -157.8583, zoom: 13 };
 
 export function PolylinePage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [points, setPoints] = useState<GeoPoint[]>(POLYLINE_POINTS);
   const [strokeWidth, setStrokeWidth] = useState(4);
   const { messages, showToast, dismissToast } = useToast();
@@ -67,7 +66,7 @@ export function PolylinePage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polyline state={polylineState} />
       <Markers states={waypointMarkers} />
       <ControlPanel title={t('Polyline Example', 'ポリラインのサンプル')}>

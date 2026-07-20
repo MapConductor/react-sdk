@@ -7,13 +7,15 @@ import {
   createCircleState,
   createGeoPoint,
   type GeoPoint,
+  type MapDesignTypeInterface,
+  type MapViewStateInterface,
   type MarkerState,
   type Offset,
 } from '@mapconductor/js-sdk-core';
 import { Circle, Marker, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
-import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
+import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../i18n';
 
 const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
@@ -33,7 +35,7 @@ function rgba(hex: string, alpha: number): string {
 function radiusLabelPosition(
   center: GeoPoint,
   edge: GeoPoint,
-  mapViewState: ReturnType<typeof useSampleMapViewState>,
+  mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>,
 ): Offset | null | Promise<Offset | null> {
   const holder = mapViewState.getMapViewHolder();
   if (!holder) return null;
@@ -43,7 +45,7 @@ function radiusLabelPosition(
 
 export function CirclePage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
+  const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   const [edgePosition, setEdgePosition] = useState(() =>
     calculatePositionAtDistance({
       center: CIRCLE_CENTER,
@@ -64,6 +66,10 @@ export function CirclePage() {
   );
 
   const updateLabelPosition = useCallback(() => {
+    if (!mapViewState) {
+      setLabelOffset(null);
+      return;
+    }
     const next = radiusLabelPosition(CIRCLE_CENTER, edgePosition, mapViewState);
     if (next instanceof Promise) {
       next.then(setLabelOffset).catch(() => setLabelOffset(null));
@@ -119,7 +125,8 @@ export function CirclePage() {
 
   return (
     <MapViewContainer
-      state={mapViewState}
+      initialCamera={INIT_CAMERA}
+      onStateReady={setMapViewState}
       onCameraMove={() => setCameraTick((tick) => tick + 1)}
       onCameraMoveEnd={() => setCameraTick((tick) => tick + 1)}
     >

@@ -9,14 +9,13 @@ import { Markers, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { POLYGON_VERTICES } from '../data/storeData';
-import { MapViewContainer, useSampleMapViewState } from '../MapViewContainer';
+import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../i18n';
 
 const INIT_CAMERA = { lat: 41.7969, lng: 140.7569, zoom: 16 };
 
 export function PolygonPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [vertices, setVertices] = useState<GeoPoint[]>(POLYGON_VERTICES);
   const [fillOpacity, setFillOpacity] = useState(0.3);
   const [strokeWidth, setStrokeWidth] = useState(3);
@@ -67,7 +66,7 @@ export function PolygonPage() {
   );
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polygon state={polygonState} />
       <Markers states={vertexMarkers} />
       <ControlPanel title={t('Polygon Example', 'ポリゴンのサンプル')}>

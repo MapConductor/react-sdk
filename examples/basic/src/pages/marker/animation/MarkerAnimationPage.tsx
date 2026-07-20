@@ -3,14 +3,13 @@ import { ColorDefaultIcon, MarkerAnimation, createMarkerState } from '@mapconduc
 import { Marker } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { HONOLULU } from '../../common/sampleHelpers';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 21.3825, lng: -157.9330, zoom: 14 };
 
 export function MarkerAnimationPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [animation, setAnimation] = useState<MarkerAnimation | null>(null);
 
   const triggerAnimation = (nextAnimation: MarkerAnimation) => {
@@ -33,7 +32,7 @@ export function MarkerAnimationPage() {
   }), [animation]);
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <Marker state={marker} />
       <ControlPanel title={t('Marker Animation', 'マーカーアニメーション')}>
         <div className="button-grid">

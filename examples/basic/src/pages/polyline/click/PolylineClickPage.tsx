@@ -10,7 +10,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 35.548852, lng: 139.784086, zoom: 4 };
@@ -22,7 +22,6 @@ const WAYPOINT_STROKE_COLOR = '#000000';
 
 export function PolylineClickPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [clickMarkers, setClickMarkers] = useState<MarkerState[]>([]);
   const [points, setPoints] = useState<GeoPoint[]>(() => [
     createGeoPoint({ latitude: 35.548852, longitude: 139.784086 }), // HND
@@ -101,7 +100,7 @@ export function PolylineClickPage() {
   [points]);
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polyline state={polyline} />
       <Polyline state={straightPolyline} />
       <Markers states={waypointMarkers} />

@@ -10,7 +10,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { MapViewContainer, useSampleMapViewState } from '../../../MapViewContainer';
+import { MapViewContainer } from '../../../MapViewContainer';
 import { california } from './California';
 import { useSampleI18n } from '../../../i18n';
 
@@ -24,7 +24,6 @@ interface ClickedMarker {
 
 export function PolygonClickPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const polygons = useMemo(
     () => california.map((points, index) =>
       createPolygonState({
@@ -88,7 +87,7 @@ export function PolygonClickPage() {
   }, [showClickedMarker]);
 
   return (
-    <MapViewContainer state={mapViewState} onMapClick={handleMapClick}>
+    <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={handleMapClick}>
       {polygons.map(polygon => (
         <Polygon
           key={polygon.id}

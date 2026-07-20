@@ -6,7 +6,7 @@ import {
   GSI_RELIEF_ATTRIBUTION_RULES,
   GSI_STANDARD_ATTRIBUTION_RULES,
 } from '../../gsiAttributions';
-import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
+import { MapViewContainer } from '../../MapViewContainer';
 import { useSampleI18n } from '../../i18n';
 
 const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 5 };
@@ -16,7 +16,6 @@ type GsiLayer = 'relief' | 'standard';
 
 export function RasterLayerPage() {
   const { t } = useSampleI18n();
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [selectedLayer, setSelectedLayer] = useState<GsiLayer>('relief');
   const [opacity, setOpacity] = useState(0.75);
   const state = useMemo(() => createRasterLayerState({
@@ -40,7 +39,7 @@ export function RasterLayerPage() {
   }), [opacity, selectedLayer]);
 
   return (
-    <MapViewContainer state={mapViewState}>
+    <MapViewContainer initialCamera={INIT_CAMERA}>
       <RasterLayer state={state} />
       <ControlPanel title={t('Raster Layer', 'ラスターレイヤー')}>
         <label className="slider-control">

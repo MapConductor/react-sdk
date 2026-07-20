@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { SingletonGoogleMapsProvider } from './SingletonGoogleMaps';
 import { SamplePageLayout } from './components/SamplePageLayout';
@@ -7,33 +8,48 @@ import {
   getSamplePageDefinition,
   isKnownSamplePage,
 } from './sampleRegistry';
-import { CirclePage } from './pages/CirclePage';
-import { MapPage } from './pages/map/basic/StoreMapPage';
-import { MarkerIconsPage } from './pages/marker/icons/MarkerIconsPage';
-import { PolygonPage } from './pages/PolygonPage';
-import { PolylinePage } from './pages/PolylinePage';
-import { GroundImagePage } from './pages/groundimage/GroundImagePage';
-import { MultipleBubblesPage } from './pages/infobubble/MultipleBubblesPage';
-import { RichContentBubblePage } from './pages/infobubble/RichContentBubblePage';
-import { SimpleInfoBubblePage } from './pages/infobubble/SimpleInfoBubblePage';
-import { StyledInfoBubblePage } from './pages/infobubble/StyledInfoBubblePage';
-import { MapDesignPage } from './pages/map/design/MapDesignPage';
-import { FlyToPage } from './pages/map/flyto/FlyToPage';
-import { TiltPage } from './pages/map/tilt/TiltPage';
-import { VisibleRegionPage } from './pages/map/visibleregion/VisibleRegionPage';
-import { CameraSyncPage } from './pages/map/camerasync/CameraSyncPage';
-import { MarkerAnimationPage } from './pages/marker/animation/MarkerAnimationPage';
-import { PostOfficePage } from './pages/marker/postoffice/PostOfficePage';
-import { PostOfficeClusterPage } from './pages/marker/postofficecluster/PostOfficeClusterPage';
-import { PolygonClickPage } from './pages/polygon/click/PolygonClickPage';
-import { PolygonGeodesicPage } from './pages/polygon/geodesic/PolygonGeodesicPage';
-import { PolygonHolePage } from './pages/polygon/hole/PolygonHolePage';
-import { PolylineClickPage } from './pages/polyline/click/PolylineClickPage';
-import { RasterLayerPage } from './pages/rasterlayer/RasterLayerPage';
-import { HeatmapLayerPage } from './pages/heatmaplayer/HeatmapLayerPage';
-import { BasicGeoJSONPage } from './pages/geojson/basic/BasicGeoJSONPage';
-import { GeoJSONLayerPage } from './pages/geojson/layer/GeoJSONLayerPage';
-import { ThreeJsObjectPage } from './pages/threejs/ThreeJsObjectPage';
+
+// Every sample page is loaded on demand instead of being bundled into one chunk.
+// A handful of pages (camera-sync, post-office, post-office-cluster, heatmap-layer)
+// statically import several provider SDKs at once to render multiple providers
+// side by side; without this, those imports would pull every provider's runtime
+// into whatever chunk this file lives in, defeating the per-provider code
+// splitting done in MapViewContainer.tsx.
+const CirclePage = lazy(() => import('./pages/CirclePage').then(m => ({ default: m.CirclePage })));
+const MapPage = lazy(() => import('./pages/map/basic/StoreMapPage').then(m => ({ default: m.MapPage })));
+const MarkerIconsPage = lazy(() => import('./pages/marker/icons/MarkerIconsPage').then(m => ({ default: m.MarkerIconsPage })));
+const PolygonPage = lazy(() => import('./pages/PolygonPage').then(m => ({ default: m.PolygonPage })));
+const PolylinePage = lazy(() => import('./pages/PolylinePage').then(m => ({ default: m.PolylinePage })));
+const GroundImagePage = lazy(() => import('./pages/groundimage/GroundImagePage').then(m => ({ default: m.GroundImagePage })));
+const MultipleBubblesPage = lazy(() => import('./pages/infobubble/MultipleBubblesPage').then(m => ({ default: m.MultipleBubblesPage })));
+const RichContentBubblePage = lazy(() => import('./pages/infobubble/RichContentBubblePage').then(m => ({ default: m.RichContentBubblePage })));
+const SimpleInfoBubblePage = lazy(() => import('./pages/infobubble/SimpleInfoBubblePage').then(m => ({ default: m.SimpleInfoBubblePage })));
+const StyledInfoBubblePage = lazy(() => import('./pages/infobubble/StyledInfoBubblePage').then(m => ({ default: m.StyledInfoBubblePage })));
+const MapDesignPage = lazy(() => import('./pages/map/design/MapDesignPage').then(m => ({ default: m.MapDesignPage })));
+const FlyToPage = lazy(() => import('./pages/map/flyto/FlyToPage').then(m => ({ default: m.FlyToPage })));
+const TiltPage = lazy(() => import('./pages/map/tilt/TiltPage').then(m => ({ default: m.TiltPage })));
+const VisibleRegionPage = lazy(() => import('./pages/map/visibleregion/VisibleRegionPage').then(m => ({ default: m.VisibleRegionPage })));
+const CameraSyncPage = lazy(() => import('./pages/map/camerasync/CameraSyncPage').then(m => ({ default: m.CameraSyncPage })));
+const MarkerAnimationPage = lazy(() => import('./pages/marker/animation/MarkerAnimationPage').then(m => ({ default: m.MarkerAnimationPage })));
+const PostOfficePage = lazy(() => import('./pages/marker/postoffice/PostOfficePage').then(m => ({ default: m.PostOfficePage })));
+const PostOfficeClusterPage = lazy(() => import('./pages/marker/postofficecluster/PostOfficeClusterPage').then(m => ({ default: m.PostOfficeClusterPage })));
+const PolygonClickPage = lazy(() => import('./pages/polygon/click/PolygonClickPage').then(m => ({ default: m.PolygonClickPage })));
+const PolygonGeodesicPage = lazy(() => import('./pages/polygon/geodesic/PolygonGeodesicPage').then(m => ({ default: m.PolygonGeodesicPage })));
+const PolygonHolePage = lazy(() => import('./pages/polygon/hole/PolygonHolePage').then(m => ({ default: m.PolygonHolePage })));
+const PolylineClickPage = lazy(() => import('./pages/polyline/click/PolylineClickPage').then(m => ({ default: m.PolylineClickPage })));
+const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage').then(m => ({ default: m.RasterLayerPage })));
+const HeatmapLayerPage = lazy(() => import('./pages/heatmaplayer/HeatmapLayerPage').then(m => ({ default: m.HeatmapLayerPage })));
+const BasicGeoJSONPage = lazy(() => import('./pages/geojson/basic/BasicGeoJSONPage').then(m => ({ default: m.BasicGeoJSONPage })));
+const GeoJSONLayerPage = lazy(() => import('./pages/geojson/layer/GeoJSONLayerPage').then(m => ({ default: m.GeoJSONLayerPage })));
+const ThreeJsObjectPage = lazy(() => import('./pages/threejs/ThreeJsObjectPage').then(m => ({ default: m.ThreeJsObjectPage })));
+
+function SamplePageLoadingPlaceholder() {
+  return (
+    <div className="sample-map-placeholder" role="status">
+      Loading…
+    </div>
+  );
+}
 
 function isPageUnavailableOnProvider(page: string | undefined, provider: string | undefined): boolean {
   const definition = getSamplePageDefinition(page);
@@ -95,10 +111,10 @@ function ProviderPageRoute() {
 
   const isUnavailable = isPageUnavailableOnProvider(requestedPage, provider);
   return (
-    <>
+    <Suspense fallback={<SamplePageLoadingPlaceholder />}>
       {isUnavailable ? <MapPage /> : pageContent(page)}
       {isUnavailable && <ProviderUnavailableOverlay />}
-    </>
+    </Suspense>
   );
 }
 

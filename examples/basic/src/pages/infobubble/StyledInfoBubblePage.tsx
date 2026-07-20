@@ -1,12 +1,11 @@
 import { useMemo, useState } from 'react';
 import { ColorDefaultIcon, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
 import { InfoBubbleCustom, Markers } from '@mapconductor/js-sdk-react';
-import { MapViewContainer, useSampleMapViewState } from '../../MapViewContainer';
+import { MapViewContainer } from '../../MapViewContainer';
 
 const INIT_CAMERA = { lat: 37.7849, lng: -122.4094, zoom: 15 };
 
 export function StyledInfoBubblePage() {
-  const mapViewState = useSampleMapViewState(INIT_CAMERA);
   const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>('marker1');
   const markers = useMemo(() => {
     const marker1 = createMarkerState({
@@ -38,7 +37,7 @@ export function StyledInfoBubblePage() {
   const activeMarker = markers.find(marker => marker.id === selectedMarkerId);
 
   return (
-    <MapViewContainer state={mapViewState} onMapClick={() => setSelectedMarkerId(null)}>
+    <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelectedMarkerId(null)}>
       <Markers states={markers} />
       {activeMarker && (
         <InfoBubbleCustom marker={activeMarker} tailOffset={{ x: 0, y: 0.5 }}>
