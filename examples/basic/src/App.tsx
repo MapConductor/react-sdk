@@ -1,229 +1,78 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
-import { Routes, Route, Navigate, useNavigate, useLocation, useParams } from 'react-router-dom';
-import { PageNav } from './components/PageNav';
-import {
-  DEFAULT_SAMPLE_PAGE,
-  getSamplePageDefinition,
-  getSamplePageMetadata,
-  isKnownSamplePage,
-  resolveProviderForPage,
-} from './sampleRegistry';
-import { SamplePageLayout } from './components/SamplePageLayout';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { getLanguageFromPath } from './i18n';
+import { getSamplePageDefinition, getSamplePageMetadata } from './sampleRegistry';
+import { AppHeader } from './app/AppHeader';
+import { AppNavigation } from './app/AppNavigation';
+import {
+  CrawlableRoutes,
+  parseSamplePath,
+  providerPath,
+  samplePath,
+  type MapProvider,
+} from './app/appRouting';
 
-type MapProvider = 'maplibre' | 'mapbox' | 'leaflet' | 'openlayers' | 'google' | 'google-3d' | 'arcgis' | 'arcgis-3d' | 'cesium';
 const ClientMapRoutes = lazy(() => import('./ClientMapRoutes'));
-const providers = new Map<string, MapProvider>([
-  ['/maplibre', 'maplibre'],
-  ['/maplibre-3d', 'maplibre'],
-  ['/mapbox', 'mapbox'],
-  ['/leaflet', 'leaflet'],
-  ['/openlayers', 'openlayers'],
-  ['/google-maps', 'google'],
-  ['/google', 'google'],
-  ['/google-maps-3d', 'google-3d'],
-  ['/google-3d', 'google-3d'],
-  ['/arcgis', 'arcgis'],
-  ['/arcgis-3d', 'arcgis-3d'],
-  ['/cesium', 'cesium'],
-]);
 
-function SeoProviderPageRoute() {
-  const { provider, page, language: languageParam } = useParams<{ provider: string; page: string; language: string }>();
-  const location = useLocation();
-  const language = getLanguageFromPath(location.pathname);
-
-  const requestedPage = isKnownSamplePage(page) ? page : DEFAULT_SAMPLE_PAGE;
-  if (requestedPage !== page || (languageParam !== 'en' && languageParam !== 'ja')) {
-    return <Navigate to={`/${provider ?? 'maplibre'}/${requestedPage}/${language}`} replace />;
+function updatePageMetadata(page: string, provider: string, language: 'en' | 'ja') {
+  const metadata = getSamplePageMetadata(page, provider, language);
+  document.title = metadata.title;
+  document.documentElement.lang = language;
+  let description = document.querySelector('meta[name="description"]');
+  if (!description) {
+    description = document.createElement('meta');
+    description.setAttribute('name', 'description');
+    document.head.appendChild(description);
   }
-  if (!provider || !providers.has(`/${provider}`)) {
-    return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
-  }
-
-  return (
-    <SamplePageLayout
-      page={requestedPage ?? DEFAULT_SAMPLE_PAGE}
-      provider={provider ?? ''}
-      language={language}
-    />
-  );
+  description.setAttribute('content', metadata.description);
 }
 
-function CrawlableRoutes() {
-  return (
-    <Routes>
-      <Route path="/" element={<Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/en`} replace />} />
-      <Route path="/:provider" element={<Navigate to={`${DEFAULT_SAMPLE_PAGE}/en`} replace />} />
-      <Route path="/:provider/:page" element={<Navigate to="en" replace />} />
-      <Route path="/:provider/:page/:language" element={<SeoProviderPageRoute />} />
-    </Routes>
-  );
-}
-
-function App() {
+export default function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [mapsEnabled, setMapsEnabled] = useState(false);
   const language = getLanguageFromPath(location.pathname);
+  const { providerPath: currentProviderPath, page, provider } = parseSamplePath(location.pathname);
+  const showProviderSelector = getSamplePageDefinition(page)?.showProviderSelector ?? true;
 
-  // Keep the map providers out of the server render and the first hydration
-  // pass. The route content above remains crawlable HTML, while the map is
-  // mounted once in the browser and Google Maps can be reused between pages.
+  useEffect(() => setMapsEnabled(true), []);
   useEffect(() => {
-    setMapsEnabled(true);
-  }, []);
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  const currentProviderPath = pathParts[0] || 'maplibre';
-  const currentPage = pathParts[1] || DEFAULT_SAMPLE_PAGE;
-  const currentProvider: MapProvider | null = providers.get(`/${currentProviderPath}`) ?? null;
-  const showProviderSelector = getSamplePageDefinition(currentPage)?.showProviderSelector ?? true;
-
-  useEffect(() => {
-    const provider = location.pathname.split('/').filter(Boolean)[0];
-    const metadata = getSamplePageMetadata(currentPage, provider, language);
-    document.title = metadata.title;
-    document.documentElement.lang = language;
-    let description = document.querySelector('meta[name="description"]');
-    if (!description) {
-      description = document.createElement('meta');
-      description.setAttribute('name', 'description');
-      document.head.appendChild(description);
-    }
-    description.setAttribute('content', metadata.description);
-  }, [currentPage, language, location.pathname]);
-
-  const switchLanguage = (nextLanguage: 'en' | 'ja') => {
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    const provider = pathParts[0] || 'maplibre';
-    const page = pathParts[1] || DEFAULT_SAMPLE_PAGE;
-    navigate(`/${provider}/${page}/${nextLanguage}`, { replace: true });
-  };
-
-  const switchProvider = (provider: MapProvider) => {
-    const pathParts = location.pathname.split('/').filter(Boolean);
-    const currentPage = pathParts[1] || DEFAULT_SAMPLE_PAGE;
-    const base = (() => {
-      switch(provider) {
-        case 'maplibre': {
-          return `/${resolveProviderForPage('maplibre', currentPage)}`;
-        }
-        case 'leaflet': {
-          return '/leaflet';
-        }
-        case 'mapbox': {
-          return '/mapbox';
-        }
-        case 'openlayers': {
-          return '/openlayers';
-        }
-        case 'arcgis': {
-          return '/arcgis';
-        }
-        case 'arcgis-3d': {
-          return '/arcgis-3d';
-        }
-        case 'cesium': {
-          return '/cesium';
-        }
-        case 'google-3d': {
-          return '/google-maps-3d';
-        }
-        default: {
-          return '/google-maps';
-        }
-      }
-    })();
-    navigate(`${base}/${currentPage}/${language}`);
-  };
-
-  useEffect(() => {
+    updatePageMetadata(page, currentProviderPath, language);
     setIsMenuOpen(false);
-  }, [location.pathname]);
+  }, [currentProviderPath, language, page]);
+
+  const switchProvider = (nextProvider: MapProvider) => {
+    navigate(samplePath(providerPath(nextProvider, page), page, language));
+  };
+  const switchLanguage = (nextLanguage: 'en' | 'ja') => {
+    navigate(samplePath(currentProviderPath, page, nextLanguage), { replace: true });
+  };
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>MapConductor React SDK Samples</h1>
-        <div className="header-controls">
-          <button
-            type="button"
-            className="menu-button"
-            aria-label="Open samples menu"
-            aria-expanded={isMenuOpen}
-            onClick={() => setIsMenuOpen(true)}
-          >
-            <span />
-            <span />
-            <span />
-          </button>
-          {showProviderSelector && (
-            <label className="provider-control">
-              <span>Provider</span>
-              <select
-                value={currentProvider ?? 'maplibre'}
-                onChange={event => switchProvider(event.target.value as MapProvider)}
-              >
-                <option value="maplibre">MapLibre</option>
-                <option value="mapbox">Mapbox</option>
-                <option value="leaflet">Leaflet</option>
-                <option value="openlayers">OpenLayers</option>
-                <option value="arcgis">ArcGIS 2D</option>
-                <option value="arcgis-3d">ArcGIS 3D</option>
-                <option value="cesium">Cesium</option>
-                <option value="google">Google Maps</option>
-                <option value="google-3d">Google Maps 3D</option>
-              </select>
-            </label>
-          )}
-          <label className="language-control">
-            <span>{language === 'ja' ? '言語' : 'Language'}</span>
-            <select
-              value={language}
-              onChange={event => switchLanguage(event.target.value as 'en' | 'ja')}
-            >
-              <option value="en">English</option>
-              <option value="ja">日本語</option>
-            </select>
-          </label>
-        </div>
-      </header>
-
+      <AppHeader
+        language={language}
+        provider={provider}
+        showProviderSelector={showProviderSelector}
+        onOpenMenu={() => setIsMenuOpen(true)}
+        onProviderChange={switchProvider}
+        onLanguageChange={switchLanguage}
+      />
       <div className="app-body">
-        <div className={['desktop-sidebar', isSidebarOpen ? 'open' : 'closed'].join(' ')}>
-          {isSidebarOpen ? <PageNav /> : null}
-          <button
-            type="button"
-            className="sidebar-toggle"
-            aria-label={isSidebarOpen ? 'Close samples sidebar' : 'Open samples sidebar'}
-            aria-expanded={isSidebarOpen}
-            title={isSidebarOpen ? 'Close samples sidebar' : 'Open samples sidebar'}
-            onClick={() => setIsSidebarOpen(open => !open)}
-          >
-            {isSidebarOpen ? '‹' : '›'}
-          </button>
-        </div>
-        <div
-          className={['mobile-menu-scrim', isMenuOpen ? 'open' : ''].filter(Boolean).join(' ')}
-          onClick={() => setIsMenuOpen(false)}
+        <AppNavigation
+          menuOpen={isMenuOpen}
+          sidebarOpen={isSidebarOpen}
+          onCloseMenu={() => setIsMenuOpen(false)}
+          onToggleSidebar={() => setIsSidebarOpen(open => !open)}
         />
-        <div className={['mobile-menu-drawer', isMenuOpen ? 'open' : ''].filter(Boolean).join(' ')}>
-          <PageNav onNavigate={() => setIsMenuOpen(false)} />
-        </div>
         <main className="map-container">
-          {mapsEnabled ? (
-            <Suspense fallback={<CrawlableRoutes />}>
-              <ClientMapRoutes />
-            </Suspense>
-          ) : (
-            <CrawlableRoutes />
-          )}
+          {mapsEnabled
+            ? <Suspense fallback={<CrawlableRoutes />}><ClientMapRoutes /></Suspense>
+            : <CrawlableRoutes />}
         </main>
       </div>
     </div>
   );
 }
-
-export default App;
