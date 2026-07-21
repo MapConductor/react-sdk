@@ -1,5 +1,17 @@
 name: Deploy basic example
 
+# Deploys examples/basic to Firebase Hosting.
+#
+# Required repository secrets:
+#   FIREBASE_SERVICE_ACCOUNT      - JSON key of a service account with the
+#                                   "Firebase Hosting Admin" role on the project
+#                                   in examples/basic/.firebaserc
+#   VITE_GOOGLE_MAPS_API_KEY      - Google Maps JavaScript API key
+#   VITE_ARCGIS_API_KEY           - ArcGIS Location Platform API key
+#   VITE_MAPBOX_ACCESS_TOKEN      - Mapbox access token
+#   VITE_HERE_API_KEY             - HERE platform API key
+# The VITE_* values are embedded into the static bundle at build time.
+
 on:
   push:
     branches:
@@ -8,15 +20,13 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: deploy-basic-example
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -46,25 +56,13 @@ jobs:
           VITE_BASE_PATH: /
           VITE_GOOGLE_MAPS_API_KEY: ${{ secrets.VITE_GOOGLE_MAPS_API_KEY }}
           VITE_ARCGIS_API_KEY: ${{ secrets.VITE_ARCGIS_API_KEY }}
+          VITE_MAPBOX_ACCESS_TOKEN: ${{ secrets.VITE_MAPBOX_ACCESS_TOKEN }}
+          VITE_HERE_API_KEY: ${{ secrets.VITE_HERE_API_KEY }}
 
-      - name: Add SPA fallback
-        run: cp examples/basic/dist/index.html examples/basic/dist/404.html
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          path: examples/basic/dist
-
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          channelId: live
+          entryPoint: examples/basic
