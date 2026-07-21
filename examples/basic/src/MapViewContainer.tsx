@@ -2,33 +2,34 @@ import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import type {
   GeoPoint,
+  GeoRectBounds,
   MapCameraPosition,
   MapDesignTypeInterface,
   MapViewStateInterface,
   MarkerTilingOptions,
 } from '@mapconductor/js-sdk-core';
 import { type InitialCamera, DEFAULT_CAMERA } from './common';
-import {
-  SingletonGoogleMapSlot,
-  useSingletonGoogleMapViewState,
-} from './SingletonGoogleMaps';
+import { SingletonMapSlot, useSingletonMapState, type SingletonMapId } from './SingletonMaps';
 import { useInitialCameraPosition } from './providers/useInitialCameraPosition';
 import type { ProviderViewProps } from './providers/types';
 
 export type { InitialCamera };
 export { DEFAULT_CAMERA };
 
-// Each provider SDK (maplibre-gl, mapbox-gl, leaflet, ol, @arcgis/core, cesium) is
-// large, so these are loaded on demand instead of being bundled into one chunk with
-// every other provider. Google Maps is the exception: it's driven by a singleton
-// context (see SingletonGoogleMaps.tsx) that's already mounted eagerly at the app
-// root to keep the map instance alive across navigation, and its SDK is small.
+// Every provider is normally driven by a singleton map instance (see
+// SingletonMaps.tsx) that's mounted once at the app root and kept alive
+// across navigation, so switching pages never destroys/recreates the map.
+// The one exception is restrictBounds: it's baked in once at map creation
+// and can't vary per page on a shared instance, so pages that need a
+// page-specific restrictBounds (currently only PolygonHolePage) fall back to
+// a dedicated, per-mount instance via the lazy Provider views below.
 const LazyLeafletProviderView = lazy(() => import('./providers/LeafletProviderView'));
 const LazyOpenLayersProviderView = lazy(() => import('./providers/OpenLayersProviderView'));
 const LazyMapLibreProviderView = lazy(() => import('./providers/MapLibreProviderView'));
-const LazyMapboxProviderView = lazy(() => import('./providers/MapboxProviderView'));
+const LazyMapBoxProviderView = lazy(() => import('./providers/MapboxProviderView'));
 const LazyArcGISProviderView = lazy(() => import('./providers/ArcGISProviderView'));
 const LazyCesiumProviderView = lazy(() => import('./providers/CesiumProviderView'));
+const LazyHereProviderView = lazy(() => import('./providers/HereProviderView'));
 
 interface MapViewContainerProps {
   children?: ReactNode;
@@ -39,6 +40,14 @@ interface MapViewContainerProps {
   onCameraMoveEnd?: (camera: MapCameraPosition) => void;
   markerTilingOptions?: MarkerTilingOptions;
   onStateReady?: (state: MapViewStateInterface<MapDesignTypeInterface<unknown>>) => void;
+  /**
+   * Restricts panning/zooming so the viewport cannot leave this rectangle.
+   * Forces a dedicated (non-singleton) map instance for the active provider,
+   * since a shared singleton instance can't have a page-specific restriction
+   * baked in without leaking it into every other page for that provider.
+   * Not applied on Google Maps, which always uses the singleton instance.
+   */
+  restrictBounds?: GeoRectBounds;
 }
 
 function MapLoadingPlaceholder() {
@@ -49,8 +58,8 @@ function MapLoadingPlaceholder() {
   );
 }
 
-function GoogleProviderView({
-  mode,
+function SingletonProviderView({
+  id,
   children,
   initialCamera,
   onMapClick,
@@ -58,26 +67,24 @@ function GoogleProviderView({
   onCameraMove,
   onCameraMoveEnd,
   onStateReady,
-}: ProviderViewProps & { mode: '2d' | '3d' }) {
-  // Google Maps marker tiling is fixed at the singleton-host level because it is
-  // constructor configuration. MapLibre can still configure it per page.
+}: ProviderViewProps & { id: SingletonMapId }) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
-  const state = useSingletonGoogleMapViewState(cameraPosition);
+  const state = useSingletonMapState(id, cameraPosition);
 
   useEffect(() => {
     onStateReady?.(state);
   }, [state, onStateReady]);
 
   return (
-    <SingletonGoogleMapSlot
-      mode={mode}
+    <SingletonMapSlot
+      id={id}
       onMapClick={onMapClick}
       onCameraMoveStart={onCameraMoveStart}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
     >
       {children}
-    </SingletonGoogleMapSlot>
+    </SingletonMapSlot>
   );
 }
 
@@ -90,6 +97,7 @@ export function MapViewContainer({
   onCameraMoveEnd,
   markerTilingOptions,
   onStateReady,
+  restrictBounds,
 }: MapViewContainerProps) {
   const location = useLocation();
   const isGoogle3D = location.pathname.startsWith('/google-maps-3d');
@@ -102,6 +110,8 @@ export function MapViewContainer({
   const isArcGIS3D = location.pathname.startsWith('/arcgis-3d');
   const isArcGIS2D = !isArcGIS3D && location.pathname.startsWith('/arcgis');
   const isCesium = location.pathname.startsWith('/cesium');
+  const isHere = location.pathname.startsWith('/here');
+  const useDedicatedInstance = Boolean(restrictBounds);
 
   const commonProps: ProviderViewProps = {
     children,
@@ -112,59 +122,89 @@ export function MapViewContainer({
     onCameraMoveEnd,
     markerTilingOptions,
     onStateReady,
+    restrictBounds,
   };
 
   switch (true) {
     case isGoogle3D || isGoogle2D: {
-      return <GoogleProviderView mode={isGoogle3D ? '3d' : '2d'} {...commonProps} />;
+      return <SingletonProviderView id={isGoogle3D ? 'google-3d' : 'google-2d'} {...commonProps} />;
     }
 
     case isLeaflet: {
-      return (
-        <Suspense fallback={<MapLoadingPlaceholder />}>
-          <LazyLeafletProviderView {...commonProps} />
-        </Suspense>
-      );
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyLeafletProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="leaflet" {...commonProps} />;
     }
 
     case isOpenLayers: {
-      return (
-        <Suspense fallback={<MapLoadingPlaceholder />}>
-          <LazyOpenLayersProviderView {...commonProps} />
-        </Suspense>
-      );
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyOpenLayersProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="openlayers" {...commonProps} />;
     }
 
     case isMapLibre3D || isMapLibre2D: {
-      return (
-        <Suspense fallback={<MapLoadingPlaceholder />}>
-          <LazyMapLibreProviderView projection={isMapLibre3D ? 'globe' : 'mercator'} {...commonProps} />
-        </Suspense>
-      );
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyMapLibreProviderView useGlobe={isMapLibre3D} {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id={isMapLibre3D ? 'maplibre-3d' : 'maplibre-2d'} {...commonProps} />;
     }
 
     case isMapbox: {
-      return (
-        <Suspense fallback={<MapLoadingPlaceholder />}>
-          <LazyMapboxProviderView {...commonProps} />
-        </Suspense>
-      );
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyMapBoxProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="mapbox" {...commonProps} />;
     }
 
     case isArcGIS3D || isArcGIS2D: {
-      return (
-        <Suspense fallback={<MapLoadingPlaceholder />}>
-          <LazyArcGISProviderView useSceneView={isArcGIS3D} {...commonProps} />
-        </Suspense>
-      );
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyArcGISProviderView useSceneView={isArcGIS3D} {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id={isArcGIS3D ? 'arcgis-3d' : 'arcgis-2d'} {...commonProps} />;
     }
 
     case isCesium: {
-      return (
-        <Suspense fallback={<MapLoadingPlaceholder />}>
-          <LazyCesiumProviderView {...commonProps} />
-        </Suspense>
-      );
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyCesiumProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="cesium" {...commonProps} />;
+    }
+
+    case isHere: {
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyHereProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="here" {...commonProps} />;
     }
 
     default: {

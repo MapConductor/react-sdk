@@ -31,3 +31,6 @@
 [submodule "react-for-leaflet"]
 	path = react-for-leaflet
 	url = git@github.com:mapconductor/react-for-leaflet.git
+[submodule "react-for-here"]
+	path = react-for-here
+	url = ./react-for-here

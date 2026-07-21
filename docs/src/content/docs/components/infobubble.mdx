@@ -1,0 +1,71 @@
+---
+title: InfoBubble
+description: Anchor arbitrary React content to a marker or geographic position.
+---
+
+# InfoBubble
+
+Info bubbles anchor arbitrary React content — not just text — to a marker or a geographic point, in a styled speech-bubble chrome.
+
+## Anchored to a marker
+
+```tsx
+<InfoBubble
+  marker={MarkerState}
+  bubbleColor?: string    // default '#ffffff'
+  borderColor?: string    // default '#000000'
+  contentPadding?: number // default 8
+  cornerRadius?: number   // default 4
+  tailSize?: number       // default 8
+>
+  {children}
+</InfoBubble>
+```
+
+The bubble tracks the marker's live position — no need to reposition it yourself when `marker.position` changes.
+
+```tsx
+<InfoBubble marker={selectedMarker} bubbleColor="#fff">
+  <StoreCard store={selectedMarker.extra} />
+</InfoBubble>
+```
+
+## Anchored to a position, no marker required
+
+```tsx
+<InfoBubbleAtPosition position={GeoPoint} /* same style props as InfoBubble */>
+  {children}
+</InfoBubbleAtPosition>
+```
+
+Useful for a click-driven popup where the clicked point doesn't correspond to an existing marker — e.g. showing details for a feature hit-tested from a [GeoJSON layer](/guides/extensions/#geojson-layer).
+
+## Fully custom content
+
+```tsx
+<InfoBubbleCustom marker={MarkerState} tailOffset={Offset /* {x, y} in 0-1 */}>
+  {children}
+</InfoBubbleCustom>
+```
+
+`InfoBubbleCustom` skips the built-in bubble chrome entirely and positions `children` verbatim at `tailOffset` relative to the marker — use it when your content is already a complete design-system popover/card and the default rounded-box-with-tail styling would be redundant or wrong.
+
+## Choosing between the three
+
+| | Anchor | Chrome |
+| --- | --- | --- |
+| `InfoBubble` | marker | built-in bubble (color, border, tail) |
+| `InfoBubbleAtPosition` | arbitrary `GeoPoint` | built-in bubble |
+| `InfoBubbleCustom` | marker | none — you provide it |
+
+## Lifecycle
+
+Mount an info bubble conditionally on the state that should show it (a selection, a hover) rather than always rendering it and toggling visibility with CSS — unmounting removes it from the bubble collector cleanly:
+
+```tsx
+{selectedMarker && (
+  <InfoBubble marker={selectedMarker}>
+    <StoreCard store={selectedMarker.extra} />
+  </InfoBubble>
+)}
+```

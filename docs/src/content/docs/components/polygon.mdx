@@ -1,0 +1,67 @@
+---
+title: Polygon
+description: Filled area overlays with optional holes, from a point list or a rectangle.
+---
+
+# Polygon
+
+Polygons draw a filled/stroked area from an outer ring of points, optional interior holes, or a `GeoRectBounds` rectangle.
+
+## Convenience props
+
+```tsx
+<Polygon
+  points={GeoPoint[]}       // OR bounds, not both
+  holes?: GeoPoint[][]      // interior rings; auto-unioned when more than one
+  bounds={GeoRectBounds}
+  id?: string | null
+  strokeColor?: string      // default '#000000'
+  strokeWidth?: number      // default 1
+  fillColor?: string        // default 'transparent'
+  geodesic?: boolean        // default false
+  zIndex?: number           // default 0
+  extra?: Serializable | null
+  onClick?: (state: PolygonState) => void
+/>
+```
+
+## Retained state
+
+```tsx
+<Polygon state={polygonState} />
+```
+
+`state` is created with [`createPolygonState()`](/states/polygon-state/). A `<Polygon>` takes `state`, `points`, or `bounds` — exactly one.
+
+## Example
+
+```tsx
+<Polygon
+  points={zoneOuterRing}
+  fillColor="rgba(220, 38, 38, 0.2)"
+  strokeColor="#dc2626"
+  strokeWidth={2}
+/>
+```
+
+## Holes
+
+Multiple overlapping hole rings are unioned automatically before being cut out of the fill — you don't need to pre-merge them:
+
+```tsx
+<Polygon points={outerRing} holes={[lakeRing, buildingFootprintRing]} />
+```
+
+See [PolygonState](/states/polygon-state/#holes-are-unioned-automatically) for the mutation-cost caveat if you're updating a large hole list frequently.
+
+## Drawing a bounds rectangle
+
+```tsx
+<Polygon bounds={referenceBounds} fillColor="rgba(37, 99, 235, 0.1)" strokeColor="#2563eb" />
+```
+
+Used as a fixed-size visual reference in the [camera sync](/guides/camera-sync/#visual-verification) demo — a non-geodesic bounds polygon renders at the same apparent size across correctly-synced providers.
+
+## Events
+
+`onClick` receives the `PolygonState`.

@@ -42,6 +42,7 @@ export function usePostOfficeMarkers(
     return () => { active = false; };
   }, [dataSource, iconScale, includeClusterImage]);
 
+  // #region markerStates
   const markerStates = useMemo(
     () => (records ?? []).map(([latitude, longitude, name, address], index) =>
       createMarkerState({
@@ -53,6 +54,7 @@ export function usePostOfficeMarkers(
       })),
     [icon, onMarkerClick, records],
   );
+  // #endregion markerStates
 
   return { error, markerStates, records, clusterImage };
 }

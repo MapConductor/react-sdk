@@ -1,0 +1,75 @@
+---
+title: Cesium
+description: Set up @mapconductor/react-for-cesium on the Web.
+---
+
+# Cesium
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-cesium
+```
+
+`cesium` is bundled — no separate install needed. Import the provider stylesheet once from your application entry point:
+
+```tsx
+import '@mapconductor/react-for-cesium/style.css';
+```
+
+No React Native counterpart exists for Cesium.
+
+## API key
+
+None required by this SDK's own configuration — there's no `apiKey`/token field anywhere in the package. The default design uses `OpenStreetMapImageryProvider` (free OSM raster tiles) on a full 3D globe, and Cesium's Ion-backed UI chrome (base layer picker, geocoder, home button, etc.) is disabled by default.
+
+This is an intentional scope boundary, not a hidden requirement: if you later pass Cesium Ion assets (World Terrain, Google Photorealistic 3D Tiles) through the raw `options` passthrough, you're responsible for setting `Cesium.Ion.defaultAccessToken` yourself — that's Cesium's own API, outside anything this SDK wires up.
+
+## Design types
+
+`CesiumDesign` members:
+
+| Member | Imagery | Notes |
+| --- | --- | --- |
+| `Default` | `OpenStreetMapImageryProvider` | carries the mandatory OSM attribution rule |
+| `None` | — | blank globe, no base imagery layer |
+
+## `useCesiumMapViewState` params
+
+```ts
+useCesiumMapViewState({
+  id?: string;
+  mapDesignType?: CesiumMapDesignType; // default CesiumDesign.Default
+  cameraPosition?: MapCameraPosition;  // default MapCameraPosition.Default
+})
+```
+
+## `<CesiumMapView>` props
+
+On top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state):
+
+```ts
+className?: string;
+containerStyle?: React.CSSProperties;
+options?: ConstructorParameters<typeof Cesium.Viewer>[1]; // raw Viewer options passthrough
+markerTilingOptions?: MarkerTilingOptions;
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+Re-enable any stripped-down Cesium widget through `options`, e.g. `{ timeline: true }`.
+
+`CesiumProvider` and `CesiumMapProvider` are the same class exported under two names — use either.
+
+## Gotchas
+
+- The camera's vertical field of view is forced to 35° to visually match Google Maps' 3D camera feel, recalculated on resize.
+- Initial camera positioning happens as a controller call after the `Viewer` is constructed (via `moveCamera`), not through `Viewer` constructor options — unlike the other providers, which pass the initial camera into their SDK's constructor directly.
+
+## Minimal example
+
+```tsx
+const state = useCesiumMapViewState({ mapDesignType: CesiumDesign.Default, cameraPosition });
+
+<CesiumMapView state={state}>
+  <Marker position={TOKYO} />
+</CesiumMapView>
+```

@@ -1,0 +1,25 @@
+---
+title: アーキテクチャ
+description: state、overlay collection、provider rendering の構造。
+---
+
+# アーキテクチャ
+
+各 provider view は `MapViewScope` を所有します。共通 overlay component はその scope の collector に state を登録し、provider controller が差分を実際の SDK へ反映します。
+
+```mermaid
+sequenceDiagram
+  participant React
+  participant Collector as OverlayCollector
+  participant Controller as Provider controller
+  participant SDK as 地図 SDK
+  React->>Collector: state を追加・置換
+  Collector->>Controller: composition を送信
+  Controller->>SDK: add / update / remove
+  React->>Collector: property の変更
+  Collector->>Controller: 対象 state を更新
+```
+
+provider hook は安定した view state を作ります。overlay state は `useState` や `useMemo` で一度生成してください。overlay は `onMapLoaded` より前に宣言でき、準備完了後に provider wrapper が保留中の composition を送ります。
+
+React Native の通常マーカーは batch bridge と native provider controller を直接通ります。Compose host は heatmap や marker clustering などの native extension 用です。

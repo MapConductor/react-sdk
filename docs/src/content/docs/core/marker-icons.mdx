@@ -1,0 +1,88 @@
+---
+title: Marker icons
+description: MarkerIcon implementations — DefaultMarkerIcon, ImageIcon, and the react-icons shapes.
+---
+
+# Marker icons
+
+`MarkerState.icon`/`<Marker icon={...} />` accepts any `MarkerIcon` implementation:
+
+```ts
+interface MarkerIcon {
+  scale: number;
+  anchor: Offset;      // {x, y} in 0-1, point within the icon that sits at the marker position
+  iconSize: number;
+  infoAnchor: Offset;  // {x, y} in 0-1, point an InfoBubble should anchor to
+  debug: boolean;
+
+  toBitmapIcon(): BitmapIcon;
+}
+```
+
+Every implementation caches its rendered bitmap by content hash (`hashCode()`), so reuse the same icon **instance** across many markers — constructing a fresh icon per marker on every render defeats that cache.
+
+## `DefaultMarkerIcon`
+
+An SVG pin shape with an optional short text label, built into `js-sdk-core`:
+
+```ts
+new DefaultMarkerIcon(fillColor?: string, {
+  strokeColor?: string;      // default '#FFFFFF'
+  strokeWidth?: number;
+  scale?: number;            // default 1
+  label?: string | null;     // short text drawn centered in the pin
+  labelTextColor?: string | null;
+  labelTextSize?: number;    // default 18
+  labelStrokeColor?: string; // default '#FFFFFF'
+  infoAnchor?: Offset;       // default {x: 0.5, y: 0}
+  iconSize?: number;
+  debug?: boolean;           // draws a debug bounding rect
+});
+```
+
+```tsx
+createMarkerState({
+  position,
+  icon: new DefaultMarkerIcon('#2563eb', { label: '3' }),
+});
+```
+
+`DefaultMarkerIcon` is a value alias for the underlying `ColorDefaultIcon` class — construct it either way.
+
+## `ImageIcon`
+
+Clips an arbitrary image/canvas source into a bitmap icon:
+
+```ts
+new ImageIcon(image: HTMLImageElement | HTMLCanvasElement | ImageBitmap, {
+  iconSize?: number;
+  scale?: number;
+  anchor?: Offset;      // default {x: 0.5, y: 0.5}
+  infoAnchor?: Offset;  // default {x: 0.5, y: 0.5}
+  debug?: boolean;
+});
+```
+
+```tsx
+const image = await loadImage('/icons/vehicle.png');
+createMarkerState({ position, icon: new ImageIcon(image, { iconSize: 36 }) });
+```
+
+## `react-icons` shapes
+
+`@mapconductor/react-icons` adds ready-made icons built on the same `AbstractMarkerIcon` base — no React components, just classes to instantiate:
+
+```ts
+new CircleIcon(fillColor?: string, { strokeColor?, strokeWidth?, scale?, iconSize?, debug? })
+new FlagIcon(fillColor?: string, { strokeColor?, strokeWidth?, scale?, iconSize?, debug? })
+new RoundInfoBubbleIcon(iconUrl: string, label: string, { fillColor?, scale?, iconSize?, debug? })
+new RightTailInfoBubbleIcon(iconUrl: string, label: string, snippet: string, { fillColor?, labelTextColor?, scale?, iconSize?, debug? })
+```
+
+`RoundInfoBubbleIcon`/`RightTailInfoBubbleIcon` compose `iconUrl` into their generated SVG via `<image href="...">` — pass a rasterized image URL (PNG/JPEG or a canvas-rendered data URL), not an SVG data URL; nested SVG-in-SVG image references render inconsistently across browsers.
+
+See [Extensions](/guides/extensions/#icons) for full usage examples.
+
+## Writing a custom icon
+
+Extend `AbstractMarkerIcon` (from `js-sdk-core`) and implement `toBitmapIcon()`, returning `{ url, anchor, size }` — `url` can be any `data:` URL (SVG or raster) or a same-origin image URL. Compute `hashCode()` from every field that affects the rendered output, since it drives the bitmap cache.

@@ -1,0 +1,47 @@
+---
+title: MapConductor React SDK
+description: Web と React Native で複数の地図 SDK を扱うための統一 React API。
+template: splash
+hero:
+  title: ひとつの地図 API。複数のプロバイダー。
+  tagline: TypeScript と React でプロバイダー非依存の地図を構築し、同じステートとオーバーレイモデルを Web と React Native で利用できます。
+  actions:
+    - text: はじめる
+      link: /ja/getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: GitHub
+      link: https://github.com/MapConductor/react-sdk
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<div class="platform-badges">
+  <span>React</span><span>React Native</span><span>TypeScript</span><span>Web</span><span>Android</span><span>iOS</span>
+</div>
+
+<CardGrid>
+  <Card title="統一オーバーレイ" icon="puzzle">マーカー、円、線、ポリゴン、地上画像、ラスター、吹き出しを同じ API で扱えます。</Card>
+  <Card title="ステート中心の更新" icon="seti:typescript">保持した observable state を変更すると、React ツリーを作り直さず renderer を更新します。</Card>
+  <Card title="プロバイダーを選択" icon="map">Web の各プロバイダーと、専用 React Native bridge を用途に応じて選べます。</Card>
+  <Card title="大規模データ" icon="rocket">一括マーカー、タイル化、クラスタリング、ヒートマップ、GeoJSON に対応します。</Card>
+</CardGrid>
+
+## アプリケーション層を共有する
+
+```tsx
+const tokyo = GeoPoint.from({ latitude: 35.6812, longitude: 139.7671 });
+const mapState = useMapLibreViewState({
+  mapDesignType: MapLibreDesign.OsmBright,
+  cameraPosition: MapCameraPosition.from({ position: tokyo, zoom: 12 }),
+});
+
+return (
+  <MapLibreView state={mapState}>
+    <Marker position={tokyo} />
+  </MapLibreView>
+);
+```
+
+[チュートリアル](/ja/getting-started/)から始め、[Web](/ja/platforms/web/) または [React Native](/ja/platforms/react-native/) の設定へ進んでください。

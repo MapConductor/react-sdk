@@ -1,0 +1,72 @@
+---
+title: PolygonState
+description: Retained, observable state for a single polygon overlay, including holes.
+---
+
+# PolygonState
+
+`PolygonState` holds a polygon's outer ring, optional interior holes, and styling as mutable, observable properties.
+
+## Creating a PolygonState
+
+```ts
+createPolygonState({
+  points: GeoPoint[];
+  holes?: GeoPoint[][];    // interior rings
+  id?: string | null;
+  strokeColor?: string;    // default '#000000'
+  strokeWidth?: number;    // default 2
+  fillColor?: string;      // default 'transparent'
+  geodesic?: boolean;      // default false
+  zIndex?: number;         // default 0
+  extra?: Serializable | null;
+  onClick?: (event: { state: PolygonState; clicked: GeoPoint }) => void;
+}): PolygonState
+```
+
+## Properties
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | readonly |
+| `points` | `GeoPoint[]` | outer ring |
+| `holes` | `GeoPoint[][]` | interior rings; auto-unioned when more than one overlaps (see below) |
+| `strokeColor`, `strokeWidth`, `fillColor` | `string` / `number` | |
+| `geodesic` | `boolean` | |
+| `zIndex` | `number` | |
+| `extra` | `Serializable \| null` | |
+| `onClick` | handler or `null` | |
+
+## Holes are unioned automatically
+
+When you assign `holes` (either at construction or via the `holes` setter) with more than one ring, MapConductor unions overlapping hole rings together before storing them — you don't need to pre-merge overlapping cutouts yourself. This runs on every `holes` assignment, so avoid reassigning `holes` on every render with a large hole count; compute the ring list once (e.g. with `useMemo`) and assign it when it actually changes.
+
+## Methods
+
+```ts
+copy(opts?: PolygonStateCopyParams): PolygonState;
+equals(other: unknown): boolean;
+hashCode(): number;
+fingerPrint(): PolygonFingerPrint;
+asObservable(): { subscribe(fn): () => void };
+```
+
+## Updating dynamically
+
+```tsx
+const [zone] = useState(() => createPolygonState({
+  points: outerRing,
+  fillColor: 'rgba(220, 38, 38, 0.2)',
+  strokeColor: '#dc2626',
+}));
+
+useEffect(() => {
+  zone.points = updatedOuterRing;
+}, [zone, updatedOuterRing]);
+
+return <Polygon state={zone} />;
+```
+
+## See also
+
+- [`<Polygon>`](/components/polygon/) — the React component that renders this state, including the `bounds`-based rectangle form

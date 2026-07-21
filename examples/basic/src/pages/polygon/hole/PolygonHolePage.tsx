@@ -2,6 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import {
   ColorDefaultIcon,
   createGeoPoint,
+  createGeoRectBounds,
   createMarkerState,
   createPolygonState,
   type GeoPoint,
@@ -13,18 +14,23 @@ import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../i18n';
 
 const INIT_CAMERA = { lat: 43.0602, lng: 141.3195, zoom: 11 };
-const WORLD_POINTS = [
-  createGeoPoint({ latitude: 85, longitude: 90 }),
-  createGeoPoint({ latitude: 85, longitude: 0.1 }),
-  createGeoPoint({ latitude: 85, longitude: -90 }),
-  createGeoPoint({ latitude: 85, longitude: -179.9 }),
-  createGeoPoint({ latitude: -85, longitude: -179.9 }),
-  createGeoPoint({ latitude: -85, longitude: -90 }),
-  createGeoPoint({ latitude: -85, longitude: 0.1 }),
-  createGeoPoint({ latitude: -85, longitude: 90 }),
-  createGeoPoint({ latitude: -85, longitude: 179.9 }),
-  createGeoPoint({ latitude: 85, longitude: 179.9 }),
+// A regional mask generously covering the Sapporo area. Cesium cannot
+// triangulate rings approaching hemisphere size (a world-spanning mask
+// renders inverted or disappears), so keep the outer ring regional.
+const OUTER_POINTS = [
+  createGeoPoint({ latitude: 44.2, longitude: 140.0 }),
+  createGeoPoint({ latitude: 44.2, longitude: 142.8 }),
+  createGeoPoint({ latitude: 42.0, longitude: 142.8 }),
+  createGeoPoint({ latitude: 42.0, longitude: 140.0 }),
 ];
+// Keep the camera within the masked area — matches OUTER_POINTS exactly, so
+// panning stops right at the edge of the region the polygon actually covers.
+// Not applied on Google Maps (shared singleton map instance; see
+// ProviderViewProps.restrictBounds).
+const RESTRICT_BOUNDS = createGeoRectBounds({
+  southWest: createGeoPoint({ latitude: 42.0, longitude: 140.0 }),
+  northEast: createGeoPoint({ latitude: 44.2, longitude: 142.8 }),
+});
 const INITIAL_HOLES = [
   [
     createGeoPoint({ latitude: 43.100869, longitude: 141.352909 }),
@@ -49,7 +55,7 @@ export function PolygonHolePage() {
     () =>
       createPolygonState({
         id: 'world-hole',
-        points: WORLD_POINTS,
+        points: OUTER_POINTS,
         holes,
         fillColor: 'rgba(120, 120, 128, 0.8)',
         strokeColor: '#ef4444',
@@ -94,7 +100,7 @@ export function PolygonHolePage() {
   );
 
   return (
-    <MapViewContainer initialCamera={INIT_CAMERA}>
+    <MapViewContainer initialCamera={INIT_CAMERA} restrictBounds={RESTRICT_BOUNDS}>
       <Polygon state={state} />
       <Markers states={vertexMarkers} />
       <ControlPanel title={t('Polygon with Holes', '穴付きポリゴン')}>

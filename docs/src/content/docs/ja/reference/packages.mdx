@@ -1,0 +1,23 @@
+---
+title: パッケージ
+description: MapConductor React SDK のパッケージ構成。
+---
+
+# パッケージ
+
+| 区分 | パッケージ | 役割 |
+| --- | --- | --- |
+| 共通 | `@mapconductor/js-sdk-core` | geometry、camera、state、controller、projection、tiling |
+| 共通 | `@mapconductor/js-sdk-react` | overlay、MapView scope、InfoBubble、Web/native entry point |
+| Web | `@mapconductor/react-for-*` | React DOM の provider view |
+| Native | `@mapconductor/reactnative-for-*` | React Native view と Android/iOS bridge |
+| 拡張 | `react-icons`, `react-geojson-layer`, `react-heatmap`, `react-marker-clustering` | 任意機能 |
+
+Web provider package に Android/iOS 実装を含めません。native bridge はそれぞれの `reactnative-for-*` package が所有し、可能な範囲で Web sibling の design/state type を再利用します。
+
+```tsx
+import { GeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
+import { Marker } from '@mapconductor/js-sdk-react';           // Web
+import { Marker } from '@mapconductor/js-sdk-react/native';    // React Native
+import { MapLibreView } from '@mapconductor/react-for-maplibre';
+```

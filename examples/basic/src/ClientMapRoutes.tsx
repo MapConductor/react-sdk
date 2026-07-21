@@ -1,12 +1,14 @@
 import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
-import { SingletonGoogleMapsProvider } from './SingletonGoogleMaps';
+import { SingletonMapsProvider } from './SingletonMaps';
 import { SamplePageLayout } from './components/SamplePageLayout';
 import { getLanguageFromPath } from './i18n';
+import { parseSamplePath, samplePath } from './app/appRouting';
 import {
   DEFAULT_SAMPLE_PAGE,
   getSamplePageDefinition,
   isKnownSamplePage,
+  isSupportedLanguage,
 } from './sampleRegistry';
 
 // Every sample page is loaded on demand instead of being bundled into one chunk.
@@ -100,12 +102,15 @@ function pageContent(page: string | undefined) {
 
 function ProviderPageRoute() {
   const { provider, page, language } = useParams<{ provider: string; page: string; language: string }>();
-  const requestedPage = isKnownSamplePage(page) ? page : DEFAULT_SAMPLE_PAGE;
+  const requestedPage = isKnownSamplePage(page) ? page! : DEFAULT_SAMPLE_PAGE;
 
-  if (requestedPage !== page || (language !== 'en' && language !== 'ja')) {
-    return <Navigate to={`/${provider ?? 'maplibre'}/${requestedPage}/${language === 'ja' ? 'ja' : 'en'}`} replace />;
+  if (requestedPage !== page || !isSupportedLanguage(language)) {
+    return <Navigate to={`/${provider ?? 'maplibre'}/${requestedPage}/${isSupportedLanguage(language) ? language : 'en'}`} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'cesium') {
+  if (requestedPage === 'camera-sync') {
+    return <Navigate to={samplePath(provider ?? 'maplibre', requestedPage, language)} replace />;
+  }
+  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'cesium' && provider !== 'here') {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 
@@ -118,22 +123,36 @@ function ProviderPageRoute() {
   );
 }
 
+function StandaloneCameraSyncRoute() {
+  const { language } = useParams<{ language: string }>();
+  if (!isSupportedLanguage(language)) {
+    return <Navigate to="/camera-sync/en" replace />;
+  }
+  return (
+    <Suspense fallback={<SamplePageLoadingPlaceholder />}>
+      <CameraSyncPage />
+    </Suspense>
+  );
+}
+
 export default function ClientMapRoutes() {
   const location = useLocation();
-  const [, provider = 'maplibre', routePage = DEFAULT_SAMPLE_PAGE] = location.pathname.split('/');
+  const { providerPath: provider, page: routePage } = parseSamplePath(location.pathname);
   const page = isKnownSamplePage(routePage) ? routePage : DEFAULT_SAMPLE_PAGE;
   const language = getLanguageFromPath(location.pathname);
 
   return (
     <SamplePageLayout page={page} provider={provider} language={language}>
-      <SingletonGoogleMapsProvider>
+      <SingletonMapsProvider>
         <Routes>
           <Route path="/" element={<Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/en`} replace />} />
+          <Route path="/camera-sync" element={<Navigate to="en" replace />} />
+          <Route path="/camera-sync/:language" element={<StandaloneCameraSyncRoute />} />
           <Route path="/:provider" element={<Navigate to={`${DEFAULT_SAMPLE_PAGE}/en`} replace />} />
           <Route path="/:provider/:page" element={<Navigate to="en" replace />} />
           <Route path="/:provider/:page/:language" element={<ProviderPageRoute />} />
         </Routes>
-      </SingletonGoogleMapsProvider>
+      </SingletonMapsProvider>
     </SamplePageLayout>
   );
 }

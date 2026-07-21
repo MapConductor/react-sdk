@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react';
 import {
   MapLibreDesign,
-  MapLibreView,
+  MapLibreMapView,
+  MapLibreMapView2D,
   useMapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 import '@mapconductor/react-for-maplibre/style.css';
@@ -10,7 +11,7 @@ import { useInitialCameraPosition } from './useInitialCameraPosition';
 import type { ProviderViewProps } from './types';
 
 interface MapLibreProviderViewProps extends ProviderViewProps {
-  projection: 'mercator' | 'globe';
+  useGlobe: boolean;
 }
 
 export default function MapLibreProviderView({
@@ -21,8 +22,9 @@ export default function MapLibreProviderView({
   onCameraMove,
   onCameraMoveEnd,
   markerTilingOptions,
-  projection,
+  useGlobe,
   onStateReady,
+  restrictBounds,
 }: MapLibreProviderViewProps) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useMapLibreViewState({
@@ -42,10 +44,11 @@ export default function MapLibreProviderView({
     onStateReady?.(state);
   }, [state, onStateReady]);
 
+  const MapView = useGlobe ? MapLibreMapView : MapLibreMapView2D;
+
   return (
-    <MapLibreView
+    <MapView
       state={state}
-      projection={projection}
       markerTilingOptions={markerTilingOptions}
       onMapClick={onMapClick}
       onCameraMoveStart={(camera: MapCameraPosition) => {
@@ -57,8 +60,9 @@ export default function MapLibreProviderView({
       onCameraMoveEnd={(camera: MapCameraPosition) => {
         if (isActive.current) onCameraMoveEnd?.(camera);
       }}
+      restrictBounds={restrictBounds}
     >
       {children}
-    </MapLibreView>
+    </MapView>
   );
 }

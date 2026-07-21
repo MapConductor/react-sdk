@@ -1,0 +1,57 @@
+---
+title: MapConductor React SDK
+description: One declarative React API for multiple map providers on Web and React Native.
+template: splash
+hero:
+  title: One map API. Many providers.
+  tagline: Build provider-independent maps with TypeScript and React, then run the same state and overlay model on the Web and React Native.
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: View on GitHub
+      link: https://github.com/MapConductor/react-sdk
+      icon: external
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+<div class="platform-badges">
+  <span>React</span><span>React Native</span><span>TypeScript</span><span>Web</span><span>Android</span><span>iOS</span>
+</div>
+
+<CardGrid>
+  <Card title="Unified overlays" icon="puzzle">
+    Markers, circles, polylines, polygons, ground images, raster layers, and info bubbles share one API.
+  </Card>
+  <Card title="State-first updates" icon="seti:typescript">
+    Retained observable state updates the provider renderer without rebuilding the React overlay tree.
+  </Card>
+  <Card title="Provider choice" icon="map">
+    Use Google Maps, MapLibre, Mapbox, Leaflet, OpenLayers, ArcGIS, or Cesium on the Web, with dedicated React Native bridges.
+  </Card>
+  <Card title="Large data sets" icon="rocket">
+    Bulk marker composition, tiling, clustering, heatmaps, and GeoJSON cover demanding map applications.
+  </Card>
+</CardGrid>
+
+## A shared application layer
+
+MapConductor separates your application’s geographic state from a provider’s rendering SDK. Your domain code creates `GeoPoint`, camera, and overlay states; a provider package supplies the map view and controller.
+
+```tsx
+const tokyo = GeoPoint.from({ latitude: 35.6812, longitude: 139.7671 });
+const mapState = useMapLibreViewState({
+  mapDesignType: MapLibreDesign.OsmBright,
+  cameraPosition: MapCameraPosition.from({ position: tokyo, zoom: 12 }),
+});
+
+return (
+  <MapLibreView state={mapState}>
+    <Marker position={tokyo} />
+  </MapLibreView>
+);
+```
+
+Start with the [tutorial](/getting-started/), then choose the [Web](/platforms/web/) or [React Native](/platforms/react-native/) setup.

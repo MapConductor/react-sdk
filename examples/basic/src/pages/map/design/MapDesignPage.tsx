@@ -24,6 +24,7 @@ const DESIGN_OPTIONS_LOADERS: Record<string, () => Promise<MapDesignOption[]>> =
   arcgis: () => import('../../../providers/designOptions/arcgisDesignOptions').then(m => m.ARCGIS_DESIGNS),
   'arcgis-3d': () => import('../../../providers/designOptions/arcgisDesignOptions').then(m => m.ARCGIS_DESIGNS),
   cesium: () => import('../../../providers/designOptions/cesiumDesignOptions').then(m => m.CESIUM_DESIGNS),
+  here: () => import('../../../providers/designOptions/hereDesignOptions').then(m => m.HERE_DESIGNS),
 };
 
 export function MapDesignPage() {

@@ -1,0 +1,66 @@
+---
+title: Circle
+description: Circular overlays with configurable radius, stroke, and fill.
+---
+
+# Circle
+
+Circles are circular overlays with a configurable radius, useful for representing ranges, zones, or areas of effect around a point.
+
+## Convenience props
+
+```tsx
+<Circle
+  center={GeoPoint}
+  radiusMeters={number}
+  id?: string | null
+  strokeColor?: string     // default '#FF0000'
+  strokeWidth?: number     // default 2
+  fillColor?: string       // default 'rgba(255,255,255,0.5)'
+  zIndex?: number | null
+  geodesic?: boolean       // default true
+  clickable?: boolean      // default true
+  extra?: Serializable | null
+  onClick?: (state: CircleState) => void
+/>
+```
+
+## Retained state
+
+```tsx
+<Circle state={circleState} />
+```
+
+`state` is created with [`createCircleState()`](/states/circle-state/). A `<Circle>` takes either `state` or the convenience props, not both.
+
+## Example
+
+```tsx
+<Circle
+  center={station}
+  radiusMeters={750}
+  strokeColor="#2563eb"
+  strokeWidth={2}
+  fillColor="rgba(37, 99, 235, 0.15)"
+/>
+```
+
+## Dynamic radius
+
+```tsx
+const [circle] = useState(() => createCircleState({ center: station, radiusMeters: 500 }));
+
+useEffect(() => {
+  circle.radiusMeters = selectedRangeMeters;
+}, [circle, selectedRangeMeters]);
+
+return <Circle state={circle} />;
+```
+
+## Geodesic vs. flat
+
+`geodesic` (default `true`) draws the circle's edge following the Earth's curvature rather than a flat projected circle. The difference is only visible for large radii or at high latitudes — leave it on unless you have a specific reason to match a provider's flat-projection rendering.
+
+## Events
+
+`onClick` receives the `CircleState`. Give circles stable, unique `id`s when handling clicks across multiple circles — it's the cheapest way to distinguish which one was hit without comparing full state objects.

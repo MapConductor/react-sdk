@@ -14,6 +14,7 @@
     "react-for-openlayers/",
     "react-for-arcgis/",
     "react-for-cesium/",
+    "react-for-here/",
     "reactnative-for-googlemaps/",
     "reactnative-for-maplibre/",
     "reactnative-for-arcgis/",
@@ -34,8 +35,8 @@
     "dev:packages": "(npm run dev --workspace @mapconductor/js-sdk-core -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/js-sdk-react -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-icons -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-googlemaps -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-maplibre -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-mapbox -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-leaflet -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-openlayers -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-for-cesium -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/reactnative-for-googlemaps -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/reactnative-for-maplibre -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/reactnative-for-arcgis -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-geojson-layer -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-heatmap -- --tsconfig ../tsconfig.dev.json & npm run dev --workspace @mapconductor/react-marker-clustering -- --tsconfig ../tsconfig.dev.json & wait)",
     "dev:examples": "npm run dev --workspace @mapconductor/example-basic",
     "dev:rn:examples": "npm run expo:start --workspace @mapconductor/example-rn-basic -- --clear",
-    "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "test": "npm run test --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
   },
@@ -44,14 +45,15 @@
     "@types/node": "^20.10.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
-    "@typescript-eslint/eslint-plugin": "^6.15.0",
-    "@typescript-eslint/parser": "^6.15.0",
     "esbuild": "0.28.1",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
+    "globals": "^16.0.0",
     "prettier": "^3.1.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-7": "npm:typescript@^7.0.2",
+    "typescript-eslint": "^8.64.0"
   },
   "engines": {
     "node": ">=18.0.0",

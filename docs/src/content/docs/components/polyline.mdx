@@ -1,0 +1,58 @@
+---
+title: Polyline
+description: Line overlays from a point list or a geographic rectangle outline.
+---
+
+# Polyline
+
+Polylines draw a line through a sequence of points, or the outline of a `GeoRectBounds` rectangle.
+
+## Convenience props
+
+```tsx
+<Polyline
+  points={GeoPoint[]}       // OR bounds, not both
+  bounds={GeoRectBounds}    // renders the rectangle outline
+  id?: string | null
+  strokeColor?: string      // default '#000000'
+  strokeWidth?: number      // default 1
+  geodesic?: boolean        // default false
+  zIndex?: number           // default 0
+  extra?: Serializable | null
+  onClick?: (state: PolylineState) => void
+/>
+```
+
+## Retained state
+
+```tsx
+<Polyline state={polylineState} />
+```
+
+`state` is created with [`createPolylineState()`](/states/polyline-state/). A `<Polyline>` takes `state`, `points`, or `bounds` — exactly one.
+
+## Example
+
+```tsx
+<Polyline points={route} strokeColor="#dc2626" strokeWidth={5} geodesic />
+```
+
+## Drawing a bounds outline
+
+Passing `bounds` instead of `points` draws the rectangle's outline — useful for debugging/visualizing a `GeoRectBounds`, as in the [camera sync](/guides/camera-sync/#visual-verification) demo:
+
+```tsx
+<Polyline bounds={locationBounds} strokeColor="#dc2626" strokeWidth={3} geodesic />
+```
+
+## Dynamic updates
+
+Reassign `points` (a new array, not an in-place mutation) to update the path:
+
+```tsx
+route.points = [...route.points, nextWaypoint];
+```
+
+## Events
+
+`onClick` receives the `PolylineState`; the clicked point is the nearest point on the line to where the user clicked, not necessarily a vertex.

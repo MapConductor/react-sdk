@@ -1,13 +1,14 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { resolveProviderForPage, SAMPLE_PAGES } from '../sampleRegistry';
+import { getSamplePageLabel, resolveProviderForPage, SAMPLE_PAGES } from '../sampleRegistry';
+import { parseSamplePath, samplePath } from '../app/appRouting';
+import { getLanguageFromPath } from '../i18n';
 
 export function PageNav({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
-  const pathParts = location.pathname.split('/').filter(Boolean);
-  const provider = pathParts[0] || 'maplibre';
-  const activePage = pathParts[1] || 'map';
-  const language = pathParts[2] === 'ja' ? 'ja' : 'en';
+  const { providerPath, page: activePage } = parseSamplePath(location.pathname);
+  const provider = providerPath === 'camera-sync' ? 'maplibre' : providerPath;
+  const language = getLanguageFromPath(location.pathname);
 
   return (
     <aside className="sidebar">
@@ -25,11 +26,11 @@ export function PageNav({ onNavigate }: { onNavigate?: () => void }) {
               ].filter(Boolean).join(' ')}
               onClick={() => {
                 const targetProvider = resolveProviderForPage(provider, page.id);
-                navigate(`/${targetProvider}/${page.id}/${language}`);
+                navigate(samplePath(targetProvider, page.id, language));
                 onNavigate?.();
               }}
             >
-              <span>{page.label}</span>
+              <span>{getSamplePageLabel(page, language)}</span>
               {page.status === 'unsupported' ? <span className="sidebar-badge">TODO</span> : null}
             </button>
           ))}

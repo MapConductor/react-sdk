@@ -9,7 +9,7 @@ import {
   GoogleMapViewState,
 } from '@mapconductor/reactnative-for-googlemaps';
 import {
-  MapLibreView,
+  MapLibreMapView,
   MapLibreViewState,
 } from '@mapconductor/reactnative-for-maplibre';
 
@@ -33,9 +33,9 @@ export function MapViewContainer({
 
   if (state instanceof MapLibreViewState) {
     return (
-      <MapLibreView state={state} {...props}>
+      <MapLibreMapView state={state} {...props}>
         {children}
-      </MapLibreView>
+      </MapLibreMapView>
     );
   }
 

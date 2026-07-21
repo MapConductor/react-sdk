@@ -1,0 +1,78 @@
+---
+title: Overlays
+description: Add and update common map overlays from React.
+---
+
+# Overlays
+
+The shared React package exports `Marker`, `Markers`, `Circle`, `Polyline`, `Polygon`, `GroundImage`, `RasterLayer`, and info-bubble components. Each ordinary overlay supports a convenience-prop form and a retained-state form. This guide covers the pattern; see **Components** and **States** in the sidebar for each overlay's full prop reference ([Marker](/components/marker/), [Circle](/components/circle/), [Polyline](/components/polyline/), [Polygon](/components/polygon/), [GroundImage](/components/groundimage/), [RasterLayer](/components/rasterlayer/), [InfoBubble](/components/infobubble/)).
+
+## Convenience props
+
+Use props for small, mostly static overlays:
+
+```tsx
+<Marker position={station} onClick={(marker) => select(marker.id)} />
+<Circle
+  center={station}
+  radiusMeters={750}
+  strokeColor="#2563eb"
+  fillColor="rgba(37, 99, 235, 0.25)"
+/>
+<Polyline points={route} strokeColor="#dc2626" strokeWidth={5} />
+```
+
+## Retained state
+
+Use state for independently managed or frequently updated overlays:
+
+```tsx
+const [marker] = useState(() => createMarkerState({
+  id: 'vehicle-42',
+  position: initialPosition,
+  draggable: true,
+}));
+
+useEffect(() => {
+  marker.position = latestPosition;
+}, [marker, latestPosition]);
+
+return <Marker state={marker} />;
+```
+
+State properties notify the collector’s update handler. Keep IDs stable; they identify the provider entity across compositions.
+
+## Info bubbles
+
+Anchor React content to a marker or geographic position:
+
+```tsx
+<InfoBubble marker={selectedMarker} bubbleColor="#fff">
+  <StoreCard store={selectedMarker.extra} />
+</InfoBubble>
+```
+
+Use `InfoBubbleAtPosition` without a marker or `InfoBubbleCustom` for fully custom content and tail placement — see [InfoBubble](/components/infobubble/) for the full comparison.
+
+## Shared scope
+
+Overlay components must be descendants of a MapConductor provider view. The view supplies the collector scope and provider controller through React context.
+
+## Updating vs. replacing state
+
+Mutate a retained state's properties in place — the collector's per-state update path notifies only the affected entity. Do not create a new state object on every change just to keep React's mental model of "new props in, new object out"; that forces a full collection diff instead of a focused update:
+
+```tsx
+// Good: mutate in place
+useEffect(() => {
+  marker.position = latestPosition;
+}, [marker, latestPosition]);
+
+// Avoid: replaces the whole marker on every position change
+useEffect(() => {
+  setMarker(createMarkerState({ id: marker.id, position: latestPosition }));
+}, [latestPosition]);
+```
+
+`marker.copy({ position: next })` is useful when you genuinely need a new object (e.g. storing marker snapshots in an undo stack) — it copies every field you don't override.
+

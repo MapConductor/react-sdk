@@ -1,0 +1,16 @@
+---
+import { LIVE_BASE_URL } from '../config/liveExample';
+
+interface Props {
+  provider: string;
+  page: string;
+  language?: string;
+}
+
+const { provider, page, language = 'en' } = Astro.props;
+const href = `${LIVE_BASE_URL}/${provider}/${page}/${language}`;
+---
+
+<p>
+  See this running: <a href={href} target="_blank" rel="noopener noreferrer">live example →</a>
+</p>

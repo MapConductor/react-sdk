@@ -1,0 +1,51 @@
+---
+title: チュートリアル
+description: MapConductor をインストールして最初の地図を表示します。
+---
+
+# チュートリアル
+
+API キーなしで開始できる Web 版 MapLibre を使用します。
+
+## インストール
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-maplibre
+```
+
+アプリケーションの entry point で CSS を一度読み込みます。
+
+```tsx
+import '@mapconductor/react-for-maplibre/style.css';
+```
+
+## 地図とマーカーを表示する
+
+```tsx
+import { GeoPoint, MapCameraPosition, createMarkerState } from '@mapconductor/js-sdk-core';
+import { Marker } from '@mapconductor/js-sdk-react';
+import { MapLibreDesign, MapLibreView, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { useState } from 'react';
+
+const TOKYO = GeoPoint.from({ latitude: 35.6812, longitude: 139.7671 });
+
+export function TokyoMap() {
+  const mapState = useMapLibreViewState({
+    mapDesignType: MapLibreDesign.OsmBright,
+    cameraPosition: MapCameraPosition.from({ position: TOKYO, zoom: 12 }),
+  });
+  const [marker] = useState(() => createMarkerState({ id: 'tokyo', position: TOKYO }));
+
+  return (
+    <div style={{ height: 480 }}>
+      <MapLibreView state={mapState} onMapClick={(point) => { marker.position = point; }}>
+        <Marker state={marker} />
+      </MapLibreView>
+    </div>
+  );
+}
+```
+
+コンテナには 0 より大きい高さが必要です。`marker.position` の変更は renderer へ通知されるため、state 自体を置き換える必要はありません。
+
+Google Maps へ変更するときは `@mapconductor/react-for-googlemaps` を追加し、view と view state のみ差し替えます。Marker、座標、カメラは共有できます。

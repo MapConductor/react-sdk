@@ -1,0 +1,28 @@
+---
+title: イベントとカメラ
+description: 共通イベント処理とカメラ制御。
+---
+
+# イベントとカメラ
+
+provider view は `onMapLoaded`、`onMapClick`、`onMapLongClick`、`onCameraMoveStart`、`onCameraMove`、`onCameraMoveEnd` を共通で公開します。
+
+```tsx
+<MapLibreView
+  state={state}
+  onMapClick={(point) => setSelectedPoint(point)}
+  onCameraMoveEnd={(camera) => loadVisibleData(camera)}
+>
+  {children}
+</MapLibreView>
+```
+
+`MapCameraPosition` は `position`、`zoom`、`bearing`、`tilt`、`visibleRegion`、`paddings` を持ちます。
+
+```tsx
+const destination = state.cameraPosition.copy({ position: OSAKA, zoom: 14 });
+state.moveCameraTo(destination);       // 即時移動
+state.moveCameraTo(destination, 800);  // 800 ms のアニメーション
+```
+
+controller の接続前に呼んだ場合は保持中のカメラが更新され、準備完了時に provider が適用します。overlay callback も provider 固有 object ではなく共通 state と geometry を受け取ります。

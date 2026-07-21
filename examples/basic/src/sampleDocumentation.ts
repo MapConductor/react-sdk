@@ -2,7 +2,7 @@ import type { SupportedLanguage } from './sampleRegistry';
 
 interface SampleDocumentation {
   code: string;
-  explanation: Record<SupportedLanguage, string>;
+  explanation: Record<'en' | 'ja', string> & Partial<Record<SupportedLanguage, string>>;
 }
 
 interface ProviderCode {
@@ -27,11 +27,25 @@ const DOCUMENTATION: Record<string, SampleDocumentation> = {
     },
   },
   'map-design': {
-    code: `const changeDesign = (design: MapDesignType) => {
-  mapViewState.mapDesignType = design;
+    code: `const handleDesignChange = (designId: string) => {
+  const option = mapDesignOptions.find(item => item.design.id === designId);
+  if (!option) return;
+  mapViewState.mapDesignType = option.design;
+  setSelectedDesignId(String(option.design.id));
 };
 
-<MapViewContainer state={mapViewState} />`,
+<MapViewContainer state={mapViewState}>
+  <select
+    value={selectedDesignId}
+    onChange={event => handleDesignChange(event.target.value)}
+  >
+    {mapDesignOptions.map(option => (
+      <option key={String(option.design.id)} value={String(option.design.id)}>
+        {option.label}
+      </option>
+    ))}
+  </select>
+</MapViewContainer>`,
     explanation: {
       en: 'Change the abstract map design on the view state. Each provider resolves it to its corresponding native style.',
       ja: '抽象的な地図デザインをViewStateへ設定します。各プロバイダーが対応するネイティブスタイルへ変換します。',
@@ -76,18 +90,26 @@ const DOCUMENTATION: Record<string, SampleDocumentation> = {
   },
   'camera-sync': {
     code: `const syncCamera = (
-  target: MapViewStateInterface<MapDesignTypeInterface<unknown>>,
-) =>
-  (camera: MapCameraPosition) => target.moveCameraTo(camera, 0);
+  source: 'left' | 'right',
+  camera: MapCameraPosition,
+) => {
+  const targetState = source === 'left' ? rightMapState : leftMapState;
+  const targetGuard = source === 'left' ? rightProgrammatic : leftProgrammatic;
+  if (targetGuard.current) return;
+
+  targetGuard.current = true;
+  targetState.moveCameraTo(camera, 0);
+  requestAnimationFrame(() => { targetGuard.current = false; });
+};
 
 <div className="camera-grid">
-  <MapLibreView
+  <MapLibreMapView
     state={leftMapState}
-    onCameraMove={syncCamera(rightMapState)}
+    onCameraMove={camera => syncCamera('left', camera)}
   />
   <LeafletMapView
     state={rightMapState}
-    onCameraMove={syncCamera(leftMapState)}
+    onCameraMove={camera => syncCamera('right', camera)}
   />
 </div>`,
     explanation: {
@@ -121,7 +143,11 @@ const DOCUMENTATION: Record<string, SampleDocumentation> = {
     },
   },
   'post-office': {
-    code: `<MapViewContainer state={mapViewState}>
+    code: `<MapViewContainer
+  state={mapViewState}
+  markerTilingOptions={markerTilingOptions}
+  onMapClick={() => setSelected(null)}
+>
   <Markers states={postOfficeMarkers} />
   {selected && <PostOfficeInfoBubble marker={selected} />}
 </MapViewContainer>`,
@@ -169,9 +195,10 @@ const DOCUMENTATION: Record<string, SampleDocumentation> = {
   },
   'polyline-click': {
     code: `<MapViewContainer state={mapViewState}>
-  <Polyline state={geodesicLine} />
-  <Polyline state={straightLine} />
-  <Markers states={clickedPositions} />
+  <Polyline state={polyline} />
+  <Polyline state={straightPolyline} />
+  <Markers states={waypointMarkers} />
+  <Markers states={clickMarkers} />
 </MapViewContainer>`,
     explanation: {
       en: 'Handle polyline clicks and compare straight and geodesic paths while marking clicked positions.',
@@ -189,9 +216,21 @@ const DOCUMENTATION: Record<string, SampleDocumentation> = {
     },
   },
   'polygon-click': {
-    code: `<MapViewContainer state={mapViewState}>
-  <Polygon state={polygon} />
-  {selection && <InfoBubbleAtPosition position={selection} />}
+    code: `<MapViewContainer state={mapViewState} onMapClick={showClickedMarker}>
+  {polygons.map(polygon => (
+    <Polygon
+      key={polygon.id}
+      state={polygon.copy({
+        onClick: event => showClickedMarker(event.clicked),
+      })}
+    />
+  ))}
+  {marker && (
+    <>
+      <Marker state={marker} />
+      <InfoBubble marker={marker}>{message}</InfoBubble>
+    </>
+  )}
 </MapViewContainer>`,
     explanation: {
       en: 'Receive polygon click events through the common overlay API and display information at the clicked coordinate.',
@@ -212,6 +251,7 @@ const DOCUMENTATION: Record<string, SampleDocumentation> = {
   'polygon-hole': {
     code: `<MapViewContainer state={mapViewState}>
   <Polygon state={polygon} />
+  <Markers states={vertexMarkers} />
 </MapViewContainer>`,
     explanation: {
       en: 'Define an outer ring and one or more inner rings to render transparent holes inside a polygon.',
@@ -402,6 +442,58 @@ const FALLBACK: SampleDocumentation = {
   },
 };
 
+const SPANISH_EXPLANATIONS: Record<string, string> = {
+  map: 'Dibuja una colección de marcadores de tiendas en una sola composición y muestra un globo de información para la tienda seleccionada.',
+  'map-design': 'Cambia el diseño abstracto del mapa en el estado de la vista. Cada proveedor lo convierte a su estilo nativo correspondiente.',
+  'fly-to': 'Mueve la cámara a un destino con una animación de un segundo mediante la misma API para todos los proveedores.',
+  tilt: 'Copia la posición actual de la cámara, cambia solo la inclinación y anima la actualización.',
+  'visible-region': 'Obtiene de los eventos de cámara la región visible independiente del proveedor, incluidos sus límites y las cuatro esquinas.',
+  'camera-sync': 'Transfiere los cambios de cámara entre dos proveedores renderizados de forma independiente y evita ciclos de actualización.',
+  marker: 'Compone marcadores con distintos tipos de iconos y abre un globo cuando se selecciona un marcador.',
+  'marker-animation': 'Configura una animación inicial y activa otra mediante la API compartida del estado del marcador.',
+  'post-office': 'Usa el componente Markers por lotes para un conjunto grande de oficinas postales y muestra detalles solo del elemento seleccionado.',
+  'post-office-cluster': 'Agrupa una colección grande de marcadores y define un icono y una acción de clic personalizados mediante la API de extensiones.',
+  circle: 'Dibuja un círculo y cambia su radio arrastrando el marcador del borde. La línea del radio se dibuja sobre el círculo.',
+  polyline: 'Dibuja una ruta a partir de coordenadas geográficas y muestra sus vértices como puntos de paso arrastrables.',
+  'polyline-click': 'Controla los clics en una polilínea, compara rutas rectas y geodésicas y permite editar sus puntos de paso.',
+  polygon: 'Dibuja un polígono relleno y usa marcadores para que cada vértice sea visible e interactivo.',
+  'polygon-click': 'Comprueba si el punto seleccionado está dentro de un polígono y muestra el resultado en un marcador.',
+  'polygon-geodesic': 'Compara bordes geodésicos y no geodésicos en distancias largas y al cruzar el antimeridiano.',
+  'polygon-hole': 'Define un contorno exterior y varios contornos interiores cuyos vértices se pueden arrastrar para modificar los huecos.',
+  'ground-image': 'Conserva una instancia de GroundImageState y actualiza sus límites desde marcadores de esquina arrastrables.',
+  'raster-layer': 'Agrega una fuente ráster en mosaicos mediante el estado compartido de la capa y cambia su opacidad sin recrear el mapa.',
+  'info-bubble-simple': 'Ancla un globo sencillo con contenido React al marcador seleccionado por el usuario.',
+  'info-bubble-styled': 'Usa un globo personalizado cuando la aplicación necesita definir el contenido, borde, sombra y punta.',
+  'info-bubble-multiple': 'Mantiene seleccionados varios marcadores y dibuja un globo independiente para cada uno.',
+  'info-bubble-rich': 'Dibuja elementos React interactivos, como encabezados y botones, dentro de un globo anclado a un marcador.',
+  'geojson-basic': 'Carga elementos GeoJSON y los dibuja con un estilo de capa independiente del proveedor.',
+  'geojson-layer': 'Procesa clics sobre elementos GeoJSON y muestra sus propiedades en la posición geográfica seleccionada.',
+  'heatmap-layer': 'Carga puntos geográficos y los compone por lotes dentro de la capa de mapa de calor.',
+  'threejs-object': 'Superpone un lienzo transparente de Three.js y ancla el objeto 3D con la proyección MapViewHolder.toScreenOffset(), independiente del proveedor.',
+};
+
+const SECTION_COMMENTS: Record<SupportedLanguage, {
+  map: string;
+  state: string;
+  render: string;
+}> = {
+  en: {
+    map: 'Create the map',
+    state: 'Prepare the data and interaction state',
+    render: 'Render the map and its overlays',
+  },
+  ja: {
+    map: '地図の作成',
+    state: 'データと操作用Stateの準備',
+    render: '地図とオーバーレイの描画',
+  },
+  'es-419': {
+    map: 'Crear el mapa',
+    state: 'Preparar los datos y el estado de interacción',
+    render: 'Renderizar el mapa y sus capas',
+  },
+};
+
 function initialCameraCode(): string {
   return `const initialCamera = createMapCameraPosition({
   position: createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }),
@@ -436,13 +528,25 @@ const mapViewState = useLeafletMapViewState({
   cameraPosition: initialCamera,
 });`,
       };
+    case 'openlayers':
+      return {
+        component: 'OpenLayersMapView',
+        openingProps: '',
+        stateSetup: `${camera}
+
+const mapViewState = useOpenLayersMapViewState({
+  mapDesignType: OpenLayersDesign.OpenStreetMap,
+  cameraPosition: initialCamera,
+});`,
+      };
     case 'mapbox':
       return {
-        component: 'MapboxView',
-        openingProps: ' accessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN}',
+        component: 'MapBoxMapView2D',
+        openingProps: '',
         stateSetup: `${camera}
 
 const mapViewState = useMapboxViewState({
+  accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
   mapDesignType: MapboxDesign.Streets,
   cameraPosition: initialCamera,
 });`,
@@ -471,10 +575,36 @@ const mapViewState = useGoogleMapViewState({
   cameraPosition: initialCamera,
 });`,
       };
+    case 'cesium':
+      return {
+        component: 'CesiumMapView',
+        openingProps: '',
+        stateSetup: `${camera}
+
+const mapViewState = useCesiumMapViewState({
+  mapDesignType: CesiumDesign.Default,
+  cameraPosition: initialCamera,
+});`,
+      };
+    case 'here':
+      return {
+        component: 'HereMapView2D',
+        openingProps: ' platform={platform}',
+        stateSetup: `${camera}
+
+const mapViewState = useHereViewState({
+  mapDesignType: HereMapDesign.NormalDay,
+  cameraPosition: initialCamera,
+});
+const platform = useMemo(
+  () => new H.service.Platform({ apikey: import.meta.env.VITE_HERE_API_KEY }),
+  [],
+);`,
+      };
     case 'maplibre-3d':
       return {
-        component: 'MapLibreView',
-        openingProps: ' projection="globe"',
+        component: 'MapLibreMapView',
+        openingProps: '',
         stateSetup: `${camera}
 
 const mapViewState = useMapLibreViewState({
@@ -484,8 +614,8 @@ const mapViewState = useMapLibreViewState({
       };
     default:
       return {
-        component: 'MapLibreView',
-        openingProps: ' projection="mercator"',
+        component: 'MapLibreMapView2D',
+        openingProps: '',
         stateSetup: `${camera}
 
 const mapViewState = useMapLibreViewState({
@@ -508,8 +638,10 @@ const storeMarkers = useMemo(() => stores.map(store => createMarkerState({
 })), [stores]);
 const clearSelection = () => setSelectedMarker(null);`;
     case 'map-design':
-      return `// The design values come from the selected provider package.
-const currentDesign = mapViewState.mapDesignType;`;
+      return `const mapDesignOptions = providerDesignOptions;
+const [selectedDesignId, setSelectedDesignId] = useState(
+  String(mapViewState.mapDesignType.id),
+);`;
     case 'fly-to':
       return `const destination = createMapCameraPosition({
   position: createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }),
@@ -528,7 +660,9 @@ const destinations = [createMarkerState({ id: 'tokyo', position: destination.pos
 const rightMapState = useLeafletMapViewState({
   mapDesignType: LeafletDesign.OpenStreetMap,
   cameraPosition: initialCamera,
-});`;
+});
+const leftProgrammatic = useRef(false);
+const rightProgrammatic = useRef(false);`;
     case 'marker':
       return `const [selected, setSelected] = useState<MarkerState | null>(null);
 const markers = useMemo(() => markerData.map(item => createMarkerState({
@@ -547,7 +681,12 @@ const postOfficeMarkers = useMemo(() => postOffices.map(office => createMarkerSt
   position: createGeoPoint({ latitude: office.lat, longitude: office.lng }),
   extra: office,
   onClick: markerState => setSelected(markerState),
-})), [postOffices]);`;
+})), [postOffices]);
+const markerTilingOptions = {
+  ...MarkerTilingOptions.Default,
+  iconScaleCallback: (_state: MarkerState, zoom: number) =>
+    zoom > 10 ? 0.8 : zoom > 5 ? 0.5 : 0.2,
+};`;
     case 'circle':
       return `const center = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
 const [edge, setEdge] = useState(() => calculatePositionAtDistance({
@@ -571,18 +710,25 @@ const waypointMarkers = points.map((position, index) => createMarkerState({
   id: \`waypoint-\${index}\`, position, draggable: true,
 }));`;
     case 'polyline-click':
-      return `const [clickedPositions, setClickedPositions] = useState<MarkerState[]>([]);
-const points = useMemo(() => [haneda, sanFrancisco, honolulu], []);
-const geodesicLine = useMemo(() => createPolylineState({
-  id: 'geodesic', points, geodesic: true, strokeColor: '#ef4444',
-  onClick: event => setClickedPositions(current => [
+      return `const [clickMarkers, setClickMarkers] = useState<MarkerState[]>([]);
+const [points, setPoints] = useState([haneda, sanFrancisco, honolulu]);
+const polyline = useMemo(() => createPolylineState({
+  id: 'route', points, geodesic: true, strokeColor: '#ef4444',
+  onClick: event => setClickMarkers(current => [
     ...current,
     createMarkerState({ id: \`click-\${current.length}\`, position: event.clicked }),
   ]),
 }), [points]);
-const straightLine = useMemo(() => geodesicLine.copy({
+const straightPolyline = useMemo(() => polyline.copy({
   id: 'straight', geodesic: false, strokeColor: '#2563eb',
-}), [geodesicLine]);`;
+}), [polyline]);
+const waypointMarkers = useMemo(() => points.map((position, index) =>
+  createMarkerState({
+    id: \`waypoint-\${index}\`, position, draggable: true,
+    onDrag: markerState => setPoints(current => current.map(
+      (point, pointIndex) => pointIndex === index ? markerState.position : point,
+    )),
+  })), [points]);`;
     case 'polygon':
       return `const [vertices, setVertices] = useState<GeoPoint[]>(initialVertices);
 const polygonState = useMemo(() => createPolygonState({
@@ -595,11 +741,22 @@ const vertexMarkers = vertices.map((position, index) => createMarkerState({
   id: \`vertex-\${index}\`, position, draggable: true,
 }));`;
     case 'polygon-click':
-      return `const [selection, setSelection] = useState<GeoPoint | null>(null);
-const polygon = useMemo(() => createPolygonState({
-  id: 'clickable-area', points: polygonPoints, clickable: true,
-  onClick: event => setSelection(event.clicked),
-}), [polygonPoints]);`;
+      return `const polygons = useMemo(() => california.map((points, index) =>
+  createPolygonState({ id: \`california-\${index}\`, points }),
+), []);
+const polygonManager = useMemo(() => {
+  const manager = new PolygonManager<null>();
+  polygons.forEach(polygon => manager.registerEntity(
+    createPolygonEntity({ polygon: null, state: polygon }),
+  ));
+  return manager;
+}, [polygons]);
+const [marker, setMarker] = useState<MarkerState | null>(null);
+const [message, setMessage] = useState('');
+const showClickedMarker = (clicked: GeoPoint) => {
+  setMessage(polygonManager.find(clicked) ? 'Inside' : 'Outside');
+  setMarker(createMarkerState({ id: 'clicked', position: clicked }));
+};`;
     case 'polygon-geodesic':
       return `const geodesicPolygon = useMemo(() => createPolygonState({
   id: 'geodesic', points: longDistancePoints, geodesic: true,
@@ -609,12 +766,21 @@ const straightPolygon = useMemo(() => geodesicPolygon.copy({
 }), [geodesicPolygon]);
 const polygons = [geodesicPolygon, straightPolygon];`;
     case 'polygon-hole':
-      return `const outerRing = [northWest, northEast, southEast, southWest];
-const [innerRing, setInnerRing] = useState<GeoPoint[]>(initialHole);
+      return `const [holes, setHoles] = useState<GeoPoint[][]>(initialHoles);
 const polygon = useMemo(() => createPolygonState({
-  id: 'area-with-hole', points: outerRing, holes: [innerRing],
+  id: 'area-with-holes', points: outerRing, holes,
   fillColor: 'rgba(37, 99, 235, 0.45)',
-}), [innerRing]);`;
+}), [holes]);
+const vertexMarkers = useMemo(() => holes.flatMap((hole, holeIndex) =>
+  hole.map((position, vertexIndex) => createMarkerState({
+    id: \`hole-\${holeIndex}-\${vertexIndex}\`, position, draggable: true,
+    onDrag: markerState => setHoles(current => current.map(
+      (ring, ringIndex) => ringIndex !== holeIndex ? ring : ring.map(
+        (point, pointIndex) => pointIndex === vertexIndex ? markerState.position : point,
+      ),
+    )),
+  })),
+), [holes]);`;
     case 'ground-image':
       return `const [groundImageState] = useState(() => createGroundImageState({
   id: 'historic-map', imageUrl, bounds: initialBounds, opacity: 0.7,
@@ -662,11 +828,17 @@ const layer = useMemo(() => new GeoJSONLayerState({ id: 'places' }), []);`;
 const [selected, setSelected] = useState<SelectedFeature | null>(null);
 const layerState = useMemo(() => new GeoJSONLayerState({ id: 'railways' }), []);`;
     case 'heatmap-layer':
-      return `const heatmapPoints = useMemo(() => data.map(point => new HeatmapPointState({
-  id: point.id,
-  position: createGeoPoint({ latitude: point.lat, longitude: point.lng }),
-  weight: point.weight,
-})), [data]);`;
+      return `const [heatmapPoints, setHeatmapPoints] = useState<HeatmapPointState[]>([]);
+useEffect(() => {
+  fetch('/postoffice/postoffices.json')
+    .then(response => response.json() as Promise<[number, number][]>)
+    .then(data => setHeatmapPoints(data.map(([latitude, longitude], index) =>
+      new HeatmapPointState({
+        id: \`post-office-\${index}\`,
+        position: createGeoPoint({ latitude, longitude }),
+      }),
+    )));
+}, []);`;
     case 'threejs-object':
       return `const position = useMemo(() => createGeoPoint({
   latitude: 35.6812,
@@ -679,8 +851,8 @@ const layerState = useMemo(() => new GeoJSONLayerState({ id: 'railways' }), []);
 
 function adaptProviderView(code: string, provider: ProviderCode): string {
   return code
-    .replaceAll('<MapViewContainer', `<${provider.component}${provider.openingProps}`)
-    .replaceAll('</MapViewContainer>', `</${provider.component}>`);
+    .split('<MapViewContainer').join(`<${provider.component}${provider.openingProps}`)
+    .split('</MapViewContainer>').join(`</${provider.component}>`);
 }
 
 interface ImportDefinition {
@@ -692,12 +864,14 @@ interface ImportDefinition {
 const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   {
     source: 'react',
-    values: ['useEffect', 'useMemo', 'useState'],
+    values: ['useEffect', 'useMemo', 'useRef', 'useState'],
   },
   {
     source: '@mapconductor/js-sdk-core',
     values: [
       'MarkerAnimation',
+      'MarkerTilingOptions',
+      'PolygonManager',
       'RasterLayerSource',
       'calculatePositionAtDistance',
       'computeDistanceBetween',
@@ -708,6 +882,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
       'createMapCameraPosition',
       'createMarkerState',
       'createPolygonState',
+      'createPolygonEntity',
       'createPolylineState',
       'createRasterLayerState',
     ],
@@ -745,12 +920,28 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
     values: ['LeafletDesign', 'LeafletMapView', 'useLeafletMapViewState'],
   },
   {
+    source: '@mapconductor/react-for-openlayers',
+    values: ['OpenLayersDesign', 'OpenLayersMapView', 'useOpenLayersMapViewState'],
+  },
+  {
+    source: '@mapconductor/react-for-arcgis',
+    values: ['ArcGISDesign', 'ArcGISMapView', 'ArcGISMapView2D', 'useArcGISViewState'],
+  },
+  {
+    source: '@mapconductor/react-for-cesium',
+    values: ['CesiumDesign', 'CesiumMapView', 'useCesiumMapViewState'],
+  },
+  {
+    source: '@mapconductor/react-for-here',
+    values: ['HereMapDesign', 'HereMapView2D', 'useHereViewState'],
+  },
+  {
     source: '@mapconductor/react-for-maplibre',
-    values: ['MapLibreDesign', 'MapLibreView', 'useMapLibreViewState'],
+    values: ['MapLibreDesign', 'MapLibreMapView', 'MapLibreMapView2D', 'useMapLibreViewState'],
   },
   {
     source: '@mapconductor/react-for-mapbox',
-    values: ['MapboxDesign', 'MapboxView', 'useMapboxViewState'],
+    values: ['MapboxDesign', 'MapBoxMapView', 'MapBoxMapView2D', 'useMapboxViewState'],
   },
   {
     source: '@mapconductor/react-geojson-layer',
@@ -798,6 +989,7 @@ function importCode(code: string): string {
 export function getSampleDocumentation(
   page: string | undefined,
   providerName?: string,
+  language: SupportedLanguage = 'en',
 ): SampleDocumentation {
   const documentation = DOCUMENTATION[page ?? ''] ?? FALLBACK;
   const provider = providerCode(providerName);
@@ -805,12 +997,24 @@ export function getSampleDocumentation(
   const providerSetup = page === 'camera-sync'
     ? initialCameraCode()
     : provider.stateSetup;
-  const mainCode = [providerSetup, state, adaptProviderView(documentation.code, provider)]
-    .filter(Boolean)
-    .join('\n\n');
+  const comments = SECTION_COMMENTS[language];
+  const stateSection = state
+    ? [`// (2) ${comments.state}`, state].join('\n')
+    : '';
+  const mainCode = [
+    `// (1) ${comments.map}`,
+    providerSetup,
+    stateSection,
+    `// (${state ? 3 : 2}) ${comments.render}`,
+    adaptProviderView(documentation.code, provider),
+  ].filter(Boolean).join('\n\n');
   return {
     ...documentation,
-    code: [importCode(mainCode), '// Main part inside the React component', mainCode]
+    explanation: {
+      ...documentation.explanation,
+      'es-419': SPANISH_EXPLANATIONS[page ?? ''] ?? 'Renderiza capas independientes del proveedor dentro de la vista de mapa compartida de MapConductor.',
+    },
+    code: [importCode(mainCode), mainCode]
       .filter(Boolean)
       .join('\n\n'),
   };

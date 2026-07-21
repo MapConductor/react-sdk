@@ -1,0 +1,86 @@
+---
+title: Google Maps
+description: Set up @mapconductor/react-for-googlemaps on the Web.
+---
+
+# Google Maps
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-googlemaps
+```
+
+No separate SDK install and no CSS import — the Google Maps JavaScript API is loaded dynamically via `@googlemaps/js-api-loader`, which ships as a bundled dependency.
+
+## API key
+
+Required. Pass it to `useGoogleMapViewState`, not to the view component:
+
+```tsx
+const state = useGoogleMapViewState({
+  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  mapDesignType: GoogleMapDesign.Normal,
+  cameraPosition,
+});
+```
+
+There's no explicit "missing key" guard — an omitted or invalid key surfaces as a failed script/SDK load. Keep the key in your build environment, never in source control.
+
+## 2D vs. 3D — two separate view components
+
+Google Maps has two independent stacks sharing the same state:
+
+- **`GoogleMapView2D`** — classic `google.maps.Map` (the `"maps"` library). Standard 2D map, no map-type restriction.
+- **`GoogleMapView`** — `google.maps.maps3d.Map3DElement` (the `"maps3d"` library, requires `version="alpha"`). True oblique/tilt 3D camera. **Only `mapDesignType` `Normal`, `Hybrid`, or `Satellite` are valid here** — `Terrain` and `None` throw at runtime (`Map3D supports only following mapDesignTypes: ROADMAP, HYBRID, and SATELLITE`).
+
+```tsx
+<GoogleMapView2D state={state} mapId="YOUR_MAP_ID" version="alpha" libraries="maps3d" />
+// or
+<GoogleMapView state={state} mapId="YOUR_MAP_ID" version="alpha" />
+```
+
+`mapId` matters beyond styling: with a `mapId` set, the 2D provider renders markers through `google.maps.marker.AdvancedMarkerElement`; without one, it falls back to the legacy marker renderer.
+
+## Design types
+
+`GoogleMapDesign` mirrors Google's map type ids:
+
+| Member | value | 3D-compatible |
+| --- | --- | --- |
+| `Normal` | `roadmap` | yes |
+| `Satellite` | `satellite` | yes |
+| `Hybrid` | `hybrid` | yes |
+| `Terrain` | `terrain` | 2D only |
+| `None` | `none` — no basemap tiles | 2D only |
+
+`GoogleMapDesign.Create(id, attributionRules?)` builds a custom entry if you need one.
+
+## `useGoogleMapViewState` params
+
+```ts
+useGoogleMapViewState({
+  id?: string;
+  apiKey?: string;                    // required in practice
+  mapId?: string;                     // needed for Advanced Markers / cloud styling
+  mapDesignType?: GoogleMapDesignType; // default GoogleMapDesign.Normal
+  cameraPosition?: MapCameraPosition;  // default MapCameraPosition.Default
+})
+```
+
+## View component props
+
+Both `GoogleMapView` and `GoogleMapView2D` accept the same props, on top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state) (`state`, `onMapLoaded`, `onMapClick`, `onMapLongClick`, `onCameraMove*`):
+
+```ts
+mapId?: string;
+markerTilingOptions?: MarkerTilingOptions;
+style?: React.CSSProperties;
+version?: string;                 // pass 'alpha' for the maps3d library
+libraries?: string;               // comma-separated, e.g. 'maps3d'
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+## Gotchas
+
+- Script loading is async; React StrictMode's double-invoke is handled by re-checking for an existing controller after the `await`.
+- A `ResizeObserver` rescales the 3D camera's `range` on viewport size changes so zoom looks consistent across window sizes.

@@ -20,6 +20,7 @@
     "@mapconductor/react-for-openlayers": "0.1.1",
     "@mapconductor/react-for-arcgis": "0.1.0",
     "@mapconductor/react-for-cesium": "0.1.0",
+    "@mapconductor/react-for-here": "0.1.0",
     "@mapconductor/react-geojson-layer": "0.1.0",
     "@mapconductor/react-heatmap": "0.1.0",
     "@mapconductor/react-icons": "0.1.0",

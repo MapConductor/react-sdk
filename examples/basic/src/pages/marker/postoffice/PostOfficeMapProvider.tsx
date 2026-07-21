@@ -6,12 +6,12 @@ import {
   type MapViewStateInterface,
   type MarkerTilingOptions,
 } from '@mapconductor/js-sdk-core';
-import { MapLibreDesign, MapLibreView, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
-import { MapboxDesign, MapboxView, useMapboxViewState } from '@mapconductor/react-for-mapbox';
+import { MapLibreDesign, MapLibreMapView2D, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, MapBoxMapView2D, useMapboxViewState } from '@mapconductor/react-for-mapbox';
 import { LeafletDesign, LeafletMapView, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
 import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
-import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState } from '@mapconductor/react-for-arcgis';
-import { SingletonGoogleMapSlot, useSingletonGoogleMapViewState } from '../../../SingletonGoogleMaps';
+import { ArcGISDesign, ArcGISMapView, ArcGISMapView2D, useArcGISViewState } from '@mapconductor/react-for-arcgis';
+import { SingletonMapSlot, useSingletonMapState } from '../../../SingletonMaps';
 
 export type PostOfficeMapState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 
@@ -27,11 +27,12 @@ interface PostOfficeMapProviderProps {
 }
 
 function GoogleProvider({ cameraPosition, children }: PostOfficeMapProviderProps) {
-  const state = useSingletonGoogleMapViewState(cameraPosition);
+  const isGoogle3D = useLocation().pathname.startsWith('/google-maps-3d');
+  const state = useSingletonMapState(isGoogle3D ? 'google-3d' : 'google-2d', cameraPosition);
   return children({
     mapViewState: state,
     renderMapView: (content, onMapClick) => (
-      <SingletonGoogleMapSlot mode="2d" onMapClick={onMapClick}>{content}</SingletonGoogleMapSlot>
+      <SingletonMapSlot id="google-2d" onMapClick={onMapClick}>{content}</SingletonMapSlot>
     ),
   });
 }
@@ -41,17 +42,17 @@ function MapLibreProvider({ cameraPosition, markerTilingOptions, children }: Pos
   return children({
     mapViewState: state,
     renderMapView: (content, onMapClick) => (
-      <MapLibreView state={state} projection="mercator" markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</MapLibreView>
+      <MapLibreMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</MapLibreMapView2D>
     ),
   });
 }
 
 function MapboxProvider({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
-  const state = useMapboxViewState({ mapDesignType: MapboxDesign.Streets, cameraPosition });
+  const state = useMapboxViewState({ accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '', mapDesignType: MapboxDesign.Streets, cameraPosition });
   return children({
     mapViewState: state,
     renderMapView: (content, onMapClick) => (
-      <MapboxView state={state} accessToken={import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? ''} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</MapboxView>
+      <MapBoxMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</MapBoxMapView2D>
     ),
   });
 }
@@ -77,6 +78,7 @@ function OpenLayersProvider({ cameraPosition, markerTilingOptions, children }: P
 }
 
 function ArcGISProvider({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
+  const isArcGIS3D = useLocation().pathname.startsWith('/arcgis-3d');
   const state = useArcGISViewState({
     apiKey: import.meta.env.VITE_ARCGIS_API_KEY ?? '',
     mapDesignType: ArcGISDesign.Streets,
@@ -85,7 +87,11 @@ function ArcGISProvider({ cameraPosition, markerTilingOptions, children }: PostO
   return children({
     mapViewState: state,
     renderMapView: (content, onMapClick) => (
-      <ArcGISMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</ArcGISMapView2D>
+      isArcGIS3D ? (
+        <ArcGISMapView state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</ArcGISMapView>
+      ) : (
+        <ArcGISMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</ArcGISMapView2D>
+      )
     ),
   });
 }

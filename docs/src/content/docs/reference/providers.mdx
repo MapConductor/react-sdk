@@ -1,0 +1,33 @@
+---
+title: Providers
+description: Provider and platform availability matrix.
+---
+
+# Providers
+
+| Provider | Web package | React Native package | API key/token | Native 3D camera |
+| --- | --- | --- | --- | --- |
+| [Google Maps](/reference/providers/google-maps/) | `@mapconductor/react-for-googlemaps` | `@mapconductor/reactnative-for-googlemaps` | required | yes |
+| [MapLibre](/reference/providers/maplibre/) | `@mapconductor/react-for-maplibre` | `@mapconductor/reactnative-for-maplibre` | none | yes |
+| [ArcGIS](/reference/providers/arcgis/) | `@mapconductor/react-for-arcgis` | `@mapconductor/reactnative-for-arcgis` | required | yes |
+| [Mapbox](/reference/providers/mapbox/) | `@mapconductor/react-for-mapbox` | — | conditional* | yes |
+| [Leaflet](/reference/providers/leaflet/) | `@mapconductor/react-for-leaflet` | — | none | simulated (CSS transform) |
+| [OpenLayers](/reference/providers/openlayers/) | `@mapconductor/react-for-openlayers` | — | none | simulated (CSS transform) |
+| [Cesium](/reference/providers/cesium/) | `@mapconductor/react-for-cesium` | — | none | yes |
+
+\* Mapbox only requires an access token for `mapbox://`-hosted styles; the OSM-based design options built into the package need no token.
+
+Availability of an overlay or advanced camera behavior may vary by provider. Build compatibility-aware UI when a page depends on a provider-specific capability. Leaflet and OpenLayers don't have a native tilt/rotation camera — MapConductor approximates `tilt`/`bearing` with a CSS 3D transform on those two providers, which is a visual effect only, not a true 3D camera.
+
+## Choosing a provider
+
+- Choose based on required data sources, licensing, offline behavior, 3D needs, platform coverage, and SDK size.
+- Keep API keys and tokens outside source control.
+- Follow provider attribution and terms even when rendering through MapConductor.
+- Test provider switching with your real styles and data; a common API cannot make different base maps visually identical.
+
+The Web example application includes a runtime provider selector and unsupported-sample handling.
+
+## Per-provider setup
+
+Each provider page under **Reference → Provider setup** covers its install command, CSS import (if any), API key/token requirements, available design/style options, view-state hook parameters, view component props, and provider-specific gotchas: [Google Maps](/reference/providers/google-maps/), [MapLibre](/reference/providers/maplibre/), [Mapbox](/reference/providers/mapbox/), [Leaflet](/reference/providers/leaflet/), [OpenLayers](/reference/providers/openlayers/), [ArcGIS](/reference/providers/arcgis/), [Cesium](/reference/providers/cesium/).

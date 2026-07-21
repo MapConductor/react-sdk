@@ -1,0 +1,73 @@
+---
+title: MapCameraPosition
+description: The provider-independent camera value — position, zoom, bearing, tilt.
+---
+
+# MapCameraPosition
+
+`MapCameraPosition` is the immutable value every provider's `cameraPosition` state and `moveCameraTo()` call is built from. It's the one camera representation the whole SDK shares — see [Camera sync](/guides/camera-sync/) for how each provider maps its native camera model onto it.
+
+## Interface
+
+```ts
+interface MapCameraPosition {
+  readonly position: GeoPoint;   // camera target
+  readonly center: GeoPoint;     // alias of position
+  readonly zoom: number;         // typically 0-22, higher = more zoomed in
+  readonly bearing: number;      // rotation in degrees, 0 = north
+  readonly tilt: number;         // degrees
+  readonly visibleRegion: VisibleRegion | null;
+  readonly paddings: MapPaddings | null; // { top, left, bottom, right } in px
+
+  equals(other: MapCameraPosition | null, tolerance?: number): boolean;
+  copy(partial?: MapCameraPositionCopyParams): MapCameraPosition;
+}
+```
+
+`zoom` follows Google Maps' integer-zoom-level convention: each +1 halves the ground distance shown. Providers with a continuous scale or altitude model (ArcGIS, Cesium) convert at the provider boundary — see [Zoom levels](/core/zoom-levels/).
+
+## Creating a camera position
+
+```ts
+MapCameraPosition.from({ position, zoom?, bearing?, tilt?, paddings?, visibleRegion? })
+MapCameraPosition.Default // position (0,0), zoom 0, bearing 0, tilt 0
+
+createMapCameraPosition({
+  position,
+  zoom = 0,
+  bearing = 0,
+  tilt = 0,
+  paddings = MapPaddings.Zeros,
+  visibleRegion = null,
+})
+```
+
+```tsx
+const camera = MapCameraPosition.from({
+  position: GeoPoint.from({ latitude: 35.6812, longitude: 139.7671 }),
+  zoom: 12,
+});
+```
+
+## Updating a camera position
+
+`copy(partial)` returns a new `MapCameraPosition`, carrying over every field you don't explicitly override:
+
+```ts
+const zoomedIn = camera.copy({ zoom: camera.zoom + 2 });
+const rotated = camera.copy({ bearing: 45, tilt: 30 });
+```
+
+`position`/`center` are interchangeable in `copy()` — passing either updates the target.
+
+## Comparing camera positions
+
+`equals(other, tolerance = 1e-2)` compares position, zoom, bearing, and tilt within tolerance. The default tolerance (`1e-2`) is much looser than `GeoPoint.equals`'s default, because camera positions routinely come back slightly off their requested value after a provider's own animation or snapping (see [Camera sync](/guides/camera-sync/#fractional-zoom-and-rounding)) — comparing with `GeoPoint`-level precision would treat every provider echo as a different camera.
+
+## Padding
+
+`paddings` (`{ top, left, bottom, right }`, in pixels) offsets the effective visual center of the map — useful when UI chrome (a bottom sheet, a side panel) covers part of the map and you want `moveCameraTo` to center within the remaining visible area rather than the full container.
+
+## Moving the camera
+
+`MapCameraPosition` is a plain value — actually moving a map is `MapViewStateInterface.moveCameraTo(position, durationMillis?)`, covered in [Events and camera](/guides/events-and-camera/).

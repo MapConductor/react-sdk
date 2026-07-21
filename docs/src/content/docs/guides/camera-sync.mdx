@@ -1,0 +1,84 @@
+---
+title: Camera sync
+description: Keep two or more provider panes locked to the same geographic view.
+---
+
+import LiveExample from '../../../components/LiveExample.astro';
+
+# Camera sync
+
+Some applications render two or more map panes side by side — comparing providers during migration, or showing a base map and an overlay map together — and need every pane to track the same center, zoom, bearing, and tilt. MapConductor doesn't ship a "synced multi-map" component, because the right amount of synchronization logic depends on the app (how many panes, whether panes can be dragged independently, how animated moves should interact). Instead, the primitives that make it possible are all provider-generic: `MapCameraPosition`, `moveCameraTo`, and the `onCameraMove`/`onCameraMoveEnd` callbacks every provider view shares.
+
+This guide covers the reusable pattern and the one genuinely provider-specific problem it runs into: zoom means different things to different SDKs.
+
+## The pattern
+
+Give each pane its own `MapCameraPosition` state and relay moves between panes with `moveCameraTo`:
+
+```tsx
+const [camera, setCamera] = useState(INITIAL_CAMERA);
+
+const paneA = useMapLibreViewState({ mapDesignType: MapLibreDesign.OsmBright, cameraPosition: camera });
+const paneB = useArcGISViewState({ mapDesignType: ArcGISDesign.Streets, cameraPosition: camera });
+
+function onMoveFromA(position: MapCameraPosition) {
+  setCamera(position);
+  paneB.moveCameraTo(position, 0); // 0ms: mirror instantly, no easing race with the drag
+}
+
+function onMoveFromB(position: MapCameraPosition) {
+  setCamera(position);
+  paneA.moveCameraTo(position, 0);
+}
+
+return (
+  <>
+    <MapLibreView state={paneA} onCameraMove={onMoveFromA} onCameraMoveEnd={onMoveFromA} />
+    <ArcGISMapView state={paneB} onCameraMove={onMoveFromB} onCameraMoveEnd={onMoveFromB} />
+  </>
+);
+```
+
+Each pane keeps an independent `MapViewStateInterface` from its own provider hook; there is no shared camera object the providers both read from. Synchronization is push-based: a real user drag on one pane produces a `MapCameraPosition`, which you push into the other pane with `moveCameraTo(position, 0)`.
+
+### Avoiding feedback loops
+
+Pushing `moveCameraTo` into pane B triggers pane B's own `onCameraMove`, which — naively — would call `paneA.moveCameraTo(...)` again. Two guards keep this from looping or fighting a live drag:
+
+- **Programmatic-echo suppression** — before calling `moveCameraTo` on a pane, record that pane's next one or two camera events as "expected echoes" and ignore them instead of relaying them back. A short grace window (a few hundred milliseconds) after the call, plus a fuzzy position/zoom comparison, covers providers that don't land on the exact requested camera (see below).
+- **Move-event throttling** — `onCameraMove` fires on every animation frame during a drag; relay it at a capped rate (for example every ~33ms) and always let `onCameraMoveEnd` through unthrottled, so the final position is always exact.
+
+The real guard heuristics from the bundled demo, verbatim:
+
+```ts file="pages/map/camerasync/cameraSyncLogic.ts"
+```
+
+The full reference implementation — including animated multi-pane "fly to" moves that must finish in both panes before user-driven sync resumes — lives in `examples/basic/src/pages/map/camerasync/` (`cameraSyncLogic.ts` above for the guard heuristics, `CameraSyncPage.tsx` for the relay). Treat the relay wiring as a pattern to adapt, not an API to import: the registry that lets the demo hot-swap between all seven web providers is demo scaffolding, not part of the SDK surface.
+
+<LiveExample provider="maplibre" page="camera-sync" />
+
+## Zoom means different things per provider
+
+MapConductor treats **Google Maps' integer zoom levels** as the reference standard: doubling the zoom level halves the ground distance shown, matching the Web Mercator convention most web maps grew up on. Providers that expose zoom natively (MapLibre, Mapbox, Leaflet, OpenLayers) already speak this language, with one documented exception:
+
+- **Mapbox** zoom is offset from Google's by an empirical constant: `googleZoom ≈ mapboxZoom + 1.0` (`MapboxZoomAltitudeConverter.MAPBOX_TO_GOOGLE_ZOOM_OFFSET` in `react-for-mapbox`).
+
+Providers whose native camera model is a **scale or altitude** rather than a zoom level convert at the provider boundary:
+
+- **ArcGIS 2D** (`MapView`) uses a display `scale`. `arcGISZoomToScale(zoom, latitude)` / `arcGISScaleToZoom(scale, latitude)` in `react-for-arcgis` convert between them using the standard Web Mercator tile-resolution formula (256px tiles, 96 DPI). Latitude is intentionally *not* used for a cosine correction — `MapView.scale` is a flat display scale, and applying one would put ArcGIS's zoom out of step with MapLibre's latitude-dependent zoom behavior.
+- **ArcGIS 3D** (`SceneView`) and **Cesium** convert zoom to camera **altitude** via a shared `AbstractZoomAltitudeConverter`: `distance = (zoom0Altitude · cos(latitude)) / 2^zoom`, then adjusted for tilt and, for `SceneView`, for the viewport's diagonal field of view (ArcGIS's `Camera.fov` is diagonal, not vertical, so a wide viewport needs a different constant than a Google-style vertical FOV would).
+
+### Fractional zoom and rounding
+
+Google Maps JS snaps a fractional target zoom to the nearest integer. ArcGIS's `MapView` has its own `snapToZoom` constraint that instead resolves a fractional `goTo` target down to the LOD *below* it — so a naive conversion at zoom `9.5` lands Google on `10` and ArcGIS on `9`, a full level apart that looks like a latitude-dependent bug but isn't. `arcGISZoomToScale` rounds with `Math.round` before computing scale specifically to mirror Google's rounding, so a `goTo` target is always an exact LOD scale that `snapToZoom` passes through unchanged.
+
+If you add a new provider pane or debug a one-level mismatch, reproduce it with a fractional demo zoom (the bundled demo uses `9.5` and `4.5`) rather than only round numbers — integer zooms won't surface a rounding-direction mismatch.
+
+## Visual verification
+
+The bundled demo renders two reference overlays on every pane so a mismatch is visible at a glance, using plain `<Polyline>`/`<Polygon>` overlays — nothing provider-specific:
+
+- **Red** geodesic polyline — the demo location's actual geographic bounds.
+- **Blue** polygon — a fixed 1°×1° square centered on the same point, filled and non-geodesic.
+
+Because the blue square is a fixed-degree shape rather than derived from provider math, it renders at the same apparent size on every correctly-synced pane; a shrunken or shifted blue square immediately flags a zoom or center mismatch even when the base maps look superficially similar. This is a good pattern to borrow whenever you need to eyeball cross-provider alignment during development — see `boundsPolyline()` and `referenceRectangles()` in `examples/basic/src/pages/map/camerasync/cameraSyncData.ts`.

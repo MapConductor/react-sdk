@@ -1,0 +1,51 @@
+---
+title: Zoom levels
+description: How MapCameraPosition.zoom maps to each provider's native camera model.
+---
+
+# Zoom levels
+
+`MapCameraPosition.zoom` is a single provider-independent number, but the SDKs underneath model "how zoomed in" very differently — a display zoom level, a map scale, or a camera altitude. Each provider converts at its own boundary via an `AbstractZoomAltitudeConverter` subclass (or, for ArcGIS 2D, standalone scale functions), so application code never has to think about the conversion — this page is for anyone debugging a cross-provider zoom mismatch or building a [camera sync](/guides/camera-sync/) pane.
+
+## The reference model
+
+```ts
+abstract class AbstractZoomAltitudeConverter {
+  static readonly DEFAULT_ZOOM0_ALTITUDE = 171_319_879.0; // meters, altitude at zoom 0
+  static readonly ZOOM_FACTOR = 2.0;
+  static readonly MIN_ZOOM_LEVEL = 0.0;
+  static readonly MAX_ZOOM_LEVEL = 22.0;
+  static readonly MIN_ALTITUDE = 100.0;
+  static readonly MAX_ALTITUDE = 50_000_000.0;
+
+  abstract zoomLevelToAltitude(params: { zoomLevel: number; latitude: number; tilt: number }): number;
+  abstract altitudeToZoomLevel(params: { altitude: number; latitude: number; tilt: number }): number;
+}
+```
+
+The shared formula is the standard Web Mercator "double the zoom, halve the ground distance" relationship:
+
+```
+distance = (zoom0Altitude · cos(latitude)) / 2^zoomLevel
+altitude = distance · cos(tilt)
+```
+
+with latitude clamped to ±85° and tilt clamped to `[0°, 90°]` before taking the cosine (avoiding a divide-by-near-zero at the poles or a 90° tilt), and the final altitude clamped to `[MIN_ALTITUDE, MAX_ALTITUDE]`.
+
+## Per-provider conversion
+
+| Provider | Native model | Conversion |
+| --- | --- | --- |
+| Google Maps, MapLibre | integer-ish zoom level | native — this *is* the reference model |
+| Mapbox | zoom level, offset from Google's | `googleZoom ≈ mapboxZoom + 1.0` (documented empirical constant) |
+| ArcGIS 2D (`MapView`) | display `scale` | `arcGISZoomToScale(zoom, latitude)` / `arcGISScaleToZoom(scale, latitude)`, exported from `react-for-arcgis` |
+| ArcGIS 3D (`SceneView`), Cesium | camera altitude | `AbstractZoomAltitudeConverter` subclass, adjusted for the viewport's diagonal field of view |
+| Leaflet, OpenLayers | zoom level (no native tilt/bearing) | native zoom; tilt/bearing are a CSS approximation, see each [provider page](/reference/providers/) |
+
+ArcGIS's scale conversion uses the standard Web Mercator tile-resolution formula (256px tiles, 96 DPI) and deliberately **ignores latitude** for a cosine correction — `MapView.scale` is a flat display scale, and applying a ground-resolution correction would put ArcGIS's zoom out of step with MapLibre's latitude-dependent zoom behavior.
+
+## Fractional zoom and rounding
+
+Google Maps JS snaps a fractional target zoom to the nearest integer. ArcGIS's `MapView` has its own `snapToZoom` constraint that instead resolves a fractional `goTo` target down to the LOD *below* it — so converting at zoom `9.5` naively lands Google on `10` and ArcGIS on `9`, a full level apart. `arcGISZoomToScale` rounds with `Math.round` before computing scale specifically to mirror Google's rounding, so a `goTo` target is always an exact LOD scale that `snapToZoom` passes through unchanged.
+
+If you're debugging a one-level mismatch between providers, reproduce it with a fractional zoom rather than a round number — integer zooms won't surface a rounding-direction disagreement. See [Camera sync](/guides/camera-sync/#fractional-zoom-and-rounding) for the full story and a worked example.

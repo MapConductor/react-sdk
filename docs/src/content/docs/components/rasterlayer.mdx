@@ -1,0 +1,66 @@
+---
+title: RasterLayer
+description: A tiled raster overlay from a URL template, TileJSON, or an ArcGIS map service.
+---
+
+# RasterLayer
+
+`RasterLayer` renders a tiled raster source over the map — your own tile server, a TileJSON endpoint, or an ArcGIS map service. It's also the primitive that [GeoJSON layers](/guides/extensions/#geojson-layer) and [heatmaps](/guides/extensions/#heatmap) render through underneath.
+
+## Convenience props
+
+```tsx
+<RasterLayer
+  source={RasterLayerSource}
+  id?: string | null
+  opacity?: number       // default 1.0
+  visible?: boolean      // default true
+  zIndex?: number        // default 0
+  userAgent?: string
+  extraHeaders?: Record<string, string> | null
+  debug?: boolean        // default false
+/>
+```
+
+## Retained state
+
+```tsx
+<RasterLayer state={rasterLayerState} />
+```
+
+`state` is created with [`createRasterLayerState()`](/states/rasterlayer-state/).
+
+## `RasterLayerSource`
+
+```ts
+RasterLayerSource.UrlTemplate({
+  template: string;          // e.g. 'https://tiles.example.com/{z}/{x}/{y}.png'
+  tileSize?: number;         // default 512
+  minZoom?: number | null;
+  maxZoom?: number | null;
+  attributionRules?: AttributionRule[];
+  scheme?: TileScheme;       // 'XYZ' | 'TMS'
+})
+RasterLayerSource.TileJson({ url: string })
+RasterLayerSource.ArcGisService({ serviceUrl: string })
+```
+
+## Example
+
+```tsx
+<RasterLayer
+  source={RasterLayerSource.UrlTemplate({
+    template: 'https://tiles.example.com/{z}/{x}/{y}.png',
+    maxZoom: 18,
+  })}
+  opacity={0.6}
+/>
+```
+
+## Attribution
+
+Attribution rules attached to a source (either directly on `UrlTemplate`, or resolved by the design type) appear automatically in the map's [attribution overlay](/architecture/#attribution) whenever the layer is `visible` and the camera's zoom falls within the source's `minZoom`/`maxZoom` range — you don't need to render attribution text yourself.
+
+## Events
+
+`RasterLayerState` doesn't carry an `onClick` — a raster layer is opaque pixels to the map, with no per-feature identity to click on. For click-driven feature layers, use [GeoJSON layers](/guides/extensions/#geojson-layer)'s `processClick()` instead.

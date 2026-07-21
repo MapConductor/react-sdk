@@ -43,6 +43,7 @@ export function PolylineClickPage() {
         position: event.clicked,
         animation: MarkerAnimation.Drop,
         icon: new ColorDefaultIcon(event.state.strokeColor),
+        clickable: false,
       })]);
     },
   }), [points]);

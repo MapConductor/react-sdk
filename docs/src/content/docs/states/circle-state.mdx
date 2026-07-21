@@ -1,0 +1,75 @@
+---
+title: CircleState
+description: Retained, observable state for a single circle overlay.
+---
+
+# CircleState
+
+`CircleState` holds a circle's center, radius, and styling as mutable, observable properties.
+
+## Creating a CircleState
+
+```ts
+createCircleState({
+  center: GeoPoint;
+  radiusMeters: number;
+  id?: string | null;
+  geodesic?: boolean;       // default true
+  clickable?: boolean;      // default true
+  strokeColor?: string;     // default '#FF0000'
+  strokeWidth?: number;     // default 1
+  fillColor?: string;       // default 'rgba(255,255,255,0.5)'
+  zIndex?: number | null;
+  extra?: Serializable | null;
+  onClick?: (event: { state: CircleState; clicked: GeoPoint }) => void;
+}): CircleState
+```
+
+Note the defaults here differ slightly from `<Circle>`'s convenience-prop defaults (`strokeWidth: 2`, `geodesic: true` there vs. `1`/`true` on the raw factory as of this writing) — pass explicit values if your app relies on a specific default rather than assuming the two match.
+
+## Properties
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | readonly |
+| `center` | `GeoPoint` | mutable |
+| `radiusMeters` | `number` | |
+| `geodesic` | `boolean` | draw using geodesic edges that follow the Earth's curvature vs. a flat projection |
+| `clickable` | `boolean` | |
+| `strokeColor`, `strokeWidth`, `fillColor` | `string` / `number` | |
+| `zIndex` | `number \| null` | |
+| `extra` | `Serializable \| null` | |
+| `onClick` | handler or `null` | receives `{ state, clicked }` — `clicked` is the geographic point that was clicked, not just the circle's center |
+
+## Methods
+
+```ts
+copy(opts?: CircleStateCopyParams): CircleState;
+equals(other: unknown): boolean;
+hashCode(): number;
+fingerPrint(): CircleFingerPrint;
+asObservable(): { subscribe(fn): () => void };
+```
+
+Unlike `MarkerState`, there are no dedicated `setX()` methods — mutate via property assignment.
+
+## Updating dynamically
+
+```tsx
+const [circle] = useState(() => createCircleState({
+  center: station,
+  radiusMeters: 500,
+  strokeColor: '#2563eb',
+  fillColor: 'rgba(37, 99, 235, 0.15)',
+}));
+
+useEffect(() => {
+  circle.radiusMeters = selectedRangeMeters;
+}, [circle, selectedRangeMeters]);
+
+return <Circle state={circle} />;
+```
+
+## See also
+
+- [`<Circle>`](/components/circle/) — the React component that renders this state

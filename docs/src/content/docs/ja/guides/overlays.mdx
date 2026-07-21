@@ -1,0 +1,30 @@
+---
+title: オーバーレイ
+description: 共通 map overlay の追加と更新。
+---
+
+# オーバーレイ
+
+`Marker`、`Markers`、`Circle`、`Polyline`、`Polygon`、`GroundImage`、`RasterLayer`、InfoBubble が共通 React package から提供されます。
+
+小規模で静的な表示には簡易 props を使えます。
+
+```tsx
+<Marker position={station} onClick={(marker) => select(marker.id)} />
+<Circle center={station} radiusMeters={750} strokeColor="#2563eb" />
+<Polyline points={route} strokeColor="#dc2626" strokeWidth={5} />
+```
+
+頻繁に更新するときは state を保持します。
+
+```tsx
+const [marker] = useState(() => createMarkerState({
+  id: 'vehicle-42', position: initialPosition, draggable: true,
+}));
+marker.position = latestPosition;
+return <Marker state={marker} />;
+```
+
+ID は composition をまたいで provider entity を特定するため、安定させます。吹き出しは `<InfoBubble marker={selectedMarker}>...</InfoBubble>` で任意の React content を marker に固定できます。
+
+overlay component は必ず MapConductor provider view の子孫へ配置してください。

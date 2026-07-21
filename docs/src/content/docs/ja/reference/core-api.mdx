@@ -1,0 +1,27 @@
+---
+title: コア API
+description: よく使う geometry、camera、state、component の一覧。
+---
+
+# コア API
+
+ここではアプリケーションでよく使う API をまとめます。正確な signature は package の TypeScript declaration を参照してください。
+
+## Geometry と camera
+
+| API | 用途 |
+| --- | --- |
+| `GeoPoint.from(...)` / `createGeoPoint(...)` | 緯度、経度、任意の高度 |
+| `MapCameraPosition.from(...)` / `createMapCameraPosition(...)` | target、zoom、bearing、tilt、region、padding |
+| `GeoRectBounds` | 地理的な矩形 |
+| `Spherical`, `WGS84Geodesic` | provider 非依存の地理計算 |
+
+## State factory
+
+`createMarkerState`、`createCircleState`、`createPolylineState`、`createPolygonState`、`createGroundImageState`、`createRasterLayerState` は observable な mutable state を返します。安定した ID を使い、React render 間で object を保持してください。
+
+## 共通 component
+
+`Marker` / `Markers`、`Circle`、`Polyline`、`Polygon`、`GroundImage`、`RasterLayer`、`InfoBubble` を Web と React Native で共有できます。
+
+各 provider の `useGoogleMapViewState` や `useMapLibreViewState` は共通の `MapViewStateInterface` を実装し、`cameraPosition`、`mapDesignType`、`moveCameraTo(...)`、`getMapViewHolder()` を提供します。通常は共通 state/component API を優先し、座標変換など高度な統合に holder/controller を使ってください。

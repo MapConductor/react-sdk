@@ -1,0 +1,41 @@
+---
+title: MapServiceRegistry
+description: A typed key/value registry for map-scoped plugins and extensions.
+---
+
+# MapServiceRegistry
+
+`MapServiceRegistry` is a small typed registry used internally to attach optional, map-scoped services — the kind of thing an extension package (like marker clustering's native strategy, or a future plugin) needs to reach without every provider controller knowing about it by name.
+
+## Interface
+
+```ts
+interface MapServiceKey<T> {
+  readonly __brand: T; // phantom type only — carries no runtime value
+}
+
+function createMapServiceKey<T>(): MapServiceKey<T>;
+
+interface MapServiceRegistry {
+  get<T>(key: MapServiceKey<T>): T | null;
+}
+```
+
+A key created with `createMapServiceKey<T>()` is what makes lookups type-safe — `registry.get(key)` returns `T | null` without a cast, and two keys are never accidentally interchangeable even if `T` happens to match.
+
+## Registering and retrieving a service
+
+```ts
+const registry = new MutableMapServiceRegistry();
+
+const analyticsKey = createMapServiceKey<AnalyticsService>();
+registry.put(analyticsKey, new AnalyticsService());
+
+const analytics = registry.get(analyticsKey); // AnalyticsService | null
+```
+
+`EmptyMapServiceRegistry` is a no-op implementation (`get()` always returns `null`) useful as a default when no registry has been wired up yet.
+
+## When you'd use this
+
+Most application code never touches `MapServiceRegistry` directly — it's infrastructure for extension packages and provider internals to share optional services within a map's scope without introducing a hard dependency between packages. If you're building your own extension package in the same style as `react-heatmap` or `react-marker-clustering`, this is the mechanism for exposing a service to other code sharing the same map view without threading it through every component's props.

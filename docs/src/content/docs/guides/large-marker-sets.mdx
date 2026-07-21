@@ -1,0 +1,39 @@
+---
+title: Large marker sets
+description: Efficient marker composition and React Native transport.
+---
+
+import LiveExample from '../../../components/LiveExample.astro';
+
+# Large marker sets
+
+Use `<Markers states={states} />` when rendering a large collection. The bundled post-office demo builds several hundred `MarkerState`s from loaded records, memoized so they're only rebuilt when the underlying data or icon changes:
+
+```tsx file="pages/marker/postoffice/usePostOfficeMarkers.ts" region="markerStates"
+```
+
+```tsx
+return <Markers states={markerStates} />;
+```
+
+`Markers` performs one collector replacement and avoids one React component/effect tree per item. Individual `<Marker>` remains the right choice for a small or independently managed marker.
+
+<LiveExample provider="maplibre" page="post-office" />
+
+## React Native transport
+
+Native marker composition uses a generation protocol:
+
+1. Build one icon registry for the full generation.
+2. Begin composition once with that registry.
+3. Send structure-of-arrays batches of 500 markers using icon indices.
+4. Wait for the native ACK before sending the next batch.
+5. Commit after the final ACK.
+
+Do not duplicate icon payloads in every batch. Reuse identical icon URIs so native decoders can share resolved icon instances.
+
+## Tiling and clustering
+
+Native tiling reduces provider marker creation and draws marker tiles, but all marker definitions still cross the React Native bridge. Marker clustering changes the displayed composition and is available from `@mapconductor/react-marker-clustering`.
+
+For Android profiling, filter logs by `MCMarkerTrace` and distinguish JS batching, bridge decoding, core diffing, provider post-processing, style synchronization, and tile rendering.

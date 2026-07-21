@@ -1,0 +1,74 @@
+---
+title: Leaflet
+description: Set up @mapconductor/react-for-leaflet on the Web.
+---
+
+# Leaflet
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-leaflet
+```
+
+`leaflet` is bundled — no separate install needed. Import the provider stylesheet once from your application entry point (this also copies Leaflet's default marker image assets):
+
+```tsx
+import '@mapconductor/react-for-leaflet/style.css';
+```
+
+No React Native counterpart exists for Leaflet.
+
+## API key
+
+None required. The default design uses the free OpenStreetMap tile server.
+
+## Design types
+
+`LeafletDesign` members:
+
+| Member | Tiles | Notes |
+| --- | --- | --- |
+| `OpenStreetMap` | `tile.openstreetmap.org` | max zoom 19; carries the mandatory OSM attribution rule |
+| `None` | — | no tile layer added at all |
+
+## `useLeafletMapViewState` params
+
+Note the component and hook names are `LeafletMapView`/`useLeafletMapViewState`, not `LeafletView` — inconsistent with the other web providers.
+
+```ts
+useLeafletMapViewState({
+  id?: string;
+  mapDesignType?: LeafletMapDesignType; // default LeafletDesign.OpenStreetMap
+  cameraPosition?: MapCameraPosition;   // default MapCameraPosition.Default
+})
+```
+
+## `<LeafletMapView>` props
+
+On top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state):
+
+```ts
+maxZoom?: number;
+minZoom?: number;
+className?: string;
+containerStyle?: React.CSSProperties;
+options?: L.MapOptions; // raw Leaflet MapOptions passthrough
+markerTilingOptions?: MarkerTilingOptions;
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+## Gotcha: tilt and bearing are simulated
+
+Leaflet has no native 3D or rotation support. MapConductor approximates `tilt`/`bearing` with a CSS 3D transform (`rotateZ`/`rotateX`, tilt capped at 60°) on an inner map-plane element, then forces Leaflet to recompute its container size with `invalidateSize({ pan: false })`. This is a visual approximation, not a real 3D camera — overlays are still projected in Leaflet's normal 2D screen space underneath the transform. If your app depends on accurate tilted/rotated overlay hit-testing, prefer a provider with a native 3D camera (Google Maps, MapLibre, Mapbox, ArcGIS, Cesium).
+
+Leaflet's built-in zoom control is moved into an untransformed wrapper so it doesn't rotate/tilt along with the map.
+
+## Minimal example
+
+```tsx
+const state = useLeafletMapViewState({ mapDesignType: LeafletDesign.OpenStreetMap, cameraPosition });
+
+<LeafletMapView state={state}>
+  <Marker position={TOKYO} />
+</LeafletMapView>
+```

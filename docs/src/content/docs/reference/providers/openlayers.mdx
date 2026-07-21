@@ -1,0 +1,70 @@
+---
+title: OpenLayers
+description: Set up @mapconductor/react-for-openlayers on the Web.
+---
+
+# OpenLayers
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-openlayers
+```
+
+`ol` is bundled — no separate install needed. Import the provider stylesheet once from your application entry point:
+
+```tsx
+import '@mapconductor/react-for-openlayers/style.css';
+```
+
+No React Native counterpart exists for OpenLayers.
+
+## API key
+
+None required. The default design uses `ol/source/OSM` (free OpenStreetMap tiles).
+
+## Design types
+
+`OpenLayersDesign` members:
+
+| Member | Tiles | Notes |
+| --- | --- | --- |
+| `OpenStreetMap` | `ol/source/OSM` | carries the mandatory OSM attribution rule |
+| `None` | — | no `TileLayer` added |
+
+## `useOpenLayersMapViewState` params
+
+```ts
+useOpenLayersMapViewState({
+  id?: string;
+  mapDesignType?: OpenLayersMapDesignType; // default OpenLayersDesign.OpenStreetMap
+  cameraPosition?: MapCameraPosition;      // default MapCameraPosition.Default
+})
+```
+
+## `<OpenLayersMapView>` props
+
+On top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state):
+
+```ts
+maxZoom?: number;
+minZoom?: number;
+className?: string;
+containerStyle?: React.CSSProperties;
+options?: Omit<ol.MapOptions, 'target'>; // raw OpenLayers Map options passthrough
+markerTilingOptions?: MarkerTilingOptions;
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+## Gotcha: tilt and bearing are simulated
+
+Like Leaflet, OpenLayers has no native tilt camera. MapConductor applies the same CSS `rotateZ`/`rotateX` transform approach (tilt capped at 60°), forcing a resize via `updateSize()` on the next animation frame. OpenLayers' own `view.rotation` is set once at init from the initial `bearing`, but subsequent bearing changes go through the CSS transform, not `view.setRotation()`. Treat tilt/bearing here as a visual approximation, and move `.ol-control` elements are kept in an untransformed wrapper so zoom buttons don't rotate with the map.
+
+## Minimal example
+
+```tsx
+const state = useOpenLayersMapViewState({ mapDesignType: OpenLayersDesign.OpenStreetMap, cameraPosition });
+
+<OpenLayersMapView state={state}>
+  <Marker position={TOKYO} />
+</OpenLayersMapView>
+```

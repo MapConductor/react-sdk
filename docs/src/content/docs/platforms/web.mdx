@@ -1,0 +1,39 @@
+---
+title: Web
+description: Configure MapConductor providers in React DOM applications.
+---
+
+# Web
+
+Install the core, shared React package, and at least one `react-for-*` provider.
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-maplibre
+```
+
+Every web provider follows the same shape: a `use<Provider>ViewState()` hook that returns a stable `MapViewStateInterface`, and a `<XxxView>` component that renders it and shares the [common event props](/guides/events-and-camera/) (`onMapLoaded`, `onMapClick`, `onCameraMove`, ...). What differs per provider is the install footprint, whether a CSS import is required, whether an API key/token is needed, and the available design/style options — see each provider's dedicated page for exact code:
+
+- [Google Maps](/reference/providers/google-maps/) — requires an API key; separate 2D/3D view components
+- [MapLibre](/reference/providers/maplibre/) — no API key; good default for a zero-config tutorial
+- [Mapbox](/reference/providers/mapbox/) — access token only for Mapbox-hosted styles
+- [Leaflet](/reference/providers/leaflet/) — no API key; tilt/bearing are a CSS approximation, not a native 3D camera
+- [OpenLayers](/reference/providers/openlayers/) — no API key; same CSS tilt/bearing approximation as Leaflet
+- [ArcGIS](/reference/providers/arcgis/) — requires an API key; separate `MapView`/`SceneView` (2D/3D) components
+- [Cesium](/reference/providers/cesium/) — no API key required by this SDK; full 3D globe
+
+See the [provider matrix](/reference/providers/) for a side-by-side comparison, including React Native availability.
+
+## Provider-independent application code
+
+Keep provider selection at one boundary and pass common overlays as children:
+
+```tsx
+function ProviderMap({ provider, children }) {
+  if (provider === 'google') {
+    return <GoogleMapView2D state={googleState}>{children}</GoogleMapView2D>;
+  }
+  return <MapLibreView state={mapLibreState}>{children}</MapLibreView>;
+}
+```
+
+The example app under `examples/basic` demonstrates runtime provider selection and compatibility-aware pages across all seven providers.

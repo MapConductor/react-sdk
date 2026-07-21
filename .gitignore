@@ -52,6 +52,7 @@ dist/*
 *.mjs
 !examples/basic/server.mjs
 *.cjs
+!eslint.config.cjs
 dist/*.d.ts
 dist/
 test-results/

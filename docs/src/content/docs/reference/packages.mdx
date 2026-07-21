@@ -1,0 +1,42 @@
+---
+title: Packages
+description: MapConductor React SDK package responsibilities.
+---
+
+# Packages
+
+## Shared packages
+
+| Package | Responsibility |
+| --- | --- |
+| `@mapconductor/js-sdk-core` | Geometry, camera values, state, controllers, projections, tiling, and shared types |
+| `@mapconductor/js-sdk-react` | Shared overlays, map scope, info bubbles, and Web/React Native entry points |
+
+## Web provider packages
+
+`@mapconductor/react-for-googlemaps`, `react-for-maplibre`, `react-for-mapbox`, `react-for-leaflet`, `react-for-openlayers`, `react-for-arcgis`, and `react-for-cesium` create React DOM map views. They must not grow Android or iOS directories.
+
+## React Native provider packages
+
+`@mapconductor/reactnative-for-googlemaps`, `reactnative-for-maplibre`, and `reactnative-for-arcgis` own their TypeScript native entry points and native `android`/`ios` bridge code. They reuse provider-neutral exports and design/state types from their Web siblings where possible.
+
+## Extension packages
+
+`@mapconductor/react-icons`, `react-geojson-layer`, `react-heatmap`, and `react-marker-clustering` add optional capabilities without changing provider controller interfaces.
+
+## Import rule of thumb
+
+```tsx
+// Values and state factories
+import { GeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
+
+// Shared Web overlays
+import { Marker } from '@mapconductor/js-sdk-react';
+
+// Shared native overlays
+import { Marker } from '@mapconductor/js-sdk-react/native';
+
+// The actual map view
+import { MapLibreView } from '@mapconductor/react-for-maplibre';
+import { MapLibreView } from '@mapconductor/reactnative-for-maplibre';
+```

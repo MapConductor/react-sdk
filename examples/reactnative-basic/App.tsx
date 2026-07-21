@@ -62,7 +62,7 @@ function Header({
   onProviderChange: (provider: MapProvider) => void;
 }) {
   const [isProviderMenuOpen, setIsProviderMenuOpen] = useState(false);
-  const providerLabel = provider === 'google-maps' ? 'GoogleMapView' : 'MapLibreView';
+  const providerLabel = provider === 'google-maps' ? 'GoogleMapView' : 'MapLibreMapView';
 
   const selectProvider = (nextProvider: MapProvider) => {
     onProviderChange(nextProvider);
@@ -139,7 +139,7 @@ function Header({
                       provider === 'maplibre' && styles.providerMenuItemTextActive,
                     ]}
                   >
-                    MapLibreView
+                    MapLibreMapView
                   </Text>
                 </TouchableOpacity>
               </View>

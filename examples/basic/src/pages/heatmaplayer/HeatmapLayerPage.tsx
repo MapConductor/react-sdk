@@ -1,14 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createGeoPoint, createMapCameraPosition } from '@mapconductor/js-sdk-core';
-import { MapLibreDesign, MapLibreView, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
-import { MapboxDesign, MapboxView, useMapboxViewState, type MapboxViewState } from '@mapconductor/react-for-mapbox';
+import { MapLibreDesign, MapLibreMapView2D, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapboxDesign, MapBoxMapView2D, useMapboxViewState, type MapboxViewState } from '@mapconductor/react-for-mapbox';
 import { LeafletDesign, LeafletMapView, useLeafletMapViewState, type LeafletMapViewState } from '@mapconductor/react-for-leaflet';
 import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState, type OpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
 import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
-import { SingletonGoogleMapSlot, useSingletonGoogleMapViewState } from '../../SingletonGoogleMaps';
+import { SingletonMapSlot, useSingletonMapState } from '../../SingletonMaps';
 import { useSampleI18n } from '../../i18n';
 
 const INIT_CAMERA_POSITION = createMapCameraPosition({
@@ -76,10 +76,10 @@ function HeatmapLayerPageContent({
 }
 
 function GoogleHeatmapLayerPage() {
-  useSingletonGoogleMapViewState(INIT_CAMERA_POSITION);
+  useSingletonMapState('google-2d', INIT_CAMERA_POSITION);
   return (
     <HeatmapLayerPageContent
-      renderMapView={children => <SingletonGoogleMapSlot mode="2d">{children}</SingletonGoogleMapSlot>}
+      renderMapView={children => <SingletonMapSlot id="google-2d">{children}</SingletonMapSlot>}
     />
   );
 }
@@ -91,20 +91,20 @@ function MapLibreHeatmapLayerPage() {
   });
   return (
     <HeatmapLayerPageContent
-      renderMapView={children => <MapLibreView state={mapViewState as MapLibreViewState} projection="mercator">{children}</MapLibreView>}
+      renderMapView={children => <MapLibreMapView2D state={mapViewState as MapLibreViewState}>{children}</MapLibreMapView2D>}
     />
   );
 }
 
 function MapboxHeatmapLayerPage() {
   const mapViewState = useMapboxViewState({
+    accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '',
     mapDesignType: MapboxDesign.Light,
     cameraPosition: INIT_CAMERA_POSITION,
   });
-  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN ?? '';
   return (
     <HeatmapLayerPageContent
-      renderMapView={children => <MapboxView state={mapViewState as MapboxViewState} accessToken={accessToken}>{children}</MapboxView>}
+      renderMapView={children => <MapBoxMapView2D state={mapViewState as MapboxViewState}>{children}</MapBoxMapView2D>}
     />
   );
 }

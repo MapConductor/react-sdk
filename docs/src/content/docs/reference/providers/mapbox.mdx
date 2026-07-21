@@ -1,0 +1,88 @@
+---
+title: Mapbox
+description: Set up @mapconductor/react-for-mapbox on the Web.
+---
+
+# Mapbox
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-mapbox
+```
+
+`mapbox-gl` is bundled — no separate install needed. Import the provider stylesheet once from your application entry point:
+
+```tsx
+import '@mapconductor/react-for-mapbox/style.css';
+```
+
+No React Native counterpart exists for Mapbox.
+
+## Access token
+
+Required only for `mapbox://` (Mapbox-hosted) styles; not required for the non-Mapbox styles reused from MapLibre's design list (see below). As with Google Maps and ArcGIS, the token is part of the view-state hook, not a view component prop — passing secrets as component props risks them ending up in test logs/snapshots:
+
+```tsx
+const state = useMapboxViewState({
+  accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN,
+  mapDesignType: MapboxDesign.Streets,
+  cameraPosition,
+});
+
+<MapboxView state={state} />
+```
+
+Internally this sets `mapboxgl.accessToken` globally. If you only use the OSM-based designs below, you can omit `accessToken` entirely.
+
+## Design types
+
+`MapboxDesign` members split into Mapbox-hosted styles (need a token) and non-Mapbox styles (don't):
+
+| Member | Style | Needs token |
+| --- | --- | --- |
+| `Streets` | `mapbox://styles/mapbox/streets-v12` | yes |
+| `Outdoors` | `mapbox://styles/mapbox/outdoors-v12` | yes |
+| `Light` | `mapbox://styles/mapbox/light-v11` | yes |
+| `Dark` | `mapbox://styles/mapbox/dark-v11` | yes |
+| `SatelliteStreets` | `mapbox://styles/mapbox/satellite-streets-v12` | yes |
+| `OsmBright`, `OsmBrightEn`, `OsmBrightJa` | same OSM Bright family as MapLibre | no |
+| `MapTilerTonerEn`, `MapTilerTonerJa`, `MapTilerBasicEn`, `MapTilerBasicJa`, `OpenMapTiles` | same MapLibre-shared styles | no |
+
+## `useMapboxViewState` params
+
+```ts
+useMapboxViewState({
+  id?: string;
+  accessToken?: string;
+  mapDesignType?: MapboxMapDesignType; // default MapboxDesign.Streets
+  cameraPosition?: MapCameraPosition;  // default MapCameraPosition.Default
+})
+```
+
+## `<MapboxView>` props
+
+On top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state):
+
+```ts
+maxZoom?: number;
+minZoom?: number;
+projection?: 'mercator' | 'globe';
+containerStyle?: React.CSSProperties;
+markerTilingOptions?: MarkerTilingOptions;
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+## Gotchas
+
+Same architecture as MapLibre: changing `mapDesignType` triggers a full map re-init rather than `setStyle`, and StrictMode's double-mount is handled the same way. Zoom is normalized against Google's reference with a documented empirical offset (`googleZoom ≈ mapboxZoom + 1.0`).
+
+## Minimal example
+
+```tsx
+const state = useMapboxViewState({ mapDesignType: MapboxDesign.OsmBright, cameraPosition });
+
+// No token needed for the OsmBright design:
+<MapboxView state={state}>
+  <Marker position={TOKYO} />
+</MapboxView>
+```

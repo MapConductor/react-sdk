@@ -22,6 +22,7 @@ export default function ArcGISProviderView({
   markerTilingOptions,
   useSceneView,
   onStateReady,
+  restrictBounds,
 }: ArcGISProviderViewProps) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useArcGISViewState({
@@ -43,6 +44,7 @@ export default function ArcGISProviderView({
       onCameraMoveStart={onCameraMoveStart}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
+      restrictBounds={restrictBounds}
     >
       {children}
     </View>

@@ -88,7 +88,7 @@ export function CameraSyncMapPane({
         </label>
       )}
 
-      {showOverlays && (
+      {true && (
         <CameraInfoCard
           label={label}
           position={cameraPosition}

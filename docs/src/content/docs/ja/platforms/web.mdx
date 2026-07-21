@@ -1,0 +1,34 @@
+---
+title: Web
+description: React DOM アプリケーションで provider を設定します。
+---
+
+# Web
+
+core、共通 React package、利用する `react-for-*` provider をインストールします。
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react \
+  @mapconductor/react-for-googlemaps @mapconductor/react-for-maplibre
+```
+
+Google Maps では browser API key を view state に渡します。キーをソースコードへ保存しないでください。
+
+```tsx
+const state = useGoogleMapViewState({
+  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  mapDesignType: GoogleMapDesign.Normal,
+  cameraPosition,
+});
+return <GoogleMapView state={state}>{children}</GoogleMapView>;
+```
+
+MapLibre は CSS を一度 import します。
+
+```tsx
+import '@mapconductor/react-for-maplibre/style.css';
+const state = useMapLibreViewState({ mapDesignType: MapLibreDesign.OsmBright, cameraPosition });
+return <MapLibreView state={state}>{children}</MapLibreView>;
+```
+
+Mapbox、Leaflet、OpenLayers、ArcGIS、Cesium も Web package があります。SDK asset、token、style、license は各 provider の要件に従います。provider の選択を MapView 境界へ集約すると、children の overlay を共有できます。

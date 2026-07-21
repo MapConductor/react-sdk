@@ -1,0 +1,82 @@
+---
+title: Marker
+description: Point annotations with custom icons, dragging, and animation.
+---
+
+# Marker
+
+Markers are point annotations placed at a geographic position. They support custom icons, click/drag interaction, and animation.
+
+## Convenience props
+
+For a small number of markers, or mostly-static ones:
+
+```tsx
+<Marker
+  position={GeoPoint}
+  id?: string | null
+  clickable?: boolean          // default true
+  draggable?: boolean          // default false
+  icon?: MarkerIcon | null
+  animation?: MarkerAnimation | null  // 'Drop' | 'Bounce'
+  extra?: Serializable | null
+  onClick?: (state: MarkerState) => void
+  onDragStart?: (state: MarkerState) => void
+  onDrag?: (state: MarkerState) => void
+  onDragEnd?: (state: MarkerState) => void
+  onAnimateStart?: (state: MarkerState) => void
+  onAnimateEnd?: (state: MarkerState) => void
+/>
+```
+
+Specifying `id` helps avoid unnecessary internal state churn when the surrounding component re-renders — omit it and one is derived from the marker's content hash.
+
+## Retained state
+
+For a large number of markers, or ones you move/update frequently:
+
+```tsx
+<Marker state={markerState} />
+```
+
+`state` is created with [`createMarkerState()`](/states/marker-state/) — see that page for the full property list and update patterns. A `<Marker>` takes either `state` **or** the convenience props above, never both.
+
+## Bulk composition with `<Markers>`
+
+```tsx
+<Markers states={MarkerState[]} />
+```
+
+`<Markers>` performs one collector replacement per render instead of mounting one `<Marker>` component (and its effects) per item — the right choice once you're rendering more than a handful of markers, or replacing the whole set on data changes. See [Large marker sets](/guides/large-marker-sets/) for the React Native transport details this enables.
+
+## Icon types
+
+Pass any `MarkerIcon` implementation to `icon` — the built-in `DefaultMarkerIcon` (SVG pin with an optional label) and `ImageIcon` (arbitrary image/canvas source), or the ready-made shapes in `@mapconductor/react-icons`. See [Marker icons](/core/marker-icons/).
+
+```tsx
+<Marker position={station} icon={new DefaultMarkerIcon('#2563eb', { label: '3' })} />
+```
+
+## Draggable markers
+
+```tsx
+<Marker
+  position={position}
+  draggable
+  onDragEnd={(state) => savePosition(state.id, state.position)}
+/>
+```
+
+`onDragStart`/`onDrag`/`onDragEnd` all receive the live `MarkerState`; read `state.position` for the current drag position at each stage.
+
+## Animation
+
+```tsx
+marker.animate('Drop'); // or 'Bounce', on a retained MarkerState
+```
+
+`onAnimateStart`/`onAnimateEnd` fire around the animation. See [MarkerState](/states/marker-state/#animating).
+
+## Events
+
+All marker interaction callbacks receive the `MarkerState`, not a provider-native event object, so handler logic is portable across providers. `extra` is the usual place to attach the domain object (a store record, a vehicle ID) a handler needs.

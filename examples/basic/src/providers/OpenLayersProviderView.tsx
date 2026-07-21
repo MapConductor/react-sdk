@@ -17,6 +17,7 @@ export default function OpenLayersProviderView({
   onCameraMoveEnd,
   markerTilingOptions,
   onStateReady,
+  restrictBounds,
 }: ProviderViewProps) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useOpenLayersMapViewState({
@@ -36,6 +37,7 @@ export default function OpenLayersProviderView({
       onCameraMoveStart={onCameraMoveStart}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
+      restrictBounds={restrictBounds}
     >
       {children}
     </OpenLayersMapView>

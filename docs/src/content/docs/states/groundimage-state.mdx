@@ -1,0 +1,66 @@
+---
+title: GroundImageState
+description: Retained, observable state for an image draped over a geographic rectangle.
+---
+
+# GroundImageState
+
+`GroundImageState` holds a georeferenced image overlay — an image draped flat over a `GeoRectBounds` rectangle, such as a floor plan, historical map, or aerial photo.
+
+## Creating a GroundImageState
+
+```ts
+createGroundImageState({
+  bounds: GeoRectBounds;
+  imageUrl: string;
+  id?: string | null;
+  opacity?: number;    // default 1.0
+  tileSize?: number;   // default 256
+  extra?: Serializable | null;
+  onClick?: (event: { state: GroundImageState; clicked: GeoPoint | null }) => void;
+}): GroundImageState
+```
+
+Note the convenience `<GroundImage bounds={...} imageUrl={...} />` prop form defaults `opacity` to `0.5`, while the raw factory here defaults to `1.0` — pass an explicit value rather than relying on either default matching the other.
+
+## Properties
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | readonly |
+| `bounds` | `GeoRectBounds` | mutable |
+| `imageUrl` | `string` | |
+| `opacity` | `number` | `0`-`1` |
+| `tileSize` | `number` | tiling granularity used when rendering the image |
+| `extra` | `Serializable \| null` | |
+| `onClick` | handler or `null` | `clicked` may be `null` on providers that can't resolve an exact click point for this overlay type |
+
+## Methods
+
+```ts
+copy(opts?: GroundImageStateCopyParams): GroundImageState;
+equals(other: unknown): boolean;
+hashCode(): number;
+fingerPrint(): GroundImageFingerPrint;
+asObservable(): { subscribe(fn): () => void };
+```
+
+## Updating dynamically
+
+```tsx
+const [overlay] = useState(() => createGroundImageState({
+  bounds: floorPlanBounds,
+  imageUrl: '/floor-plans/level-3.png',
+  opacity: 0.7,
+}));
+
+useEffect(() => {
+  overlay.opacity = isActiveFloor ? 0.9 : 0.3;
+}, [overlay, isActiveFloor]);
+
+return <GroundImage state={overlay} />;
+```
+
+## See also
+
+- [`<GroundImage>`](/components/groundimage/) — the React component that renders this state

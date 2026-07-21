@@ -1,0 +1,68 @@
+---
+title: Spherical utilities
+description: Distance, heading, offset, and interpolation math shared with the overlay renderers.
+---
+
+# Spherical utilities
+
+`js-sdk-core` exports three interchangeable calculators for geographic math — distance, heading, offset, interpolation — differing only in the earth model they assume. Use these instead of hand-rolled trigonometry when you need results consistent with what the SDK's own circle/polyline/polygon renderers use for geodesic drawing.
+
+## Choosing a calculator
+
+| Namespace | Earth model | Use when |
+| --- | --- | --- |
+| `Spherical` | sphere (haversine) | fast, good enough for most UI-level distance/heading — the default most apps want |
+| `WGS84Geodesic` | WGS84 ellipsoid (Vincenty) | sub-meter accuracy over long distances; more expensive (iterative) |
+| `GeographicLibCalculator` | full geodesic (GeographicLib-equivalent) | edge cases where Vincenty's iteration doesn't converge (near-antipodal points) |
+
+All three expose the same function shape, plus flat top-level aliases for the common two:
+
+```ts
+import { Spherical, WGS84Geodesic, computeDistanceBetween, computeWGS84DistanceBetween } from '@mapconductor/js-sdk-core';
+
+Spherical.computeDistanceBetween(from, to);      // === computeDistanceBetween(from, to)
+WGS84Geodesic.computeDistanceBetween(from, to);  // === computeWGS84DistanceBetween(from, to)
+```
+
+## Core functions (per calculator)
+
+```ts
+computeDistanceBetween(from: GeoPoint, to: GeoPoint): number;       // meters
+computeHeading(from: GeoPoint, to: GeoPoint): number;                // degrees, -180 to 180
+```
+
+`Spherical` additionally provides:
+
+```ts
+computeOffset({ origin, distance, heading }): GeoPoint;              // point `distance` meters along `heading` from origin
+computeOffsetOrigin({ to, distance, heading }): GeoPoint | null;     // inverse of computeOffset
+computeLength(path: GeoPoint[]): number;                             // total path length, meters
+computeArea(path: GeoPoint[]): number;                                // polygon area, m² (unsigned)
+computeSignedArea(path: GeoPoint[]): number;                          // signed — sign indicates winding order
+sphericalInterpolate({ from, to, fraction }): GeoPoint;               // great-circle interpolation
+linearInterpolate({ from, to, fraction }): GeoPoint;                  // straight lat/lng interpolation (handles antimeridian crossing)
+```
+
+`WGS84Geodesic.interpolate({ from, to, fraction })` is the ellipsoid-accurate equivalent of `sphericalInterpolate`.
+
+```tsx
+const distance = Spherical.computeDistanceBetween(store.position, userPosition);
+const bearing = Spherical.computeHeading(userPosition, store.position);
+const midpoint = Spherical.sphericalInterpolate({ from: a, to: b, fraction: 0.5 });
+```
+
+## Additional helpers
+
+Smaller single-purpose utilities live alongside the calculators and are re-exported from the same `js-sdk-core` root:
+
+| Function | Purpose |
+| --- | --- |
+| `calculateMetersPerPixel(...)` | ground resolution at a given latitude/zoom — useful for pixel-based hit-test radii |
+| `calculatePositionAtDistance(...)` | point at a given distance/fraction along a multi-point path |
+| `closestPointOnSegment(...)` | nearest point on a line segment to a given point |
+| `isPointOnTheGeodesicLine(...)` / `isPointOnLinearLine(...)` | hit-testing against polylines drawn geodesically vs. linearly |
+| `expandBounds(...)` | grow a `GeoRectBounds` — used internally by `expandedByDegrees` |
+| `splitByMeridian(...)` | split a path that crosses the antimeridian into renderable segments |
+| `geoNearest(...)` | nearest point in a set to a query point |
+
+These back the same click hit-testing and geodesic rendering the built-in `Circle`/`Polyline`/`Polygon` components use — reach for them when building custom hit-testing or measurement UI rather than reimplementing the math.

@@ -56,6 +56,7 @@ export function PolygonClickPage() {
           position: clickedMarker.position,
           icon: markerIcon,
           animation: MarkerAnimation.Drop,
+          clickable: false,
         })
       : null,
     [clickedMarker, markerIcon],

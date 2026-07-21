@@ -17,7 +17,8 @@ export type PaneProvider =
   | 'google-maps-3d'
   | 'arcgis'
   | 'arcgis-3d'
-  | 'cesium';
+  | 'cesium'
+  | 'here';
 
 export interface CameraLocationInfo {
   name: string;

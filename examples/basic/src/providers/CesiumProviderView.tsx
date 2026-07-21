@@ -17,6 +17,7 @@ export default function CesiumProviderView({
   onCameraMoveEnd,
   markerTilingOptions,
   onStateReady,
+  restrictBounds,
 }: ProviderViewProps) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useCesiumMapViewState({
@@ -36,6 +37,7 @@ export default function CesiumProviderView({
       onCameraMoveStart={onCameraMoveStart}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
+      restrictBounds={restrictBounds}
     >
       {children}
     </CesiumMapView>

@@ -1,0 +1,54 @@
+---
+title: MapView component
+description: The shared contract every provider's map view component implements.
+---
+
+# MapView component
+
+Every provider package (`react-for-*`) exports its own map view component — `GoogleMapView`, `MapLibreView`, `ArcGISMapView`, and so on — but they all implement the same base contract, `MapViewBaseProps`, so application code that only uses the common surface reads identically no matter which provider is mounted.
+
+## Shared props
+
+```ts
+interface MapViewBaseProps<TState extends MapViewStateInterface> {
+  state: TState;                       // from the matching use<Provider>ViewState() hook
+  style?: CSSProperties;               // React Native: StyleProp<ViewStyle>
+  children?: ReactNode;                // overlay components
+
+  onMapLoaded?: (state: TState) => void;          // fires once, controller attached
+  onMapClick?: (point: GeoPoint) => void;
+  onMapLongClick?: (point: GeoPoint) => void;
+  onCameraMoveStart?: (camera: MapCameraPosition) => void;
+  onCameraMove?: (camera: MapCameraPosition) => void;   // fires per frame while moving
+  onCameraMoveEnd?: (camera: MapCameraPosition) => void;
+}
+```
+
+`onMapClick`/`onMapLongClick` receive a `GeoPoint`, not a provider-native pixel/DOM event, so the same handler logic works across providers. See [Events and camera](/guides/events-and-camera/) for the full event model.
+
+## Minimal usage
+
+```tsx
+const state = useMapLibreViewState({
+  mapDesignType: MapLibreDesign.OsmBright,
+  cameraPosition: MapCameraPosition.from({ position: tokyo, zoom: 12 }),
+});
+
+<MapLibreView state={state} onMapClick={(point) => addMarker(point)}>
+  <Marker position={tokyo} />
+</MapLibreView>
+```
+
+The container must have a non-zero rendered height (set it via `style` or a parent with a defined height) — a zero-height container is the most common reason a map "doesn't render."
+
+## What's provider-specific
+
+Beyond the shared props, each view component adds its own: a required or optional API key/token, a `markerTilingOptions` object, style/projection knobs, and an `onError` handler. These are documented per provider — see [Reference → Provider setup](/reference/providers/) for the exact prop list of `GoogleMapView`, `MapLibreView`, `MapboxView`, `LeafletMapView`, `OpenLayersMapView`, `ArcGISMapView`, and `CesiumMapView`.
+
+## Readiness and children
+
+Overlay components (`<Marker>`, `<Circle>`, ...) can be declared as children before `onMapLoaded` fires — the provider queues pending overlay compositions and dispatches them once the underlying SDK is ready. Don't gate rendering your overlay tree behind `onMapLoaded` yourself; that's redundant with what the provider already does and can hide real lifecycle bugs. See [Architecture → Readiness](/architecture/#readiness).
+
+## Accessing the native map instance
+
+`state.getMapViewHolder()` returns the provider's native view/map instance once available — see [MapViewHolder](/core/mapviewholder/) for the escape-hatch API when you need a provider-specific capability MapConductor doesn't model directly.

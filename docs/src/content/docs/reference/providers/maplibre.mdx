@@ -1,0 +1,76 @@
+---
+title: MapLibre
+description: Set up @mapconductor/react-for-maplibre on the Web.
+---
+
+# MapLibre
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-maplibre
+```
+
+`maplibre-gl` is bundled — no separate install needed. Import the provider stylesheet once from your application entry point:
+
+```tsx
+import '@mapconductor/react-for-maplibre/style.css';
+```
+
+## API key
+
+None required. The default style (`MapLibreDesign.DemoTiles`) points at MapLibre's own free demo tile service.
+
+## Design types
+
+`MapLibreDesign` instances wrap a style JSON URL:
+
+| Member | Notes |
+| --- | --- |
+| `DemoTiles` | `demotiles.maplibre.org` — good for a zero-config tutorial |
+| `OsmBright`, `OsmBrightEn`, `OsmBrightJa` | OSM Bright style, default/English/Japanese label variants |
+| `MapTilerTonerEn`, `MapTilerTonerJa` | high-contrast toner style |
+| `MapTilerBasicEn`, `MapTilerBasicJa` | minimal basic style |
+| `OpenMapTiles` | generic OpenMapTiles style |
+
+`OsmBright*`/`MapTiler*`/`OpenMapTiles` styles are served from a Japan-focused public demo tile host (`tile.openstreetmap.jp`) — fine for development, but point `mapDesignType` at your own hosted style JSON for production traffic and licensing compliance.
+
+## `useMapLibreViewState` params
+
+```ts
+useMapLibreViewState({
+  id?: string;
+  mapDesignType?: MapLibreMapDesignType; // default MapLibreDesign.OsmBright
+  cameraPosition?: MapCameraPosition;    // default MapCameraPosition.Default
+})
+```
+
+## `<MapLibreView>` props
+
+On top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state):
+
+```ts
+maxZoom?: number;
+minZoom?: number;
+projection?: 'mercator' | 'globe';  // default 'mercator'; a component prop, not part of state
+containerStyle?: React.CSSProperties;
+markerTilingOptions?: MarkerTilingOptions;
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+## Gotchas
+
+- Changing `mapDesignType` re-initializes the map (remove + recreate) rather than calling `setStyle` — style swaps are not cheap.
+- React StrictMode's double-mount is handled via a sentinel error thrown from the map's `remove` event; the provider swallows it on the aborted first run.
+
+## Minimal example
+
+```tsx
+const state = useMapLibreViewState({
+  mapDesignType: MapLibreDesign.OsmBright,
+  cameraPosition: MapCameraPosition.from({ position: TOKYO, zoom: 12 }),
+});
+
+<MapLibreView state={state} projection="mercator">
+  <Marker position={TOKYO} />
+</MapLibreView>
+```

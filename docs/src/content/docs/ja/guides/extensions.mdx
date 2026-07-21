@@ -1,0 +1,23 @@
+---
+title: 拡張機能
+description: GeoJSON、heatmap、marker clustering、icon package。
+---
+
+# 拡張機能
+
+| パッケージ | 用途 |
+| --- | --- |
+| `@mapconductor/react-geojson-layer` | GeoJSON / GeoJSON sequence の解析と layer 描画 |
+| `@mapconductor/react-heatmap` | 重み付き座標の密度可視化 |
+| `@mapconductor/react-marker-clustering` | 近接 marker の grouping と cluster icon |
+| `@mapconductor/react-icons` | 共通 icon helper |
+
+```tsx
+<MarkerClusterGroup
+  markers={markerStates}
+  clusterRadiusPx={80}
+  minClusterSize={3}
+/>
+```
+
+React Native extension は汎用の `NativeMapExtensionCapable` 境界を利用します。provider の public controller に extension 固有 command を追加しません。native path の heatmap と clustering は大きな入力を immutable composition として扱い、更新は extension interface 経由で送信します。

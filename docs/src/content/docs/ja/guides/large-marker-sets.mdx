@@ -1,0 +1,23 @@
+---
+title: 大量のマーカー
+description: 高効率な marker composition と React Native transport。
+---
+
+# 大量のマーカー
+
+大量の collection には `<Markers states={states} />` を使います。collector の置換が一度になり、各マーカーごとの React component/effect tree を作りません。
+
+```tsx
+const markers = useMemo(() => records.map((record) => createMarkerState({
+  id: record.id,
+  position: GeoPoint.from(record.location),
+  extra: record,
+})), [records]);
+return <Markers states={markers} />;
+```
+
+React Native では世代全体で icon registry を一度作り、500 件の structure-of-arrays batch を ACK 待ちで送り、最後に commit します。各 batch へ icon payload を重複して入れず、同一 URI の icon は共有してください。
+
+native tiling は provider marker の生成数を減らしますが、全 marker definition は bridge を通ります。クラスタリングは表示 composition 自体を変更する別の機能です。
+
+Android の計測では `MCMarkerTrace` を使い、JS batch、native decode、core diff、provider 処理、style 同期、tile 描画を分けて比較します。

@@ -1,0 +1,68 @@
+---
+title: Events and camera
+description: Handle map events and control camera state.
+---
+
+# Events and camera
+
+Provider map views expose a common event surface:
+
+```tsx
+<MapLibreView
+  state={state}
+  onMapLoaded={(mapState) => console.log(mapState.id)}
+  onMapClick={(point) => setSelectedPoint(point)}
+  onMapLongClick={(point) => addMarker(point)}
+  onCameraMoveStart={(camera) => console.log('start', camera)}
+  onCameraMove={(camera) => synchronize(camera)}
+  onCameraMoveEnd={(camera) => loadVisibleData(camera)}
+>
+  {children}
+</MapLibreView>
+```
+
+See [MapCameraPosition](/core/mapcameraposition/) for the full type — `position`, `zoom`, `bearing`, `tilt`, optional `visibleRegion`, and optional `paddings`.
+
+## Move or animate
+
+```tsx
+const destination = state.cameraPosition.copy({
+  position: GeoPoint.from({ latitude: 34.6937, longitude: 135.5023 }),
+  zoom: 14,
+});
+
+state.moveCameraTo(destination);       // immediate
+state.moveCameraTo(destination, 800);  // animate for 800 ms
+```
+
+Calling `moveCameraTo` before the controller attaches updates the retained camera state; the provider applies it when ready.
+
+Every provider view shares the same event prop shape — see [MapView component](/components/mapview/) for the full `MapViewBaseProps` contract. `onMapClick`/`onMapLongClick` receive a `GeoPoint`, not a provider-native pixel/DOM event — the same value works whichever provider is mounted.
+
+## Overlay events
+
+Marker states support click, drag, and animation callbacks. Shape state supports its corresponding click handler. Callback payloads use MapConductor state and geometry instead of provider-native objects, keeping application logic portable.
+
+```ts
+marker.onClick = (state) => select(state.id);
+marker.onDragStart = (state) => beginDrag(state.id);
+marker.onDrag = (state) => previewMove(state.position);
+marker.onDragEnd = (state) => commitMove(state.id, state.position);
+marker.onAnimateStart = (state) => console.log('animating', state.id);
+marker.onAnimateEnd = (state) => console.log('settled', state.id);
+
+circle.onClick = (state) => inspect(state.id);
+polyline.onClick = (state) => inspect(state.id);
+polygon.onClick = (state) => inspect(state.id);
+groundImage.onClick = (state) => inspect(state.id);
+```
+
+## Pointer type on Web
+
+`usePointerType()` (from `js-sdk-react`) returns a ref tracking whether the last input was touch or mouse/pen, updated on `pointerdown`. It's useful for choosing a hit-test radius or tap target size at click time without re-rendering on every pointer change:
+
+```tsx
+const pointerTypeRef = usePointerType();
+
+const radius = pointerTypeRef.current === 'touch' ? TOUCH_HIT_RADIUS : MOUSE_HIT_RADIUS;
+```

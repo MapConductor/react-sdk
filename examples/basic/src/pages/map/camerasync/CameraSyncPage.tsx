@@ -5,6 +5,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import '@mapconductor/react-for-openlayers/style.css';
 import '@mapconductor/react-for-mapbox/style.css';
+import '@mapconductor/react-for-leaflet/style.css';
 import { CameraSyncMapPane } from './CameraSyncMapPane';
 import {
   cameraSyncProviderById,

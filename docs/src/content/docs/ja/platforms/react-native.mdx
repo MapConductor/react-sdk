@@ -1,0 +1,32 @@
+---
+title: React Native
+description: 専用 React Native provider bridge の設定。
+---
+
+# React Native
+
+React Native provider は Web package とは別の兄弟パッケージです。
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react \
+  @mapconductor/reactnative-for-googlemaps @mapconductor/reactnative-for-maplibre
+```
+
+共通 component は明示的な native entry point から import します。
+
+```tsx
+import { Marker, Markers, InfoBubble } from '@mapconductor/js-sdk-react/native';
+import { GoogleMapDesign, GoogleMapView, useGoogleMapViewState } from '@mapconductor/reactnative-for-googlemaps';
+```
+
+```tsx
+const state = useGoogleMapViewState({
+  mapDesignType: GoogleMapDesign.Normal,
+  cameraPosition: MapCameraPosition.from({ position: TOKYO, zoom: 12 }),
+});
+return <GoogleMapView state={state} style={{ flex: 1 }}><Marker position={TOKYO} /></GoogleMapView>;
+```
+
+native module は autolinking で検出されます。Google Maps key は Android の `local.properties`、Gradle property、`GOOGLE_MAPS_API_KEY` など、各 platform の安全な設定方法を利用します。
+
+overlay は `onMapLoaded` 前でも宣言できます。大量マーカーには `<Markers>` を使い、ACK 付きの世代別 batch transport を利用してください。実例は `examples/reactnative-basic` にあります。

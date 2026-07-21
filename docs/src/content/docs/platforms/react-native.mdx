@@ -1,0 +1,70 @@
+---
+title: React Native
+description: Configure the dedicated React Native provider bridges.
+---
+
+# React Native
+
+React Native uses the common core and overlay API, but each native provider is a separate sibling package.
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react \
+  @mapconductor/reactnative-for-googlemaps \
+  @mapconductor/reactnative-for-maplibre
+```
+
+Use the explicit native entry point for shared components:
+
+```tsx
+import { Marker, Markers, InfoBubble } from '@mapconductor/js-sdk-react/native';
+import {
+  GoogleMapDesign,
+  GoogleMapView,
+  useGoogleMapViewState,
+} from '@mapconductor/reactnative-for-googlemaps';
+```
+
+This avoids relying on tooling to resolve the `react-native` export condition.
+
+## Basic view
+
+```tsx
+const state = useGoogleMapViewState({
+  mapDesignType: GoogleMapDesign.Normal,
+  cameraPosition: MapCameraPosition.from({ position: TOKYO, zoom: 12 }),
+});
+
+return (
+  <GoogleMapView state={state} style={{ flex: 1 }}>
+    <Marker position={TOKYO} />
+  </GoogleMapView>
+);
+```
+
+## Native configuration
+
+- Provider modules are discovered through React Native autolinking.
+- Google Maps keys belong in `local.properties`, Gradle properties, or `GOOGLE_MAPS_API_KEY` on Android; configure the corresponding native mechanism on iOS.
+- Android packages consume MapConductor native artifacts from MavenLocal during repository development.
+- iOS packages consume the sibling iOS SDK as XCFrameworks; repository scripts build and synchronize them.
+
+## Lifecycle and performance
+
+Declare overlays normally even before `onMapLoaded`. The wrapper queues pending compositions. For large sets, use `<Markers>` so the bridge can send a generation registry followed by ACK-controlled structure-of-arrays batches.
+
+See `examples/reactnative-basic` for Google Maps and MapLibre screens covering maps, overlays, GeoJSON, heatmaps, clustering, and raster layers.
+
+## Design types and view state are shared with Web
+
+A React Native provider package re-exports its Web sibling's provider-neutral types directly — you're using the exact same `GoogleMapDesign`/`ArcGISDesign` enum and `use<Provider>ViewState()` hook signature on both platforms:
+
+```tsx
+// reactnative-for-googlemaps/src/index.ts re-exports these from react-for-googlemaps:
+export { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/react-for-googlemaps';
+```
+
+Only the view component (`GoogleMapView`, backed by a native Fabric component) and the controller/bridge code are platform-specific. See [Providers](/reference/providers/) for which providers ship a React Native package (Google Maps, MapLibre, ArcGIS only) and their design-type options.
+
+## Extensions on React Native
+
+Heatmap and marker clustering are available on React Native from the same `@mapconductor/react-heatmap` and `@mapconductor/react-marker-clustering` packages — unlike `js-sdk-react`, they resolve their native build through the bundler's `react-native` export condition on the same import path rather than a separate `/native` subpath, so no import changes are needed. They render through the shared native extension host rather than the Web tile-rasterization path. See [Extensions](/guides/extensions/) for the component API, which is the same on both platforms — only the rendering path underneath differs.

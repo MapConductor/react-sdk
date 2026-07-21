@@ -1,0 +1,85 @@
+---
+title: RasterLayerState
+description: Retained, observable state for a tiled raster overlay.
+---
+
+# RasterLayerState
+
+`RasterLayerState` holds a raster tile layer's source and styling as mutable, observable properties. It's the state type `<RasterLayer>` renders, and also the type extension packages like `react-geojson-layer` and `react-heatmap` build on internally — both rasterize their content into tiles and mount a `RasterLayer` underneath.
+
+## Creating a RasterLayerState
+
+```ts
+createRasterLayerState({
+  source: RasterLayerSource;
+  id?: string | null;
+  opacity?: number;      // default 1.0
+  visible?: boolean;     // default true
+  zIndex?: number;       // default 0
+  userAgent?: string;    // default 'MapConductor/RasterLayerAgent(https://mapconductor.com)'
+  extraHeaders?: Record<string, string> | null;
+  debug?: boolean;       // default false
+}): RasterLayerState
+```
+
+## `RasterLayerSource`
+
+A discriminated union with three constructors:
+
+```ts
+RasterLayerSource.UrlTemplate({
+  template: string;          // e.g. 'https://tiles.example.com/{z}/{x}/{y}.png'
+  tileSize?: number;         // default 512
+  minZoom?: number | null;
+  maxZoom?: number | null;
+  attributionRules?: AttributionRule[];
+  scheme?: TileScheme;       // 'XYZ' | 'TMS'
+})
+RasterLayerSource.TileJson({ url: string })
+RasterLayerSource.ArcGisService({ serviceUrl: string })
+```
+
+`minZoom`/`maxZoom` gate both tile requests and attribution display — an attribution rule tied to a source only appears in [`MapAttributionOverlay`](/architecture/#attribution) while the camera's zoom falls within that source's range.
+
+## Properties
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | readonly |
+| `source` | `RasterLayerSource` | mutable |
+| `opacity` | `number` | `0`-`1` |
+| `visible` | `boolean` | toggling this is cheaper than adding/removing the overlay |
+| `zIndex` | `number` | |
+| `userAgent` | `string` | sent with tile requests |
+| `extraHeaders` | `Record<string, string> \| null` | additional HTTP headers for tile requests (e.g. an API key header) |
+| `debug` | `boolean` | overlays tile boundaries for debugging |
+
+## Methods
+
+```ts
+copy(opts?: RasterLayerStateCopyParams): RasterLayerState;
+equals(other: unknown): boolean;
+hashCode(): number;
+fingerPrint(): RasterLayerFingerPrint;
+asObservable(): { subscribe(fn): () => void };
+```
+
+## Updating dynamically
+
+```tsx
+const [layer] = useState(() => createRasterLayerState({
+  source: RasterLayerSource.UrlTemplate({ template: tileUrlTemplate, maxZoom: 18 }),
+  opacity: 0.6,
+}));
+
+useEffect(() => {
+  layer.visible = showOverlay;
+}, [layer, showOverlay]);
+
+return <RasterLayer state={layer} />;
+```
+
+## See also
+
+- [`<RasterLayer>`](/components/rasterlayer/) — the React component that renders this state
+- [Extensions](/guides/extensions/) — GeoJSON and heatmap layers, both built on `RasterLayerState`

@@ -1,0 +1,94 @@
+---
+title: MarkerState
+description: Retained, observable state for a single marker.
+---
+
+# MarkerState
+
+`MarkerState` holds a marker's position, appearance, and interaction settings as mutable, observable properties. Assigning to a property notifies the map's marker collector directly — no need to replace the object or trigger a React re-render for the change to reach the map. See [Architecture](/architecture/#state-ownership) for how updates propagate.
+
+## Creating a MarkerState
+
+```ts
+createMarkerState({
+  position: GeoPoint;
+  id?: string | null;                 // auto-generated from content hash if omitted
+  extra?: Serializable | null;
+  icon?: MarkerIcon | null;
+  animation?: MarkerAnimation | null; // 'Drop' | 'Bounce'
+  zIndex?: number | null;
+  clickable?: boolean;                // default true
+  draggable?: boolean;                // default false
+  onClick?: (state: MarkerState) => void;
+  onDragStart?: (state: MarkerState) => void;
+  onDrag?: (state: MarkerState) => void;
+  onDragEnd?: (state: MarkerState) => void;
+  onAnimateStart?: (state: MarkerState) => void;
+  onAnimateEnd?: (state: MarkerState) => void;
+}): MarkerState
+```
+
+Event handlers are set per-state at construction (or later, by assignment) — each marker can own its own click/drag logic rather than routing every marker's events through a single handler on the map view.
+
+## Properties
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | readonly; identifies the marker across compositions — keep it stable |
+| `position` | `GeoPoint` | mutable |
+| `extra` | `Serializable \| null` | arbitrary app data carried alongside the marker, handed back in event callbacks |
+| `icon` | `MarkerIcon \| null` | see [Marker icons](/core/marker-icons/) |
+| `animation` | `MarkerAnimation \| null` | `'Drop'` or `'Bounce'`; set to trigger, typically followed by resetting to `null` |
+| `clickable` | `boolean` | |
+| `draggable` | `boolean` | |
+| `zIndex` | `number` | drawing order among markers |
+| `onClick`, `onDragStart`, `onDrag`, `onDragEnd`, `onAnimateStart`, `onAnimateEnd` | event handler or `null` | |
+
+## Methods
+
+```ts
+setPosition(position: GeoPoint): void;
+setIcon(icon: MarkerIcon | null): void;
+setClickable(clickable: boolean): void;
+setDraggable(draggable: boolean): void;
+setZIndex(zIndex: number): void;
+animate(animation: MarkerAnimation | null): void;
+getAnimation(): MarkerAnimation | null;
+
+copy(opts?: MarkerStateCopyParams): MarkerState;   // new state, unset fields carried over
+equals(other: unknown): boolean;                    // structural equality via hashCode
+hashCode(): number;
+fingerPrint(): MarkerFingerPrint;                    // snapshot used for diffing
+asObservable(): { subscribe(fn: (fp: MarkerFingerPrint) => void): () => void };
+```
+
+The setter methods (`setPosition`, `setIcon`, ...) are equivalent to assigning the corresponding property — use whichever reads better at the call site. `fingerPrint()`/`asObservable()` back the collector's per-state update subscription (see [Architecture](/architecture/#mapviewscope-and-overlaycollector)); application code rarely calls them directly.
+
+## Updating dynamically
+
+Mutate properties in place — this is the common, efficient pattern:
+
+```tsx
+const [marker] = useState(() => createMarkerState({ id: 'vehicle-42', position: initialPosition }));
+
+useEffect(() => {
+  marker.position = latestPosition;
+}, [marker, latestPosition]);
+
+return <Marker state={marker} />;
+```
+
+Avoid creating a new `MarkerState` on every update just to satisfy React's "new props in" mental model — that forces a full collection diff instead of a focused per-marker update. Use `copy()` when you deliberately want a new, independent state object (e.g. storing a snapshot in an undo stack), not as a substitute for mutation.
+
+## Animating
+
+```tsx
+marker.animate('Drop');
+```
+
+`onAnimateStart`/`onAnimateEnd` fire around the animation; `getAnimation()` reads the currently-set animation without triggering a new one.
+
+## See also
+
+- [`<Marker>` / `<Markers>`](/components/marker/) — the React components that render this state
+- [Large marker sets](/guides/large-marker-sets/) — bulk composition with `<Markers>`

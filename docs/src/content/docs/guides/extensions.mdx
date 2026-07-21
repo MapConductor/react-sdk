@@ -1,0 +1,184 @@
+---
+title: Extensions
+description: GeoJSON, heatmap, clustering, and icon extension packages.
+---
+
+# Extensions
+
+Extension packages build on the same map scope and state model as the core overlays: a retained state object plus a component that registers it, or convenience props for the common case.
+
+| Package | Purpose |
+| --- | --- |
+| `@mapconductor/react-geojson-layer` | Parse GeoJSON/GeoJSON Sequence data and render feature layers |
+| `@mapconductor/react-heatmap` | Density visualization from weighted geographic points |
+| `@mapconductor/react-marker-clustering` | Group nearby markers and render cluster icons |
+| `@mapconductor/react-icons` | Ready-made `MarkerIcon` shapes (circle, flag, info-bubble tails) |
+
+## GeoJSON layer
+
+`<GeoJSONLayer>` rasterizes features into tiles and renders them as a `RasterLayer` under the hood, so large feature sets stay off the main render path. Load static GeoJSON with `GeoJSONParser` and pass the parsed features directly:
+
+```tsx
+import { GeoJSONLayer, GeoJSONLayerState, GeoJSONParser, colorArgb } from '@mapconductor/react-geojson-layer';
+import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+
+const layerState = useMemo(() => new GeoJSONLayerState({
+  fillColor: colorArgb(127, 0x3b, 0xb2, 0xd0),
+  strokeColor: colorArgb(255, 0x1d, 0x70, 0x82),
+  strokeWidth: 2,
+}), []);
+
+const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
+useEffect(() => {
+  setFeatures(GeoJSONParser.parseFeatures(geoJsonText));
+}, [geoJsonText]);
+
+<GeoJSONLayer state={layerState} features={features} />
+```
+
+Colors are packed ARGB integers (`colorArgb(a, r, g, b)` / `colorRgb(r, g, b)`), matching the convention used by `react-heatmap`. Per-feature `strokeColor`/`fillColor`/`strokeWidth`/`pointRadius` (set when creating a `GeoJSONFeatureData` or `GeoJSONFeatureState`) override the layer defaults; leave them `null`/unset to inherit from `GeoJSONLayerState`.
+
+Because rendering is tile-based rather than one DOM/canvas overlay per feature, there's no native per-feature click event — call `layerState.processClick(point, pixelTolerance, zoom)` from your map's `onMapClick` handler and handle hits through `onLoadStart`/`onLoadComplete`/`onClick` on `GeoJSONLayerState`:
+
+```tsx
+const layerState = useMemo(() => new GeoJSONLayerState({
+  strokeColor: colorArgb(200, 250, 36, 29),
+  strokeWidth: 6,
+  onClick: (feature, position) => setSelected({ position, properties: feature.properties }),
+}), []);
+
+const handleMapClick = useCallback((point: GeoPoint) => {
+  if (mapState && !layerState.processClick(point, 10, mapState.cameraPosition.zoom)) {
+    setSelected(null);
+  }
+}, [layerState, mapState]);
+
+<MapView state={mapState} onMapClick={handleMapClick}>
+  <GeoJSONLayer state={layerState} features={features} />
+  {selected && <InfoBubbleAtPosition position={selected.position}>{/* ... */}</InfoBubbleAtPosition>}
+</MapView>
+```
+
+For very large datasets that arrive as newline/RS-delimited records rather than one `FeatureCollection`, use `GeoJSONSeqParser` (GeoJSON Text Sequences, RFC 8142) instead of `GeoJSONParser` — both expose a `streamParse(text, onFeature)` method so you don't have to hold the whole payload in memory before the first feature renders.
+
+Reactive per-feature updates go through `<GeoJSONFeature>`/`<GeoJSONFeatures>` children (mirroring `<Marker>`/`<Markers>`) instead of the `features` prop:
+
+```tsx
+<GeoJSONLayer trackFeatureUpdates>
+  <GeoJSONFeatures states={featureStates} />
+</GeoJSONLayer>
+```
+
+## Heatmap
+
+`<HeatmapOverlay>` follows the same retained-state-or-props pattern and also renders through the tile pipeline:
+
+```tsx
+import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
+
+const [points, setPoints] = useState<HeatmapPointState[]>([]);
+useEffect(() => {
+  fetchRecords().then((records) => {
+    setPoints(records.map((r, i) => new HeatmapPointState({
+      id: `point-${i}`,
+      position: createGeoPoint({ latitude: r.lat, longitude: r.lng }),
+      weight: r.weight, // defaults to 1.0
+    })));
+  });
+}, []);
+
+<HeatmapOverlay>
+  <HeatmapPoints states={points} />
+</HeatmapOverlay>
+```
+
+Style with `radiusPx` (default `20`), `opacity` (default `0.7`), and `gradient` — a `HeatmapGradient` built from `{ position: 0-1, color: colorRgb(...) }` stops (default: green at `0.2` fading to red at `1.0`). Leave `maxIntensity` unset to auto-scale the color ceiling per zoom level from the current point density, or pin it to a fixed value so the same weight always maps to the same color regardless of how zoomed in the view is:
+
+```tsx
+<HeatmapOverlay
+  radiusPx={28}
+  opacity={0.8}
+  gradient={new HeatmapGradient([
+    { position: 0.0, color: colorRgb(0, 0, 255) },
+    { position: 0.5, color: colorRgb(0, 255, 0) },
+    { position: 1.0, color: colorRgb(255, 0, 0) },
+  ])}
+  maxIntensity={50}
+>
+  <HeatmapPoints states={points} />
+</HeatmapOverlay>
+```
+
+## Marker clustering
+
+```tsx
+import { MarkerClusterGroup } from '@mapconductor/react-marker-clustering';
+
+<MarkerClusterGroup
+  markers={markerStates}
+  clusterRadiusPx={80}
+  minClusterSize={3}
+  enableZoomAnimation
+  enablePanAnimation
+  onClusterClick={(cluster) => zoomToCluster(cluster.markerIds)}
+/>
+```
+
+The group can also collect child `<Marker>` components instead of a `markers` array — useful when markers are already declared elsewhere in the tree:
+
+```tsx
+<MarkerClusterGroup clusterRadiusPx={80}>
+  {items.map((item) => <Marker key={item.id} state={item.markerState} />)}
+</MarkerClusterGroup>
+```
+
+Cluster markers are ordinary `MarkerState` objects (`id` prefixed `cluster_<zoom>_<cellX>_<cellY>`, `extra` holding a `MarkerCluster { count, markerIds }`), so `onClusterClick` gets a plain object you can resolve back to member markers and re-center the camera on. Customize the cluster's icon with `clusterIconProvider={(count) => MarkerIcon}` — it defaults to a blue `ColorDefaultIcon` labeled with the count:
+
+```tsx
+const clusterIconProvider = useMemo<ClusterIconProvider>(() => (count) => {
+  const label = count > 1000 ? '1k+' : String(count);
+  return new ImageIcon(drawClusterBadge(backgroundImage, label), { anchor: { x: 0.5, y: 0.5 } });
+}, [backgroundImage]);
+```
+
+Set `debugHullPolygons` to render each cluster's convex hull as a `Polygon` while tuning `clusterRadiusPx`/`expandMargin`; `onDebugInfo` receives the raw per-cluster geometry (center, radius, hull points) on every recompute if you want to drive your own overlay instead.
+
+## Icons
+
+`@mapconductor/react-icons` is a plain icon-factory library — no React components, just `MarkerIcon` classes you instantiate and pass to `createMarkerState({ icon })` or the `<Marker icon={...} />` prop:
+
+```tsx
+import { CircleIcon, FlagIcon, RoundInfoBubbleIcon, RightTailInfoBubbleIcon } from '@mapconductor/react-icons';
+import { createMarkerState, createGeoPoint } from '@mapconductor/js-sdk-core';
+
+createMarkerState({
+  position: createGeoPoint({ latitude, longitude }),
+  icon: new CircleIcon('#0000ff', { strokeColor: '#ffffff', strokeWidth: 2 }),
+});
+
+createMarkerState({
+  position: createGeoPoint({ latitude, longitude }),
+  icon: new FlagIcon('#008000', { strokeColor: '#808080' }),
+});
+
+createMarkerState({
+  position: createGeoPoint({ latitude, longitude }),
+  icon: new RoundInfoBubbleIcon(priceIconUrl, '$197', { fillColor: '#ffffff' }),
+});
+
+createMarkerState({
+  position: createGeoPoint({ latitude, longitude }),
+  icon: new RightTailInfoBubbleIcon(weatherIconUrl, '5h 37m', '304 mi', {
+    fillColor: '#ffffff',
+    labelTextColor: '#000000',
+  }),
+});
+```
+
+`RoundInfoBubbleIcon` and `RightTailInfoBubbleIcon` compose their `iconUrl` into a generated SVG via `<image href="...">`. Pass a rasterized image (PNG/JPEG URL or data URL), not an SVG data URL — nested SVG-in-SVG image references render inconsistently across browsers and providers. If your source icon is an SVG, rasterize it to a canvas/PNG data URL first.
+
+## Native extension boundary
+
+React Native extensions communicate through the generic `NativeMapExtensionCapable` boundary. Provider public controllers remain generic; extension-specific commands belong in extension descriptors and events.
+
+Heatmap and marker clustering render through the native extension host on React Native. Their large input lists are immutable compositions on the native path, so update them through the extension interface instead of attaching an observer to every point or marker.

@@ -2,6 +2,7 @@ import type { ReactNode } from 'react';
 import type { SupportedLanguage } from '../sampleRegistry';
 import { SamplePageSeo } from '../SamplePageSeo';
 import { SampleDocumentation } from './SampleDocumentation';
+import { translate } from '../i18n';
 
 export function SamplePageLayout({
   page,
@@ -21,7 +22,7 @@ export function SamplePageLayout({
         <div className="sample-map-stage">
           {children ?? (
             <div className="sample-map-placeholder" aria-hidden="true">
-              {language === 'ja' ? '地図を読み込んでいます…' : 'Loading map…'}
+              {translate(language, 'Loading map…', '地図を読み込んでいます…', 'Cargando el mapa…')}
             </div>
           )}
         </div>

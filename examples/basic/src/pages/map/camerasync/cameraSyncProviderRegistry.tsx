@@ -7,11 +7,12 @@ import {
   type GoogleMapViewState,
 } from '@mapconductor/react-for-googlemaps';
 import {
-  MapLibreView,
+  MapLibreMapView,
   type MapLibreViewState,
 } from '@mapconductor/react-for-maplibre';
 import {
-  MapboxView,
+  MapBoxMapView,
+  MapBoxMapView2D,
   ZoomAltitudeConverter as MapboxZoomAltitudeConverter,
   type MapboxViewState,
 } from '@mapconductor/react-for-mapbox';
@@ -34,6 +35,7 @@ import {
   type CesiumMapViewState,
 } from '@mapconductor/react-for-cesium';
 import type { PaneProvider, PaneState } from './types';
+import { HereMapView2D, HereViewState } from '@mapconductor/react-for-here';
 
 interface MapViewRenderProps {
   paneState: PaneState;
@@ -52,6 +54,7 @@ export interface CameraSyncProviderAdapter {
 const googleZoom = new GoogleZoomAltitudeConverter();
 const mapboxZoom = new MapboxZoomAltitudeConverter();
 const cesiumZoom = new CesiumZoomAltitudeConverter();
+let herePlatform: H.service.Platform | null = null;
 
 function convertedAltitude(
   position: MapCameraPosition,
@@ -86,7 +89,7 @@ function googleAltitude(pane: PaneState, position: MapCameraPosition): number {
 const adapters: CameraSyncProviderAdapter[] = [
   {
     id: 'maplibre', label: 'MapLibre', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
-    render: ({ paneState: pane, children, ...events }) => <MapLibreView state={pane.mapState as MapLibreViewState} projection="globe" {...events}>{children}</MapLibreView>,
+    render: ({ paneState: pane, children, ...events }) => <MapLibreMapView state={pane.mapState as MapLibreViewState} {...events}>{children}</MapLibreMapView>,
   },
   {
     id: 'mapbox', label: 'Mapbox', altitude: (_pane, position) => convertedAltitude(position, mapboxZoom),
@@ -128,6 +131,10 @@ const adapters: CameraSyncProviderAdapter[] = [
     },
     render: ({ paneState: pane, children, ...events }) => <CesiumMapView state={pane.mapState as CesiumMapViewState} {...events}>{children}</CesiumMapView>,
   },
+  {
+    id: 'here', label: 'HERE', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: props => renderHere(props),
+  },
 ];
 
 export const cameraSyncProviders: readonly CameraSyncProviderAdapter[] = adapters;
@@ -141,7 +148,17 @@ function renderGoogle({ paneState: pane, children, ...events }: MapViewRenderPro
 }
 
 function renderMapbox({ paneState: pane, children, ...events }: MapViewRenderProps, projection: 'mercator' | 'globe'): ReactNode {
-  const accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || '';
-  if (!accessToken) return <MissingKey title="Mapbox Access Token is Missing" envName="VITE_MAPBOX_ACCESS_TOKEN" />;
-  return <MapboxView state={pane.mapState as MapboxViewState} accessToken={accessToken} projection={projection} {...events}>{children}</MapboxView>;
+  const state = pane.mapState as MapboxViewState;
+  if (!state.accessToken) return <MissingKey title="Mapbox Access Token is Missing" envName="VITE_MAPBOX_ACCESS_TOKEN" />;
+  const MapView = projection === 'globe' ? MapBoxMapView : MapBoxMapView2D;
+  return <MapView state={state} {...events}>{children}</MapView>;
+}
+
+function renderHere({ paneState: pane, children, ...events }: MapViewRenderProps): ReactNode {
+  const apiKey = import.meta.env.VITE_HERE_API_KEY || '';
+  if (!apiKey || apiKey === 'your_api_key_here') {
+    return <MissingKey title="HERE API Key is Missing" envName="VITE_HERE_API_KEY" />;
+  }
+  herePlatform ??= new H.service.Platform({ apikey: apiKey });
+  return <HereMapView2D state={pane.mapState as HereViewState} platform={herePlatform} {...events}>{children}</HereMapView2D>;
 }

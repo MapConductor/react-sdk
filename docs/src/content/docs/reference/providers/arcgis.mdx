@@ -1,0 +1,87 @@
+---
+title: ArcGIS
+description: Set up @mapconductor/react-for-arcgis on the Web and React Native.
+---
+
+# ArcGIS
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-arcgis
+```
+
+`@arcgis/core` is bundled. Unlike the other providers, **do not** import a `style.css` yourself — there is no `./style.css` export. ArcGIS's theme CSS (`@arcgis/core/assets/esri/themes/light/main.css`) is imported as a side effect inside the view component itself.
+
+React Native is supported via `@mapconductor/reactnative-for-arcgis` — see [React Native](/platforms/react-native/).
+
+## API key
+
+Required, and enforced: `ArcGISMapView`/`ArcGISMapView2D` render a visible error banner (`role="alert"`) instead of a map if `apiKey` is missing or blank, rather than failing silently.
+
+```tsx
+const state = useArcGISViewState({
+  apiKey: import.meta.env.VITE_ARCGIS_API_KEY,
+  mapDesignType: ArcGISDesign.Streets,
+  cameraPosition,
+});
+```
+
+## 2D vs. 3D — SceneView vs. MapView
+
+`ArcGISMapView` uses a `SceneView` (3D globe) by default. `ArcGISMapView2D` is a thin wrapper that forces the 2D `MapView`:
+
+```tsx
+export function ArcGISMapView2D(props) {
+  return <ArcGISMapView {...props} useSceneView={false} />;
+}
+```
+
+Use whichever fits your UI; both share the same `useArcGISViewState` state.
+
+## Design types
+
+`ArcGISDesign` exposes around 60 static members covering Esri's basemap style catalog — light/dark gray, imagery, topographic, navigation, human geography, several OSM-based styles, and stylistic variants (charted territory, colored pencil, midcentury, newspaper...). A representative subset:
+
+| Member | Notes |
+| --- | --- |
+| `Streets` | default |
+| `Imagery`, `ImageryLabels` | satellite imagery, with/without labels |
+| `Topographic` | topographic shading |
+| `LightGray`, `DarkGray` | minimal basemaps for data overlays |
+| `Oceans` | bathymetric |
+| `Navigation`, `NavigationNight` | turn-by-turn style |
+| `OsmStandard`, `OsmStreets`, `OsmNavigation` | OSM-sourced basemaps, no Esri basemap dependency |
+
+Each member maps to an Esri basemap style id via `ArcGISDesign.toBasemapStyle()`. Build a custom entry with `ArcGISDesign.Create(id, elevationSources?)`; elevation sources feed `SceneView`'s ground layers and are ignored in 2D. See the package's `ArcGISMapDesign.ts` for the full list — `arcgis.mdx` intentionally doesn't reproduce all 60.
+
+Unlike other providers, ArcGIS supports live basemap swapping: changing `state.mapDesignType` after mount calls the controller's `setMapDesignType` directly instead of requiring a remount.
+
+## `useArcGISViewState` params
+
+```ts
+useArcGISViewState({
+  id?: string;
+  apiKey?: string;                          // required in practice
+  mapDesignType?: ArcGISDesignTypeInterface; // default ArcGISDesign.Streets
+  cameraPosition?: MapCameraPosition;        // default MapCameraPosition.Default
+})
+```
+
+## View component props
+
+On top of the [shared `MapViewBaseProps`](/reference/core-api/#map-view-state):
+
+```ts
+style?: React.CSSProperties;
+markerTilingOptions?: MarkerTilingOptions;
+onError?: (error: Error) => void;
+children?: React.ReactNode;
+```
+
+## Zoom and scale conversion
+
+ArcGIS 2D's `MapView` uses a display `scale`, not a zoom level. `arcGISZoomToScale(zoom, latitude)` / `arcGISScaleToZoom(scale, latitude)` (exported from this package) convert using the standard Web Mercator tile-resolution formula. `arcGISZoomToScale` rounds to the nearest integer zoom before computing scale, deliberately mirroring Google Maps' rounding so that `MapView`'s own `snapToZoom` constraint doesn't disagree by a full level at fractional zooms — see [Camera sync](/guides/camera-sync/) for why this matters. `SceneView` (3D) instead converts zoom to camera altitude via its own `ZoomAltitudeConverter`, accounting for the SceneView camera's diagonal (not vertical) field of view.
+
+## Gotchas
+
+- Keep all `@arcgis/core` imports in your app **static**, not dynamic. Mixing static and dynamic imports of `@arcgis/core` submodules can cause Vite's dev-time dependency pre-bundling to load two separate copies of the module during a cold start — overlay `Graphic`s created from one copy are silently ignored by a `View` from the other, so markers/shapes appear to just not render, with no error. This only shows up in dev mode.
+- A global `<style>` override is injected once to fix ArcGIS's own CSS assuming a flex layout on `.esri-view-root`.

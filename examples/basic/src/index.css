@@ -456,7 +456,7 @@ body,
   min-height: 1.6em;
 }
 
-.singleton-google-map-layer {
+.singleton-map-layer {
   position: absolute;
   inset: 0;
   z-index: 0;
@@ -468,12 +468,12 @@ body,
   min-width: 105px;
 }
 
-.singleton-google-map-layer.active {
+.singleton-map-layer.active {
   visibility: visible;
   pointer-events: auto;
 }
 
-.singleton-google-map-message {
+.singleton-map-message {
   display: grid;
   place-content: center;
   gap: 0.75rem;

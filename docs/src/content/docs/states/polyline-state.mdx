@@ -1,0 +1,63 @@
+---
+title: PolylineState
+description: Retained, observable state for a single polyline overlay.
+---
+
+# PolylineState
+
+`PolylineState` holds a polyline's points and styling as mutable, observable properties.
+
+## Creating a PolylineState
+
+```ts
+createPolylineState({
+  points: GeoPoint[];
+  id?: string | null;
+  strokeColor?: string;   // default '#000000'
+  strokeWidth?: number;   // default 1
+  geodesic?: boolean;     // default false
+  zIndex?: number;        // default 0
+  extra?: Serializable | null;
+  onClick?: (event: { state: PolylineState; clicked: GeoPoint }) => void;
+}): PolylineState
+```
+
+## Properties
+
+| Property | Type | Notes |
+| --- | --- | --- |
+| `id` | `string` | readonly |
+| `points` | `GeoPoint[]` | mutable — reassign the whole array to change the path |
+| `strokeColor`, `strokeWidth` | `string` / `number` | |
+| `geodesic` | `boolean` | draw following the Earth's curvature vs. a flat projection between points |
+| `zIndex` | `number` | |
+| `extra` | `Serializable \| null` | |
+| `onClick` | handler or `null` | `clicked` is the geographic point nearest the click, not a vertex |
+
+## Methods
+
+```ts
+copy(opts?: PolylineStateCopyParams): PolylineState;
+equals(other: unknown): boolean;
+hashCode(): number;
+fingerPrint(): PolylineFingerPrint;
+asObservable(): { subscribe(fn): () => void };
+```
+
+## Updating dynamically
+
+Reassigning `points` (rather than mutating the array in place) is what triggers the update — the state's internal fingerprinting compares the array reference/contents, so push a new array:
+
+```tsx
+const [route] = useState(() => createPolylineState({ points: initialRoute, strokeWidth: 4 }));
+
+useEffect(() => {
+  route.points = [...route.points, nextWaypoint];
+}, [route, nextWaypoint]);
+
+return <Polyline state={route} />;
+```
+
+## See also
+
+- [`<Polyline>`](/components/polyline/) — the React component that renders this state, including the `bounds`-based rectangle-outline form

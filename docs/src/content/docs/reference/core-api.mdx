@@ -1,0 +1,60 @@
+---
+title: Core API overview
+description: An index of the components, states, and core geometry/camera types.
+---
+
+# Core API overview
+
+The full API reference is split into three sections, mirroring the shape of the SDK itself: a component you render, the retained state object behind it (when you need one), and the provider-independent geometry/camera types both are built from.
+
+## Components
+
+Each overlay component accepts either convenience props (for small or static overlays) or a `state` prop (for large or frequently-updated ones) — see [Overlays](/guides/overlays/) for when to use which.
+
+| Component | Reference |
+| --- | --- |
+| Map view (shared contract across all providers) | [MapView component](/components/mapview/) |
+| `Marker` / `Markers` | [Marker](/components/marker/) |
+| `Circle` | [Circle](/components/circle/) |
+| `Polyline` | [Polyline](/components/polyline/) |
+| `Polygon` | [Polygon](/components/polygon/) |
+| `GroundImage` | [GroundImage](/components/groundimage/) |
+| `RasterLayer` | [RasterLayer](/components/rasterlayer/) |
+| `InfoBubble` / `InfoBubbleAtPosition` / `InfoBubbleCustom` | [InfoBubble](/components/infobubble/) |
+
+## States
+
+Retained state objects — created with a `create*State()` factory, mutated by property assignment, and passed to the matching component's `state` prop.
+
+| State | Reference |
+| --- | --- |
+| `MarkerState` | [MarkerState](/states/marker-state/) |
+| `CircleState` | [CircleState](/states/circle-state/) |
+| `PolylineState` | [PolylineState](/states/polyline-state/) |
+| `PolygonState` | [PolygonState](/states/polygon-state/) |
+| `GroundImageState` | [GroundImageState](/states/groundimage-state/) |
+| `RasterLayerState` | [RasterLayerState](/states/rasterlayer-state/) |
+
+## Core
+
+Geometry, camera, and provider-independent utility types shared by every component and state above.
+
+| Type / topic | Reference |
+| --- | --- |
+| `GeoPoint` | [GeoPoint](/core/geopoint/) |
+| `GeoRectBounds` | [GeoRectBounds](/core/georectbounds/) |
+| `MapCameraPosition` | [MapCameraPosition](/core/mapcameraposition/) |
+| Marker icons (`DefaultMarkerIcon`, `ImageIcon`, `react-icons`) | [Marker icons](/core/marker-icons/) |
+| Distance/heading/interpolation math | [Spherical utilities](/core/spherical-utilities/) |
+| How zoom maps across providers | [Zoom levels](/core/zoom-levels/) |
+| Native map/view escape hatch | [MapViewHolder](/core/mapviewholder/) |
+| Map-scoped plugin registry | [MapServiceRegistry](/core/service-registry/) |
+
+## Everything else
+
+- [Packages](/reference/packages/) — what each npm package is responsible for
+- [Providers](/reference/providers/) — the provider comparison matrix and per-provider setup pages
+- [Extensions](/guides/extensions/) — GeoJSON layers, heatmaps, marker clustering, and icon shapes
+- [Architecture](/architecture/) — how overlay state reaches the provider SDK under the hood
+
+TypeScript declarations in the packages remain the authoritative signature reference; this site documents the parts every application is expected to use.

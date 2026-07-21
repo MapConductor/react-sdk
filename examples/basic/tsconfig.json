@@ -10,5 +10,5 @@
       "@mapconductor/react-for-maplibre": ["../../react-for-maplibre/src/index.ts"]
     }
   },
-  "include": ["src", "src/vite-env.d.ts", "src/pages/CirclePage.tsx", "src/pages/map/basic/StoreMapPage.tsx", "src/pages/MarkerPage.tsx", "src/pages/PolygonPage.tsx", "src/pages/PolylinePage.tsx"]
+  "include": ["src", "src/vite-env.d.ts", "src/pages/CirclePage.tsx", "src/pages/map/basic/StoreMapPage.tsx", "src/pages/MarkerPage.tsx", "src/pages/PolygonPage.tsx", "src/pages/PolylinePage.tsx", "vite.config.ts"]
 }

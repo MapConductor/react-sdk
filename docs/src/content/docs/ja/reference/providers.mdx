@@ -1,0 +1,20 @@
+---
+title: プロバイダー
+description: provider と platform の対応表。
+---
+
+# プロバイダー
+
+| Provider | Web | React Native |
+| --- | --- | --- |
+| Google Maps | `react-for-googlemaps` | `reactnative-for-googlemaps` |
+| MapLibre | `react-for-maplibre` | `reactnative-for-maplibre` |
+| ArcGIS | `react-for-arcgis` | `reactnative-for-arcgis` |
+| Mapbox | `react-for-mapbox` | — |
+| Leaflet | `react-for-leaflet` | — |
+| OpenLayers | `react-for-openlayers` | — |
+| Cesium | `react-for-cesium` | — |
+
+overlay や高度なカメラ機能の対応状況は provider によって異なる場合があります。必要な data source、license、offline、3D、platform、SDK size を基準に選択してください。
+
+API key と token を source control に含めず、各 provider の attribution と利用規約に従います。共通 API を使っても base map の見た目や provider 固有機能まで同一になるわけではないため、実データで切り替えを検証してください。

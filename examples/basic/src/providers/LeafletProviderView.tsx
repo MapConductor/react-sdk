@@ -17,6 +17,7 @@ export default function LeafletProviderView({
   onCameraMoveEnd,
   markerTilingOptions,
   onStateReady,
+  restrictBounds,
 }: ProviderViewProps) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useLeafletMapViewState({
@@ -36,6 +37,7 @@ export default function LeafletProviderView({
       onCameraMoveStart={onCameraMoveStart}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
+      restrictBounds={restrictBounds}
     >
       {children}
     </LeafletMapView>

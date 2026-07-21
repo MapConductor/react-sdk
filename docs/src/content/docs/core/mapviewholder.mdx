@@ -1,0 +1,45 @@
+---
+title: MapViewHolder
+description: The escape hatch for accessing a provider's native map/view instance.
+---
+
+# MapViewHolder
+
+MapConductor's common API doesn't wrap every feature of every provider SDK. `MapViewHolder` is the escape hatch: it exposes the underlying native view and map/controller instance so you can call provider-specific APIs directly when you need to.
+
+## Interface
+
+```ts
+interface MapViewHolder<ActualMapView, ActualMap> {
+  mapView: ActualMapView;
+  map: ActualMap;
+
+  toScreenOffset(position: GeoPointInterface): Offset | null | Promise<Offset | null>;
+  fromScreenOffset(offset: Offset): Promise<GeoPoint | null>;
+  fromScreenOffsetSync(offset: Offset): GeoPoint | null; // not implemented by every provider — may return null
+}
+```
+
+`ActualMapView`/`ActualMap` are provider-specific types — for Google Maps, `mapView` is the DOM container and `map` is the `google.maps.Map`/`Map3DElement`; for MapLibre, `map` is the `maplibregl.Map`; and so on.
+
+## Getting a holder
+
+Every provider's view-state exposes `getMapViewHolder()`, returning `null` until the map has finished initializing:
+
+```tsx
+const holder = mapState.getMapViewHolder();
+if (holder) {
+  // provider-specific API, e.g. for MapLibre:
+  holder.map.fitBounds([[west, south], [east, north]]);
+}
+```
+
+Poll or check inside `onMapLoaded` rather than assuming the holder is available immediately after render — the underlying SDK's async initialization hasn't necessarily finished on the first render pass.
+
+## Screen ↔ geographic coordinate conversion
+
+`toScreenOffset`/`fromScreenOffset` convert between a `GeoPoint` and a pixel offset relative to the map container's top-left corner — useful for custom overlay positioning (this is what `InfoBubble` uses internally) or hit-testing against a non-overlay UI element. `fromScreenOffsetSync` is a synchronous variant that not every provider backs with a real implementation; treat a `null` result as "use the async version instead," not as an error.
+
+## When to reach for this vs. the common API
+
+Prefer the shared state/component/event surface for anything it already covers — it's what keeps your application code provider-independent. Reach for `MapViewHolder` only for capabilities MapConductor doesn't model (a provider-specific control, a native SDK callback, a rendering feature with no cross-provider equivalent), and keep that code isolated behind your provider-selection boundary so switching providers later touches one place. Native API calls made through the holder aren't tracked by MapConductor's state model — changes you make this way won't automatically survive a provider swap or a composition diff.

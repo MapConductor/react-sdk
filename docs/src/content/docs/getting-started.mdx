@@ -1,0 +1,85 @@
+---
+title: Getting started
+description: Install MapConductor and display a provider-independent marker.
+---
+
+# Getting started
+
+This tutorial uses MapLibre on the Web because it can start without an API key.
+
+## Install packages
+
+```bash
+npm install @mapconductor/js-sdk-core @mapconductor/js-sdk-react @mapconductor/react-for-maplibre
+```
+
+Provider packages are deliberately separate. Add only those your application uses.
+
+## Import the provider stylesheet
+
+Import MapLibre’s bundled CSS once from your application entry point:
+
+```tsx
+import '@mapconductor/react-for-maplibre/style.css';
+```
+
+## Render your first map
+
+```tsx
+import {
+  GeoPoint,
+  MapCameraPosition,
+  createMarkerState,
+} from '@mapconductor/js-sdk-core';
+import { Marker } from '@mapconductor/js-sdk-react';
+import {
+  MapLibreDesign,
+  MapLibreView,
+  useMapLibreViewState,
+} from '@mapconductor/react-for-maplibre';
+import { useState } from 'react';
+
+const TOKYO = GeoPoint.from({ latitude: 35.6812, longitude: 139.7671 });
+
+export function TokyoMap() {
+  const mapState = useMapLibreViewState({
+    mapDesignType: MapLibreDesign.OsmBright,
+    cameraPosition: MapCameraPosition.from({
+      position: TOKYO,
+      zoom: 12,
+    }),
+  });
+  const [marker] = useState(() =>
+    createMarkerState({ id: 'tokyo', position: TOKYO })
+  );
+
+  return (
+    <div style={{ height: 480 }}>
+      <MapLibreView
+        state={mapState}
+        onMapClick={(point) => { marker.position = point; }}
+      >
+        <Marker state={marker} />
+      </MapLibreView>
+    </div>
+  );
+}
+```
+
+The map container must have a non-zero height. Mutating `marker.position` notifies the active renderer; you do not need to replace the marker state.
+
+## Switch to Google Maps
+
+Install `@mapconductor/react-for-googlemaps`, then replace only the provider imports and map view/state:
+
+```tsx
+const mapState = useGoogleMapViewState({
+  apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+  mapDesignType: GoogleMapDesign.Normal,
+  cameraPosition,
+});
+
+return <GoogleMapView state={mapState}>{overlays}</GoogleMapView>;
+```
+
+The same `Marker`, state, point, and camera objects remain valid. Continue with [Web setup](/platforms/web/) or [React Native setup](/platforms/react-native/).

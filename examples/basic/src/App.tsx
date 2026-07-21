@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getLanguageFromPath } from './i18n';
-import { getSamplePageDefinition, getSamplePageMetadata } from './sampleRegistry';
+import { getSamplePageDefinition, getSamplePageMetadata, type SupportedLanguage } from './sampleRegistry';
 import { AppHeader } from './app/AppHeader';
 import { AppNavigation } from './app/AppNavigation';
 import {
@@ -14,7 +14,7 @@ import {
 
 const ClientMapRoutes = lazy(() => import('./ClientMapRoutes'));
 
-function updatePageMetadata(page: string, provider: string, language: 'en' | 'ja') {
+function updatePageMetadata(page: string, provider: string, language: SupportedLanguage) {
   const metadata = getSamplePageMetadata(page, provider, language);
   document.title = metadata.title;
   document.documentElement.lang = language;
@@ -46,7 +46,7 @@ export default function App() {
   const switchProvider = (nextProvider: MapProvider) => {
     navigate(samplePath(providerPath(nextProvider, page), page, language));
   };
-  const switchLanguage = (nextLanguage: 'en' | 'ja') => {
+  const switchLanguage = (nextLanguage: SupportedLanguage) => {
     navigate(samplePath(currentProviderPath, page, nextLanguage), { replace: true });
   };
 

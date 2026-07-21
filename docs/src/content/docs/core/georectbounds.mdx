@@ -1,0 +1,65 @@
+---
+title: GeoRectBounds
+description: A geographic rectangle that correctly handles the antimeridian.
+---
+
+# GeoRectBounds
+
+`GeoRectBounds` represents a rectangular geographic region as southwest/northeast corners. It's used for polyline/polygon "bounds" convenience props, viewport queries, and `MapCameraPosition.visibleRegion`.
+
+## Interface
+
+```ts
+interface GeoRectBounds {
+  readonly southWest: GeoPoint | null;
+  readonly northEast: GeoPoint | null;
+  readonly center: GeoPoint | null;
+
+  extend(point: GeoPointInterface): void; // mutates in place, grows the bounds
+  isEmpty(): boolean;
+  contains(point: GeoPointInterface): boolean;
+  intersects(other: GeoRectBounds): boolean;
+  union(other: GeoRectBounds | null): GeoRectBounds;
+  expandedByDegrees(latPad: number, lonPad: number): GeoRectBounds;
+  toSpan(): GeoPoint | null;              // lat/lng span as a GeoPoint
+  toUrlValue(precision?: number): string; // "swLat,swLng,neLat,neLng"
+  equals(other: GeoRectBounds | null): boolean;
+  toString(): string;
+}
+```
+
+## Creating bounds
+
+```ts
+createGeoRectBounds()                              // empty
+createGeoRectBounds({ southWest, northEast })       // from two corners
+```
+
+An empty bounds (`southWest`/`northEast` both `null`) grows as you `extend()` it with points — this is the usual pattern for computing a bounding box from a set of markers:
+
+```ts
+const bounds = createGeoRectBounds();
+for (const record of records) {
+  bounds.extend(record.position);
+}
+
+<Polyline bounds={bounds} strokeColor="#2563eb" />
+```
+
+`extend()` mutates the bounds instance in place and updates `center` as a side effect — it isn't a builder that returns a new value.
+
+## Antimeridian handling
+
+Every method here (`contains`, `intersects`, `extend`, `expandedByDegrees`, `center`) accounts for a bounds that crosses the ±180° date line, choosing the minimal-arc longitude span rather than assuming `west ≤ east`. If `southWest.longitude > northEast.longitude`, the bounds is interpreted as wrapping across the antimeridian, not as an invalid range — don't "fix" this by swapping the corners.
+
+## Other operations
+
+- **`union(other)`** returns a new bounds covering both inputs (doesn't mutate either).
+- **`expandedByDegrees(latPad, lonPad)`** returns a new bounds padded outward by fixed degree amounts, clamped at the poles.
+- **`toSpan()`** returns the bounds' latitude/longitude extent as a `GeoPoint` (`latitude` = lat span, `longitude` = lng span — a full-globe-wide bounds reports a `360°` longitude span rather than `0`).
+- **`contains(point)`** / **`intersects(other)`** for hit-testing and viewport-overlap checks.
+- **`equals(other)`** compares corners with the same ~1cm tolerance as `GeoPoint.equals`.
+
+## Rendering a bounds as an overlay
+
+`<Polyline>` and `<Polygon>` accept a `bounds` prop directly (drawing the rectangle outline, or a filled rectangle) as an alternative to `points` — see [Polyline](/components/polyline/) and [Polygon](/components/polygon/).
