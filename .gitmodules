@@ -40,6 +40,9 @@
 [submodule "react-for-arcgis"]
 	path = react-for-arcgis
 	url = git@github.com:mapconductor/react-for-arcgis
+[submodule "reactnative-for-arcgis"]
+	path = reactnative-for-arcgis
+	url = git@github.com:mapconductor/reactnative-for-arcgis.git
 [submodule "react-for-cesium"]
 	path = react-for-cesium
 	url = git@github.com:mapconductor/react-for-cesium
