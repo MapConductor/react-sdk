@@ -1,4 +1,4 @@
-name: npm publish (dry run)
+name: npm publish 
 
 # Packages are intentionally not published by this workflow yet. Once the
 # generated package contents have been verified, remove --dry-run from the
@@ -72,4 +72,30 @@ jobs:
           done
         env:
           # npm checks authentication even for a publish dry run.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish npm packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t packages < <(
+            npm query .workspace --json | node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                for (const workspace of JSON.parse(input)) {
+                  if (!workspace.private) console.log(workspace.name);
+                }
+              });
+            '
+          )
+
+          for package in "${packages[@]}"; do
+            echo "::group::${package}"
+            npm publish --workspace "${package}" --access public
+            echo "::endgroup::"
+          done
+        env:
+          # npm checks authentication even for a publish.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
