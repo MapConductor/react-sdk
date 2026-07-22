@@ -1,0 +1,63 @@
+name: npm publish (dry run)
+
+# Packages are intentionally not published by this workflow yet. Once the
+# generated package contents have been verified, remove --dry-run from the
+# publish command and update the workflow name.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-publish
+  cancel-in-progress: false
+
+jobs:
+  publish-dry-run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build publishable packages
+        run: npm run build:packages
+
+      - name: Preview npm packages
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          mapfile -t packages < <(
+            npm query .workspace --json | node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                for (const workspace of JSON.parse(input)) {
+                  if (!workspace.private) console.log(workspace.name);
+                }
+              });
+            '
+          )
+
+          for package in "${packages[@]}"; do
+            echo "::group::${package}"
+            npm publish --workspace "${package}" --access public --dry-run
+            echo "::endgroup::"
+          done
+        env:
+          # npm checks authentication even for a publish dry run.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
