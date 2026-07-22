@@ -38,6 +38,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: 22
+          cache: npm
 
       # The @mapconductor/* packages are not published to npm yet. They live in
       # this repo as git submodules (checked out above) and are wired up as npm
@@ -49,18 +50,10 @@ jobs:
       - name: Link local workspace packages
         run: node scripts/link-local-workspaces.mjs
 
-      - name: Cache node_modules
-        id: node-modules-cache
-        uses: actions/cache@v6
-        with:
-          path: node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package.json') }}
-
       # `npm install` (not `npm ci`): the link step above rewrites package.json
       # files at build time, so the committed lockfile is intentionally not kept
       # in exact sync and `npm ci` would fail the integrity check.
       - name: Install dependencies
-        if: steps.node-modules-cache.outputs.cache-hit != 'true'
         run: npm install --no-audit --no-fund
 
       - name: Build basic example
