@@ -1,59 +1,28 @@
-import type {
-  MapDesignTypeInterface,
-  MapViewStateInterface,
-  MarkerTilingOptions,
-} from '@mapconductor/js-sdk-core';
-import type { MapViewBaseProps } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapView,
-  GoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreMapView,
-  MapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
-import {
-  HereMapView,
-  HereViewState,
-} from '@mapconductor/reactnative-for-here';
+import React from 'react';
+import type { ProviderDesignOverrides, ProviderViewProps, MapProvider } from '../providers/types';
+import { MapLibreProviderView } from '../providers/MapLibreProviderView';
+import { GoogleMapsProviderView } from '../providers/GoogleMapsProviderView';
+import { HereProviderView } from '../providers/HereProviderView';
+import { ArcGISProviderView } from '../providers/ArcGISProviderView';
 
-type CommonMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
-type MapViewContainerProps = MapViewBaseProps<CommonMapViewState> & {
-  markerTilingOptions?: MarkerTilingOptions;
-};
+export type { MapProvider, ProviderDesignOverrides };
 
-export function MapViewContainer({
-  state,
-  children,
-  ...props
-}: MapViewContainerProps) {
-  if (state instanceof GoogleMapViewState) {
-    return (
-      <GoogleMapView state={state} {...props}>
-        {children}
-      </GoogleMapView>
-    );
+interface MapViewContainerProps extends ProviderViewProps {
+  provider: MapProvider;
+  designTypes?: ProviderDesignOverrides;
+}
+
+export function MapViewContainer({ provider, designTypes, ...rest }: MapViewContainerProps) {
+  switch (provider) {
+    case 'maplibre':
+      return <MapLibreProviderView mapDesignType={designTypes?.maplibre} {...rest} />;
+    case 'google-maps':
+      return <GoogleMapsProviderView mapDesignType={designTypes?.['google-maps']} {...rest} />;
+    case 'here':
+      return <HereProviderView mapDesignType={designTypes?.here} {...rest} />;
+    case 'arcgis':
+      return <ArcGISProviderView mapDesignType={designTypes?.arcgis} {...rest} />;
+    default:
+      return null;
   }
-
-  if (state instanceof MapLibreViewState) {
-    return (
-      <MapLibreMapView state={state} {...props}>
-        {children}
-      </MapLibreMapView>
-    );
-  }
-
-  if (state instanceof HereViewState) {
-    // accessKeyId/accessKeySecret aren't passed here: on Android, HereMapViewControllerStore
-    // reads HERE_ACCESS_KEY_ID/HERE_ACCESS_KEY_SECRET from AndroidManifest.xml meta-data instead
-    // (see reactnative-for-here/android/build.gradle's manifestPlaceholders injection). iOS has
-    // no manifest equivalent and would need these two props supplied here.
-    return (
-      <HereMapView state={state} {...props}>
-        {children}
-      </HereMapView>
-    );
-  }
-
-  throw new Error('No container is available for specified provider');
 }

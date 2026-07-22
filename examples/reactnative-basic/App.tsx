@@ -12,8 +12,7 @@ import {
   View,
 } from 'react-native';
 import { MapScreen } from 'src/screens/MapScreen';
-
-type MapProvider = 'google-maps' | 'maplibre' | 'here';
+import type { MapProvider } from 'src/providers/types';
 
 export interface SamplePageDefinition {
   id: string;
@@ -67,7 +66,9 @@ function Header({
       ? 'GoogleMapView'
       : provider === 'here'
         ? 'HereMapView'
-        : 'MapLibreMapView';
+        : provider === 'arcgis'
+          ? 'ArcGISMapView'
+          : 'MapLibreMapView';
 
   const selectProvider = (nextProvider: MapProvider) => {
     onProviderChange(nextProvider);
@@ -159,6 +160,20 @@ function Header({
                     ]}
                   >
                     HereMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'arcgis' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('arcgis')}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'arcgis' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    ArcGISMapView
                   </Text>
                 </TouchableOpacity>
               </View>

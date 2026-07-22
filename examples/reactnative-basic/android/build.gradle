@@ -18,6 +18,10 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+    // com.mapconductor:for-arcgis's POM depends on com.esri:arcgis-maps-kotlin-toolkit-bom,
+    // published only here - reactnative-for-arcgis/android/build.gradle declares this repo too,
+    // but the :app project's own dependency resolution needs it listed at this (root) level.
+    maven { url 'https://esri.jfrog.io/artifactory/arcgis' }
   }
 }
 

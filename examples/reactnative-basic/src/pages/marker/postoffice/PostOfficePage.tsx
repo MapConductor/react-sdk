@@ -16,19 +16,13 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers, ReactNativeImageIcon } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
 import postOfficesJson from '../../../data/postoffice/postoffices.json';
 import { MapViewContainer } from '../../MapViewContainer';
+import type { MapProvider } from '../../../providers/types';
+import { useMapStateRef } from '../../../providers/useMapStateRef';
 
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
 type PostOfficeRow = [number, number, string, string];
 
 interface PostOfficeExtra {
@@ -113,54 +107,10 @@ function PostOfficeMarkers({ onSelectMarker }: { onSelectMarker: (marker: Marker
   return <Markers states={markers} />;
 }
 
-function PostOfficeMap({
-  provider,
-  mapLibreState,
-  googleState,
-  selectedMarker,
-  onMapLoaded,
-  onMapClick,
-  onSelectMarker,
-  onZoomMarker,
-}: {
-  provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
-  selectedMarker: MarkerState | null;
-  onMapLoaded: () => void;
-  onMapClick: () => void;
-  onSelectMarker: (marker: MarkerState) => void;
-  onZoomMarker: (marker: MarkerState) => void;
-}) {
-  const overlay = selectedMarker ? (
-    <InfoBubble marker={selectedMarker} bubbleColor="#ffffff" borderColor="#ef4444">
-      <PostOfficeInfoView
-        info={selectedMarker.extra as unknown as PostOfficeExtra}
-        marker={selectedMarker}
-        onZoom={onZoomMarker}
-      />
-    </InfoBubble>
-  ) : null;
-  const markers = <PostOfficeMarkers onSelectMarker={onSelectMarker} />;
-
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
-  return (
-    <MapViewContainer
-      state={state}
-      style={styles.map}
-      markerTilingOptions={MARKER_TILING_OPTIONS}
-      onMapLoaded={onMapLoaded}
-      onMapClick={onMapClick}
-    >
-      {markers}
-      {overlay}
-    </MapViewContainer>
-  );
-}
-
 export function PostOfficePage({ provider }: { provider: MapProvider }) {
   const [selectedMarker, setSelectedMarker] = useState<MarkerState | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const { stateRef, onStateReady } = useMapStateRef();
 
   // Switching providers remounts the native map view, so the "ready" state
   // must be re-armed for the newly mounted view.
@@ -172,21 +122,9 @@ export function PostOfficePage({ provider }: { provider: MapProvider }) {
     setTimeout(() => setMapReady(true), 10000);
   }, []);
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'post-office-maplibre',
-    mapDesignType: MapLibreDesign.OsmBrightJa,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'post-office-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-
   const handleZoomMarker = useCallback(
     (marker: MarkerState) => {
-      const state = provider === 'google-maps' ? googleState : mapLibreState;
-      state.moveCameraTo(
+      stateRef.current?.moveCameraTo(
         MapCameraPosition.from({
           position: marker.position,
           zoom: 18,
@@ -196,21 +134,35 @@ export function PostOfficePage({ provider }: { provider: MapProvider }) {
         2000
       );
     },
-    [googleState, mapLibreState, provider]
+    [stateRef]
   );
+
+  const overlay = selectedMarker ? (
+    <InfoBubble marker={selectedMarker} bubbleColor="#ffffff" borderColor="#ef4444">
+      <PostOfficeInfoView
+        info={selectedMarker.extra as unknown as PostOfficeExtra}
+        marker={selectedMarker}
+        onZoom={handleZoomMarker}
+      />
+    </InfoBubble>
+  ) : null;
 
   return (
     <View style={styles.mapContainer}>
-      <PostOfficeMap
+      <MapViewContainer
         provider={provider}
-        mapLibreState={mapLibreState}
-        googleState={googleState}
-        selectedMarker={selectedMarker}
+        cameraPosition={INIT_CAMERA}
+        mapId="post-office"
+        designTypes={{ maplibre: MapLibreDesign.OsmBrightJa }}
+        style={styles.map}
+        markerTilingOptions={MARKER_TILING_OPTIONS}
+        onStateReady={onStateReady}
         onMapLoaded={handleMapLoaded}
         onMapClick={() => setSelectedMarker(null)}
-        onSelectMarker={setSelectedMarker}
-        onZoomMarker={handleZoomMarker}
-      />
+      >
+        <PostOfficeMarkers onSelectMarker={setSelectedMarker} />
+        {overlay}
+      </MapViewContainer>
 
       {!mapReady && (
         <View style={styles.loadingOverlay} pointerEvents="none">

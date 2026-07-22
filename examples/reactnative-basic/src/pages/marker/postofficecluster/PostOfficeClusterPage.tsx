@@ -16,14 +16,7 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, ReactNativeImageIcon } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import {
   MarkerClusterGroup,
   type MarkerCluster,
@@ -31,8 +24,9 @@ import {
 } from '@mapconductor/react-marker-clustering';
 import { MapViewContainer } from '../../MapViewContainer';
 import postOfficesJson from '../../../data/postoffice/postoffices.json';
+import type { MapProvider } from '../../../providers/types';
+import { useMapStateRef } from '../../../providers/useMapStateRef';
 
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
 type PostOfficeRow = [number, number, string, string];
 
 interface PostOfficeExtra {
@@ -111,17 +105,7 @@ export function PostOfficeClusterPage({ provider }: { provider: MapProvider }) {
   const [selectedMarker, setSelectedMarker] = useState<MarkerState | null>(null);
   const [mapReady, setMapReady] = useState(false);
   const [debugHullPolygons, setDebugHullPolygons] = useState(false);
-
-  const mapLibreState = useMapLibreViewState({
-    id: 'post-office-cluster-maplibre',
-    mapDesignType: MapLibreDesign.OsmBrightJa,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'post-office-cluster-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
+  const { stateRef, onStateReady } = useMapStateRef();
 
   useEffect(() => {
     setMapReady(false);
@@ -157,10 +141,11 @@ export function PostOfficeClusterPage({ provider }: { provider: MapProvider }) {
     markerMapRef.current = new Map(markers.map((marker) => [marker.id, marker]));
   }, [markers]);
 
-  const activeMapState = provider === 'google-maps' ? googleState : mapLibreState;
-
   const handleClusterClick = useCallback(
     (cluster: MarkerCluster) => {
+      const state = stateRef.current;
+      if (!state) return;
+
       let latitude = 0;
       let longitude = 0;
       let count = 0;
@@ -173,26 +158,26 @@ export function PostOfficeClusterPage({ provider }: { provider: MapProvider }) {
       }
       if (count === 0) return;
 
-      activeMapState.moveCameraTo(
+      state.moveCameraTo(
         MapCameraPosition.from({
           position: GeoPoint.from({
             latitude: latitude / count,
             longitude: longitude / count,
             altitude: 0,
           }),
-          zoom: Math.min((activeMapState.cameraPosition?.zoom ?? 10) + 2, 18),
+          zoom: Math.min((state.cameraPosition?.zoom ?? 10) + 2, 18),
           bearing: 0,
           tilt: 0,
         }),
         600
       );
     },
-    [activeMapState]
+    [stateRef]
   );
 
   const handleZoomMarker = useCallback(
     (marker: MarkerState) => {
-      activeMapState.moveCameraTo(
+      stateRef.current?.moveCameraTo(
         MapCameraPosition.from({
           position: marker.position,
           zoom: 18,
@@ -202,14 +187,18 @@ export function PostOfficeClusterPage({ provider }: { provider: MapProvider }) {
         2000
       );
     },
-    [activeMapState]
+    [stateRef]
   );
 
   return (
     <View style={styles.mapContainer}>
       <MapViewContainer
-          state={activeMapState}
+          provider={provider}
+          cameraPosition={INIT_CAMERA}
+          mapId="post-office-cluster"
+          designTypes={{ maplibre: MapLibreDesign.OsmBrightJa }}
           style={styles.map}
+          onStateReady={onStateReady}
           onMapLoaded={() => setMapReady(true)}
           onMapClick={() => setSelectedMarker(null)}>
 

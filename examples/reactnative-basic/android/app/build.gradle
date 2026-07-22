@@ -97,12 +97,14 @@ android {
 
         buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
 
-        // Set directly here (rather than relying solely on reactnative-for-here's own
-        // rootProject.subprojects manifestPlaceholders hook) for reliability during local testing.
+        // Set directly here (rather than relying solely on reactnative-for-here's/
+        // reactnative-for-arcgis's own rootProject.subprojects manifestPlaceholders hooks) for
+        // reliability during local testing.
         def localProps = new Properties()
         file("${rootDir}/local.properties").withInputStream { localProps.load(it) }
         manifestPlaceholders["hereAccessKeyId"] = localProps.getProperty("HERE_ACCESS_KEY_ID", "")
         manifestPlaceholders["hereAccessKeySecret"] = localProps.getProperty("HERE_ACCESS_KEY_SECRET", "")
+        manifestPlaceholders["arcgisApiKey"] = localProps.getProperty("ARCGIS_API_KEY", "")
     }
     signingConfigs {
         debug {

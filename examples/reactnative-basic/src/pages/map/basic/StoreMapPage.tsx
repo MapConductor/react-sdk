@@ -20,23 +20,10 @@ import {
   Markers,
   ReactNativeImageDefaultIcon,
 } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
-import {
-  HereMapDesign,
-  useHereViewState,
-} from '@mapconductor/reactnative-for-here';
 
 import { STORES, type StoreInfo } from '../../../data/storeData';
 import { MapViewContainer } from '../../MapViewContainer';
-
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
+import type { MapProvider } from '../../../providers/types';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 21.382314, longitude: -157.933097, altitude: 0 }),
@@ -157,17 +144,11 @@ function StoreMarkers({ onSelectMarker }: { onSelectMarker: (marker: MarkerState
 
 function StoreMap({
   provider,
-  mapLibreState,
-  googleState,
-  hereState,
   onMapClick,
   onSelectMarker,
   selectedMarker,
 }: {
   provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
-  hereState: ReturnType<typeof useHereViewState>;
   onMapClick: () => void;
   onSelectMarker: (marker: MarkerState) => void;
   selectedMarker: MarkerState | null;
@@ -178,10 +159,14 @@ function StoreMap({
     </InfoBubble>
   ) : null;
 
-  const state =
-    provider === 'google-maps' ? googleState : provider === 'here' ? hereState : mapLibreState;
   return (
-    <MapViewContainer state={state} style={styles.map} onMapClick={onMapClick}>
+    <MapViewContainer
+      provider={provider}
+      cameraPosition={INIT_CAMERA}
+      mapId="store-map"
+      style={styles.map}
+      onMapClick={onMapClick}
+    >
       <StoreMarkers onSelectMarker={onSelectMarker} />
       {overlay}
     </MapViewContainer>
@@ -194,29 +179,10 @@ export function MapPage({ provider }: { provider: MapProvider }) {
     setSelectedMarker(marker);
   }, []);
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'store-map-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'store-map-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-  const hereState = useHereViewState({
-    id: 'store-map-here',
-    mapDesignType: HereMapDesign.NormalDay,
-    cameraPosition: INIT_CAMERA,
-  });
-
   return (
     <View style={styles.mapContainer}>
       <StoreMap
         provider={provider}
-        mapLibreState={mapLibreState}
-        googleState={googleState}
-        hereState={hereState}
         onMapClick={() => setSelectedMarker(null)}
         onSelectMarker={handleSelectMarker}
         selectedMarker={selectedMarker}

@@ -7,14 +7,8 @@ import {
 } from 'react-native';
 
 import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { GoogleMapDesign } from '@mapconductor/reactnative-for-googlemaps';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import {
   HeatmapOverlay,
   HeatmapPointState,
@@ -22,8 +16,8 @@ import {
 
 import postOfficesJson from '../../data/postoffice/postoffices.json';
 import { MapViewContainer } from '../MapViewContainer';
+import type { MapProvider } from '../../providers/types';
 
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
 type PostOfficeRow = [number, number, string, string];
 
 const POST_OFFICES = postOfficesJson as PostOfficeRow[];
@@ -37,16 +31,6 @@ const INIT_CAMERA = MapCameraPosition.from({
 
 export function HeatmapLayerPage({ provider }: { provider: MapProvider }) {
   const [mapReady, setMapReady] = useState(false);
-  const mapLibreState = useMapLibreViewState({
-    id: 'heatmap-layer-maplibre',
-    mapDesignType: MapLibreDesign.MapTilerTonerEn,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'heatmap-layer-google',
-    mapDesignType: GoogleMapDesign.Hybrid,
-    cameraPosition: INIT_CAMERA,
-  });
 
   useEffect(() => {
     setMapReady(false);
@@ -65,12 +49,17 @@ export function HeatmapLayerPage({ provider }: { provider: MapProvider }) {
   );
 
   const heatmap = <HeatmapOverlay points={heatmapPoints} />;
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
 
   return (
     <View style={styles.mapContainer}>
       <MapViewContainer
-        state={state}
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="heatmap-layer"
+        designTypes={{
+          maplibre: MapLibreDesign.MapTilerTonerEn,
+          'google-maps': GoogleMapDesign.Hybrid,
+        }}
         style={styles.map}
         onMapLoaded={() => setMapReady(true)}
       >

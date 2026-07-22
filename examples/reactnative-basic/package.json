@@ -16,6 +16,7 @@
     "@mapconductor/reactnative-for-googlemaps": "*",
     "@mapconductor/reactnative-for-maplibre": "*",
     "@mapconductor/reactnative-for-here": "*",
+    "@mapconductor/reactnative-for-arcgis": "*",
     "@mapconductor/react-geojson-layer": "*",
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-marker-clustering": "*",

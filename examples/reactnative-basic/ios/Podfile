@@ -51,6 +51,18 @@ target 'MapConductorBasic' do
   # only covers npm packages, so these path pods must be declared explicitly.
   pod 'MapConductorCore', :path => '../../../../ios-sdk/ios-sdk-core'
   pod 'MapConductorForGoogleMaps', :path => '../../../../ios-sdk/ios-for-googlemaps'
+  # MapConductorForHERE is also a path pod for the same reason - it additionally vendors the
+  # proprietary heresdk.xcframework itself (see MapConductorForHERE.podspec), since HERE has no
+  # public pod to depend on.
+  pod 'MapConductorForHERE', :path => '../../../../ios-sdk/ios-for-here'
+  # MapConductorForArcGIS is also a path pod for the same reason - it additionally vendors
+  # Esri's ArcGIS.xcframework/CoreArcGIS.xcframework itself (see MapConductorForArcGIS.podspec),
+  # since Esri only distributes this SDK via Swift Package Manager (no public CocoaPods spec).
+  pod 'MapConductorForArcGIS', :path => '../../../../ios-sdk/ios-for-arcgis'
+  pod 'MapConductorMarkerCluster', :path => '../../../../ios-sdk/ios-marker-cluster'
+  pod 'MapConductorForMapLibre', :path => '../../../../ios-sdk/ios-for-maplibre'
+  pod 'MapConductorHeatmap', :path => '../../../../ios-sdk/ios-heatmap'
+  pod 'MapConductorGeoJSON', :path => '../../../../ios-sdk/ios-geojson-layer'
 
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']

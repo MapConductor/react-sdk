@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { SamplePageDefinition } from '../../App';
 import { MapPage } from 'src/pages/map/basic/StoreMapPage';
 import { CameraSyncPage } from 'src/pages/map/camerasync/CameraSyncPage';
-import { MapDesignPage, type MapProvider } from 'src/pages/map/design/MapDesignPage';
+import { MapDesignPage } from 'src/pages/map/design/MapDesignPage';
 import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
 import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
@@ -22,6 +22,7 @@ import { PolygonClickPage } from 'src/pages/polygon/PolygonClickPage';
 import { PolygonGeodesicPage } from 'src/pages/polygon/PolygonGeodesicPage';
 import { PolygonHolePage } from 'src/pages/polygon/PolygonHolePage';
 import { CirclePage } from 'src/pages/circle/CirclePage';
+import type { MapProvider } from 'src/providers/types';
 
 export type { MapProvider };
 

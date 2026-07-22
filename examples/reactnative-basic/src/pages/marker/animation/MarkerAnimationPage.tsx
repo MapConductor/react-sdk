@@ -14,17 +14,8 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { Marker } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
-
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
+import type { MapProvider } from '../../../providers/types';
 
 const HONOLULU = GeoPoint.from({ latitude: 21.3825, longitude: -157.933, altitude: 0 });
 
@@ -40,25 +31,6 @@ function triggerAnimation(marker: MarkerState, animation: MarkerAnimation) {
   setTimeout(() => marker.animate(null), 900);
 }
 
-function MarkerAnimationMap({
-  provider,
-  mapLibreState,
-  googleState,
-  marker,
-}: {
-  provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
-  marker: MarkerState;
-}) {
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
-  return (
-    <MapViewContainer state={state} style={styles.map}>
-      <Marker state={marker} />
-    </MapViewContainer>
-  );
-}
-
 export function MarkerAnimationPage({ provider }: { provider: MapProvider }) {
   const [marker] = useState(
     () =>
@@ -70,25 +42,16 @@ export function MarkerAnimationPage({ provider }: { provider: MapProvider }) {
       })
   );
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'marker-animation-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'marker-animation-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-
   return (
     <View style={styles.mapContainer}>
-      <MarkerAnimationMap
+      <MapViewContainer
         provider={provider}
-        mapLibreState={mapLibreState}
-        googleState={googleState}
-        marker={marker}
-      />
+        cameraPosition={INIT_CAMERA}
+        mapId="marker-animation"
+        style={styles.map}
+      >
+        <Marker state={marker} />
+      </MapViewContainer>
 
       <View style={styles.controlPanel}>
         <Text style={styles.controlPanelTitle}>Marker Animation</Text>
