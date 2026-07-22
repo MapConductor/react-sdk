@@ -51,6 +51,8 @@ dist/*
 *.map
 *.mjs
 !examples/basic/server.mjs
+!examples/basic/scripts/generate-static.mjs
+!scripts/link-local-workspaces.mjs
 *.cjs
 !eslint.config.cjs
 dist/*.d.ts
