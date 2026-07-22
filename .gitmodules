@@ -33,7 +33,16 @@
 	url = git@github.com:mapconductor/react-for-leaflet.git
 [submodule "react-for-here"]
 	path = react-for-here
-	url = ./react-for-here
+	url = git@github.com:mapconductor/react-for-here
 [submodule "reactnative-for-here"]
 	path = reactnative-for-here
-	url = ./reactnative-for-here
+	url = git@github.com:mapconductor/reactnative-for-here
+[submodule "react-for-arcgis"]
+	path = react-for-arcgis
+	url = git@github.com:mapconductor/react-for-arcgis
+[submodule "react-for-cesium"]
+	path = react-for-cesium
+	url = git@github.com:mapconductor/react-for-cesium
+[submodule "react-for-mapbox"]
+	path = react-for-mapbox
+	url = git@github.com:mapconductor/react-for-mapbox
