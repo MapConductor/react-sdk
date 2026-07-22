@@ -46,3 +46,6 @@
 [submodule "react-for-mapbox"]
 	path = react-for-mapbox
 	url = git@github.com:mapconductor/react-for-mapbox
+[submodule "react-for-openlayers"]
+	path = react-for-openlayers
+	url = git@github.com:mapconductor/react-for-openlayers
