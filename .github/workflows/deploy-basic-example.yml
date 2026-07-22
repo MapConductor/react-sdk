@@ -3,9 +3,9 @@ name: Deploy basic example
 # Deploys examples/basic to Firebase Hosting.
 #
 # Required repository secrets:
-#   FIREBASE_SERVICE_ACCOUNT      - JSON key of a service account with the
-#                                   "Firebase Hosting Admin" role on the project
-#                                   in examples/basic/.firebaserc
+#   FIREBASE_SERVICE_ACCOUNT      - JSON key of a service account for the
+#                                   `mapconductor` Firebase project with the
+#                                   "Firebase Hosting Admin" role
 #   VITE_GOOGLE_MAPS_API_KEY      - Google Maps JavaScript API key
 #   VITE_ARCGIS_API_KEY           - ArcGIS Location Platform API key
 #   VITE_MAPBOX_ACCESS_TOKEN      - Mapbox access token
@@ -75,7 +75,7 @@ jobs:
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          projectId: mapconductor
           channelId: live
           entryPoint: examples/basic

@@ -1,7 +1,5 @@
 {
   "projects": {
-    "default": "mapconductor-react"
-  },
-  "targets": {},
-  "etags": {}
+    "default": "mapconductor"
+  }
 }
