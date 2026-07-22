@@ -28,11 +28,15 @@ import {
   MapLibreDesign,
   useMapLibreViewState,
 } from '@mapconductor/reactnative-for-maplibre';
+import {
+  HereMapDesign,
+  useHereViewState,
+} from '@mapconductor/reactnative-for-here';
 
 import { STORES, type StoreInfo } from '../../../data/storeData';
 import { MapViewContainer } from '../../MapViewContainer';
 
-type MapProvider = 'maplibre' | 'google-maps';
+type MapProvider = 'maplibre' | 'google-maps' | 'here';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 21.382314, longitude: -157.933097, altitude: 0 }),
@@ -155,6 +159,7 @@ function StoreMap({
   provider,
   mapLibreState,
   googleState,
+  hereState,
   onMapClick,
   onSelectMarker,
   selectedMarker,
@@ -162,6 +167,7 @@ function StoreMap({
   provider: MapProvider;
   mapLibreState: ReturnType<typeof useMapLibreViewState>;
   googleState: ReturnType<typeof useGoogleMapViewState>;
+  hereState: ReturnType<typeof useHereViewState>;
   onMapClick: () => void;
   onSelectMarker: (marker: MarkerState) => void;
   selectedMarker: MarkerState | null;
@@ -172,7 +178,8 @@ function StoreMap({
     </InfoBubble>
   ) : null;
 
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
+  const state =
+    provider === 'google-maps' ? googleState : provider === 'here' ? hereState : mapLibreState;
   return (
     <MapViewContainer state={state} style={styles.map} onMapClick={onMapClick}>
       <StoreMarkers onSelectMarker={onSelectMarker} />
@@ -197,6 +204,11 @@ export function MapPage({ provider }: { provider: MapProvider }) {
     mapDesignType: GoogleMapDesign.Normal,
     cameraPosition: INIT_CAMERA,
   });
+  const hereState = useHereViewState({
+    id: 'store-map-here',
+    mapDesignType: HereMapDesign.NormalDay,
+    cameraPosition: INIT_CAMERA,
+  });
 
   return (
     <View style={styles.mapContainer}>
@@ -204,6 +216,7 @@ export function MapPage({ provider }: { provider: MapProvider }) {
         provider={provider}
         mapLibreState={mapLibreState}
         googleState={googleState}
+        hereState={hereState}
         onMapClick={() => setSelectedMarker(null)}
         onSelectMarker={handleSelectMarker}
         selectedMarker={selectedMarker}

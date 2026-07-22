@@ -17,7 +17,7 @@ import {
 } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 
-type MapProvider = 'maplibre' | 'google-maps';
+type MapProvider = 'maplibre' | 'google-maps' | 'here';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 21.3069, longitude: -157.8583, altitude: 0 }),

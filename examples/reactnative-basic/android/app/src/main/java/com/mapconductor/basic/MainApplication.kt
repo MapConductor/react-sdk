@@ -10,9 +10,6 @@ import com.facebook.react.ReactPackage
 import com.facebook.react.ReactHost
 import com.facebook.react.common.ReleaseLevel
 import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
-import com.mapconductor.react.googlemaps.MapConductorGoogleMapsPackage
-import com.mapconductor.react.maplibre.MapConductorMapLibrePackage
-import com.mapconductor.react.geojson.GeoJSONStyleProviderRegistry
 
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ExpoReactHostFactory
@@ -26,18 +23,12 @@ class MainApplication : Application(), ReactApplication {
         PackageList(this).packages.apply {
           // Packages that cannot be autolinked yet can be added manually here, for example:
           // add(MyReactNativePackage())
-          add(MapConductorGoogleMapsPackage())
-          add(MapConductorMapLibrePackage())
         }
     )
   }
 
   override fun onCreate() {
     super.onCreate()
-    GeoJSONStyleProviderRegistry.register("example-n02-route") { context, sourceUri ->
-      requireNotNull(sourceUri) { "example-n02-route requires a GeoJSON ZIP sourceUri" }
-      ExampleGeoJSONStyler.fromZip(context, sourceUri)
-    }
     DefaultNewArchitectureEntryPoint.releaseLevel = try {
       ReleaseLevel.valueOf(BuildConfig.REACT_NATIVE_RELEASE_LEVEL.uppercase())
     } catch (e: IllegalArgumentException) {

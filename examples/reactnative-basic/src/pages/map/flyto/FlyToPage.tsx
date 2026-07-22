@@ -22,7 +22,7 @@ import {
 } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 
-type MapProvider = 'maplibre' | 'google-maps';
+type MapProvider = 'maplibre' | 'google-maps' | 'here';
 
 interface CityLocation {
   id: string;

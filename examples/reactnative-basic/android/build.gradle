@@ -19,17 +19,12 @@ allprojects {
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
   }
-  configurations.configureEach {
-    resolutionStrategy.force "androidx.core:core:1.16.0"
-    resolutionStrategy.force "androidx.core:core-ktx:1.16.0"
-  }
-}
-
-ext {
-  minSdkVersion = 26
-  compileSdkVersion = 35
-  targetSdkVersion = 35
 }
 
 apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
+
+// com.mapconductor:for-googlemaps requires minSdk 26; this Expo app's generated default is 24.
+// (Pre-existing gap unrelated to reactnative-for-here - reactnative-for-googlemaps ships an Expo
+// config plugin that's supposed to raise this but isn't wired into this app's app.config.ts.)
+ext.minSdkVersion = 26

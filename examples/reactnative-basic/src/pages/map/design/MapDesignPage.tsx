@@ -23,7 +23,7 @@ import {
 } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 
-export type MapProvider = 'maplibre' | 'google-maps';
+export type MapProvider = 'maplibre' | 'google-maps' | 'here';
 
 interface MapDesignOption {
   label: string;

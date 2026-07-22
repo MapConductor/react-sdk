@@ -23,7 +23,7 @@ import {
 import postOfficesJson from '../../data/postoffice/postoffices.json';
 import { MapViewContainer } from '../MapViewContainer';
 
-type MapProvider = 'maplibre' | 'google-maps';
+type MapProvider = 'maplibre' | 'google-maps' | 'here';
 type PostOfficeRow = [number, number, string, string];
 
 const POST_OFFICES = postOfficesJson as PostOfficeRow[];

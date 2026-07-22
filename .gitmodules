@@ -34,3 +34,6 @@
 [submodule "react-for-here"]
 	path = react-for-here
 	url = ./react-for-here
+[submodule "reactnative-for-here"]
+	path = reactnative-for-here
+	url = ./reactnative-for-here

@@ -12,6 +12,10 @@ import {
   MapLibreMapView,
   MapLibreViewState,
 } from '@mapconductor/reactnative-for-maplibre';
+import {
+  HereMapView,
+  HereViewState,
+} from '@mapconductor/reactnative-for-here';
 
 type CommonMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 type MapViewContainerProps = MapViewBaseProps<CommonMapViewState> & {
@@ -36,6 +40,18 @@ export function MapViewContainer({
       <MapLibreMapView state={state} {...props}>
         {children}
       </MapLibreMapView>
+    );
+  }
+
+  if (state instanceof HereViewState) {
+    // accessKeyId/accessKeySecret aren't passed here: on Android, HereMapViewControllerStore
+    // reads HERE_ACCESS_KEY_ID/HERE_ACCESS_KEY_SECRET from AndroidManifest.xml meta-data instead
+    // (see reactnative-for-here/android/build.gradle's manifestPlaceholders injection). iOS has
+    // no manifest equivalent and would need these two props supplied here.
+    return (
+      <HereMapView state={state} {...props}>
+        {children}
+      </HereMapView>
     );
   }
 

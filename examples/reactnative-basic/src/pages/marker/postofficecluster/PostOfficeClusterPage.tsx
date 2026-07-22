@@ -32,7 +32,7 @@ import {
 import { MapViewContainer } from '../../MapViewContainer';
 import postOfficesJson from '../../../data/postoffice/postoffices.json';
 
-type MapProvider = 'maplibre' | 'google-maps';
+type MapProvider = 'maplibre' | 'google-maps' | 'here';
 type PostOfficeRow = [number, number, string, string];
 
 interface PostOfficeExtra {

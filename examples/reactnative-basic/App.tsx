@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { MapScreen } from 'src/screens/MapScreen';
 
-type MapProvider = 'google-maps' | 'maplibre';
+type MapProvider = 'google-maps' | 'maplibre' | 'here';
 
 export interface SamplePageDefinition {
   id: string;
@@ -62,7 +62,12 @@ function Header({
   onProviderChange: (provider: MapProvider) => void;
 }) {
   const [isProviderMenuOpen, setIsProviderMenuOpen] = useState(false);
-  const providerLabel = provider === 'google-maps' ? 'GoogleMapView' : 'MapLibreMapView';
+  const providerLabel =
+    provider === 'google-maps'
+      ? 'GoogleMapView'
+      : provider === 'here'
+        ? 'HereMapView'
+        : 'MapLibreMapView';
 
   const selectProvider = (nextProvider: MapProvider) => {
     onProviderChange(nextProvider);
@@ -140,6 +145,20 @@ function Header({
                     ]}
                   >
                     MapLibreMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'here' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('here')}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'here' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    HereMapView
                   </Text>
                 </TouchableOpacity>
               </View>

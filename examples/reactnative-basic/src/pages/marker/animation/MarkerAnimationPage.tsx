@@ -24,7 +24,7 @@ import {
 } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 
-type MapProvider = 'maplibre' | 'google-maps';
+type MapProvider = 'maplibre' | 'google-maps' | 'here';
 
 const HONOLULU = GeoPoint.from({ latitude: 21.3825, longitude: -157.933, altitude: 0 });
 
