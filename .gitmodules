@@ -52,3 +52,9 @@
 [submodule "react-for-openlayers"]
 	path = react-for-openlayers
 	url = git@github.com:mapconductor/react-for-openlayers
+[submodule "react-for-mapkit"]
+	path = react-for-mapkit
+	url = git@github.com:mapconductor/react-for-mapkit
+[submodule "react-for-azuremaps"]
+	path = react-for-azuremaps
+	url = git@github.com:mapconductor/react-for-azuremaps
