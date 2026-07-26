@@ -7,7 +7,7 @@ import {
   resolveProviderForPage,
   SAMPLE_PAGES,
   type SupportedLanguage,
-} from './sampleRegistry';
+} from './samples/sampleRegistry';
 import { getLanguageFromPath } from './samples/i18n';
 
 export function render(url: string): string {
