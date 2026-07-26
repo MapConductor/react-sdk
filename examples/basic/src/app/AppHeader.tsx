@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { SupportedLanguage } from '../sampleRegistry';
-import { translate } from '../i18n';
+import { translate } from '../samples/i18n';
 import type { MapProvider } from './appRouting';
 
 const PROVIDERS: Array<{ value: MapProvider; label: string }> = [
@@ -10,6 +10,8 @@ const PROVIDERS: Array<{ value: MapProvider; label: string }> = [
   { value: 'openlayers', label: 'OpenLayers' },
   { value: 'arcgis', label: 'ArcGIS 2D' },
   { value: 'arcgis-3d', label: 'ArcGIS 3D' },
+  { value: 'mapkit', label: 'MapKit' },
+  { value: 'azuremaps', label: 'Azure Maps' },
   { value: 'cesium', label: 'Cesium' },
   { value: 'here', label: 'HERE' },
   { value: 'google', label: 'Google Maps' },

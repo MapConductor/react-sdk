@@ -8,6 +8,7 @@ import {
   useId,
   useLayoutEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -30,6 +31,8 @@ import { MapboxDesign, useMapboxViewState } from '@mapconductor/react-for-mapbox
 import { LeafletDesign, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
 import { OpenLayersDesign, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
 import { ArcGISDesign, useArcGISViewState } from '@mapconductor/react-for-arcgis';
+import { MapKitMapDesign, useMapKitViewState } from '@mapconductor/react-for-mapkit';
+import { AzureMapsDesign, useAzureMapsViewState } from '@mapconductor/react-for-azuremaps';
 import { CesiumDesign, useCesiumMapViewState } from '@mapconductor/react-for-cesium';
 import { HereMapDesign, useHereViewState } from '@mapconductor/react-for-here';
 import type { SingletonMapContent } from './providers/singleton/types';
@@ -46,15 +49,21 @@ export type SingletonMapId =
   | 'openlayers'
   | 'arcgis-2d'
   | 'arcgis-3d'
+  | 'mapkit'
+  | 'azuremaps'
   | 'cesium'
   | 'here';
 
 type AnyMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+type AnyMapDesignType = MapDesignTypeInterface<unknown>;
 
 interface SingletonMapsContextValue {
   statesById: Record<SingletonMapId, AnyMapViewState>;
   register(id: SingletonMapId, content: SingletonMapContent): void;
   unregister(id: SingletonMapId, owner: string): void;
+  // Resets the shared (singleton) map instance for `id` back to its defaults so
+  // settings a previous page applied don't leak across navigation.
+  resetMapState(id: SingletonMapId): void;
 }
 
 interface SingletonMapSlotProps extends Omit<SingletonMapContent, 'owner'> {
@@ -103,13 +112,17 @@ const LazyMapboxSingletonView = lazy(() => import('./providers/singleton/MapboxS
 const LazyLeafletSingletonView = lazy(() => import('./providers/singleton/LeafletSingletonView'));
 const LazyOpenLayersSingletonView = lazy(() => import('./providers/singleton/OpenLayersSingletonView'));
 const LazyArcGISSingletonView = lazy(() => import('./providers/singleton/ArcGISSingletonView'));
+const LazyMapKitSingletonView = lazy(() => import('./providers/singleton/MapKitSingletonView'));
+const LazyAzureMapsSingletonView = lazy(() => import('./providers/singleton/AzureMapsSingletonView'));
 const LazyCesiumSingletonView = lazy(() => import('./providers/singleton/CesiumSingletonView'));
 const LazyHereSingletonView = lazy(() => import('./providers/singleton/HereSingletonView'));
 
 export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const arcGISApiKey = import.meta.env.VITE_ARCGIS_API_KEY || '';
+  const mapKitToken = import.meta.env.VITE_MAPKIT_TOKEN || '';
   const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || '';
+  const azureMapsKey = import.meta.env.VITE_AZURE_MAPS_SUBSCRIOTION_KEY || '';
 
   // Each use<Provider>ViewState() hook only creates lightweight camera/config
   // state (no heavy SDK import), so calling all of them eagerly here is
@@ -125,6 +138,8 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const openLayersState = useOpenLayersMapViewState({ mapDesignType: OpenLayersDesign.OpenStreetMap, cameraPosition: DEFAULT_CAMERA });
   const arcgis2DState = useArcGISViewState({ apiKey: arcGISApiKey, mapDesignType: ArcGISDesign.Streets, cameraPosition: DEFAULT_CAMERA });
   const arcgis3DState = useArcGISViewState({ apiKey: arcGISApiKey, mapDesignType: ArcGISDesign.Streets, cameraPosition: DEFAULT_CAMERA });
+  const mapkitState = useMapKitViewState({ token: mapKitToken, mapDesignType: MapKitMapDesign.Standard, cameraPosition: DEFAULT_CAMERA });
+  const azuremapsState = useAzureMapsViewState({ subscriptionKey: azureMapsKey, mapDesignType: AzureMapsDesign.Road, cameraPosition: DEFAULT_CAMERA });
   const cesiumState = useCesiumMapViewState({ mapDesignType: CesiumDesign.Default, cameraPosition: DEFAULT_CAMERA });
   const hereState = useHereViewState({ mapDesignType: HereMapDesign.NormalDay, cameraPosition: DEFAULT_CAMERA });
 
@@ -138,12 +153,23 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     openlayers: openLayersState,
     'arcgis-2d': arcgis2DState,
     'arcgis-3d': arcgis3DState,
+    mapkit: mapkitState,
+    azuremaps: azuremapsState,
     cesium: cesiumState,
     here: hereState,
   }), [
     google2DState, google3DState, maplibre2DState, maplibre3DState, mapboxState,
-    leafletState, openLayersState, arcgis2DState, arcgis3DState, cesiumState, hereState,
+    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState,
   ]);
+
+  // Capture each provider's default map design once, up front, before any page
+  // can mutate the shared state's mapDesignType. resetMapState() restores these.
+  const defaultDesignsRef = useRef<Record<SingletonMapId, AnyMapDesignType> | null>(null);
+  if (!defaultDesignsRef.current) {
+    defaultDesignsRef.current = Object.fromEntries(
+      (Object.keys(statesById) as SingletonMapId[]).map(id => [id, statesById[id].mapDesignType]),
+    ) as Record<SingletonMapId, AnyMapDesignType>;
+  }
 
   const [mounted, setMounted] = useState<Partial<Record<SingletonMapId, boolean>>>({});
   const [content, setContent] = useState<Partial<Record<SingletonMapId, SingletonMapContent | null>>>({});
@@ -157,11 +183,48 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     setContent(prev => (prev[id]?.owner === owner ? { ...prev, [id]: null } : prev));
   }, []);
 
+  // Every provider is driven by a single shared map instance kept alive across
+  // navigation (see the comment on MapViewContainer). That means view-level
+  // settings a page changes — the map design and the camera's bearing/tilt —
+  // would otherwise persist into the next page. Reset them to a clean baseline
+  // on each page entry (useSingletonMapState calls this before applying the new
+  // page's initialCamera).
+  //
+  // minZoom / maxZoom / restrictBounds are intentionally not handled here: they
+  // are baked into a map at creation time and are never applied to a singleton
+  // instance (pages that need them opt into a dedicated, per-mount instance in
+  // MapViewContainer), so there is nothing to reset for those.
+  const resetMapState = useCallback((id: SingletonMapId) => {
+    const state = statesById[id];
+    const defaultDesign = defaultDesignsRef.current?.[id];
+    if (!state || !defaultDesign) return;
+
+    if (state.mapDesignType.id !== defaultDesign.id) {
+      state.mapDesignType = defaultDesign;
+    }
+
+    // Neutral top-down orientation. Position/zoom are left untouched because the
+    // page's own initialCamera is applied right after this, which also re-applies
+    // any tilt/bearing a page intentionally wants (e.g. the Tilt sample).
+    if (state.cameraPosition.bearing !== 0 || state.cameraPosition.tilt !== 0) {
+      state.moveCameraTo(
+        createMapCameraPosition({
+          position: state.cameraPosition.position,
+          zoom: state.cameraPosition.zoom,
+          bearing: 0,
+          tilt: 0,
+        }),
+        0,
+      );
+    }
+  }, [statesById]);
+
   const contextValue = useMemo<SingletonMapsContextValue>(() => ({
     statesById,
     register,
     unregister,
-  }), [statesById, register, unregister]);
+    resetMapState,
+  }), [statesById, register, unregister, resetMapState]);
 
   const hasGoogleKey = Boolean(googleApiKey && googleApiKey !== 'your_api_key_here');
 
@@ -230,6 +293,14 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
       node: <Suspense fallback={null}><LazyArcGISSingletonView state={arcgis3DState} content={content['arcgis-3d'] ?? null} useSceneView /></Suspense>,
     },
     {
+      id: 'mapkit',
+      node: <Suspense fallback={null}><LazyMapKitSingletonView state={mapkitState} content={content['mapkit'] ?? null} /></Suspense>,
+    },
+    {
+      id: 'azuremaps',
+      node: <Suspense fallback={null}><LazyAzureMapsSingletonView state={azuremapsState} content={content['azuremaps'] ?? null} /></Suspense>,
+    },
+    {
       id: 'cesium',
       node: <Suspense fallback={null}><LazyCesiumSingletonView state={cesiumState} content={content['cesium'] ?? null} /></Suspense>,
     },
@@ -281,7 +352,7 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
 }
 
 export function useSingletonMapState(id: SingletonMapId, cameraPosition: MapCameraPosition): AnyMapViewState {
-  const { statesById } = useSingletonMapsContext();
+  const { statesById, resetMapState } = useSingletonMapsContext();
   const state = statesById[id];
   const cameraKey = [
     cameraPosition.position.latitude,
@@ -293,9 +364,11 @@ export function useSingletonMapState(id: SingletonMapId, cameraPosition: MapCame
   ].join(':');
 
   useLayoutEffect(() => {
+    // Reset the shared instance to its defaults, then apply this page's camera.
+    resetMapState(id);
     state.moveCameraTo(cameraPosition, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cameraKey, state]);
+  }, [cameraKey, state, id, resetMapState]);
 
   return state;
 }

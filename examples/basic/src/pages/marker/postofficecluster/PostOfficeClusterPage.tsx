@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createGeoPoint, createMapCameraPosition, type MarkerState } from '@mapconductor/js-sdk-core';
 import { MarkerClusterGroup, type MarkerCluster } from '@mapconductor/react-marker-clustering';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 import { PostOfficeInfoBubble } from '../postoffice/PostOfficeInfoBubble';
 import {
   PostOfficeMapProvider,

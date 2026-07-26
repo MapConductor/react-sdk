@@ -11,7 +11,7 @@ import {
 import { Markers, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 
 const INIT_CAMERA = { lat: 43.0602, lng: 141.3195, zoom: 11 };
 // A regional mask generously covering the Sapporo area. Cesium cannot

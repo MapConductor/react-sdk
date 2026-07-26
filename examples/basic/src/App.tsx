@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getLanguageFromPath } from './i18n';
-import { getSamplePageDefinition, getSamplePageMetadata, type SupportedLanguage } from './sampleRegistry';
+import { getLanguageFromPath } from './samples/i18n';
+import { getSamplePageDefinition, getSamplePageMetadata, type SupportedLanguage } from './samples/sampleRegistry';
 import { AppHeader } from './app/AppHeader';
 import { AppNavigation } from './app/AppNavigation';
 import {

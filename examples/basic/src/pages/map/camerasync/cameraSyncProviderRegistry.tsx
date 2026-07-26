@@ -30,10 +30,19 @@ import {
   type ArcGISViewState,
 } from '@mapconductor/react-for-arcgis';
 import {
+  MapKitMapView,
+  MapKitZoomAltitudeConverter,
+  type MapKitViewState,
+} from '@mapconductor/react-for-mapkit';
+import {
   CesiumMapView,
   ZoomAltitudeConverter as CesiumZoomAltitudeConverter,
   type CesiumMapViewState,
 } from '@mapconductor/react-for-cesium';
+import {
+  AzureMapsMapView,
+  type AzureMapsViewState,
+} from '@mapconductor/react-for-azuremaps';
 import type { PaneProvider, PaneState } from './types';
 import { HereMapView2D, HereViewState } from '@mapconductor/react-for-here';
 
@@ -54,6 +63,7 @@ export interface CameraSyncProviderAdapter {
 const googleZoom = new GoogleZoomAltitudeConverter();
 const mapboxZoom = new MapboxZoomAltitudeConverter();
 const cesiumZoom = new CesiumZoomAltitudeConverter();
+const mapkitZoom = new MapKitZoomAltitudeConverter();
 let herePlatform: H.service.Platform | null = null;
 
 function convertedAltitude(
@@ -124,12 +134,26 @@ const adapters: CameraSyncProviderAdapter[] = [
     render: ({ paneState: pane, children, ...events }) => <ArcGISMapView state={pane.mapState as ArcGISViewState} {...events}>{children}</ArcGISMapView>,
   },
   {
+    id: 'mapkit', label: 'MapKit',
+    altitude: (pane, position) => {
+      // MapKit JS exposes the camera altitude directly as `cameraDistance`;
+      // read the live value, falling back to the converter before the map is ready.
+      const holder = pane.mapState.getMapViewHolder() as { map?: { cameraDistance?: number } } | null;
+      return holder?.map?.cameraDistance ?? convertedAltitude(position, mapkitZoom);
+    },
+    render: ({ paneState: pane, children, ...events }) => <MapKitMapView state={pane.mapState as MapKitViewState} {...events}>{children}</MapKitMapView>,
+  },
+  {
     id: 'cesium', label: 'Cesium',
     altitude: (pane, position) => {
       const holder = pane.mapState.getMapViewHolder() as { map?: { camera?: { positionCartographic?: { height?: number } } } } | null;
       return holder?.map?.camera?.positionCartographic?.height ?? convertedAltitude(position, cesiumZoom);
     },
     render: ({ paneState: pane, children, ...events }) => <CesiumMapView state={pane.mapState as CesiumMapViewState} {...events}>{children}</CesiumMapView>,
+  },
+  {
+    id: 'azuremaps', label: 'Azure Maps', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: ({ paneState: pane, children, ...events }) => <AzureMapsMapView state={pane.mapState as AzureMapsViewState} {...events}>{children}</AzureMapsMapView>,
   },
   {
     id: 'here', label: 'HERE', altitude: (_pane, position) => convertedAltitude(position, googleZoom),

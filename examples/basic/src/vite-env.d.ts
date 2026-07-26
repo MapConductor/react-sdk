@@ -5,6 +5,8 @@ interface ImportMetaEnv {
   readonly VITE_ARCGIS_API_KEY: string;
   readonly VITE_MAPBOX_ACCESS_TOKEN: string;
   readonly VITE_HERE_API_KEY: string;
+  readonly VITE_MAPKIT_TOKEN: string;
+  readonly VITE_AZURE_MAPS_SUBSCRIOTION_KEY: string;
   // Add more environment variables here as needed
 }
 

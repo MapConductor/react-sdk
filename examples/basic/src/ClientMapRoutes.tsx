@@ -2,14 +2,14 @@ import { lazy, Suspense } from 'react';
 import { Navigate, Route, Routes, useLocation, useParams } from 'react-router-dom';
 import { SingletonMapsProvider } from './SingletonMaps';
 import { SamplePageLayout } from './components/SamplePageLayout';
-import { getLanguageFromPath } from './i18n';
+import { getLanguageFromPath } from './samples/i18n';
 import { parseSamplePath, samplePath } from './app/appRouting';
 import {
   DEFAULT_SAMPLE_PAGE,
   getSamplePageDefinition,
   isKnownSamplePage,
   isSupportedLanguage,
-} from './sampleRegistry';
+} from './samples/sampleRegistry';
 
 // Every sample page is loaded on demand instead of being bundled into one chunk.
 // A handful of pages (camera-sync, post-office, post-office-cluster, heatmap-layer)
@@ -44,6 +44,7 @@ const HeatmapLayerPage = lazy(() => import('./pages/heatmaplayer/HeatmapLayerPag
 const BasicGeoJSONPage = lazy(() => import('./pages/geojson/basic/BasicGeoJSONPage').then(m => ({ default: m.BasicGeoJSONPage })));
 const GeoJSONLayerPage = lazy(() => import('./pages/geojson/layer/GeoJSONLayerPage').then(m => ({ default: m.GeoJSONLayerPage })));
 const ThreeJsObjectPage = lazy(() => import('./pages/threejs/ThreeJsObjectPage').then(m => ({ default: m.ThreeJsObjectPage })));
+const HelloMapTutorialPage = lazy(() => import('./pages/hellomap/HelloMapTutorialPage').then(m => ({ default: m.HelloMapTutorialPage })));
 
 function SamplePageLoadingPlaceholder() {
   return (
@@ -107,10 +108,10 @@ function ProviderPageRoute() {
   if (requestedPage !== page || !isSupportedLanguage(language)) {
     return <Navigate to={`/${provider ?? 'maplibre'}/${requestedPage}/${isSupportedLanguage(language) ? language : 'en'}`} replace />;
   }
-  if (requestedPage === 'camera-sync') {
+  if (requestedPage === 'camera-sync' || requestedPage === 'hello-map') {
     return <Navigate to={samplePath(provider ?? 'maplibre', requestedPage, language)} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'cesium' && provider !== 'here') {
+  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here') {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 
@@ -135,6 +136,18 @@ function StandaloneCameraSyncRoute() {
   );
 }
 
+function StandaloneHelloMapRoute() {
+  const { language } = useParams<{ language: string }>();
+  if (!isSupportedLanguage(language)) {
+    return <Navigate to="/hello-map/en" replace />;
+  }
+  return (
+    <Suspense fallback={<SamplePageLoadingPlaceholder />}>
+      <HelloMapTutorialPage />
+    </Suspense>
+  );
+}
+
 export default function ClientMapRoutes() {
   const location = useLocation();
   const { providerPath: provider, page: routePage } = parseSamplePath(location.pathname);
@@ -148,6 +161,8 @@ export default function ClientMapRoutes() {
           <Route path="/" element={<Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/en`} replace />} />
           <Route path="/camera-sync" element={<Navigate to="en" replace />} />
           <Route path="/camera-sync/:language" element={<StandaloneCameraSyncRoute />} />
+          <Route path="/hello-map" element={<Navigate to="en" replace />} />
+          <Route path="/hello-map/:language" element={<StandaloneHelloMapRoute />} />
           <Route path="/:provider" element={<Navigate to={`${DEFAULT_SAMPLE_PAGE}/en`} replace />} />
           <Route path="/:provider/:page" element={<Navigate to="en" replace />} />
           <Route path="/:provider/:page/:language" element={<ProviderPageRoute />} />

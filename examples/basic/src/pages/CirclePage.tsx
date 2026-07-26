@@ -16,7 +16,7 @@ import { Circle, Marker, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { MapViewContainer } from '../MapViewContainer';
-import { useSampleI18n } from '../i18n';
+import { useSampleI18n } from '../samples/i18n';
 
 const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
 const INIT_CAMERA = { lat: CIRCLE_CENTER.latitude, lng: CIRCLE_CENTER.longitude, zoom: 12 };

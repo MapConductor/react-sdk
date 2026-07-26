@@ -28,6 +28,8 @@ const LazyOpenLayersProviderView = lazy(() => import('./providers/OpenLayersProv
 const LazyMapLibreProviderView = lazy(() => import('./providers/MapLibreProviderView'));
 const LazyMapBoxProviderView = lazy(() => import('./providers/MapboxProviderView'));
 const LazyArcGISProviderView = lazy(() => import('./providers/ArcGISProviderView'));
+const LazyMapKitProviderView = lazy(() => import('./providers/MapKitProviderView'));
+const LazyAzureMapsProviderView = lazy(() => import('./providers/AzureMapsProviderView'));
 const LazyCesiumProviderView = lazy(() => import('./providers/CesiumProviderView'));
 const LazyHereProviderView = lazy(() => import('./providers/HereProviderView'));
 
@@ -109,6 +111,8 @@ export function MapViewContainer({
   const isMapLibre2D = !isMapLibre3D && location.pathname.startsWith('/maplibre');
   const isArcGIS3D = location.pathname.startsWith('/arcgis-3d');
   const isArcGIS2D = !isArcGIS3D && location.pathname.startsWith('/arcgis');
+  const isMapKit = location.pathname.startsWith('/mapkit');
+  const isAzureMaps = location.pathname.startsWith('/azuremaps');
   const isCesium = location.pathname.startsWith('/cesium');
   const isHere = location.pathname.startsWith('/here');
   const useDedicatedInstance = Boolean(restrictBounds);
@@ -183,6 +187,28 @@ export function MapViewContainer({
         );
       }
       return <SingletonProviderView id={isArcGIS3D ? 'arcgis-3d' : 'arcgis-2d'} {...commonProps} />;
+    }
+
+    case isMapKit: {
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyMapKitProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="mapkit" {...commonProps} />;
+    }
+
+    case isAzureMaps: {
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyAzureMapsProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="azuremaps" {...commonProps} />;
     }
 
     case isCesium: {

@@ -17,6 +17,8 @@ export type PaneProvider =
   | 'google-maps-3d'
   | 'arcgis'
   | 'arcgis-3d'
+  | 'mapkit'
+  | 'azuremaps'
   | 'cesium'
   | 'here';
 

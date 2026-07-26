@@ -7,7 +7,7 @@ import {
 import { ControlPanel } from '../../components/ControlPanel';
 import { ThreeMapObject } from '../../components/ThreeMapObject';
 import { MapViewContainer } from '../../MapViewContainer';
-import { useSampleI18n } from '../../i18n';
+import { useSampleI18n } from '../../samples/i18n';
 
 const TOKYO_STATION_CAMERA = {
   lat: 35.6812,

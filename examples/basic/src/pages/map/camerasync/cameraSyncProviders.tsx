@@ -27,9 +27,17 @@ import {
   useArcGISViewState,
 } from '@mapconductor/react-for-arcgis';
 import {
+  MapKitMapDesign,
+  useMapKitViewState,
+} from '@mapconductor/react-for-mapkit';
+import {
   CesiumDesign,
   useCesiumMapViewState,
 } from '@mapconductor/react-for-cesium';
+import {
+  AzureMapsDesign,
+  useAzureMapsViewState,
+} from '@mapconductor/react-for-azuremaps';
 import { INITIAL_CAMERA } from './cameraSyncData';
 import type { PaneProvider, PaneState } from './types';
 import { HereMapDesign, useHereViewState } from '@mapconductor/react-for-here';
@@ -43,7 +51,9 @@ function paneState(provider: PaneProvider, mapState: MapViewStateInterface<MapDe
 export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderStateMap {
   const googleMapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
   const arcGISApiKey = import.meta.env.VITE_ARCGIS_API_KEY || '';
+  const mapKitToken = import.meta.env.VITE_MAPKIT_TOKEN || '';
   const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || '';
+  const azureMapsKey = import.meta.env.VITE_AZURE_MAPS_SUBSCRIOTION_KEY || '';
   const mapLibreState = useMapLibreViewState({ id: `camera-sync-${prefix}-maplibre`, mapDesignType: prefix === 'left' ? MapLibreDesign.OsmBrightJa : MapLibreDesign.MapTilerBasicJa, cameraPosition: INITIAL_CAMERA });
   const mapboxState = useMapboxViewState({ id: `camera-sync-${prefix}-mapbox`, accessToken: mapboxAccessToken, mapDesignType: prefix === 'left' ? MapboxDesign.Streets : MapboxDesign.Light, cameraPosition: INITIAL_CAMERA });
   const mapbox3DState = useMapboxViewState({ id: `camera-sync-${prefix}-mapbox-3d`, accessToken: mapboxAccessToken, mapDesignType: prefix === 'left' ? MapboxDesign.Outdoors : MapboxDesign.SatelliteStreets, cameraPosition: INITIAL_CAMERA });
@@ -53,7 +63,9 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
   const google3DState = useGoogleMapViewState({ id: `camera-sync-${prefix}-google-3d`, apiKey: googleMapsApiKey, mapDesignType: GoogleMapDesign.Normal, cameraPosition: INITIAL_CAMERA });
   const arcGISState = useArcGISViewState({ id: `camera-sync-${prefix}-arcgis-2d`, apiKey: arcGISApiKey, mapDesignType: ArcGISDesign.Streets, cameraPosition: INITIAL_CAMERA });
   const arcGIS3DState = useArcGISViewState({ id: `camera-sync-${prefix}-arcgis-3d`, apiKey: arcGISApiKey, mapDesignType: ArcGISDesign.OsmStandard, cameraPosition: INITIAL_CAMERA });
+  const mapKitState = useMapKitViewState({ id: `camera-sync-${prefix}-mapkit`, token: mapKitToken, mapDesignType: prefix === 'left' ? MapKitMapDesign.Standard : MapKitMapDesign.MutedStandard, cameraPosition: INITIAL_CAMERA });
   const cesiumState = useCesiumMapViewState({ id: `camera-sync-${prefix}-cesium`, mapDesignType: CesiumDesign.Default, cameraPosition: INITIAL_CAMERA });
+  const azureMapsState = useAzureMapsViewState({ id: `camera-sync-${prefix}-azuremaps`, subscriptionKey: azureMapsKey, mapDesignType: prefix === 'left' ? AzureMapsDesign.Road : AzureMapsDesign.GrayscaleLight, cameraPosition: INITIAL_CAMERA });
   const hereState = useHereViewState({ id: `camera-sync-${prefix}-here`, mapDesignType: HereMapDesign.NormalDay, cameraPosition: INITIAL_CAMERA });
 
   return {
@@ -66,6 +78,8 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
     'google-maps-3d': paneState('google-maps-3d', google3DState),
     arcgis: paneState('arcgis', arcGISState),
     'arcgis-3d': paneState('arcgis-3d', arcGIS3DState),
+    mapkit: paneState('mapkit', mapKitState),
+    azuremaps: paneState('azuremaps', azureMapsState),
     cesium: paneState('cesium', cesiumState),
     here: paneState('here', hereState),
   };

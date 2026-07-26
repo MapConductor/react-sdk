@@ -10,7 +10,7 @@ import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { POLYGON_VERTICES } from '../data/storeData';
 import { MapViewContainer } from '../MapViewContainer';
-import { useSampleI18n } from '../i18n';
+import { useSampleI18n } from '../samples/i18n';
 
 const INIT_CAMERA = { lat: 41.7969, lng: 140.7569, zoom: 16 };
 

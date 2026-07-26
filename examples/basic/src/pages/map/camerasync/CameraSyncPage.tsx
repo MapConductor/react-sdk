@@ -6,6 +6,12 @@ import {
 import '@mapconductor/react-for-openlayers/style.css';
 import '@mapconductor/react-for-mapbox/style.css';
 import '@mapconductor/react-for-leaflet/style.css';
+// Cesium's widgets.css sizes .cesium-widget and its canvas to fill the
+// container; without it the WebGL canvas stays at the 300x150 HTML default and
+// the map only paints a top band. The standalone Cesium demo pages import this,
+// so the camera-sync page rendered correctly only after visiting one of those
+// first — importing it here makes a fresh load of this page reliable too.
+import '@mapconductor/react-for-cesium/style.css';
 import { CameraSyncMapPane } from './CameraSyncMapPane';
 import {
   cameraSyncProviderById,

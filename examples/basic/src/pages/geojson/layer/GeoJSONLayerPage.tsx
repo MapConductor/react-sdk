@@ -4,7 +4,7 @@ import { InfoBubbleAtPosition } from '@mapconductor/js-sdk-react';
 import { GeoJSONLayer, GeoJSONLayerState, colorArgb, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 import { PropertyTable } from './PropertyTable';
 import { railroadGeoJSONSource, type RailroadGeoJSONSource } from './railroadGeoJSON';
 

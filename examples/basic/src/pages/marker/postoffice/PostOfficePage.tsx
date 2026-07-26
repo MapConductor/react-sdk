@@ -7,7 +7,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { Markers } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 import { PostOfficeInfoBubble } from './PostOfficeInfoBubble';
 import {
   PostOfficeMapProvider,

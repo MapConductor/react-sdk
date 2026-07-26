@@ -8,7 +8,7 @@ import {
 import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 
 const INIT_CAMERA = { lat: 25.255377, lng: 55.3089185, zoom: 13 };
 

@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react';
-import type { SupportedLanguage } from '../sampleRegistry';
-import { SamplePageSeo } from '../SamplePageSeo';
+import type { SupportedLanguage } from '../samples/sampleRegistry';
+import { SamplePageSeo } from '../samples/SamplePageSeo';
 import { SampleDocumentation } from './SampleDocumentation';
-import { translate } from '../i18n';
+import { SampleIntroOverlay } from './SampleIntroOverlay';
+import { translate } from '../samples/i18n';
 
 export function SamplePageLayout({
   page,
@@ -15,6 +16,17 @@ export function SamplePageLayout({
   language: SupportedLanguage;
   children?: ReactNode;
 }) {
+  // The Hello Map tutorial is a full-page article (its own live demo + steps),
+  // not the standard map-stage + documentation layout.
+  if (page === 'hello-map') {
+    return (
+      <div className="sample-page-layout hello-map-page">
+        <SamplePageSeo page={page} provider={provider} language={language} />
+        {children}
+      </div>
+    );
+  }
+
   return (
     <div className="sample-page-layout">
       <SamplePageSeo page={page} provider={provider} language={language} />
@@ -25,6 +37,7 @@ export function SamplePageLayout({
               {translate(language, 'Loading map…', '地図を読み込んでいます…', 'Cargando el mapa…')}
             </div>
           )}
+          <SampleIntroOverlay page={page} language={language} />
         </div>
       </div>
       <SampleDocumentation page={page} provider={provider} language={language} />

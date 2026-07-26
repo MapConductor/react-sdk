@@ -7,9 +7,9 @@ import {
   GSI_STANDARD_ATTRIBUTION_RULES,
 } from '../../gsiAttributions';
 import { MapViewContainer } from '../../MapViewContainer';
-import { useSampleI18n } from '../../i18n';
+import { useSampleI18n } from '../../samples/i18n';
 
-const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 5 };
+const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 7 };
 const TILE_SIZE = 256;
 
 type GsiLayer = 'relief' | 'standard';

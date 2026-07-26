@@ -4,7 +4,7 @@ import { Marker } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { HONOLULU } from '../../common/sampleHelpers';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 
 const INIT_CAMERA = { lat: 21.3825, lng: -157.9330, zoom: 14 };
 

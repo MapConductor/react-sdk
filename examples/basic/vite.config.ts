@@ -93,11 +93,13 @@ export default defineConfig({
     dedupe: ['react', 'react-dom', '@mapconductor/js-sdk-core'],
   },
   ssr: {
-    noExternal: ['prism-react-renderer'],
+    // maplibre-gl v6 is ESM-only; keep it in the SSR bundle so its worker-URL
+    // import (`?worker&url`) resolves through Vite instead of Node's require.
+    noExternal: ['prism-react-renderer', 'maplibre-gl'],
   },
   server: {
     host: '0.0.0.0',
-    port: 4000,
+    port: 4003,
   },
   build: {
     sourcemap: true,

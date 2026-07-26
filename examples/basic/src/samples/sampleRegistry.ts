@@ -12,10 +12,11 @@ export interface SamplePageDefinition {
 }
 
 export const SAMPLE_PAGES: SamplePageDefinition[] = [
+  { id: 'hello-map', label: 'Hello Map', labelJa: 'Hello Map', labelEs419: 'Hello Map', group: 'Getting Started', showProviderSelector: false },
   { id: 'map', label: 'Store Map', labelJa: '店舗マップ', labelEs419: 'Mapa de tiendas', group: 'Map' },
   { id: 'map-design', label: 'Map Design', labelJa: '地図デザイン', labelEs419: 'Diseño del mapa', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', labelJa: 'カメラ移動', labelEs419: 'Volar a un lugar', group: 'Map' },
-  { id: 'tilt', label: 'Tilt', labelJa: '傾き', labelEs419: 'Inclinación', group: 'Map', unavailableProviders: ['google-maps'] },
+  { id: 'tilt', label: 'Tilt', labelJa: '傾き', labelEs419: 'Inclinación', group: 'Map', unavailableProviders: ['google-maps', 'mapkit'] },
   { id: 'visible-region', label: 'Visible Region', labelJa: '表示領域', labelEs419: 'Región visible', group: 'Map' },
   { id: 'camera-sync', label: 'Camera Sync', labelJa: 'カメラ同期', labelEs419: 'Sincronización de cámara', group: 'Map', showProviderSelector: false },
   { id: 'marker', label: 'Marker Icons', labelJa: 'マーカーアイコン', labelEs419: 'Iconos de marcadores', group: 'Marker' },
@@ -41,7 +42,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'threejs-object', label: 'Three.js Object (web only)', labelJa: 'Three.js (web only)', labelEs419: 'Objeto Three.js (solo web)', group: 'Extensions', unavailableProviders: ['cesium'] },
 ];
 
-export const DEFAULT_SAMPLE_PAGE = 'map';
+export const DEFAULT_SAMPLE_PAGE = 'hello-map';
 export type SupportedLanguage = 'en' | 'ja' | 'es-419';
 
 export function isSupportedLanguage(language: string | undefined): language is SupportedLanguage {
@@ -79,6 +80,8 @@ export function getProviderLabel(provider: string | undefined): string {
     case 'openlayers': return 'OpenLayers';
     case 'arcgis': return 'ArcGIS 2D';
     case 'arcgis-3d': return 'ArcGIS 3D';
+    case 'mapkit': return 'MapKit';
+    case 'azuremaps': return 'Azure Maps';
     case 'cesium': return 'Cesium';
     case 'here': return 'HERE';
     default: return 'MapLibre';

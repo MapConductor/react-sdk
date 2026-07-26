@@ -9,7 +9,7 @@ import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
 import { SingletonMapSlot, useSingletonMapState } from '../../SingletonMaps';
-import { useSampleI18n } from '../../i18n';
+import { useSampleI18n } from '../../samples/i18n';
 
 const INIT_CAMERA_POSITION = createMapCameraPosition({
   position: createGeoPoint({ latitude: 35.68049, longitude: 139.76669 }),

@@ -12,7 +12,7 @@ import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { california } from './California';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 
 const INIT_CAMERA = { lat: 37.2, lng: -119.6, zoom: 5 };
 

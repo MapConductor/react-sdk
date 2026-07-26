@@ -10,7 +10,7 @@ import { ControlPanel, SliderControl } from '../components/ControlPanel';
 import { Toast, useToast } from '../components/Toast';
 import { POLYLINE_POINTS } from '../data/storeData';
 import { MapViewContainer } from '../MapViewContainer';
-import { useSampleI18n } from '../i18n';
+import { useSampleI18n } from '../samples/i18n';
 
 const INIT_CAMERA = { lat: 21.3069, lng: -157.8583, zoom: 13 };
 

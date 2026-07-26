@@ -1,13 +1,17 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { getSamplePageLabel, resolveProviderForPage, SAMPLE_PAGES } from '../sampleRegistry';
+import { getSamplePageLabel, resolveProviderForPage, SAMPLE_PAGES } from '../samples/sampleRegistry';
 import { parseSamplePath, samplePath } from '../app/appRouting';
-import { getLanguageFromPath } from '../i18n';
+import { getLanguageFromPath } from '../samples/i18n';
 
 export function PageNav({ onNavigate }: { onNavigate?: () => void }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { providerPath, page: activePage } = parseSamplePath(location.pathname);
-  const provider = providerPath === 'camera-sync' ? 'maplibre' : providerPath;
+  // camera-sync and hello-map are provider-less pages; fall back to a real
+  // provider so links to other pages keep a valid provider segment.
+  const provider = providerPath === 'camera-sync' || providerPath === 'hello-map'
+    ? 'maplibre'
+    : providerPath;
   const language = getLanguageFromPath(location.pathname);
 
   return (

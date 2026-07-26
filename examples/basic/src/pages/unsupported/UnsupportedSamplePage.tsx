@@ -1,6 +1,6 @@
 import { ControlPanel } from '../../components/ControlPanel';
 import { MapViewContainer } from '../../MapViewContainer';
-import { useSampleI18n } from '../../i18n';
+import { useSampleI18n } from '../../samples/i18n';
 
 export function UnsupportedSamplePage({ title, titleJa = title }: { title: string; titleJa?: string }) {
   const { t } = useSampleI18n();

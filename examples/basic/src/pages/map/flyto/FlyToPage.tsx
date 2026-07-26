@@ -11,7 +11,7 @@ import {
 import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { useSampleI18n } from '../../../i18n';
+import { useSampleI18n } from '../../../samples/i18n';
 
 const INIT_CAMERA = { lat: 35.0, lng: 0.0, zoom: 3 };
 

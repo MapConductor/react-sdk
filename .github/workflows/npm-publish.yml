@@ -67,6 +67,24 @@ jobs:
 
           for package in "${packages[@]}"; do
             echo "::group::${package}"
+
+            # Skip previewing when the local version is already on the registry.
+            local_version="$(npm pkg get version --workspace "${package}" | node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                const parsed = JSON.parse(input);
+                const version = typeof parsed === "string" ? parsed : Object.values(parsed)[0];
+                process.stdout.write(version);
+              });
+            ')"
+
+            if npm view "${package}@${local_version}" version >/dev/null 2>&1; then
+              echo "Skipping ${package}@${local_version}: already published."
+              echo "::endgroup::"
+              continue
+            fi
+
             npm publish --workspace "${package}" --access public --dry-run
             echo "::endgroup::"
           done
@@ -93,6 +111,24 @@ jobs:
 
           for package in "${packages[@]}"; do
             echo "::group::${package}"
+
+            # Skip publishing when the local version is already on the registry.
+            local_version="$(npm pkg get version --workspace "${package}" | node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                const parsed = JSON.parse(input);
+                const version = typeof parsed === "string" ? parsed : Object.values(parsed)[0];
+                process.stdout.write(version);
+              });
+            ')"
+
+            if npm view "${package}@${local_version}" version >/dev/null 2>&1; then
+              echo "Skipping ${package}@${local_version}: already published."
+              echo "::endgroup::"
+              continue
+            fi
+
             npm publish --workspace "${package}" --access public
             echo "::endgroup::"
           done

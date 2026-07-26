@@ -8,7 +8,7 @@ import {
   SAMPLE_PAGES,
   type SupportedLanguage,
 } from './sampleRegistry';
-import { getLanguageFromPath } from './i18n';
+import { getLanguageFromPath } from './samples/i18n';
 
 export function render(url: string): string {
   return renderToString(
@@ -41,6 +41,8 @@ export function getStaticPaths(): string[] {
     'openlayers',
     'arcgis',
     'arcgis-3d',
+    'mapkit',
+    'azuremaps',
     'cesium',
     'here',
     'google-maps',
