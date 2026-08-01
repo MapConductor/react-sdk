@@ -35,6 +35,9 @@ import { MapKitMapDesign, useMapKitViewState } from '@mapconductor/react-for-map
 import { AzureMapsDesign, useAzureMapsViewState } from '@mapconductor/react-for-azuremaps';
 import { CesiumDesign, useCesiumMapViewState } from '@mapconductor/react-for-cesium';
 import { HereMapDesign, useHereViewState } from '@mapconductor/react-for-here';
+import { TomTomDesign, useTomTomViewState } from '@mapconductor/react-for-tomtom';
+import { MapTilerDesign, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
+import { LongdoDesign, useLongdoViewState } from '@mapconductor/react-for-longdo';
 import type { SingletonMapContent } from './providers/singleton/types';
 
 export type { SingletonMapContent };
@@ -52,7 +55,10 @@ export type SingletonMapId =
   | 'mapkit'
   | 'azuremaps'
   | 'cesium'
-  | 'here';
+  | 'here'
+  | 'tomtom'
+  | 'maptiler'
+  | 'longdo';
 
 type AnyMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 type AnyMapDesignType = MapDesignTypeInterface<unknown>;
@@ -116,6 +122,9 @@ const LazyMapKitSingletonView = lazy(() => import('./providers/singleton/MapKitS
 const LazyAzureMapsSingletonView = lazy(() => import('./providers/singleton/AzureMapsSingletonView'));
 const LazyCesiumSingletonView = lazy(() => import('./providers/singleton/CesiumSingletonView'));
 const LazyHereSingletonView = lazy(() => import('./providers/singleton/HereSingletonView'));
+const LazyTomTomSingletonView = lazy(() => import('./providers/singleton/TomTomSingletonView'));
+const LazyMapTilerSingletonView = lazy(() => import('./providers/singleton/MapTilerSingletonView'));
+const LazyLongdoSingletonView = lazy(() => import('./providers/singleton/LongdoSingletonView'));
 
 export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const googleApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '';
@@ -123,6 +132,9 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const mapKitToken = import.meta.env.VITE_MAPKIT_TOKEN || '';
   const mapboxAccessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN || '';
   const azureMapsKey = import.meta.env.VITE_AZURE_MAPS_SUBSCRIOTION_KEY || '';
+  const tomtomApiKey = import.meta.env.VITE_TOMTOM_API_KEY || '';
+  const mapTilerApiKey = import.meta.env.VITE_MAPTILER || '';
+  const longdoApiKey = import.meta.env.VITE_LONGDO || '';
 
   // Each use<Provider>ViewState() hook only creates lightweight camera/config
   // state (no heavy SDK import), so calling all of them eagerly here is
@@ -142,6 +154,9 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const azuremapsState = useAzureMapsViewState({ subscriptionKey: azureMapsKey, mapDesignType: AzureMapsDesign.Road, cameraPosition: DEFAULT_CAMERA });
   const cesiumState = useCesiumMapViewState({ mapDesignType: CesiumDesign.Default, cameraPosition: DEFAULT_CAMERA });
   const hereState = useHereViewState({ mapDesignType: HereMapDesign.NormalDay, cameraPosition: DEFAULT_CAMERA });
+  const tomtomState = useTomTomViewState({ apiKey: tomtomApiKey, mapDesignType: TomTomDesign.Standard, cameraPosition: DEFAULT_CAMERA });
+  const mapTilerState = useMapTilerViewState({ apiKey: mapTilerApiKey, mapDesignType: MapTilerDesign.Streets, cameraPosition: DEFAULT_CAMERA });
+  const longdoState = useLongdoViewState({ apiKey: longdoApiKey, mapDesignType: LongdoDesign.Normal, cameraPosition: DEFAULT_CAMERA });
 
   const statesById = useMemo<Record<SingletonMapId, AnyMapViewState>>(() => ({
     'google-2d': google2DState,
@@ -157,9 +172,12 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     azuremaps: azuremapsState,
     cesium: cesiumState,
     here: hereState,
+    tomtom: tomtomState,
+    maptiler: mapTilerState,
+    longdo: longdoState,
   }), [
     google2DState, google3DState, maplibre2DState, maplibre3DState, mapboxState,
-    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState,
+    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState, tomtomState, mapTilerState, longdoState,
   ]);
 
   // Capture each provider's default map design once, up front, before any page
@@ -307,6 +325,18 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     {
       id: 'here',
       node: <Suspense fallback={null}><LazyHereSingletonView state={hereState} content={content['here'] ?? null} /></Suspense>,
+    },
+    {
+      id: 'tomtom',
+      node: <Suspense fallback={null}><LazyTomTomSingletonView state={tomtomState} content={content['tomtom'] ?? null} /></Suspense>,
+    },
+    {
+      id: 'maptiler',
+      node: <Suspense fallback={null}><LazyMapTilerSingletonView state={mapTilerState} content={content['maptiler'] ?? null} /></Suspense>,
+    },
+    {
+      id: 'longdo',
+      node: <Suspense fallback={null}><LazyLongdoSingletonView state={longdoState} content={content['longdo'] ?? null} /></Suspense>,
     },
   ];
 

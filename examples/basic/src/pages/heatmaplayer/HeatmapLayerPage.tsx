@@ -6,6 +6,8 @@ import { MapboxDesign, MapBoxMapView2D, useMapboxViewState, type MapboxViewState
 import { LeafletDesign, LeafletMapView, useLeafletMapViewState, type LeafletMapViewState } from '@mapconductor/react-for-leaflet';
 import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState, type OpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
 import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState } from '@mapconductor/react-for-arcgis';
+import { TomTomDesign, TomTomMapView2D, useTomTomViewState, type TomTomViewState } from '@mapconductor/react-for-tomtom';
+import { MapTilerDesign, MapTilerMapView2D, useMapTilerViewState, type MapTilerViewState } from '@mapconductor/react-for-maptiler';
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
 import { SingletonMapSlot, useSingletonMapState } from '../../SingletonMaps';
@@ -146,9 +148,37 @@ function ArcGISHeatmapLayerPage() {
   );
 }
 
+function TomTomHeatmapLayerPage() {
+  const mapViewState = useTomTomViewState({
+    apiKey: import.meta.env.VITE_TOMTOM_API_KEY ?? '',
+    mapDesignType: TomTomDesign.MonoLight,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <TomTomMapView2D state={mapViewState as TomTomViewState}>{children}</TomTomMapView2D>}
+    />
+  );
+}
+
+function MapTilerHeatmapLayerPage() {
+  const mapViewState = useMapTilerViewState({
+    apiKey: import.meta.env.VITE_MAPTILER ?? '',
+    mapDesignType: MapTilerDesign.StreetsLight,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <MapTilerMapView2D state={mapViewState as MapTilerViewState}>{children}</MapTilerMapView2D>}
+    />
+  );
+}
+
 export function HeatmapLayerPage() {
   const location = useLocation();
   if (location.pathname.startsWith('/google-maps')) return <GoogleHeatmapLayerPage />;
+  if (location.pathname.startsWith('/maptiler')) return <MapTilerHeatmapLayerPage />;
+  if (location.pathname.startsWith('/tomtom')) return <TomTomHeatmapLayerPage />;
   if (location.pathname.startsWith('/mapbox')) return <MapboxHeatmapLayerPage />;
   if (location.pathname.startsWith('/leaflet')) return <LeafletHeatmapLayerPage />;
   if (location.pathname.startsWith('/openlayers')) return <OpenLayersHeatmapLayerPage />;

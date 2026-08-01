@@ -27,6 +27,8 @@ const DESIGN_OPTIONS_LOADERS: Record<string, () => Promise<MapDesignOption[]>> =
   azuremaps: () => import('../../../providers/designOptions/azuremapsDesignOptions').then(m => m.AZUREMAPS_DESIGNS),
   cesium: () => import('../../../providers/designOptions/cesiumDesignOptions').then(m => m.CESIUM_DESIGNS),
   here: () => import('../../../providers/designOptions/hereDesignOptions').then(m => m.HERE_DESIGNS),
+  maptiler: () => import('../../../providers/designOptions/maptilerDesignOptions').then(m => m.MAPTILER_DESIGNS),
+  longdo: () => import('../../../providers/designOptions/longdoDesignOptions').then(m => m.LONGDO_DESIGNS),
 };
 
 export function MapDesignPage() {

@@ -3,13 +3,13 @@ import { SamplePageLayout } from '../components/SamplePageLayout';
 import { getLanguageFromPath } from '../samples/i18n';
 import { DEFAULT_SAMPLE_PAGE, isKnownSamplePage, isSupportedLanguage, resolveProviderForPage, type SupportedLanguage } from '../samples/sampleRegistry';
 
-export type MapProvider = 'maplibre' | 'mapbox' | 'leaflet' | 'openlayers' | 'google' | 'google-3d' | 'arcgis' | 'arcgis-3d' | 'mapkit' | 'azuremaps' | 'cesium' | 'here';
+export type MapProvider = 'maplibre' | 'mapbox' | 'leaflet' | 'openlayers' | 'google' | 'google-3d' | 'arcgis' | 'arcgis-3d' | 'mapkit' | 'azuremaps' | 'cesium' | 'here' | 'tomtom' | 'maptiler' | 'longdo';
 
 const providerByPath = new Map<string, MapProvider>([
   ['maplibre', 'maplibre'], ['maplibre-3d', 'maplibre'], ['mapbox', 'mapbox'],
   ['leaflet', 'leaflet'], ['openlayers', 'openlayers'], ['google-maps', 'google'],
   ['google', 'google'], ['google-maps-3d', 'google-3d'], ['google-3d', 'google-3d'],
-  ['arcgis', 'arcgis'], ['arcgis-3d', 'arcgis-3d'], ['mapkit', 'mapkit'], ['azuremaps', 'azuremaps'], ['cesium', 'cesium'], ['here', 'here'],
+  ['arcgis', 'arcgis'], ['arcgis-3d', 'arcgis-3d'], ['mapkit', 'mapkit'], ['azuremaps', 'azuremaps'], ['cesium', 'cesium'], ['here', 'here'], ['tomtom', 'tomtom'], ['maptiler', 'maptiler'], ['longdo', 'longdo'],
 ]);
 
 export function parseSamplePath(pathname: string) {
@@ -28,7 +28,7 @@ export function providerPath(provider: MapProvider, page: string): string {
     maplibre: resolveProviderForPage('maplibre', page),
     mapbox: 'mapbox', leaflet: 'leaflet', openlayers: 'openlayers',
     google: 'google-maps', 'google-3d': 'google-maps-3d',
-    arcgis: 'arcgis', 'arcgis-3d': 'arcgis-3d', mapkit: 'mapkit', azuremaps: 'azuremaps', cesium: 'cesium', here: 'here',
+    arcgis: 'arcgis', 'arcgis-3d': 'arcgis-3d', mapkit: 'mapkit', azuremaps: 'azuremaps', cesium: 'cesium', here: 'here', tomtom: 'tomtom', maptiler: 'maptiler', longdo: 'longdo',
   };
   return paths[provider];
 }

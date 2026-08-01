@@ -20,7 +20,10 @@ export type PaneProvider =
   | 'mapkit'
   | 'azuremaps'
   | 'cesium'
-  | 'here';
+  | 'here'
+  | 'tomtom'
+  | 'maptiler'
+  | 'longdo';
 
 export interface CameraLocationInfo {
   name: string;

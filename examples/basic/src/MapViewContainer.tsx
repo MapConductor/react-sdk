@@ -32,6 +32,9 @@ const LazyMapKitProviderView = lazy(() => import('./providers/MapKitProviderView
 const LazyAzureMapsProviderView = lazy(() => import('./providers/AzureMapsProviderView'));
 const LazyCesiumProviderView = lazy(() => import('./providers/CesiumProviderView'));
 const LazyHereProviderView = lazy(() => import('./providers/HereProviderView'));
+const LazyTomTomProviderView = lazy(() => import('./providers/TomTomProviderView'));
+const LazyMapTilerProviderView = lazy(() => import('./providers/MapTilerProviderView'));
+const LazyLongdoProviderView = lazy(() => import('./providers/LongdoProviderView'));
 
 interface MapViewContainerProps {
   children?: ReactNode;
@@ -115,6 +118,9 @@ export function MapViewContainer({
   const isAzureMaps = location.pathname.startsWith('/azuremaps');
   const isCesium = location.pathname.startsWith('/cesium');
   const isHere = location.pathname.startsWith('/here');
+  const isTomTom = location.pathname.startsWith('/tomtom');
+  const isMapTiler = location.pathname.startsWith('/maptiler');
+  const isLongdo = location.pathname.startsWith('/longdo');
   const useDedicatedInstance = Boolean(restrictBounds);
 
   const commonProps: ProviderViewProps = {
@@ -231,6 +237,39 @@ export function MapViewContainer({
         );
       }
       return <SingletonProviderView id="here" {...commonProps} />;
+    }
+
+    case isTomTom: {
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyTomTomProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="tomtom" {...commonProps} />;
+    }
+
+    case isMapTiler: {
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyMapTilerProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="maptiler" {...commonProps} />;
+    }
+
+    case isLongdo: {
+      if (useDedicatedInstance) {
+        return (
+          <Suspense fallback={<MapLoadingPlaceholder />}>
+            <LazyLongdoProviderView {...commonProps} />
+          </Suspense>
+        );
+      }
+      return <SingletonProviderView id="longdo" {...commonProps} />;
     }
 
     default: {

@@ -111,7 +111,7 @@ function ProviderPageRoute() {
   if (requestedPage === 'camera-sync' || requestedPage === 'hello-map') {
     return <Navigate to={samplePath(provider ?? 'maplibre', requestedPage, language)} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here') {
+  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here' && provider !== 'tomtom' && provider !== 'maptiler' && provider !== 'longdo') {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 

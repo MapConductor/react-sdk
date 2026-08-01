@@ -19,8 +19,8 @@ import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../samples/i18n';
 
 const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
-const INIT_CAMERA = { lat: CIRCLE_CENTER.latitude, lng: CIRCLE_CENTER.longitude, zoom: 12 };
-const INITIAL_RADIUS_METERS = 1000;
+const INIT_CAMERA = { lat: CIRCLE_CENTER.latitude, lng: CIRCLE_CENTER.longitude, zoom: 3 };
+const INITIAL_RADIUS_METERS = 5000000.0;
 const SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS = 300;
 const CIRCLE_COLORS = ['#0000ff', '#ff0000', '#008000', '#00ffff', '#d3d3d3', '#ff00ff'];
 
@@ -104,6 +104,7 @@ export function CirclePage() {
         strokeColor: 'rgba(0, 0, 255, 0.5)',
         strokeWidth,
         zIndex: 0,
+        geodesic: true,
         clickable: true,
         onClick: () => {
           if (Date.now() < suppressCircleClickUntilRef.current) return;

@@ -50,8 +50,8 @@ export function CameraSyncPage() {
   const leftStates = useCameraSyncProviderStates('left');
   const rightStates = useCameraSyncProviderStates('right');
 
-  const [leftProvider, setLeftProvider] = useState<PaneProvider>('maplibre');
-  const [rightProvider, setRightProvider] = useState<PaneProvider>('leaflet');
+  const [leftProvider, setLeftProvider] = useState<PaneProvider>('longdo');
+  const [rightProvider, setRightProvider] = useState<PaneProvider>('google-maps');
   const [leftCameraPosition, setLeftCameraPosition] = useState(INITIAL_CAMERA);
   const [rightCameraPosition, setRightCameraPosition] = useState(INITIAL_CAMERA);
   const [showOverlays, setShowOverlays] = useState(true);

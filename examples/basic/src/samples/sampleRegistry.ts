@@ -84,6 +84,9 @@ export function getProviderLabel(provider: string | undefined): string {
     case 'azuremaps': return 'Azure Maps';
     case 'cesium': return 'Cesium';
     case 'here': return 'HERE';
+    case 'tomtom': return 'TomTom';
+    case 'maptiler': return 'MapTiler';
+    case 'longdo': return 'Longdo';
     default: return 'MapLibre';
   }
 }

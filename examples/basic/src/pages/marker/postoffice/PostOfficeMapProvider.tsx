@@ -17,6 +17,10 @@ import { MapKitMapDesign, MapKitMapView, useMapKitViewState } from '@mapconducto
 import { CesiumDesign, CesiumMapView, useCesiumMapViewState } from '@mapconductor/react-for-cesium';
 import '@mapconductor/react-for-cesium/style.css';
 import { HereMapDesign, HereMapView2D, useHereViewState } from '@mapconductor/react-for-here';
+import { TomTomDesign, TomTomMapView2D, useTomTomViewState } from '@mapconductor/react-for-tomtom';
+import { MapTilerDesign, MapTilerMapView2D, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
+import '@mapconductor/react-for-maptiler/style.css';
+import { LongdoDesign, LongdoMapView2D, useLongdoViewState } from '@mapconductor/react-for-longdo';
 import { SingletonMapSlot, useSingletonMapState } from '../../../SingletonMaps';
 
 export type PostOfficeMapState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
@@ -169,9 +173,75 @@ function HereProvider({ cameraPosition, markerTilingOptions, children }: PostOff
   });
 }
 
+function TomTomProvider({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
+  const state = useTomTomViewState({
+    apiKey: import.meta.env.VITE_TOMTOM_API_KEY ?? '',
+    mapDesignType: TomTomDesign.Standard,
+    cameraPosition,
+  });
+  if (!state.apiKey) {
+    return (
+      <div className="sample-map-placeholder" role="status">
+        Add VITE_TOMTOM_API_KEY to examples/basic/.env to load the TomTom map.
+      </div>
+    );
+  }
+  return children({
+    mapViewState: state,
+    renderMapView: (content, onMapClick) => (
+      <TomTomMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</TomTomMapView2D>
+    ),
+  });
+}
+
+function MapTilerProvider({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
+  const state = useMapTilerViewState({
+    apiKey: import.meta.env.VITE_MAPTILER ?? '',
+    mapDesignType: MapTilerDesign.Streets,
+    cameraPosition,
+  });
+  if (!state.apiKey) {
+    return (
+      <div className="sample-map-placeholder" role="status">
+        Add VITE_MAPTILER to examples/basic/.env to load the MapTiler map.
+      </div>
+    );
+  }
+  return children({
+    mapViewState: state,
+    renderMapView: (content, onMapClick) => (
+      <MapTilerMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</MapTilerMapView2D>
+    ),
+  });
+}
+
+function LongdoProvider({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
+  const state = useLongdoViewState({
+    apiKey: import.meta.env.VITE_LONGDO ?? '',
+    mapDesignType: LongdoDesign.Normal,
+    cameraPosition,
+  });
+  if (!state.apiKey) {
+    return (
+      <div className="sample-map-placeholder" role="status">
+        Add VITE_LONGDO to examples/basic/.env to load the Longdo map.
+      </div>
+    );
+  }
+  return children({
+    mapViewState: state,
+    renderMapView: (content, onMapClick) => (
+      <LongdoMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</LongdoMapView2D>
+    ),
+  });
+}
+
 export function PostOfficeMapProvider(props: PostOfficeMapProviderProps) {
   const pathname = useLocation().pathname;
   if (pathname.startsWith('/google-maps')) return <GoogleProvider {...props} />;
+  if (pathname.startsWith('/maptiler')) return <MapTilerProvider {...props} />;
+  if (pathname.startsWith('/longdo')) return <LongdoProvider {...props} />;
+  if (pathname.startsWith('/tomtom')) return <TomTomProvider {...props} />;
   if (pathname.startsWith('/mapbox')) return <MapboxProvider {...props} />;
   if (pathname.startsWith('/leaflet')) return <LeafletProvider {...props} />;
   if (pathname.startsWith('/openlayers')) return <OpenLayersProvider {...props} />;

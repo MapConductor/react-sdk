@@ -45,6 +45,18 @@ import {
 } from '@mapconductor/react-for-azuremaps';
 import type { PaneProvider, PaneState } from './types';
 import { HereMapView2D, HereViewState } from '@mapconductor/react-for-here';
+import {
+  TomTomMapView2D,
+  type TomTomViewState,
+} from '@mapconductor/react-for-tomtom';
+import {
+  MapTilerMapView2D,
+  type MapTilerViewState,
+} from '@mapconductor/react-for-maptiler';
+import {
+  LongdoMapView2D,
+  type LongdoViewState,
+} from '@mapconductor/react-for-longdo';
 
 interface MapViewRenderProps {
   paneState: PaneState;
@@ -159,6 +171,21 @@ const adapters: CameraSyncProviderAdapter[] = [
     id: 'here', label: 'HERE', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
     render: props => renderHere(props),
   },
+  {
+    // TomTom is MapLibre-based; report the unified (Google-reference) altitude like MapLibre.
+    id: 'tomtom', label: 'TomTom', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: props => renderTomTom(props),
+  },
+  {
+    // MapTiler renders through MapLibre GL; report the unified (Google-reference) altitude like MapLibre.
+    id: 'maptiler', label: 'MapTiler', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: props => renderMapTiler(props),
+  },
+  {
+    // Longdo renders through MapLibre GL (map.Renderer); report the unified (Google-reference) altitude like MapLibre.
+    id: 'longdo', label: 'Longdo', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: props => renderLongdo(props),
+  },
 ];
 
 export const cameraSyncProviders: readonly CameraSyncProviderAdapter[] = adapters;
@@ -185,4 +212,28 @@ function renderHere({ paneState: pane, children, ...events }: MapViewRenderProps
   }
   herePlatform ??= new H.service.Platform({ apikey: apiKey });
   return <HereMapView2D state={pane.mapState as HereViewState} platform={herePlatform} {...events}>{children}</HereMapView2D>;
+}
+
+function renderTomTom({ paneState: pane, children, ...events }: MapViewRenderProps): ReactNode {
+  const state = pane.mapState as TomTomViewState;
+  if (!state.apiKey || state.apiKey === 'your_api_key_here') {
+    return <MissingKey title="TomTom API Key is Missing" envName="VITE_TOMTOM_API_KEY" />;
+  }
+  return <TomTomMapView2D state={state} {...events}>{children}</TomTomMapView2D>;
+}
+
+function renderMapTiler({ paneState: pane, children, ...events }: MapViewRenderProps): ReactNode {
+  const state = pane.mapState as MapTilerViewState;
+  if (!state.apiKey || state.apiKey === 'your_api_key_here') {
+    return <MissingKey title="MapTiler API Key is Missing" envName="VITE_MAPTILER" />;
+  }
+  return <MapTilerMapView2D state={state} {...events}>{children}</MapTilerMapView2D>;
+}
+
+function renderLongdo({ paneState: pane, children, ...events }: MapViewRenderProps): ReactNode {
+  const state = pane.mapState as LongdoViewState;
+  if (!state.apiKey || state.apiKey === 'your_api_key_here') {
+    return <MissingKey title="Longdo API Key is Missing" envName="VITE_LONGDO" />;
+  }
+  return <LongdoMapView2D state={state} {...events}>{children}</LongdoMapView2D>;
 }

@@ -14,6 +14,9 @@ const PROVIDERS: Array<{ value: MapProvider; label: string }> = [
   { value: 'azuremaps', label: 'Azure Maps' },
   { value: 'cesium', label: 'Cesium' },
   { value: 'here', label: 'HERE' },
+  { value: 'tomtom', label: 'TomTom' },
+  { value: 'maptiler', label: 'MapTiler' },
+  { value: 'longdo', label: 'Longdo' },
   { value: 'google', label: 'Google Maps' },
   { value: 'google-3d', label: 'Google Maps 3D' },
 ];

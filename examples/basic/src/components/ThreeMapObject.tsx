@@ -22,6 +22,26 @@ export function ThreeMapObject({
     const holder = mapViewState.getMapViewHolder();
     if (!holder) return;
 
+    // Render the overlay into the same frame `toScreenOffset` reports in — the
+    // outer viewport (the position:relative wrapper), not `mapView` itself. For
+    // MapLibre/Mapbox the two share bounds so this is a no-op, but HERE renders
+    // its H.Map into a 200%×200% inner plane and projects geo points back into
+    // the outer viewport, so attaching to `mapView` misplaces the object.
+    const overlayHost = (holder.mapView.parentElement as HTMLElement | null) ?? holder.mapView;
+
+    // Project into the OUTER viewport frame that `overlayHost` lives in. Most
+    // providers' `toScreenOffset` already returns outer-viewport coords (for
+    // MapLibre/Mapbox `mapView` IS the viewport; HERE/OpenLayers transform their
+    // inner 200% plane back to the viewport). Leaflet is the exception: its
+    // `toScreenOffset` returns INNER-plane coords and it exposes a separate
+    // `toOuterScreenOffset` for screen-space overlays — use that when present so
+    // the object lines up with the map on every provider.
+    const projectToOuter = (pos: GeoPointInterface): Offset | Promise<Offset | null> | null => {
+      const outerProject = (holder as { toOuterScreenOffset?: (p: GeoPointInterface) => Offset })
+        .toOuterScreenOffset;
+      return outerProject ? outerProject.call(holder, pos) : holder.toScreenOffset(pos);
+    };
+
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 1000);
     camera.position.z = 200;
@@ -30,7 +50,7 @@ export function ThreeMapObject({
     renderer.setClearColor(0x000000, 0);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.domElement.className = 'three-map-overlay';
-    holder.mapView.appendChild(renderer.domElement);
+    overlayHost.appendChild(renderer.domElement);
 
     scene.add(new THREE.AmbientLight(0xffffff, 1.8));
     const light = new THREE.DirectionalLight(0xffffff, 2.5);
@@ -59,8 +79,8 @@ export function ThreeMapObject({
     let width = 1;
     let height = 1;
     const resize = () => {
-      width = Math.max(holder.mapView.clientWidth, 1);
-      height = Math.max(holder.mapView.clientHeight, 1);
+      width = Math.max(overlayHost.clientWidth, 1);
+      height = Math.max(overlayHost.clientHeight, 1);
       renderer.setSize(width, height, false);
       camera.left = 0;
       camera.right = width;
@@ -69,7 +89,7 @@ export function ThreeMapObject({
       camera.updateProjectionMatrix();
     };
     const resizeObserver = new ResizeObserver(resize);
-    resizeObserver.observe(holder.mapView);
+    resizeObserver.observe(overlayHost);
     resize();
 
     let disposed = false;
@@ -86,7 +106,7 @@ export function ThreeMapObject({
     const animate = () => {
       knot.rotation.x += 0.012;
       knot.rotation.y += 0.018;
-      const projected = holder.toScreenOffset(position);
+      const projected = projectToOuter(position);
       if (projected instanceof Promise) {
         if (!projectionPending) {
           projectionPending = true;
