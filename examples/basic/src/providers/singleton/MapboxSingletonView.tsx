@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { MapBoxMapView2D, type MapboxViewState } from '@mapconductor/react-for-mapbox';
+import { MapBoxMapView2D, type MapboxViewStateInterface } from '@mapconductor/react-for-mapbox';
 import '@mapconductor/react-for-mapbox/style.css';
 import type { SingletonMapContent } from './types';
 
 export default function MapboxSingletonView({ state, content }: {
-  state: MapboxViewState;
+  state: MapboxViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   const style = state.mapDesignType.getValue();

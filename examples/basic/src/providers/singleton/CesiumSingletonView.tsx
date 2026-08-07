@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { CesiumMapView, type CesiumMapViewState } from '@mapconductor/react-for-cesium';
+import { CesiumMapView, type CesiumMapViewStateInterface } from '@mapconductor/react-for-cesium';
 import '@mapconductor/react-for-cesium/style.css';
 import type { SingletonMapContent } from './types';
 
 export default function CesiumSingletonView({ state, content }: {
-  state: CesiumMapViewState;
+  state: CesiumMapViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   return (

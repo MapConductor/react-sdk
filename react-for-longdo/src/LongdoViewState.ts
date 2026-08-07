@@ -115,7 +115,7 @@ export class LongdoViewState
   }
 }
 
-export function useLongdoViewState(params: LongdoViewStateParams = {}): LongdoViewState {
+export function useLongdoViewState(params: LongdoViewStateParams = {}): LongdoViewStateInterface {
   const [state] = useState(() => new LongdoViewState(params));
   return state;
 }

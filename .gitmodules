@@ -58,3 +58,12 @@
 [submodule "react-for-azuremaps"]
 	path = react-for-azuremaps
 	url = git@github.com:mapconductor/react-for-azuremaps
+[submodule "react-for-longdo"]
+	path = react-for-longdo
+	url = git@github.com:mapconductor/react-for-longdo
+[submodule "react-for-tomtom"]
+	path = react-for-tomtom
+	url = git@github.com:mapconductor/react-for-tomtom
+[submodule "react-for-maptiler"]
+	path = react-for-maptiler
+	url = git@github.com:mapconductor/react-for-maptiler

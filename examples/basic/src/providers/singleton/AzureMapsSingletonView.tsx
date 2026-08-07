@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { AzureMapsMapView, type AzureMapsViewState } from '@mapconductor/react-for-azuremaps';
+import { AzureMapsMapView, type AzureMapsViewStateInterface } from '@mapconductor/react-for-azuremaps';
 import '@mapconductor/react-for-azuremaps/style.css';
 import type { SingletonMapContent } from './types';
 
 export default function AzureMapsSingletonView({ state, content }: {
-  state: AzureMapsViewState;
+  state: AzureMapsViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   return (

@@ -1,9 +1,9 @@
 import { Fragment } from 'react';
-import { LongdoMapView2D, type LongdoViewState } from '@mapconductor/react-for-longdo';
+import { LongdoMapView2D, type LongdoViewStateInterface } from '@mapconductor/react-for-longdo';
 import type { SingletonMapContent } from './types';
 
 export default function LongdoSingletonView({ state, content }: {
-  state: LongdoViewState;
+  state: LongdoViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   if (!state.apiKey) {

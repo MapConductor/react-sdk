@@ -1,9 +1,9 @@
 import { Fragment } from 'react';
-import { TomTomMapView2D, type TomTomViewState } from '@mapconductor/react-for-tomtom';
+import { TomTomMapView2D, type TomTomViewStateInterface } from '@mapconductor/react-for-tomtom';
 import type { SingletonMapContent } from './types';
 
 export default function TomTomSingletonView({ state, content }: {
-  state: TomTomViewState;
+  state: TomTomViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   if (!state.apiKey) {

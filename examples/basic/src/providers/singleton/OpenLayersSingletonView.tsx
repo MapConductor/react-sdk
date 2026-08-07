@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { OpenLayersMapView, type OpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import { OpenLayersMapView, type OpenLayersMapViewStateInterface } from '@mapconductor/react-for-openlayers';
 import '@mapconductor/react-for-openlayers/style.css';
 import type { SingletonMapContent } from './types';
 
 export default function OpenLayersSingletonView({ state, content }: {
-  state: OpenLayersMapViewState;
+  state: OpenLayersMapViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   return (

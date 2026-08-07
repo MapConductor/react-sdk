@@ -1,9 +1,9 @@
 import { Fragment } from 'react';
-import { MapKitMapView, type MapKitViewState } from '@mapconductor/react-for-mapkit';
+import { MapKitMapView, type MapKitViewStateInterface } from '@mapconductor/react-for-mapkit';
 import type { SingletonMapContent } from './types';
 
 export default function MapKitSingletonView({ state, content }: {
-  state: MapKitViewState;
+  state: MapKitViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   return (

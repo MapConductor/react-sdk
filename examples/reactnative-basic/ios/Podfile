@@ -59,7 +59,7 @@ target 'MapConductorBasic' do
   # Esri's ArcGIS.xcframework/CoreArcGIS.xcframework itself (see MapConductorForArcGIS.podspec),
   # since Esri only distributes this SDK via Swift Package Manager (no public CocoaPods spec).
   pod 'MapConductorForArcGIS', :path => '../../../../ios-sdk/ios-for-arcgis'
-  pod 'MapConductorMarkerCluster', :path => '../../../../ios-sdk/ios-marker-cluster'
+  pod 'MapConductorMarkerClustering', :path => '../../../../ios-sdk/ios-marker-clustering'
   pod 'MapConductorForMapLibre', :path => '../../../../ios-sdk/ios-for-maplibre'
   pod 'MapConductorHeatmap', :path => '../../../../ios-sdk/ios-heatmap'
   pod 'MapConductorGeoJSON', :path => '../../../../ios-sdk/ios-geojson-layer'

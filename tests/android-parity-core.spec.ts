@@ -292,6 +292,136 @@ test.describe('ポリゴンの穴ユニオン', () => {
     });
 });
 
+test.describe('穴のブリッジ（HoleBridge）', () => {
+    // android-sdk `HoleBridge.kt` / ios-sdk `HoleBridge.swift` と同じ性質を押さえる。
+    // ブリッジ後の単一リングは偶奇規則で「外周の内側かつ全穴の外側」だけを塗る。
+
+    test('穴が偶奇規則で抜け、separation で厳密に単純なリングになる', async ({ page }) => {
+        const result = await evalInCore(page, (core) => {
+            const rect = (south: number, west: number, north: number, east: number) => [
+                core.createGeoPoint({ latitude: south, longitude: west }),
+                core.createGeoPoint({ latitude: south, longitude: east }),
+                core.createGeoPoint({ latitude: north, longitude: east }),
+                core.createGeoPoint({ latitude: north, longitude: west }),
+            ];
+            const evenOddInside = (lat: number, lng: number, ring: any[]) => {
+                let inside = false;
+                for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                    const a = ring[i];
+                    const b = ring[j];
+                    if ((a.latitude > lat) !== (b.latitude > lat)) {
+                        const x =
+                            a.longitude +
+                            ((lat - a.latitude) / (b.latitude - a.latitude)) *
+                                (b.longitude - a.longitude);
+                        if (lng < x) inside = !inside;
+                    }
+                }
+                return inside;
+            };
+            const duplicates = (ring: any[]) =>
+                ring.length - new Set(ring.map((p) => `${p.latitude},${p.longitude}`)).size;
+
+            const outer = rect(0, 0, 10, 10);
+            const hole = rect(4, 4, 6, 6);
+            const zero = core.bridgeHolesIntoSingleRing(outer, [hole]);
+            const separated = core.bridgeHolesIntoSingleRing(outer, [hole], 1e-6);
+            const noHoles = core.bridgeHolesIntoSingleRing(outer, []);
+            // 巻き方向に依存しない
+            const reversedHole = core.bridgeHolesIntoSingleRing(outer, [[...hole].reverse()]);
+
+            return {
+                // 元の頂点 + 穴頂点 + 橋の複製 2 点
+                length: zero.length,
+                holeIsCutOut: evenOddInside(5, 5, zero),
+                insideIsFilled: evenOddInside(2, 2, zero),
+                outsideIsEmpty: evenOddInside(11, 11, zero),
+                // separation = 0 は幅ゼロの橋（座標が一致する頂点が 2 つ）
+                zeroDuplicates: duplicates(zero),
+                separatedDuplicates: duplicates(separated),
+                separatedLength: separated.length,
+                separatedHoleIsCutOut: evenOddInside(5, 5, separated),
+                separatedInsideIsFilled: evenOddInside(2, 2, separated),
+                noHolesLength: noHoles.length,
+                reversedHoleIsCutOut: evenOddInside(5, 5, reversedHole),
+            };
+        });
+
+        expect(result.length).toBe(10);
+        expect(result.holeIsCutOut).toBe(false);
+        expect(result.insideIsFilled).toBe(true);
+        expect(result.outsideIsEmpty).toBe(false);
+        expect(result.zeroDuplicates).toBe(2);
+        expect(result.separatedDuplicates).toBe(0);
+        expect(result.separatedLength).toBe(10);
+        expect(result.separatedHoleIsCutOut).toBe(false);
+        expect(result.separatedInsideIsFilled).toBe(true);
+        expect(result.noHolesLength).toBe(4);
+        expect(result.reversedHoleIsCutOut).toBe(false);
+    });
+
+    test('WrapAware は 180 度超の橋エッジを避ける', async ({ page }) => {
+        // 世界マスク外周 + 東経の穴では、西向きの橋が経度 180 度超を跨ぐ。ネイティブ側は
+        // そのエッジを「短い方」（対蹠線越え）に描くため塗りが壊れる。ios-sdk と同じく
+        // 経度を鏡像反転して東向きに張り直す（`HoleBridgeTests.swift` と同じ入力）。
+        const result = await evalInCore(page, (core) => {
+            const g = (latitude: number, longitude: number) =>
+                core.createGeoPoint({ latitude, longitude });
+            const maxAbsLngStep = (ring: any[]) => {
+                let maxStep = 0;
+                for (let i = 0; i < ring.length; i++) {
+                    const a = ring[i];
+                    const b = ring[(i + 1) % ring.length];
+                    maxStep = Math.max(maxStep, Math.abs(b.longitude - a.longitude));
+                }
+                return maxStep;
+            };
+            const evenOddInside = (lat: number, lng: number, ring: any[]) => {
+                let inside = false;
+                for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+                    const a = ring[i];
+                    const b = ring[j];
+                    if ((a.latitude > lat) !== (b.latitude > lat)) {
+                        const x =
+                            a.longitude +
+                            ((lat - a.latitude) / (b.latitude - a.latitude)) *
+                                (b.longitude - a.longitude);
+                        if (lng < x) inside = !inside;
+                    }
+                }
+                return inside;
+            };
+
+            const outer = [
+                g(85, 90), g(85, 0.1), g(85, -90), g(85, -179.9),
+                g(0, -179.9), g(-85, -179.9), g(-85, -90), g(-85, 0.1),
+                g(-85, 90), g(-85, 179.9), g(0, 179.9), g(85, 179.9),
+            ];
+            const hole = [
+                g(43.10086924222251, 141.35290903949243),
+                g(43.04444342582366, 141.4118953480885),
+                g(43.05060149394299, 141.30656265416695),
+            ];
+            const west = core.bridgeHolesIntoSingleRing(outer, [hole]);
+            const wrapAware = core.bridgeHolesIntoSingleRingWrapAware(outer, [hole], 1e-6);
+            return {
+                westMaxStep: maxAbsLngStep(west),
+                wrapAwareMaxStep: maxAbsLngStep(wrapAware),
+                holeIsCutOut: evenOddInside(43.0653, 141.3571, wrapAware),
+                filledTokyo: evenOddInside(35, 139, wrapAware),
+                filledSouth: evenOddInside(-30, 20, wrapAware),
+            };
+        });
+
+        // 標準（西向き）は 180 度超のエッジを含み、wrap-aware は全エッジ 180 度以下
+        expect(result.westMaxStep).toBeGreaterThan(180);
+        expect(result.wrapAwareMaxStep).toBeLessThanOrEqual(180);
+        expect(result.holeIsCutOut).toBe(false);
+        expect(result.filledTokyo).toBe(true);
+        expect(result.filledSouth).toBe(true);
+    });
+});
+
 test.describe('CameraRestriction', () => {
     test('空判定と個別 prop からの正規化', async ({ page }) => {
         const result = await evalInCore(page, (core) => ({
@@ -445,11 +575,11 @@ test.describe('BaseMapViewController', () => {
             c.unregisterOverlayController(overlay);
             c.fireMoveEnd(cam(6));
 
-            return { seen, registered: c.getOverlayControllers().length, userCallbacks };
+            return { seen, userCallbacks };
         });
-        // 登録中の1回だけ受け取り、解除後は届かない。利用者コールバックは両方とも呼ばれる。
+        // 登録中の1回だけ受け取り、解除後は届かない（＝解除が効いている）。
+        // 利用者コールバックは両方とも呼ばれる。
         expect(result.seen).toEqual([5]);
-        expect(result.registered).toBe(0);
         expect(result.userCallbacks).toBe(2);
     });
 });

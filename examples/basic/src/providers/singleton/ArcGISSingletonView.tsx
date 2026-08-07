@@ -1,9 +1,9 @@
 import { Fragment } from 'react';
-import { ArcGISMapView, ArcGISMapView2D, type ArcGISViewState } from '@mapconductor/react-for-arcgis';
+import { ArcGISMapView, ArcGISMapView2D, type ArcGISMapViewStateInterface } from '@mapconductor/react-for-arcgis';
 import type { SingletonMapContent } from './types';
 
 export default function ArcGISSingletonView({ state, content, useSceneView }: {
-  state: ArcGISViewState;
+  state: ArcGISMapViewStateInterface;
   content: SingletonMapContent | null;
   useSceneView: boolean;
 }) {

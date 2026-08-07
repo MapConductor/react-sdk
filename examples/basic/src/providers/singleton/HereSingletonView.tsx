@@ -1,9 +1,9 @@
 import { Fragment, useMemo } from 'react';
-import { HereMapView2D, type HereViewState } from '@mapconductor/react-for-here';
+import { HereMapView2D, type HereViewStateInterface } from '@mapconductor/react-for-here';
 import type { SingletonMapContent } from './types';
 
 export default function HereSingletonView({ state, content }: {
-  state: HereViewState;
+  state: HereViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   // HERE Maps API for JavaScript is loaded from CDN (see index.html); the

@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { MapTilerMapView2D, type MapTilerViewState } from '@mapconductor/react-for-maptiler';
+import { MapTilerMapView2D, type MapTilerViewStateInterface } from '@mapconductor/react-for-maptiler';
 import '@mapconductor/react-for-maptiler/style.css';
 import type { SingletonMapContent } from './types';
 
 export default function MapTilerSingletonView({ state, content }: {
-  state: MapTilerViewState;
+  state: MapTilerViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   if (!state.apiKey) {

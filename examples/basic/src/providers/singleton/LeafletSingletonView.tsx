@@ -1,10 +1,10 @@
 import { Fragment } from 'react';
-import { LeafletMapView, type LeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import { LeafletMapView, type LeafletMapViewStateInterface } from '@mapconductor/react-for-leaflet';
 import '@mapconductor/react-for-leaflet/style.css';
 import type { SingletonMapContent } from './types';
 
 export default function LeafletSingletonView({ state, content }: {
-  state: LeafletMapViewState;
+  state: LeafletMapViewStateInterface;
   content: SingletonMapContent | null;
 }) {
   return (
