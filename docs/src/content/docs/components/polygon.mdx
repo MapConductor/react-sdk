@@ -12,7 +12,7 @@ Polygons draw a filled/stroked area from an outer ring of points, optional inter
 ```tsx
 <Polygon
   points={GeoPoint[]}       // OR bounds, not both
-  holes?: GeoPoint[][]      // interior rings; auto-unioned when more than one
+  holes?: GeoPoint[][]      // interior rings; overlapping rings are unioned on render
   bounds={GeoRectBounds}
   id?: string | null
   strokeColor?: string      // default '#000000'
@@ -52,7 +52,7 @@ Multiple overlapping hole rings are unioned automatically before being cut out o
 <Polygon points={outerRing} holes={[lakeRing, buildingFootprintRing]} />
 ```
 
-See [PolygonState](/states/polygon-state/#holes-are-unioned-automatically) for the mutation-cost caveat if you're updating a large hole list frequently.
+The merge happens in this component, not on the state — see [PolygonState](/states/polygon-state/#holes-are-unioned-at-the-component-not-on-the-state) if you drive a controller directly.
 
 ## Drawing a bounds rectangle
 

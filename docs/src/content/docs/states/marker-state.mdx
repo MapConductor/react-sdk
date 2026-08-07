@@ -41,8 +41,15 @@ Event handlers are set per-state at construction (or later, by assignment) — e
 | `animation` | `MarkerAnimation \| null` | `'Drop'` or `'Bounce'`; set to trigger, typically followed by resetting to `null` |
 | `clickable` | `boolean` | |
 | `draggable` | `boolean` | |
-| `zIndex` | `number` | drawing order among markers |
+| `zIndex` | `number \| null` | drawing order among markers. `null` means *unset*, and providers fall back to ordering by latitude (southern markers on top) — the same as `Int?` on Android/iOS. An explicit `0` is a real z-order and is honoured. |
 | `onClick`, `onDragStart`, `onDrag`, `onDragEnd`, `onAnimateStart`, `onAnimateEnd` | event handler or `null` | |
+
+:::caution[Breaking change]
+`zIndex` is now `number | null` and defaults to `null` instead of `0`. Code that read it
+as a plain `number` needs a null check. The distinction matters: `null` lets the provider
+pick the drawing order from latitude, which is what most markers want; `0` pins the marker
+to z-order 0.
+:::
 
 ## Methods
 
@@ -51,7 +58,7 @@ setPosition(position: GeoPoint): void;
 setIcon(icon: MarkerIcon | null): void;
 setClickable(clickable: boolean): void;
 setDraggable(draggable: boolean): void;
-setZIndex(zIndex: number): void;
+setZIndex(zIndex: number | null): void;
 animate(animation: MarkerAnimation | null): void;
 getAnimation(): MarkerAnimation | null;
 

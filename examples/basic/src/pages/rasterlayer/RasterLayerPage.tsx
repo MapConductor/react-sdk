@@ -14,10 +14,42 @@ const TILE_SIZE = 256;
 
 type GsiLayer = 'relief' | 'standard';
 
+/**
+ * ヘッダ計測モード（`?probeHeaders=1`）で使うタイルの宛先と指定値。
+ *
+ * **同一オリジンの相対パス**にしてあるのが重要。`extraHeaders` を付けた fetch を
+ * 別オリジンへ飛ばすと CORS のプリフライトが挟まり、計測したいのはヘッダなのに
+ * プリフライトの成否を測ることになる。テスト側（raster-headers.spec.ts）は
+ * このパスを横取りしてヘッダを記録する。
+ *
+ * 値は android-sdk / ios-sdk の計測ページと同じものを使う。
+ */
+const PROBE_TEMPLATE = '/__mc-header-probe/{z}/{x}/{y}.png';
+const PROBE_USER_AGENT = 'MapConductorRasterHeaderProbe/1.0';
+const PROBE_HEADER_NAME = 'X-MapConductor-Test';
+const PROBE_HEADER_VALUE = 'mapconductor-probe';
+
+function useHeaderProbeState() {
+  return useMemo(() => {
+    const enabled =
+      typeof window !== 'undefined' &&
+      new URLSearchParams(window.location.search).get('probeHeaders') === '1';
+    if (!enabled) return null;
+    return createRasterLayerState({
+      id: 'mc-header-probe',
+      source: RasterLayerSource.UrlTemplate({ template: PROBE_TEMPLATE, tileSize: TILE_SIZE }),
+      opacity: 1,
+      userAgent: PROBE_USER_AGENT,
+      extraHeaders: { [PROBE_HEADER_NAME]: PROBE_HEADER_VALUE },
+    });
+  }, []);
+}
+
 export function RasterLayerPage() {
   const { t } = useSampleI18n();
   const [selectedLayer, setSelectedLayer] = useState<GsiLayer>('relief');
   const [opacity, setOpacity] = useState(0.75);
+  const probeState = useHeaderProbeState();
   const state = useMemo(() => createRasterLayerState({
     id: 'gsi-raster',
     source: selectedLayer === 'relief'
@@ -37,6 +69,16 @@ export function RasterLayerPage() {
         }),
     opacity,
   }), [opacity, selectedLayer]);
+
+  // 計測モードでは GSI のタイルを出さない。実在のサーバへの要求が混ざると、
+  // 記録したヘッダがどのレイヤのものか区別できなくなる。
+  if (probeState) {
+    return (
+      <MapViewContainer initialCamera={INIT_CAMERA}>
+        <RasterLayer state={probeState} />
+      </MapViewContainer>
+    );
+  }
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>

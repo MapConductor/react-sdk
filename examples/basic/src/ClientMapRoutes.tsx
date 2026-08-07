@@ -29,7 +29,9 @@ const SimpleInfoBubblePage = lazy(() => import('./pages/infobubble/SimpleInfoBub
 const StyledInfoBubblePage = lazy(() => import('./pages/infobubble/StyledInfoBubblePage').then(m => ({ default: m.StyledInfoBubblePage })));
 const MapDesignPage = lazy(() => import('./pages/map/design/MapDesignPage').then(m => ({ default: m.MapDesignPage })));
 const FlyToPage = lazy(() => import('./pages/map/flyto/FlyToPage').then(m => ({ default: m.FlyToPage })));
+const FitBoundsPage = lazy(() => import('./pages/map/fitbounds/FitBoundsPage').then(m => ({ default: m.FitBoundsPage })));
 const TiltPage = lazy(() => import('./pages/map/tilt/TiltPage').then(m => ({ default: m.TiltPage })));
+const UISettingsPage = lazy(() => import('./pages/map/uisettings/UISettingsPage').then(m => ({ default: m.UISettingsPage })));
 const VisibleRegionPage = lazy(() => import('./pages/map/visibleregion/VisibleRegionPage').then(m => ({ default: m.VisibleRegionPage })));
 const CameraSyncPage = lazy(() => import('./pages/map/camerasync/CameraSyncPage').then(m => ({ default: m.CameraSyncPage })));
 const MarkerAnimationPage = lazy(() => import('./pages/marker/animation/MarkerAnimationPage').then(m => ({ default: m.MarkerAnimationPage })));
@@ -73,7 +75,9 @@ function pageContent(page: string | undefined) {
   switch (page) {
     case 'map-design': return <MapDesignPage />;
     case 'fly-to': return <FlyToPage />;
+    case 'fit-bounds': return <FitBoundsPage />;
     case 'tilt': return <TiltPage />;
+    case 'ui-settings': return <UISettingsPage />;
     case 'visible-region': return <VisibleRegionPage />;
     case 'camera-sync': return <CameraSyncPage />;
     case 'marker': return <MarkerIconsPage />;

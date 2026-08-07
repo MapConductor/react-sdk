@@ -16,7 +16,7 @@ const polyline = useMemo(() => createPolylineState({
       id: \`click-\${current.length}\`,
       position: event.clicked,
       animation: MarkerAnimation.Drop,
-      icon: new ColorDefaultIcon(event.state.strokeColor),
+      icon: new ColorDefaultIcon({ fillColor: event.state.strokeColor }),
       clickable: false,
     }),
   ]),

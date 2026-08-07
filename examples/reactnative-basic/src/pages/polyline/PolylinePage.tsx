@@ -44,8 +44,7 @@ export function PolylinePage({ provider }: { provider: MapProvider }) {
       createMarkerState({
         id: `waypoint-${index}`,
         position: point,
-        icon: new ColorDefaultIcon(index === 0 || index === INITIAL_POINTS.length - 1 ? '#22c55e' : '#ffff00', {
-          label: index === 0 ? 'S' : index === INITIAL_POINTS.length - 1 ? 'E' : `${index}`,
+        icon: new ColorDefaultIcon({ fillColor: index === 0 || index === INITIAL_POINTS.length - 1 ? '#22c55e' : '#ffff00', label: index === 0 ? 'S' : index === INITIAL_POINTS.length - 1 ? 'E' : `${index}`,
           strokeColor: '#000000',
           labelTextColor: '#000000',
         }),

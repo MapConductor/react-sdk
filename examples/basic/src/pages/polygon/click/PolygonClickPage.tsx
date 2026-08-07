@@ -46,7 +46,7 @@ export function PolygonClickPage() {
   }, [polygons]);
   const [clickedMarker, setClickedMarker] = useState<ClickedMarker | null>(null);
   const markerIcon = useMemo(
-    () => new ColorDefaultIcon('#ef4444', { label: 'P', labelTextColor: '#ffffff' }),
+    () => new ColorDefaultIcon({ fillColor: '#ef4444', label: 'P', labelTextColor: '#ffffff' }),
     [],
   );
   const marker = useMemo(

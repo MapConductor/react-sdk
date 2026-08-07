@@ -1,89 +1,94 @@
 import { useMemo, useRef, useState } from 'react';
 import {
+  ColorDefaultIcon,
+  createGeoPoint,
   createMarkerState,
   createPolylineState,
   type GeoPoint,
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { Markers, Polyline } from '@mapconductor/js-sdk-react';
-import { ControlPanel, SliderControl } from '../components/ControlPanel';
-import { Toast, useToast } from '../components/Toast';
-import { POLYLINE_POINTS } from '../data/storeData';
+import { ControlPanel } from '../components/ControlPanel';
 import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../samples/i18n';
 
-const INIT_CAMERA = { lat: 21.3069, lng: -157.8583, zoom: 13 };
+const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 15 };
+
+// Colors mirror the Android polyline/basic sample (Color.Green / Color.Yellow /
+// Color.Black / Color.Red).
+const GREEN = '#00ff00';
+const YELLOW = '#ffff00';
+const BLACK = '#000000';
+const RED = '#ff0000';
+
+// The Android sample lays out a closed loop around Honolulu (last point equals
+// the first).
+const INITIAL_POINTS: GeoPoint[] = [
+  createGeoPoint({ latitude: 21.382314, longitude: -157.933097 }), // Honolulu center
+  createGeoPoint({ latitude: 21.385314, longitude: -157.930097 }), // Northeast
+  createGeoPoint({ latitude: 21.387314, longitude: -157.935097 }), // Northwest
+  createGeoPoint({ latitude: 21.380314, longitude: -157.937097 }), // Southwest
+  createGeoPoint({ latitude: 21.378314, longitude: -157.930097 }), // Southeast
+  createGeoPoint({ latitude: 21.382314, longitude: -157.933097 }), // Back to center
+];
 
 export function PolylinePage() {
   const { t } = useSampleI18n();
-  const [points, setPoints] = useState<GeoPoint[]>(POLYLINE_POINTS);
-  const [strokeWidth, setStrokeWidth] = useState(4);
-  const { messages, showToast, dismissToast } = useToast();
+  const [points, setPoints] = useState<GeoPoint[]>(INITIAL_POINTS);
   const setPointsRef = useRef(setPoints);
   setPointsRef.current = setPoints;
 
   const polylineState = useMemo(
     () =>
       createPolylineState({
-        id: 'demo-polyline',
+        id: 'example_polyline',
         points,
-        strokeColor: '#e74c3c',
-        strokeWidth,
+        strokeColor: RED,
+        strokeWidth: 4,
         geodesic: true,
-        onClick: event =>
-          showToast(
-            `Polyline clicked near [${event.clicked.latitude.toFixed(4)}, ${event.clicked.longitude.toFixed(4)}]`
-          ),
       }),
-    [points, strokeWidth, showToast]
+    [points],
   );
 
-  const waypointMarkers = useMemo(
+  const wayPointMarkers = useMemo(
     () =>
-      points.map((point, index) =>
-        createMarkerState({
-          id: `wp-${index}`,
+      points.map((point, index) => {
+        const isEndpoint = index === 0 || index === points.length - 1;
+        const fillColor = isEndpoint ? GREEN : YELLOW;
+        const label = index === 0 ? 'S' : index === points.length - 1 ? 'E' : String(index);
+        const onDrag = (state: MarkerState) => {
+          setPointsRef.current(prev => {
+            const next = [...prev];
+            next[index] = state.position;
+            return next;
+          });
+        };
+        return createMarkerState({
+          id: `waypoint_${index}`,
           position: point,
-          draggable: index > 0 && index < points.length - 1,
+          icon: new ColorDefaultIcon({ fillColor, strokeColor: BLACK, label }),
+          draggable: true,
           clickable: false,
-          onDrag: (state: MarkerState) => {
-            setPointsRef.current(prev => {
-              const next = [...prev];
-              next[index] = state.position;
-              return next;
-            });
-          },
-          onDragEnd: (state: MarkerState) => {
-            setPointsRef.current(prev => {
-              const next = [...prev];
-              next[index] = state.position;
-              return next;
-            });
-          },
-        })
-      ),
-    [points]
+          onDragStart: onDrag,
+          onDrag,
+          onDragEnd: onDrag,
+        });
+      }),
+    [points],
   );
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polyline state={polylineState} />
-      <Markers states={waypointMarkers} />
-      <ControlPanel title={t('Polyline Example', 'ポリラインのサンプル')}>
-        <SliderControl
-          label={t('Stroke Width', '線の太さ')}
-          value={strokeWidth}
-          min={1}
-          max={12}
-          step={0.5}
-          format={value => `${value.toFixed(1)}px`}
-          onChange={setStrokeWidth}
-        />
+      <Markers states={wayPointMarkers} />
+      <ControlPanel title={t('Description', '説明')}>
         <p className="control-panel-note">
-          {t('Drag waypoint markers to reshape the polyline.', 'ウェイポイントをドラッグしてポリラインの形を変更できます。')}
+          {t(
+            'Drag the waypoint markers to reshape the polyline.',
+            'ウェイポイントのマーカーをドラッグすると、ポリラインの形を変更できます。',
+          )}
         </p>
       </ControlPanel>
-      <Toast messages={messages} onDismiss={dismissToast} />
     </MapViewContainer>
   );
 }

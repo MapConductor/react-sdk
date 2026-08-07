@@ -17,6 +17,7 @@ export default function TomTomSingletonView({ state, content }: {
   return (
     <TomTomMapView2D
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

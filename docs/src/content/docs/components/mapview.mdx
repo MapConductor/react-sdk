@@ -21,10 +21,46 @@ interface MapViewBaseProps<TState extends MapViewStateInterface> {
   onCameraMoveStart?: (camera: MapCameraPosition) => void;
   onCameraMove?: (camera: MapCameraPosition) => void;   // fires per frame while moving
   onCameraMoveEnd?: (camera: MapCameraPosition) => void;
+
+  cameraRestriction?: CameraRestriction | null;   // pan/zoom limits, applied at runtime
 }
 ```
 
 `onMapClick`/`onMapLongClick` receive a `GeoPoint`, not a provider-native pixel/DOM event, so the same handler logic works across providers. See [Events and camera](/guides/events-and-camera/) for the full event model.
+
+## Restricting the camera
+
+`cameraRestriction` limits where the camera can go. It mirrors `CameraRestriction` on the
+Android SDK, including the unified (Google-style) zoom scale — each provider converts it to
+its own zoom system.
+
+```ts
+interface CameraRestriction {
+  bounds?: GeoRectBounds | null;   // the camera target cannot leave this rectangle
+  minZoom?: number | null;         // unified zoom, roughly 0–22
+  maxZoom?: number | null;
+}
+```
+
+```tsx
+<MapLibreView
+  state={state}
+  cameraRestriction={{ bounds: tokyoBounds, minZoom: 8, maxZoom: 18 }}
+/>
+```
+
+Pass `null` (or `NoCameraRestriction`) to clear it. Unlike the older per-provider
+`restrictBounds` / `minZoom` / `maxZoom` props — which are baked in when the map is created
+and still work — `cameraRestriction` is applied through the controller, so **changing the
+prop takes effect on the live map**. That is what lets one long-lived map instance serve
+pages with different limits.
+
+Providers whose engine has a native restriction API (Mapbox, MapLibre, MapTiler, TomTom,
+Google, Leaflet, Azure Maps) apply it directly. The rest (HERE, ArcGIS, MapKit, Cesium,
+OpenLayers, Longdo) clamp the camera when it comes to rest, matching how the Android SDK
+splits the same providers. Clamping uses a small epsilon so a correction never retriggers
+itself.
+
 
 ## Minimal usage
 

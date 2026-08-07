@@ -92,7 +92,7 @@ export function GroundImagePage() {
     createMarkerState({
       id: 'south_west',
       position: southWest,
-      icon: new ColorDefaultIcon('#2563eb', { label: 'SW', labelTextColor: '#ffffff' }),
+      icon: new ColorDefaultIcon({ fillColor: '#2563eb', label: 'SW', labelTextColor: '#ffffff' }),
       draggable: true,
       onDrag: dragSouthWest,
       onDragEnd: commitSouthWest,
@@ -100,7 +100,7 @@ export function GroundImagePage() {
     createMarkerState({
       id: 'north_east',
       position: northEast,
-      icon: new ColorDefaultIcon('#ef4444', { label: 'NE', labelTextColor: '#ffffff' }),
+      icon: new ColorDefaultIcon({ fillColor: '#ef4444', label: 'NE', labelTextColor: '#ffffff' }),
       draggable: true,
       onDrag: dragNorthEast,
       onDragEnd: commitNorthEast,

@@ -28,6 +28,7 @@ const DESIGN_OPTIONS_LOADERS: Record<string, () => Promise<MapDesignOption[]>> =
   cesium: () => import('../../../providers/designOptions/cesiumDesignOptions').then(m => m.CESIUM_DESIGNS),
   here: () => import('../../../providers/designOptions/hereDesignOptions').then(m => m.HERE_DESIGNS),
   maptiler: () => import('../../../providers/designOptions/maptilerDesignOptions').then(m => m.MAPTILER_DESIGNS),
+  tomtom: () => import('../../../providers/designOptions/tomtomDesignOptions').then(m => m.TOMTOM_DESIGNS),
   longdo: () => import('../../../providers/designOptions/longdoDesignOptions').then(m => m.LONGDO_DESIGNS),
 };
 

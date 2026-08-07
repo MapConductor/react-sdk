@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createGeoPoint, type GeoPoint, type MapDesignTypeInterface, type MapViewStateInterface } from '@mapconductor/js-sdk-core';
-import { InfoBubbleAtPosition } from '@mapconductor/js-sdk-react';
+import { InfoBubble } from '@mapconductor/js-sdk-react';
 import { GeoJSONLayer, GeoJSONLayerState, colorArgb, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
@@ -44,7 +44,7 @@ export function GeoJSONLayerPage({ source = railroadGeoJSONSource }: { source?: 
   return (
     <MapViewContainer initialCamera={{ lat: 35.68, lng: 139.77, zoom: 13 }} onStateReady={setMapState} onMapClick={handleMapClick}>
       <GeoJSONLayer state={layerState} features={features} />
-      {selected && <InfoBubbleAtPosition position={selected.position}><PropertyTable properties={selected.properties} /></InfoBubbleAtPosition>}
+      {selected && <InfoBubble position={selected.position}><PropertyTable properties={selected.properties} /></InfoBubble>}
       <ControlPanel title={t('GeoJSON Layer', 'GeoJSON レイヤー')}>
         <p className="control-panel-note">{isLoading
           ? t('Loading GeoJSON…', 'GeoJSONを読み込んでいます…')

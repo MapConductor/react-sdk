@@ -1,0 +1,42 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["typescript", "react", "oxc"],
+  "categories": {
+    "correctness": "warn"
+  },
+  "ignorePatterns": [
+    "**/*.cjs",
+    "**/*.js",
+    "**/*.mjs",
+    "**/*.mts",
+    "**/build/**",
+    "**/dist/**",
+    "**/test-results/**"
+  ],
+  "rules": {
+    "typescript/no-explicit-any": "warn",
+    "no-unused-vars": [
+      "warn",
+      { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_", "caughtErrorsIgnorePattern": "^_" }
+    ]
+  },
+  "overrides": [
+    {
+      // Ambient/vendored SDK declarations (e.g. the HERE Maps global `H`
+      // namespace) are intentionally loosely typed with `any` so this package can
+      // mirror the sibling native SDK's shape without becoming brittle to
+      // upstream API drift. See the header comment in react-for-here/src/here.d.ts.
+      "files": ["**/*.d.ts"],
+      "rules": { "typescript/no-explicit-any": "off" }
+    },
+    {
+      // Map view components initialize the underlying provider map exactly once
+      // on mount and deliberately capture the initial props/state; live callbacks
+      // are kept in refs to avoid re-running the effect. Listing the "missing"
+      // dependencies would recreate the map on every state change, so the
+      // exhaustive-deps rule is intentionally disabled for these files.
+      "files": ["**/*View*.tsx"],
+      "rules": { "react/exhaustive-deps": "off" }
+    }
+  ]
+}

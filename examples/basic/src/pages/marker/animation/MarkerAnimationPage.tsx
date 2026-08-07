@@ -20,8 +20,7 @@ export function MarkerAnimationPage() {
   const marker = useMemo(() => createMarkerState({
     id: 'animated-marker',
     position: HONOLULU,
-    icon: new ColorDefaultIcon('#e74c3c', {
-      label: animation === MarkerAnimation.Drop ? 'D' : animation === MarkerAnimation.Bounce ? 'B' : 'M',
+    icon: new ColorDefaultIcon({ fillColor: '#e74c3c', label: animation === MarkerAnimation.Drop ? 'D' : animation === MarkerAnimation.Bounce ? 'B' : 'M',
       labelTextColor: '#ffffff',
     }),
     animation,

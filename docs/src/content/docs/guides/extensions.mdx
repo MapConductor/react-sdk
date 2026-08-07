@@ -55,7 +55,7 @@ const handleMapClick = useCallback((point: GeoPoint) => {
 
 <MapView state={mapState} onMapClick={handleMapClick}>
   <GeoJSONLayer state={layerState} features={features} />
-  {selected && <InfoBubbleAtPosition position={selected.position}>{/* ... */}</InfoBubbleAtPosition>}
+  {selected && <InfoBubble position={selected.position}>{/* ... */}</InfoBubble>}
 </MapView>
 ```
 
@@ -141,7 +141,7 @@ const clusterIconProvider = useMemo<ClusterIconProvider>(() => (count) => {
 }, [backgroundImage]);
 ```
 
-Set `debugHullPolygons` to render each cluster's convex hull as a `Polygon` while tuning `clusterRadiusPx`/`expandMargin`; `onDebugInfo` receives the raw per-cluster geometry (center, radius, hull points) on every recompute if you want to drive your own overlay instead.
+Set `debugHullPolygons` to render each cluster's convex hull as a `Polygon` while tuning `clusterRadiusPx`/`expandMargin`. It is the only debug switch the clustering API exposes, and it is the same on Android, iOS and React.
 
 ## Icons
 

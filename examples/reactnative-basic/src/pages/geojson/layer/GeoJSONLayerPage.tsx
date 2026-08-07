@@ -7,7 +7,7 @@ import {
   View,
 } from 'react-native';
 import { GeoPoint } from '@mapconductor/js-sdk-core';
-import { InfoBubbleAtPosition } from '@mapconductor/js-sdk-react/native';
+import { InfoBubble } from '@mapconductor/js-sdk-react/native';
 import { GeoJSONLayer, GeoJSONLayerState, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
 import type { MapProvider } from '../../../screens/MapScreen';
 import { MapViewContainer } from '../../MapViewContainer';
@@ -75,9 +75,9 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
       >
         {sourceUri ? <GeoJSONLayer state={layerState} sourceUri={sourceUri} /> : null}
         {tappedPosition && selectedFeature ? (
-          <InfoBubbleAtPosition position={tappedPosition}>
+          <InfoBubble position={tappedPosition}>
             <PropertyTable properties={selectedFeature.properties} />
-          </InfoBubbleAtPosition>
+          </InfoBubble>
         ) : null}
       </MapViewContainer>
 

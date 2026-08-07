@@ -7,6 +7,7 @@ import {
   type Offset,
 } from '@mapconductor/js-sdk-core';
 import type { LongdoViewController } from './LongdoViewController';
+import type { LongdoMapInstance } from './longdoApi';
 
 export class LongdoMapViewHolder extends MapViewHolderBase<HTMLElement, maplibregl.Map> {
   private _controller: LongdoViewController | null = null;
@@ -14,6 +15,8 @@ export class LongdoMapViewHolder extends MapViewHolderBase<HTMLElement, maplibre
   constructor(
     readonly mapView: HTMLElement,
     readonly map: maplibregl.Map,
+    /** The Longdo API3 map that owns `map` (its MapLibre renderer). */
+    readonly longdoMap: LongdoMapInstance,
   ) {
     super();
   }

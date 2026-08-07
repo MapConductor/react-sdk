@@ -99,8 +99,7 @@ export function PolygonHolePage({ provider }: { provider: MapProvider }) {
           draggable: true,
           clickable: false,
           extra: { holeIndex, vertexIndex } satisfies HoleVertex,
-          icon: new ColorDefaultIcon(HOLE_MARKER_COLORS[holeIndex] ?? '#64748b', {
-            label: `${holeIndex + 1}-${vertexIndex + 1}`,
+          icon: new ColorDefaultIcon({ fillColor: HOLE_MARKER_COLORS[holeIndex] ?? '#64748b', label: `${holeIndex + 1}-${vertexIndex + 1}`,
             labelTextColor: '#ffffff',
             strokeColor: '#ffffff',
           }),

@@ -11,8 +11,7 @@ export function StyledInfoBubblePage() {
     const marker1 = createMarkerState({
       id: 'marker1',
       position: createGeoPoint({ latitude: 37.7749, longitude: -122.4194 }),
-      icon: new ColorDefaultIcon('#2563eb', {
-        label: '1',
+      icon: new ColorDefaultIcon({ fillColor: '#2563eb', label: '1',
         labelTextColor: '#ffffff',
         infoAnchor: { x: 0.5, y: 0.25 },
       }),
@@ -25,8 +24,7 @@ export function StyledInfoBubblePage() {
     const marker2 = createMarkerState({
       id: 'marker2',
       position: createGeoPoint({ latitude: 37.7849, longitude: -122.4094 }),
-      icon: new ColorDefaultIcon('#ef4444', {
-        label: '2',
+      icon: new ColorDefaultIcon({ fillColor: '#ef4444', label: '2',
         labelTextColor: '#ffffff',
         infoAnchor: { x: 0.5, y: 0.25 },
       }),

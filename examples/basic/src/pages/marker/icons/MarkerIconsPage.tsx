@@ -73,7 +73,7 @@ export function MarkerIconsPage() {
         id: 'default-scale-0-7',
         lat: 0.018,
         lng: 0.004,
-        icon: new ColorDefaultIcon('#ff0000', { scale: 0.7, label: '0.7', debug: true }),
+        icon: new ColorDefaultIcon({ fillColor: '#ff0000', scale: 0.7, label: '0.7', debug: true }),
         extra: `DefaultIcon(
   scale = 0.7,
   label = "0.7",
@@ -84,7 +84,7 @@ export function MarkerIconsPage() {
         id: 'default-scale-1-0',
         lat: 0.018,
         lng: 0.006,
-        icon: new ColorDefaultIcon('#ff0000', { scale: 1, label: '1.0', debug: true }),
+        icon: new ColorDefaultIcon({ fillColor: '#ff0000', scale: 1, label: '1.0', debug: true }),
         extra: `DefaultIcon(
   scale = 1.0,
   label = "1.0",
@@ -95,7 +95,7 @@ export function MarkerIconsPage() {
         id: 'default-scale-1-4',
         lat: 0.018,
         lng: 0.009,
-        icon: new ColorDefaultIcon('#ff0000', { scale: 1.4, label: '1.4', debug: true }),
+        icon: new ColorDefaultIcon({ fillColor: '#ff0000', scale: 1.4, label: '1.4', debug: true }),
         extra: `DefaultIcon(
   scale = 1.4,
   label = "1.4",
@@ -106,7 +106,7 @@ export function MarkerIconsPage() {
         id: 'default-scale-2-1',
         lat: 0.018,
         lng: 0.013,
-        icon: new ColorDefaultIcon('#ff0000', { scale: 2.1, label: '2.1', debug: true }),
+        icon: new ColorDefaultIcon({ fillColor: '#ff0000', scale: 2.1, label: '2.1', debug: true }),
         extra: `DefaultIcon(
   scale = 2.1,
   label = "2.1",
@@ -124,7 +124,7 @@ export function MarkerIconsPage() {
         id: 'default-yellow',
         lat: 0.014,
         lng: 0.008,
-        icon: new ColorDefaultIcon('#ffff00', { strokeColor: '#000000', strokeWidth: 2 }),
+        icon: new ColorDefaultIcon({ fillColor: '#ffff00', strokeColor: '#000000', strokeWidth: 2 }),
         extra: `DefaultIcon(
   fillColor = Color.Yellow,
   strokeColor = Color.Black,
@@ -135,8 +135,7 @@ export function MarkerIconsPage() {
         id: 'default-labeled',
         lat: 0.014,
         lng: 0.012,
-        icon: new ColorDefaultIcon('#2ef527', {
-          strokeColor: '#fc225c',
+        icon: new ColorDefaultIcon({ fillColor: '#2ef527', strokeColor: '#fc225c',
           label: 'AB',
           labelTextColor: '#ffffff',
           labelStrokeColor: '#000000',
@@ -211,7 +210,7 @@ export function MarkerIconsPage() {
         id: 'drawable-human',
         lat: 0.01,
         lng: 0.004,
-        icon: new ImageDefaultIcon(humanImage),
+        icon: new ImageDefaultIcon({ backgroundImage: humanImage }),
         extra: `DrawableDefaultIcon(
   backgroundDrawable = icon,
 )`,
@@ -223,7 +222,7 @@ export function MarkerIconsPage() {
         id: 'drawable-launcher',
         lat: 0.01,
         lng: 0.006,
-        icon: new ImageDefaultIcon(launcherImage, { strokeColor: '#000000', scale: 1.5 }),
+        icon: new ImageDefaultIcon({ backgroundImage: launcherImage, strokeColor: '#000000', scale: 1.5 }),
         extra: `DrawableDefaultIcon(
   backgroundDrawable = icon,
   strokeColor = Color.Black,

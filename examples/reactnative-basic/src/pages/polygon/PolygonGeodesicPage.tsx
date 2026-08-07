@@ -10,7 +10,7 @@ import {
   createPolygonState,
   type PolygonEvent,
 } from '@mapconductor/js-sdk-core';
-import { InfoBubbleAtPosition, Marker, Polygon } from '@mapconductor/js-sdk-react/native';
+import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
@@ -41,16 +41,14 @@ export function PolygonGeodesicPage({ provider }: { provider: MapProvider }) {
     createMarkerState({
       id: 'polygon-geodesic-clicked',
       position: POINTS[0],
-      icon: new ColorDefaultIcon('#22c55e', {
-        label: 'P',
+      icon: new ColorDefaultIcon({ fillColor: '#22c55e', label: 'P',
         labelTextColor: '#ffffff',
       }),
     })
   );
   const handlePolygonClick = useCallback((label: string, event: PolygonEvent) => {
     markerState.position = event.clicked;
-    markerState.icon = new ColorDefaultIcon(event.state.fillColor, {
-      label: 'P',
+    markerState.icon = new ColorDefaultIcon({ fillColor: event.state.fillColor, label: 'P',
       labelTextColor: '#ffffff',
     });
     markerState.animate(MarkerAnimation.Drop);
@@ -102,9 +100,9 @@ export function PolygonGeodesicPage({ provider }: { provider: MapProvider }) {
         {clicked ? (
           <>
             <Marker state={markerState} />
-            <InfoBubbleAtPosition position={clicked.position}>
+            <InfoBubble position={clicked.position}>
               <Text style={styles.bubbleText}>{clicked.label}</Text>
-            </InfoBubbleAtPosition>
+            </InfoBubble>
           </>
         ) : null}
       </MapViewContainer>

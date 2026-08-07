@@ -88,14 +88,12 @@ export function CameraSyncMapPane({
         </label>
       )}
 
-      {true && (
-        <CameraInfoCard
-          label={label}
-          position={cameraPosition}
-          altitude={provider.altitude(paneState, cameraPosition)}
-          mapSize={mapDivSize(paneState)}
-        />
-      )}
+      <CameraInfoCard
+        label={label}
+        position={cameraPosition}
+        altitude={provider.altitude(paneState, cameraPosition)}
+        mapSize={mapDivSize(paneState)}
+      />
     </section>
   );
 }

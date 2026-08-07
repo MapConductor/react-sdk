@@ -10,6 +10,7 @@ export default function LeafletSingletonView({ state, content }: {
   return (
     <LeafletMapView
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

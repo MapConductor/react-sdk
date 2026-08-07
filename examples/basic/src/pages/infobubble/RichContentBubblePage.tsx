@@ -22,7 +22,7 @@ export function RichContentBubblePage() {
     return createMarkerState({
       id: 'golden-gate-park',
       position: createGeoPoint({ latitude: 37.7694, longitude: -122.4862 }),
-      icon: new ColorDefaultIcon('#22c55e', { label: '🌳' }),
+      icon: new ColorDefaultIcon({ fillColor: '#22c55e', label: '🌳' }),
       extra: locationInfo,
       onClick: state => setSelectedMarkerId(state.id),
     });

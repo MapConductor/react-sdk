@@ -33,6 +33,18 @@ export interface LongdoMapInstance {
   readonly Renderer: maplibregl.Map;
   readonly Event: { bind(eventName: string, handler: (data?: unknown) => void): void };
   readonly Layers: { setBase(layer: unknown): void };
+  /**
+   * Longdo drives pan and wheel zoom itself rather than leaving them to the
+   * MapLibre renderer, so these are the switches that actually gate them.
+   */
+  readonly Ui?: {
+    readonly Mouse?: {
+      enable(enabled: boolean): void;
+      enableClick(enabled: boolean): void;
+      enableDrag(enabled: boolean): void;
+      enableWheel(enabled: boolean): void;
+    };
+  };
   location(location?: LongdoLatLon, animate?: boolean): LongdoLatLon;
   zoom(zoom?: number, animate?: boolean): number;
   resize?(): void;

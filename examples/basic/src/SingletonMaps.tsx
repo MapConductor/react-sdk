@@ -208,10 +208,11 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   // on each page entry (useSingletonMapState calls this before applying the new
   // page's initialCamera).
   //
-  // minZoom / maxZoom / restrictBounds are intentionally not handled here: they
-  // are baked into a map at creation time and are never applied to a singleton
-  // instance (pages that need them opt into a dedicated, per-mount instance in
-  // MapViewContainer), so there is nothing to reset for those.
+  // The camera restriction is not reset here either: it is a per-page prop that
+  // flows through SingletonMapContent, so unmounting a page clears the content
+  // and the next page's value (or undefined) is applied straight away. minZoom /
+  // maxZoom passed as separate provider props are still creation-time only —
+  // use `cameraRestriction` when a page needs to change them at runtime.
   const resetMapState = useCallback((id: SingletonMapId) => {
     const state = statesById[id];
     const defaultDesign = defaultDesignsRef.current?.[id];
@@ -256,6 +257,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           version="alpha"
           libraries="maps3d"
           markerTilingOptions={SINGLETON_MARKER_TILING_OPTIONS}
+          cameraRestriction={content['google-2d']?.cameraRestriction}
           onMapClick={content['google-2d']?.onMapClick}
           onCameraMoveStart={content['google-2d']?.onCameraMoveStart}
           onCameraMove={content['google-2d']?.onCameraMove}
@@ -273,6 +275,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           mapId="DEMO_MAP_ID"
           version="alpha"
           markerTilingOptions={SINGLETON_MARKER_TILING_OPTIONS}
+          cameraRestriction={content['google-3d']?.cameraRestriction}
           onMapClick={content['google-3d']?.onMapClick}
           onCameraMoveStart={content['google-3d']?.onCameraMoveStart}
           onCameraMove={content['google-3d']?.onCameraMove}
@@ -352,7 +355,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd }: SingletonMapSlotProps) {
+export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction }: SingletonMapSlotProps) {
   const { register, unregister } = useSingletonMapsContext();
   const owner = useId();
 
@@ -364,6 +367,7 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
       onCameraMoveStart,
       onCameraMove,
       onCameraMoveEnd,
+      cameraRestriction,
     });
     return () => unregister(id, owner);
   }, [
@@ -374,6 +378,7 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
     onCameraMoveStart,
     onCameraMove,
     onCameraMoveEnd,
+    cameraRestriction,
     register,
     unregister,
   ]);

@@ -74,8 +74,7 @@ export function PolygonPage({ provider }: { provider: MapProvider }) {
         position: point,
         extra: index,
         draggable: true,
-        icon: new ColorDefaultIcon('#FFFF00', {
-          scale: 0.7,
+        icon: new ColorDefaultIcon({ fillColor: '#FFFF00', scale: 0.7,
           strokeColor: '#000000',
         }),
         onDrag: handleVertexDrag,

@@ -42,8 +42,8 @@
     "dev:examples": "npm run dev --workspace @mapconductor/example-basic",
     "dev:rn:examples": "npm run expo:start --workspace @mapconductor/example-rn-basic -- --clear",
     "link:local": "node scripts/link-local-workspaces.mjs",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "oxlint",
+    "lint:fix": "oxlint --fix",
     "test": "npm run test --workspaces --if-present",
     "clean": "npm run clean --workspaces --if-present && rm -rf node_modules"
   },
@@ -53,14 +53,10 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "esbuild": "0.28.1",
-    "eslint": "^8.57.1",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
-    "globals": "^16.0.0",
+    "oxlint": "^1.76.0",
     "prettier": "^3.1.1",
     "typescript": "^5.9.3",
-    "typescript-7": "npm:typescript@^7.0.2",
-    "typescript-eslint": "^8.64.0"
+    "typescript-7": "npm:typescript@^7.0.2"
   },
   "engines": {
     "node": ">=18.0.0",

@@ -65,8 +65,7 @@ export function PolygonGeodesicPage() {
       ? createMarkerState({
           id: `polygon-geodesic-click-${clickedPolygon.sequence}`,
           position: clickedPolygon.position,
-          icon: new ColorDefaultIcon(clickedPolygon.markerColor, {
-            label: 'P',
+          icon: new ColorDefaultIcon({ fillColor: clickedPolygon.markerColor, label: 'P',
             labelTextColor: '#ffffff',
           }),
           animation: MarkerAnimation.Drop,

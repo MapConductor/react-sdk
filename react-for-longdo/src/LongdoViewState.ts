@@ -5,6 +5,7 @@ import {
   type GeoPoint,
   type MapCameraPosition,
   type MapViewControllerInterface,
+  type GeoRectBounds,
   type MapViewHolder,
   MapCameraPosition as MapCameraPositionNS,
   createRandomId,
@@ -76,7 +77,7 @@ export class LongdoViewState
     if (!durationMillis || durationMillis === 0) {
       ctrl.moveCamera(newPosition);
     } else {
-      void ctrl.animateCamera(newPosition, { duration: durationMillis });
+      void ctrl.animateCamera(newPosition, durationMillis);
     }
     this._cameraPosition = newPosition;
     this._cameraPositionChangeListener?.(newPosition);
@@ -84,6 +85,10 @@ export class LongdoViewState
 
   override getMapViewHolder(): MapViewHolder<unknown, unknown> | null {
     return this._controller?.holder ?? null;
+  }
+
+  override fitBounds(bounds: GeoRectBounds, padding: number = 0): void {
+    void this._controller?.fitBounds(bounds, padding);
   }
 
   // Called by LongdoView when controller is initialized

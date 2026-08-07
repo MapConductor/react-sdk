@@ -6,6 +6,7 @@
     "paths": {
       "@mapconductor/js-sdk-core": ["../../js-sdk-core/src/index.ts"],
       "@mapconductor/js-sdk-react": ["../../js-sdk-react/src/index.ts"],
+      "@mapconductor/js-sdk-react/internal": ["../../js-sdk-react/src/internal.ts"],
       "@mapconductor/react-for-googlemaps": ["../../react-for-googlemaps/src/index.ts"],
       "@mapconductor/react-for-maplibre": ["../../react-for-maplibre/src/index.ts"]
     }

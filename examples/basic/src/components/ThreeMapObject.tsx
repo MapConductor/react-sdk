@@ -1,12 +1,12 @@
 import { useEffect } from 'react';
 import * as THREE from 'three';
+import { useMapLoaded } from '@mapconductor/js-sdk-react';
 import {
   type GeoPointInterface,
   type MapDesignTypeInterface,
   type MapViewStateInterface,
   type Offset,
 } from '@mapconductor/js-sdk-core';
-import { useMapReady } from '@mapconductor/js-sdk-react';
 
 export function ThreeMapObject({
   mapViewState,
@@ -15,10 +15,11 @@ export function ThreeMapObject({
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
   position: GeoPointInterface;
 }) {
-  const isMapReady = useMapReady();
+  // 地図エンジンの初期化完了（= 3 者共通の `onMapLoaded` と同じ瞬間）を値として読む。
+  const isMapLoaded = useMapLoaded();
 
   useEffect(() => {
-    if (!isMapReady) return;
+    if (!isMapLoaded) return;
     const holder = mapViewState.getMapViewHolder();
     if (!holder) return;
 
@@ -133,7 +134,7 @@ export function ThreeMapObject({
       knotMaterial.dispose();
       renderer.dispose();
     };
-  }, [isMapReady, mapViewState, position]);
+  }, [isMapLoaded, mapViewState, position]);
 
   return null;
 }

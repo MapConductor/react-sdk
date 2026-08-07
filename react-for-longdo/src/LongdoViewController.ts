@@ -2,7 +2,6 @@ import type * as maplibregl from 'maplibre-gl';
 import {
   BaseMapViewController,
   createGeoRectBounds,
-  type CameraOptions,
   type CircleCapable,
   type CircleState,
   type GeoRectBounds,
@@ -26,6 +25,9 @@ import {
   type RasterLayerCapable,
   type RasterLayerState,
   type VisibleRegion,
+  type MapUISettings,
+  type GlGestureHandlers,
+  applyGlMapUISettings,
 } from '@mapconductor/js-sdk-core';
 import { lngLatFromEvent } from './helpers';
 import { toCameraPosition, toMapCameraPosition } from './MapCameraPosition';
@@ -103,6 +105,18 @@ export class LongdoViewController
 
   getMap(): maplibregl.Map {
     return this.mapInstance;
+  }
+
+  /**
+   * Longdo API3 handles panning and wheel zoom above its MapLibre renderer, so
+   * those two have to go through `Ui.Mouse` — switching the renderer's own
+   * handlers off is not enough. Rotation and tilt are pure renderer gestures.
+   */
+  applyUISettings(settings: MapUISettings): void {
+    const mouse = this.holder.longdoMap.Ui?.Mouse;
+    mouse?.enableDrag(settings.scrollGesture);
+    mouse?.enableWheel(settings.zoomGesture);
+    applyGlMapUISettings(this.mapInstance as unknown as Partial<GlGestureHandlers>, settings, 'Longdo');
   }
 
   private setupEventListeners(): void {
@@ -200,7 +214,7 @@ export class LongdoViewController
       void this.polylineController.resync();
       this.polygonController.resync();
       this.groundImageController.resync();
-      this.rasterLayerController.resync();
+      void this.rasterLayerController.resync();
     };
 
     this.mapInstance.on('styledata', () => {
@@ -249,33 +263,37 @@ export class LongdoViewController
     });
   }
 
-  animateCamera(position: MapCameraPosition, options?: CameraOptions): Promise<boolean> {
+  animateCamera(position: MapCameraPosition, durationMillis: number): Promise<boolean> {
     this.logicalTiltHint = position.tilt;
     const cam = toCameraPosition(position);
     return new Promise((resolve) => {
       this.mapInstance.once('moveend', () => resolve(true));
-      const padding = options?.padding ?? options?.paddings;
       this.mapInstance.easeTo({
         center: cam.center,
         zoom: cam.zoom,
         bearing: cam.bearing,
         pitch: cam.tilt,
-        duration: options?.duration || 500,
-        ...(padding != null ? { padding } : {}),
+        duration: durationMillis || 500,
       });
     });
   }
 
-  fitBounds(bounds: GeoRectBounds, options?: CameraOptions): Promise<boolean> {
+  fitBounds(bounds: GeoRectBounds, padding: number): Promise<boolean> {
     return new Promise((resolve) => {
       this.mapInstance.once('moveend', () => resolve(true));
-      const fitPadding = options?.padding ?? options?.paddings;
+      const fitPadding = padding;
       this.mapInstance.fitBounds(
         [
           [bounds.southWest!.longitude, bounds.southWest!.latitude],
           [bounds.northEast!.longitude, bounds.northEast!.latitude],
         ],
-        { ...(fitPadding != null ? { padding: fitPadding } : {}), duration: options?.duration },
+        {
+          ...(fitPadding != null ? { padding: fitPadding } : {}),
+          // Preserve current rotation/tilt so the fit is correct at any bearing/pitch
+          // (maplibre-gl resets bearing to 0 when omitted).
+          bearing: this.mapInstance.getBearing(),
+          pitch: this.mapInstance.getPitch(),
+        },
       );
     });
   }
@@ -296,9 +314,6 @@ export class LongdoViewController
     return camera.copy({ visibleRegion });
   }
 
-  getBounds(): GeoRectBounds | null {
-    return this.getVisibleRegion()?.bounds ?? null;
-  }
 
   /**
    * Projects the four screen corners of the map viewport back to geo
@@ -438,11 +453,11 @@ export class LongdoViewController
   // --- RasterLayer ---
 
   async compositionRasterLayers(data: RasterLayerState[]): Promise<void> {
-    this.rasterLayerController.composition(data);
+    await this.rasterLayerController.composition(data);
   }
 
   async updateRasterLayer(state: RasterLayerState): Promise<void> {
-    this.rasterLayerController.update(state);
+    await this.rasterLayerController.update(state);
   }
 
   hasRasterLayer(state: RasterLayerState): boolean {
@@ -457,7 +472,7 @@ export class LongdoViewController
     await this.polylineController.clear();
     await this.polygonController.clear();
     this.groundImageController.clear();
-    this.rasterLayerController.clear();
+    await this.rasterLayerController.clear();
   }
 
   destroy(): void {

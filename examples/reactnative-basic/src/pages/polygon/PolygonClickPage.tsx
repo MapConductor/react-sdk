@@ -9,7 +9,7 @@ import {
   createPolygonState,
   type PolygonEvent,
 } from '@mapconductor/js-sdk-core';
-import { InfoBubbleAtPosition, Marker, Polygon } from '@mapconductor/js-sdk-react/native';
+import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react/native';
 import {
   GoogleMapDesign,
   useGoogleMapViewState,
@@ -36,8 +36,7 @@ export function PolygonClickPage({ provider }: { provider: MapProvider }) {
     createMarkerState({
       id: 'polygon-clicked',
       position: INIT_CAMERA.position,
-      icon: new ColorDefaultIcon('#ef4444', {
-        label: 'P',
+      icon: new ColorDefaultIcon({ fillColor: '#ef4444', label: 'P',
         labelTextColor: '#ffffff',
       }),
     })
@@ -99,9 +98,9 @@ export function PolygonClickPage({ provider }: { provider: MapProvider }) {
         {markerVisible ? (
           <>
             <Marker state={markerState} />
-            <InfoBubbleAtPosition position={markerState.position}>
+            <InfoBubble position={markerState.position}>
               <Text style={styles.bubbleText}>{message}</Text>
-            </InfoBubbleAtPosition>
+            </InfoBubble>
           </>
         ) : null}
       </MapViewContainer>

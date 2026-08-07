@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { useEffect, useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import type {
   GeoPoint,
@@ -16,25 +16,18 @@ import type { ProviderViewProps } from './providers/types';
 export type { InitialCamera };
 export { DEFAULT_CAMERA };
 
-// Every provider is normally driven by a singleton map instance (see
-// SingletonMaps.tsx) that's mounted once at the app root and kept alive
-// across navigation, so switching pages never destroys/recreates the map.
-// The one exception is restrictBounds: it's baked in once at map creation
-// and can't vary per page on a shared instance, so pages that need a
-// page-specific restrictBounds (currently only PolygonHolePage) fall back to
-// a dedicated, per-mount instance via the lazy Provider views below.
-const LazyLeafletProviderView = lazy(() => import('./providers/LeafletProviderView'));
-const LazyOpenLayersProviderView = lazy(() => import('./providers/OpenLayersProviderView'));
-const LazyMapLibreProviderView = lazy(() => import('./providers/MapLibreProviderView'));
-const LazyMapBoxProviderView = lazy(() => import('./providers/MapboxProviderView'));
-const LazyArcGISProviderView = lazy(() => import('./providers/ArcGISProviderView'));
-const LazyMapKitProviderView = lazy(() => import('./providers/MapKitProviderView'));
-const LazyAzureMapsProviderView = lazy(() => import('./providers/AzureMapsProviderView'));
-const LazyCesiumProviderView = lazy(() => import('./providers/CesiumProviderView'));
-const LazyHereProviderView = lazy(() => import('./providers/HereProviderView'));
-const LazyTomTomProviderView = lazy(() => import('./providers/TomTomProviderView'));
-const LazyMapTilerProviderView = lazy(() => import('./providers/MapTilerProviderView'));
-const LazyLongdoProviderView = lazy(() => import('./providers/LongdoProviderView'));
+// Every provider is driven by a singleton map instance (see SingletonMaps.tsx)
+// that's mounted once at the app root and kept alive across navigation, so
+// switching pages never destroys/recreates the map.
+//
+// restrictBounds used to be the one exception — it was baked in at map creation
+// and couldn't vary per page on a shared instance, so pages needing it fell back
+// to a dedicated per-mount instance. The SDK now applies the restriction at
+// runtime through `setCameraRestriction`, so the shared instance handles it and
+// every page goes through the singleton path.
+//
+// The per-provider `*ProviderView` components that existed only to serve that
+// fallback are gone with it.
 
 interface MapViewContainerProps {
   children?: ReactNode;
@@ -47,20 +40,10 @@ interface MapViewContainerProps {
   onStateReady?: (state: MapViewStateInterface<MapDesignTypeInterface<unknown>>) => void;
   /**
    * Restricts panning/zooming so the viewport cannot leave this rectangle.
-   * Forces a dedicated (non-singleton) map instance for the active provider,
-   * since a shared singleton instance can't have a page-specific restriction
-   * baked in without leaking it into every other page for that provider.
-   * Not applied on Google Maps, which always uses the singleton instance.
+   * Applied to the shared singleton instance at runtime and cleared when the
+   * page unmounts, so it never leaks into other pages for that provider.
    */
   restrictBounds?: GeoRectBounds;
-}
-
-function MapLoadingPlaceholder() {
-  return (
-    <div className="sample-map-placeholder" role="status">
-      Loading map…
-    </div>
-  );
 }
 
 function SingletonProviderView({
@@ -72,9 +55,16 @@ function SingletonProviderView({
   onCameraMove,
   onCameraMoveEnd,
   onStateReady,
+  restrictBounds,
 }: ProviderViewProps & { id: SingletonMapId }) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useSingletonMapState(id, cameraPosition);
+  // The SDK normalizes `restrictBounds` / `minZoom` / `maxZoom` into a single
+  // CameraRestriction, so a page that only needs a rectangle can pass just that.
+  const cameraRestriction = useMemo(
+    () => (restrictBounds ? { bounds: restrictBounds } : null),
+    [restrictBounds],
+  );
 
   useEffect(() => {
     onStateReady?.(state);
@@ -87,6 +77,7 @@ function SingletonProviderView({
       onCameraMoveStart={onCameraMoveStart}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
+      cameraRestriction={cameraRestriction}
     >
       {children}
     </SingletonMapSlot>
@@ -121,7 +112,6 @@ export function MapViewContainer({
   const isTomTom = location.pathname.startsWith('/tomtom');
   const isMapTiler = location.pathname.startsWith('/maptiler');
   const isLongdo = location.pathname.startsWith('/longdo');
-  const useDedicatedInstance = Boolean(restrictBounds);
 
   const commonProps: ProviderViewProps = {
     children,
@@ -141,134 +131,50 @@ export function MapViewContainer({
     }
 
     case isLeaflet: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyLeafletProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="leaflet" {...commonProps} />;
     }
 
     case isOpenLayers: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyOpenLayersProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="openlayers" {...commonProps} />;
     }
 
     case isMapLibre3D || isMapLibre2D: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyMapLibreProviderView useGlobe={isMapLibre3D} {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id={isMapLibre3D ? 'maplibre-3d' : 'maplibre-2d'} {...commonProps} />;
     }
 
     case isMapbox: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyMapBoxProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="mapbox" {...commonProps} />;
     }
 
     case isArcGIS3D || isArcGIS2D: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyArcGISProviderView useSceneView={isArcGIS3D} {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id={isArcGIS3D ? 'arcgis-3d' : 'arcgis-2d'} {...commonProps} />;
     }
 
     case isMapKit: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyMapKitProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="mapkit" {...commonProps} />;
     }
 
     case isAzureMaps: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyAzureMapsProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="azuremaps" {...commonProps} />;
     }
 
     case isCesium: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyCesiumProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="cesium" {...commonProps} />;
     }
 
     case isHere: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyHereProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="here" {...commonProps} />;
     }
 
     case isTomTom: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyTomTomProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="tomtom" {...commonProps} />;
     }
 
     case isMapTiler: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyMapTilerProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="maptiler" {...commonProps} />;
     }
 
     case isLongdo: {
-      if (useDedicatedInstance) {
-        return (
-          <Suspense fallback={<MapLoadingPlaceholder />}>
-            <LazyLongdoProviderView {...commonProps} />
-          </Suspense>
-        );
-      }
       return <SingletonProviderView id="longdo" {...commonProps} />;
     }
 

@@ -57,12 +57,3 @@ polygon.onClick = (state) => inspect(state.id);
 groundImage.onClick = (state) => inspect(state.id);
 ```
 
-## Pointer type on Web
-
-`usePointerType()` (from `js-sdk-react`) returns a ref tracking whether the last input was touch or mouse/pen, updated on `pointerdown`. It's useful for choosing a hit-test radius or tap target size at click time without re-rendering on every pointer change:
-
-```tsx
-const pointerTypeRef = usePointerType();
-
-const radius = pointerTypeRef.current === 'touch' ? TOUCH_HIT_RADIUS : MOUSE_HIT_RADIUS;
-```

@@ -17,6 +17,7 @@ import {
   type RasterLayerState,
 } from '@mapconductor/js-sdk-core';
 import { LongdoMapViewHolder } from '../LongdoMapViewHolder';
+import { ZoomAltitudeConverter } from '../zoom/ZoomAltitudeConverter';
 import { LongdoMarkerOverlayRenderer } from './LongdoMarkerOverlayRenderer';
 import {
   type LongdoActualMarker,
@@ -155,7 +156,7 @@ export class LongdoMarkerController extends AbstractMarkerController<LongdoActua
 
     const tiledStates = this.markerManager
       .allEntities()
-      .filter((e) => e.marker === null)
+      .filter(e => e.tiling)
       .map((e) => e.state);
 
     if (tiledStates.length === 0) {
@@ -170,10 +171,16 @@ export class LongdoMarkerController extends AbstractMarkerController<LongdoActua
     const server = LocalTileServer.startServer();
 
     const { iconScaleCallback } = this.tilingOptions;
-    const tileRenderer = new MarkerTileRenderer<MarkerState>(tiledStates, {
-      tileSize: 256,
-      iconScaleCallback: iconScaleCallback ?? undefined,
-    });
+    // Longdo は GL マップの zoom が MapConductor zoom から 1 ずれる（Longdo zoom =
+    // MapConductor zoom - 1）。タイルの z は GL(MapLibre) zoom なので、そのまま
+    // iconScaleCallback に渡すと他プロバイダより 1 レベル低い zoom で評価され、ズームに応じた
+    // アイコンスケールが噛み合わない。タイル z を MapConductor(Google 相当)zoom に戻してから
+    // callback を呼び、他プロバイダと同じ実効 zoom でスケーリングする。
+    const scaledCallback = iconScaleCallback
+      ? (item: MarkerState, tileZoom: number) =>
+          iconScaleCallback(item, ZoomAltitudeConverter.maplibreZoomToGoogleZoom(tileZoom))
+      : undefined;
+    const tileRenderer = new MarkerTileRenderer<MarkerState>(tiledStates, 256, scaledCallback);
     this.tileRenderer = tileRenderer;
     this.tileVersion++;
     server.register(this.tileRouteId, tileRenderer);

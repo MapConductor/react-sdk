@@ -18,6 +18,7 @@ export default function MapTilerSingletonView({ state, content }: {
   return (
     <MapTilerMapView2D
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

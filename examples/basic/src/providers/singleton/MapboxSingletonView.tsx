@@ -20,6 +20,7 @@ export default function MapboxSingletonView({ state, content }: {
   return (
     <MapBoxMapView2D
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

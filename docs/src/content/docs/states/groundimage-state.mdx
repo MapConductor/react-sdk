@@ -15,7 +15,7 @@ createGroundImageState({
   imageUrl: string;
   id?: string | null;
   opacity?: number;    // default 1.0
-  tileSize?: number;   // default 256
+  tileSize?: number;   // default 512
   extra?: Serializable | null;
   onClick?: (event: { state: GroundImageState; clicked: GeoPoint | null }) => void;
 }): GroundImageState
@@ -31,7 +31,7 @@ Note the convenience `<GroundImage bounds={...} imageUrl={...} />` prop form def
 | `bounds` | `GeoRectBounds` | mutable |
 | `imageUrl` | `string` | |
 | `opacity` | `number` | `0`-`1` |
-| `tileSize` | `number` | tiling granularity used when rendering the image |
+| `tileSize` | `number` | tiling granularity used when rendering the image. Defaults to `512`, matching `GroundImageTileProvider.DEFAULT_TILE_SIZE` on Android/iOS. |
 | `extra` | `Serializable \| null` | |
 | `onClick` | handler or `null` | `clicked` may be `null` on providers that can't resolve an exact click point for this overlay type |
 

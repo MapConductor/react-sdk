@@ -12,6 +12,7 @@ export default function MapLibreSingletonView({ state, content, useGlobe }: {
   return (
     <MapView
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

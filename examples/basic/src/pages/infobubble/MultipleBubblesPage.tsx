@@ -31,7 +31,7 @@ export function MultipleBubblesPage() {
         createMarkerState({
           id: `marker_${index}`,
           position: data.position,
-          icon: new ColorDefaultIcon(data.color, { label: `${index + 1}`, labelTextColor: '#ffffff' }),
+          icon: new ColorDefaultIcon({ fillColor: data.color, label: `${index + 1}`, labelTextColor: '#ffffff' }),
           extra: data.name,
           onClick: state => {
             setSelectedMarkerIds(prev => {

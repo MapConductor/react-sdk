@@ -3,9 +3,8 @@ import Slider from '@react-native-community/slider';
 import { StyleSheet, Text, View } from 'react-native';
 
 import {
-  calculatePositionAtDistance,
   ColorDefaultIcon,
-  computeDistanceBetween,
+  Spherical,
   createCircleState,
   createGeoPoint,
   createMapCameraPosition,
@@ -38,10 +37,10 @@ const INIT_CAMERA = createMapCameraPosition({
     zoom: 12,
   });
 const INITIAL_RADIUS_METERS = 1000;
-const INITIAL_EDGE_POSITION = calculatePositionAtDistance({
-  center: CIRCLE_CENTER,
-  distanceMeters: INITIAL_RADIUS_METERS,
-  bearingDegrees: 90,
+const INITIAL_EDGE_POSITION = Spherical.computeOffset({
+  origin: CIRCLE_CENTER,
+  distance: INITIAL_RADIUS_METERS,
+  heading: 90,
 });
 const SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS = 300;
 const CIRCLE_COLORS = ['#0000ff', '#ff0000', '#008000', '#00ffff', '#d3d3d3', '#ff00ff'];
@@ -65,7 +64,7 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
 
   const handleMarkerMove = useCallback((dragged: MarkerState) => {
     if (circleStateRef.current) {
-      circleStateRef.current.radiusMeters = computeDistanceBetween(
+      circleStateRef.current.radiusMeters = Spherical.computeDistanceBetween(
         CIRCLE_CENTER,
         dragged.position
       );
@@ -124,8 +123,7 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
       createMarkerState({
         id: 'center_marker',
         position: CIRCLE_CENTER,
-        icon: new ColorDefaultIcon('#FF0000', {
-          strokeColor: '#FFFFFF',
+        icon: new ColorDefaultIcon({ fillColor: '#FF0000', strokeColor: '#FFFFFF',
           label: 'C',
         }),
         clickable: false,
@@ -137,8 +135,7 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
       createMarkerState({
         id: 'edge_marker',
         position: INITIAL_EDGE_POSITION,
-        icon: new ColorDefaultIcon('#008000', {
-          strokeColor: '#FFFFFF',
+        icon: new ColorDefaultIcon({ fillColor: '#008000', strokeColor: '#FFFFFF',
           label: 'E',
         }),
         draggable: true,

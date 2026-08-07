@@ -30,16 +30,36 @@ createPolygonState({
 | --- | --- | --- |
 | `id` | `string` | readonly |
 | `points` | `GeoPoint[]` | outer ring |
-| `holes` | `GeoPoint[][]` | interior rings; auto-unioned when more than one overlaps (see below) |
+| `holes` | `GeoPoint[][]` | interior rings, stored as given. The `<Polygon>` component unions overlapping rings before rendering (see below). |
 | `strokeColor`, `strokeWidth`, `fillColor` | `string` / `number` | |
 | `geodesic` | `boolean` | |
 | `zIndex` | `number` | |
 | `extra` | `Serializable \| null` | |
 | `onClick` | handler or `null` | |
 
-## Holes are unioned automatically
+## Holes are unioned at the component, not on the state
 
-When you assign `holes` (either at construction or via the `holes` setter) with more than one ring, MapConductor unions overlapping hole rings together before storing them — you don't need to pre-merge overlapping cutouts yourself. This runs on every `holes` assignment, so avoid reassigning `holes` on every render with a large hole count; compute the ring list once (e.g. with `useMemo`) and assign it when it actually changes.
+`createPolygonState()`, `copy()` and the `holes` setter store the rings exactly as you pass
+them. Overlapping rings are merged by the `<Polygon>` component, which calls
+`unionHolesInPlace(state)` once when there is more than one hole — the same place
+Android does it (`PolygonComponent.kt`).
+
+So if you render through `<Polygon>`, overlapping cutouts still merge automatically and
+you don't need to pre-merge them. If you drive a controller directly, without the
+component, call it yourself:
+
+```ts
+import { unionHolesInPlace } from '@mapconductor/js-sdk-core';
+
+if (state.holes.length > 1) unionHolesInPlace(state);
+```
+
+:::note[Changed behavior]
+The state used to union on construction, on `copy()` **and** in the `holes` setter, on top
+of the component's own call — so a single `unionHolesInPlace()` could run the merge up to
+four times, re-processing rings whose winding it had already flipped. The union now runs
+exactly once, at the component.
+:::
 
 ## Methods
 

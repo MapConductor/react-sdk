@@ -127,7 +127,7 @@ export class LongdoProvider extends MapProvider {
     // holder's mapView, mirroring the other MapLibre-family providers — the outer
     // Longdo placeholder can report a 0×0 rect once Longdo takes it over.
     const mapView = (map.getContainer?.() as HTMLElement | undefined) ?? container;
-    const holder = new LongdoMapViewHolder(mapView, map);
+    const holder = new LongdoMapViewHolder(mapView, map, longdoMap);
     // Rely solely on styleReady rather than also calling isStyleLoaded() here.
     // isStyleLoaded() can return false transiently while Longdo processes an
     // addLayer/addSource call, which would incorrectly block overlay resync.

@@ -10,6 +10,7 @@ export default function CesiumSingletonView({ state, content }: {
   return (
     <CesiumMapView
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

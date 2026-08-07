@@ -40,7 +40,7 @@ const TILT_MARKERS: MarkerState[] = [
   createMarkerState({
     id: 'tilt-center',
     position: CENTER,
-    icon: new ColorDefaultIcon(CENTER_COLOR),
+    icon: new ColorDefaultIcon({ fillColor: CENTER_COLOR }),
     onClick: bounceOnClick,
   }),
   ...Array.from({ length: RING_COUNT }, (_unused, ringIndex) => ringIndex + 1).flatMap(ring =>
@@ -49,7 +49,7 @@ const TILT_MARKERS: MarkerState[] = [
       return createMarkerState({
         id: `tilt-ring${ring}-${heading}`,
         position: computeOffset({ origin: CENTER, distance: ring * RING_SPACING_METERS, heading }),
-        icon: new ColorDefaultIcon(RING_COLORS[ring - 1]),
+        icon: new ColorDefaultIcon({ fillColor: RING_COLORS[ring - 1] }),
         onClick: bounceOnClick,
       });
     }),

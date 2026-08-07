@@ -62,7 +62,7 @@ export function MapPage() {
         return createMarkerState({
           position: createGeoPoint({ latitude: lat, longitude: lng }),
           extra: info,
-          icon: img ? new ImageDefaultIcon(img) : null,
+          icon: img ? new ImageDefaultIcon({ backgroundImage: img }) : null,
           clickable: true,
           draggable: true,
           onClick: (state: MarkerState) => {

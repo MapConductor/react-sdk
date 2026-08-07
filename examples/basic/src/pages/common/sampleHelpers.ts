@@ -12,6 +12,6 @@ export function cityMarker(id: string, label: string, latitude: number, longitud
     id,
     position: createGeoPoint({ latitude, longitude }),
     extra: label,
-    icon: new ColorDefaultIcon('#2563eb', { label: label.slice(0, 1), labelTextColor: '#ffffff' }),
+    icon: new ColorDefaultIcon({ fillColor: '#2563eb', label: label.slice(0, 1), labelTextColor: '#ffffff' }),
   });
 }

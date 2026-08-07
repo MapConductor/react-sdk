@@ -17,6 +17,7 @@ export default function LongdoSingletonView({ state, content }: {
   return (
     <LongdoMapView2D
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

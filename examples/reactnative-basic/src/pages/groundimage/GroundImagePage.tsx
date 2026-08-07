@@ -61,8 +61,7 @@ function markerLabels(southWest: MarkerState, northEast: MarkerState): [string, 
 }
 
 function markerIcon(color: string, label: string): ColorDefaultIcon {
-  return new ColorDefaultIcon(color, {
-    strokeColor: '#FFFFFF',
+  return new ColorDefaultIcon({ fillColor: color, strokeColor: '#FFFFFF',
     label,
     labelTextColor: '#FFFFFF',
   });

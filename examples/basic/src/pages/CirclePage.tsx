@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ColorDefaultIcon,
+  Planar,
   Spherical,
-  calculatePositionAtDistance,
-  computeDistanceBetween,
   createCircleState,
   createGeoPoint,
   type GeoPoint,
@@ -39,7 +38,7 @@ function radiusLabelPosition(
 ): Offset | null | Promise<Offset | null> {
   const holder = mapViewState.getMapViewHolder();
   if (!holder) return null;
-  const midpoint = Spherical.linearInterpolate({ from: center, to: edge, fraction: 0.5 });
+  const midpoint = Planar.interpolate({ from: center, to: edge, fraction: 0.5 });
   return holder.toScreenOffset(midpoint);
 }
 
@@ -47,10 +46,10 @@ export function CirclePage() {
   const { t } = useSampleI18n();
   const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   const [edgePosition, setEdgePosition] = useState(() =>
-    calculatePositionAtDistance({
-      center: CIRCLE_CENTER,
-      distanceMeters: INITIAL_RADIUS_METERS,
-      bearingDegrees: 90,
+    Spherical.computeOffset({
+      origin: CIRCLE_CENTER,
+      distance: INITIAL_RADIUS_METERS,
+      heading: 90,
     }),
   );
   const [colorIndex, setColorIndex] = useState(0);
@@ -61,7 +60,7 @@ export function CirclePage() {
   const suppressCircleClickUntilRef = useRef(0);
   const { messages, showToast, dismissToast } = useToast();
   const radius = useMemo(
-    () => computeDistanceBetween(CIRCLE_CENTER, edgePosition),
+    () => Spherical.computeDistanceBetween(CIRCLE_CENTER, edgePosition),
     [edgePosition],
   );
 
@@ -116,11 +115,11 @@ export function CirclePage() {
   );
 
   const centerIcon = useMemo(
-    () => new ColorDefaultIcon('#ff0000', { strokeColor: '#ffffff', label: 'C' }),
+    () => new ColorDefaultIcon({ fillColor: '#ff0000', strokeColor: '#ffffff', label: 'C' }),
     [],
   );
   const edgeIcon = useMemo(
-    () => new ColorDefaultIcon('#008000', { strokeColor: '#ffffff', label: 'E' }),
+    () => new ColorDefaultIcon({ fillColor: '#008000', strokeColor: '#ffffff', label: 'E' }),
     [],
   );
 

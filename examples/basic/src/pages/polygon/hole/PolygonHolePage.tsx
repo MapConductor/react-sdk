@@ -25,8 +25,8 @@ const OUTER_POINTS = [
 ];
 // Keep the camera within the masked area — matches OUTER_POINTS exactly, so
 // panning stops right at the edge of the region the polygon actually covers.
-// Not applied on Google Maps (shared singleton map instance; see
-// ProviderViewProps.restrictBounds).
+// Applied on every provider: MapViewContainer turns this into a
+// CameraRestriction that the shared map instance accepts at runtime.
 const RESTRICT_BOUNDS = createGeoRectBounds({
   southWest: createGeoPoint({ latitude: 42.0, longitude: 140.0 }),
   northEast: createGeoPoint({ latitude: 44.2, longitude: 142.8 }),
@@ -86,8 +86,7 @@ export function PolygonHolePage() {
             position: point,
             draggable: true,
             clickable: false,
-            icon: new ColorDefaultIcon(HOLE_MARKER_COLORS[holeIndex] ?? '#64748b', {
-              label,
+            icon: new ColorDefaultIcon({ fillColor: HOLE_MARKER_COLORS[holeIndex] ?? '#64748b', label,
               labelTextColor: '#ffffff',
               strokeColor: '#ffffff',
             }),

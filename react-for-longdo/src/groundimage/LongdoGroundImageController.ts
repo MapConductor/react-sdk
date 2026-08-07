@@ -1,4 +1,9 @@
-import { createGroundImageEntity, type GeoPoint, type GroundImageState } from '@mapconductor/js-sdk-core';
+import {
+  createGroundImageEntity,
+  type GeoPoint,
+  type GroundImageState,
+  wrapClickedPoint,
+} from '@mapconductor/js-sdk-core';
 import { LongdoGroundImageOverlayRenderer } from './LongdoGroundImageOverlayRenderer';
 
 export class LongdoGroundImageController {
@@ -51,7 +56,8 @@ export class LongdoGroundImageController {
     for (const state of states) {
       if (!state.bounds.contains(point)) continue;
       if (!state.onClick) return false;
-      state.onClick({ state, clicked: point });
+      // clicked を正規化してから配送する。理由は core の GroundImageController.dispatchClick を参照。
+      state.onClick({ state, clicked: wrapClickedPoint(point) });
       return true;
     }
     return false;

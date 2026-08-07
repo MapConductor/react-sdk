@@ -9,6 +9,7 @@ export default function MapKitSingletonView({ state, content }: {
   return (
     <MapKitMapView
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

@@ -11,7 +11,7 @@ export function SimpleInfoBubblePage() {
   const marker = useMemo(() => createMarkerState({
     id: 'simple-text-bubble',
     position: SAN_FRANCISCO,
-    icon: new ColorDefaultIcon('#2563eb', { label: 'SF', labelTextColor: '#ffffff' }),
+    icon: new ColorDefaultIcon({ fillColor: '#2563eb', label: 'SF', labelTextColor: '#ffffff' }),
     extra: 'San Francisco - The Golden Gate City',
     onClick: state => setSelectedMarkerId(state.id),
   }), []);

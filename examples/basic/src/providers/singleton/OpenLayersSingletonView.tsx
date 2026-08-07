@@ -10,6 +10,7 @@ export default function OpenLayersSingletonView({ state, content }: {
   return (
     <OpenLayersMapView
       state={state}
+      cameraRestriction={content?.cameraRestriction}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

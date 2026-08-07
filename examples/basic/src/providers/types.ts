@@ -20,12 +20,9 @@ export interface ProviderViewProps {
   onStateReady?: (state: MapViewStateInterface<MapDesignTypeInterface<unknown>>) => void;
   /**
    * Restricts panning/zooming so the viewport cannot leave this rectangle.
-   * Providers normally share one singleton map instance app-wide (see
-   * SingletonMaps.tsx), so a page-specific restriction would leak into every
-   * other page for that provider. MapViewContainer only honors this by
-   * falling back to a dedicated (non-singleton) instance for the active
-   * provider; it's still ignored on Google Maps, which always uses the
-   * singleton instance.
+   * MapViewContainer converts this into a `CameraRestriction` and applies it to
+   * the shared singleton instance at runtime, clearing it when the page
+   * unmounts — so it never leaks into other pages for that provider.
    */
   restrictBounds?: GeoRectBounds;
 }

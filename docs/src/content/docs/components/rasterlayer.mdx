@@ -22,6 +22,20 @@ description: A tiled raster overlay from a URL template, TileJSON, or an ArcGIS 
 />
 ```
 
+## Request headers
+
+`extraHeaders` is sent with each tile request on the providers whose map library exposes a
+hook for it: **MapLibre, MapTiler, Mapbox, Azure Maps, Leaflet, OpenLayers and Cesium**.
+On Google Maps, ArcGIS, HERE, MapKit JS, TomTom and Longdo the tile URL is all the library
+accepts, so the value is ignored and a warning is logged to the console.
+
+`userAgent` never takes effect in a browser — `User-Agent` is a
+[forbidden header name](https://developer.mozilla.org/docs/Glossary/Forbidden_header_name),
+so no SDK can set it. The prop is kept because **React Native passes both values through to
+the native Android/iOS SDKs, where `userAgent` does work**: the same component code runs in
+both places, and you never have to branch on the platform. Specifying it on the web logs one
+warning per layer rather than failing silently.
+
 ## Retained state
 
 ```tsx

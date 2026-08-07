@@ -32,10 +32,12 @@ The bubble tracks the marker's live position — no need to reposition it yourse
 
 ## Anchored to a position, no marker required
 
+Pass a `position` instead of a `marker` — the same `InfoBubble` component, with the same style props. This mirrors Compose/iOS's overloaded `InfoBubble(position:)`.
+
 ```tsx
-<InfoBubbleAtPosition position={GeoPoint} /* same style props as InfoBubble */>
+<InfoBubble position={GeoPoint} /* same style props as the marker form */>
   {children}
-</InfoBubbleAtPosition>
+</InfoBubble>
 ```
 
 Useful for a click-driven popup where the clicked point doesn't correspond to an existing marker — e.g. showing details for a feature hit-tested from a [GeoJSON layer](/guides/extensions/#geojson-layer).
@@ -50,12 +52,12 @@ Useful for a click-driven popup where the clicked point doesn't correspond to an
 
 `InfoBubbleCustom` skips the built-in bubble chrome entirely and positions `children` verbatim at `tailOffset` relative to the marker — use it when your content is already a complete design-system popover/card and the default rounded-box-with-tail styling would be redundant or wrong.
 
-## Choosing between the three
+## Choosing between them
 
 | | Anchor | Chrome |
 | --- | --- | --- |
-| `InfoBubble` | marker | built-in bubble (color, border, tail) |
-| `InfoBubbleAtPosition` | arbitrary `GeoPoint` | built-in bubble |
+| `InfoBubble marker={…}` | marker | built-in bubble (color, border, tail) |
+| `InfoBubble position={…}` | arbitrary `GeoPoint` | built-in bubble |
 | `InfoBubbleCustom` | marker | none — you provide it |
 
 ## Lifecycle

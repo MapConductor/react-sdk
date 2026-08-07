@@ -10,7 +10,7 @@ import {
   createPolylineState,
   type PolylineEvent,
 } from '@mapconductor/js-sdk-core';
-import { InfoBubbleAtPosition, Marker, Polyline } from '@mapconductor/js-sdk-react/native';
+import { InfoBubble, Marker, Polyline } from '@mapconductor/js-sdk-react/native';
 import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/reactnative-for-googlemaps';
 import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/reactnative-for-maplibre';
 
@@ -33,12 +33,12 @@ export function PolylineClickPage({ provider }: { provider: MapProvider }) {
     createMarkerState({
       id: 'polyline-clicked',
       position: POINTS[0],
-      icon: new ColorDefaultIcon('#ff0000'),
+      icon: new ColorDefaultIcon({ fillColor: '#ff0000' }),
     })
   );
   const handleClick = useCallback((event: PolylineEvent) => {
     markerState.position = event.clicked;
-    markerState.icon = new ColorDefaultIcon(event.state.strokeColor);
+    markerState.icon = new ColorDefaultIcon({ fillColor: event.state.strokeColor });
     markerState.animate(MarkerAnimation.Drop);
     setClicked(event.clicked);
   }, [markerState]);
@@ -65,7 +65,7 @@ export function PolylineClickPage({ provider }: { provider: MapProvider }) {
       <MapViewContainer state={mapState} style={styles.map}>
         <Polyline state={curvedPolyline} />
         <Polyline state={straightPolyline} />
-        {clicked ? <><Marker state={markerState} /><InfoBubbleAtPosition position={clicked}><Text style={styles.bubbleText}>Clicked polyline</Text></InfoBubbleAtPosition></> : null}
+        {clicked ? <><Marker state={markerState} /><InfoBubble position={clicked}><Text style={styles.bubbleText}>Clicked polyline</Text></InfoBubble></> : null}
       </MapViewContainer>
       <View style={styles.controlPanel}>
         <Text style={styles.title}>Polyline Click</Text>

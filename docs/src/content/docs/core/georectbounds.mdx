@@ -16,7 +16,7 @@ interface GeoRectBounds {
   readonly center: GeoPoint | null;
 
   extend(point: GeoPointInterface): void; // mutates in place, grows the bounds
-  isEmpty(): boolean;
+  readonly isEmpty: boolean;              // property, not a method
   contains(point: GeoPointInterface): boolean;
   intersects(other: GeoRectBounds): boolean;
   union(other: GeoRectBounds | null): GeoRectBounds;
@@ -35,7 +35,7 @@ createGeoRectBounds()                              // empty
 createGeoRectBounds({ southWest, northEast })       // from two corners
 ```
 
-An empty bounds (`southWest`/`northEast` both `null`) grows as you `extend()` it with points — this is the usual pattern for computing a bounding box from a set of markers:
+An empty bounds (`isEmpty` is `true`; `southWest`/`northEast` both `null`) grows as you `extend()` it with points — this is the usual pattern for computing a bounding box from a set of markers:
 
 ```ts
 const bounds = createGeoRectBounds();
@@ -47,6 +47,18 @@ for (const record of records) {
 ```
 
 `extend()` mutates the bounds instance in place and updates `center` as a side effect — it isn't a builder that returns a new value.
+
+:::caution[Breaking change]
+`isEmpty` is a **property**, not a method. It used to be `isEmpty()`; the call form no
+longer works. This aligns React with `GeoRectBounds.isEmpty` on the Android and iOS SDKs.
+
+```ts
+// before
+if (bounds.isEmpty()) return;
+// after
+if (bounds.isEmpty) return;
+```
+:::
 
 ## Antimeridian handling
 
