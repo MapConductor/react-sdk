@@ -66,6 +66,9 @@ jobs:
           VITE_HERE_API_KEY: ${{ secrets.VITE_HERE_API_KEY }}
           VITE_MAPKIT_TOKEN: ${{ secrets.VITE_MAPKIT_TOKEN }}
           VITE_AZURE_MAPS_SUBSCRIOTION_KEY: ${{ secrets.VITE_AZURE_MAPS_SUBSCRIOTION_KEY }}
+          VITE_TOMTOM_API_KEY: ${{ secrets.VITE_TOMTOM_API_KEY }}
+          VITE_MAPTILER: ${{ secrets.VITE_MAPTILER }}
+          VITE_LONGDO: ${{ secrets.VITE_LONGDO }}
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0
@@ -74,3 +77,4 @@ jobs:
           projectId: mapconductor
           channelId: live
           entryPoint: examples/basic
+
