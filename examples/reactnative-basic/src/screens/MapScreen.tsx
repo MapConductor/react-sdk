@@ -7,6 +7,11 @@ import { MapDesignPage } from 'src/pages/map/design/MapDesignPage';
 import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
 import { TiltPage } from 'src/pages/map/tilt/TiltPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
+import { FitBoundsPage } from 'src/pages/map/fitbounds/FitBoundsPage';
+import { SimpleInfoBubblePage } from 'src/pages/infobubble/SimpleInfoBubblePage';
+import { MultipleBubblesPage } from 'src/pages/infobubble/MultipleBubblesPage';
+import { RichContentBubblePage } from 'src/pages/infobubble/RichContentBubblePage';
+import { StyledInfoBubblePage } from 'src/pages/infobubble/StyledInfoBubblePage';
 import { HeatmapLayerPage } from 'src/pages/heatmaplayer/HeatmapLayerPage';
 import { BasicGeoJSONPage } from 'src/pages/geojson/basic/BasicGeoJSONPage';
 import { GeoJSONLayerPage } from 'src/pages/geojson/layer/GeoJSONLayerPage';
@@ -50,6 +55,16 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <TiltPage provider={provider} />;
     case 'visible-region':
       return <VisibleRegionPage provider={provider} />;
+    case 'fit-bounds':
+      return <FitBoundsPage provider={provider} />;
+    case 'info-bubble-simple':
+      return <SimpleInfoBubblePage provider={provider} />;
+    case 'info-bubble-multiple':
+      return <MultipleBubblesPage provider={provider} />;
+    case 'info-bubble-rich':
+      return <RichContentBubblePage provider={provider} />;
+    case 'info-bubble-styled':
+      return <StyledInfoBubblePage provider={provider} />;
     case 'camera-sync':
       return <CameraSyncPage />;
     case 'marker-animation':

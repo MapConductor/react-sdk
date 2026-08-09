@@ -11,16 +11,9 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { Markers, Polygon } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
-import type { MapProvider } from '../../screens/MapScreen';
+import type { MapProvider } from '../../providers/types';
 import { MapViewContainer } from '../MapViewContainer';
 
 const POLYGON_VERTICES = [
@@ -82,18 +75,6 @@ export function PolygonPage({ provider }: { provider: MapProvider }) {
     )
   );
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'polygon-basic-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'polygon-basic-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-  const mapState = provider === 'google-maps' ? googleState : mapLibreState;
-
   const handleFillOpacityChange = (value: number) => {
     polygonState.fillColor = `rgba(0, 100, 230, ${value})`;
     setFillOpacity(value);
@@ -106,7 +87,13 @@ export function PolygonPage({ provider }: { provider: MapProvider }) {
 
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={mapState} style={styles.map}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="polygon-basic"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+      >
         <Polygon state={polygonState} />
         <Markers states={vertexMarkers} />
       </MapViewContainer>

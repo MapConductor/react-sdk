@@ -19,16 +19,9 @@ import {
   Marker,
   Polyline,
 } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
-import type { MapProvider } from '../../screens/MapScreen';
+import type { MapProvider } from '../../providers/types';
 import { MapViewContainer } from '../MapViewContainer';
 
 const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
@@ -145,18 +138,6 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
       })
   );
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'circle-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'circle-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
-
   const handleFillOpacityChange = (value: number) => {
     fillOpacityRef.current = value;
     circleState.fillColor = rgba(CIRCLE_COLORS[colorIndex], value);
@@ -170,7 +151,13 @@ export function CirclePage({ provider }: { provider: MapProvider }) {
 
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={state} style={styles.map}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="circle"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+      >
         <Circle state={circleState} />
         <Polyline state={radiusLineState} />
         <Marker state={centerMarkerState} />

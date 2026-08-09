@@ -18,6 +18,7 @@ export function GoogleMapsProviderView({
   onCameraMoveEnd,
   onMapLoaded,
   markerTilingOptions,
+  cameraRestriction,
   onStateReady,
 }: GoogleMapsProviderViewProps) {
   const state = useGoogleMapViewState({
@@ -35,6 +36,7 @@ export function GoogleMapsProviderView({
       state={state}
       style={style}
       markerTilingOptions={markerTilingOptions}
+      cameraRestriction={cameraRestriction}
       onMapLoaded={onMapLoaded}
       onMapClick={onMapClick}
       onCameraMoveStart={onCameraMoveStart}

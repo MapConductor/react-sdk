@@ -15,17 +15,9 @@ import {
   type MapDesignTypeInterface,
   type MapViewStateInterface,
 } from '@mapconductor/js-sdk-core';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-  type GoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-  type MapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
+import { useMapStateRef } from '../../../providers/useMapStateRef';
 
 type PaneId = 'left' | 'right';
 type PaneProvider = 'maplibre' | 'google-maps';
@@ -52,7 +44,9 @@ interface PairedFlyToState {
 
 interface PaneState {
   provider: PaneProvider;
-  mapState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+  /** MapViewContainer が生成した現在のビューの state。onStateReady で更新される。 */
+  stateRef: React.MutableRefObject<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>;
+  onStateReady: (state: MapViewStateInterface<MapDesignTypeInterface<unknown>>) => void;
 }
 
 const INITIAL_CAMERA = MapCameraPosition.from({
@@ -162,21 +156,9 @@ function defaultLocations(): CameraLocationInfo[] {
   ];
 }
 
-function usePaneState(
-  provider: PaneProvider,
-  mapLibreState: MapLibreViewState,
-  googleState: GoogleMapViewState,
-): PaneState {
-  if (provider === 'google-maps') {
-    return {
-      provider,
-      mapState: googleState as MapViewStateInterface<MapDesignTypeInterface<unknown>>,
-    };
-  }
-  return {
-    provider,
-    mapState: mapLibreState as MapViewStateInterface<MapDesignTypeInterface<unknown>>,
-  };
+function usePaneState(provider: PaneProvider): PaneState {
+  const { stateRef, onStateReady } = useMapStateRef();
+  return { provider, stateRef, onStateReady };
 }
 
 function providerLabel(provider: PaneProvider): string {
@@ -203,18 +185,24 @@ function CameraInfoCard({
 }
 
 function CameraSyncMapView({
+  paneId,
   paneState,
   onCameraMove,
   onCameraMoveEnd,
 }: {
+  paneId: PaneId;
   paneState: PaneState;
   onCameraMove: (camera: MapCameraPosition) => void;
   onCameraMoveEnd: (camera: MapCameraPosition) => void;
 }) {
   return (
     <MapViewContainer
-      state={paneState.mapState}
+      provider={paneState.provider}
+      cameraPosition={INITIAL_CAMERA}
+      mapId={`camera-sync-${paneId}`}
       style={styles.map}
+      designTypes={{ maplibre: MapLibreDesign.OpenMapTiles }}
+      onStateReady={paneState.onStateReady}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
     />
@@ -222,6 +210,7 @@ function CameraSyncMapView({
 }
 
 function CameraSyncMapPane({
+  paneId,
   label,
   paneState,
   selectedProvider,
@@ -230,6 +219,7 @@ function CameraSyncMapPane({
   onCameraMove,
   onCameraMoveEnd,
 }: {
+  paneId: PaneId;
   label: string;
   paneState: PaneState;
   selectedProvider: PaneProvider;
@@ -241,6 +231,7 @@ function CameraSyncMapPane({
   return (
     <View style={styles.pane}>
       <CameraSyncMapView
+        paneId={paneId}
         paneState={paneState}
         onCameraMove={onCameraMove}
         onCameraMoveEnd={onCameraMoveEnd}
@@ -269,34 +260,13 @@ export function CameraSyncPage() {
   const isStacked = height > width;
   const locations = useMemo(defaultLocations, []);
 
-  const leftMapLibreState = useMapLibreViewState({
-    id: 'camera-sync-left-maplibre',
-    mapDesignType: MapLibreDesign.OpenMapTiles,
-    cameraPosition: INITIAL_CAMERA,
-  });
-  const rightMapLibreState = useMapLibreViewState({
-    id: 'camera-sync-right-maplibre',
-    mapDesignType: MapLibreDesign.OpenMapTiles,
-    cameraPosition: INITIAL_CAMERA,
-  });
-  const leftGoogleState = useGoogleMapViewState({
-    id: 'camera-sync-left-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INITIAL_CAMERA,
-  });
-  const rightGoogleState = useGoogleMapViewState({
-    id: 'camera-sync-right-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INITIAL_CAMERA,
-  });
-
   const [leftProvider, setLeftProvider] = useState<PaneProvider>('maplibre');
   const [rightProvider, setRightProvider] = useState<PaneProvider>('google-maps');
   const [leftCameraPosition, setLeftCameraPosition] = useState(INITIAL_CAMERA);
   const [rightCameraPosition, setRightCameraPosition] = useState(INITIAL_CAMERA);
 
-  const leftPaneState = usePaneState(leftProvider, leftMapLibreState, leftGoogleState);
-  const rightPaneState = usePaneState(rightProvider, rightMapLibreState, rightGoogleState);
+  const leftPaneState = usePaneState(leftProvider);
+  const rightPaneState = usePaneState(rightProvider);
 
   const leftProgrammaticRef = useRef<ProgrammaticMoveState>({
     key: null,
@@ -383,7 +353,7 @@ export function CameraSyncPage() {
     setCameraForPane(source, position);
     setCameraForPane(target, position);
     markProgrammaticMove(targetRef, position, currentMs);
-    selectedPaneState(target).mapState.moveCameraTo(position, 0);
+    selectedPaneState(target).stateRef.current?.moveCameraTo(position, 0);
   }
 
   function flyToLocation(location: CameraLocationInfo) {
@@ -402,8 +372,8 @@ export function CameraSyncPage() {
       rightEnded: false,
     };
 
-    leftPaneState.mapState.moveCameraTo(position, FLY_TO_DURATION_MS);
-    rightPaneState.mapState.moveCameraTo(position, FLY_TO_DURATION_MS);
+    leftPaneState.stateRef.current?.moveCameraTo(position, FLY_TO_DURATION_MS);
+    rightPaneState.stateRef.current?.moveCameraTo(position, FLY_TO_DURATION_MS);
     setLeftCameraPosition(position);
     setRightCameraPosition(position);
     markProgrammaticMove(
@@ -446,6 +416,7 @@ export function CameraSyncPage() {
 
       <View style={[styles.grid, isStacked ? styles.gridStacked : styles.gridSideBySide]}>
         <CameraSyncMapPane
+          paneId="left"
           label="Left"
           paneState={leftPaneState}
           selectedProvider={leftProvider}
@@ -455,6 +426,7 @@ export function CameraSyncPage() {
           onCameraMoveEnd={(position) => syncFromPane('left', position, false)}
         />
         <CameraSyncMapPane
+          paneId="right"
           label="Right"
           paneState={rightPaneState}
           selectedProvider={rightProvider}

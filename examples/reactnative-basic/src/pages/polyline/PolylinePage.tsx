@@ -9,10 +9,9 @@ import {
   createPolylineState,
 } from '@mapconductor/js-sdk-core';
 import { Markers, Polyline } from '@mapconductor/js-sdk-react/native';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/reactnative-for-googlemaps';
-import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
-import type { MapProvider } from '../../screens/MapScreen';
+import type { MapProvider } from '../../providers/types';
 import { MapViewContainer } from '../MapViewContainer';
 
 const INIT_CAMERA = MapCameraPosition.from({
@@ -60,21 +59,15 @@ export function PolylinePage({ provider }: { provider: MapProvider }) {
       })
     )
   );
-  const mapLibreState = useMapLibreViewState({
-    id: 'polyline-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'polyline-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-  const mapState = provider === 'google-maps' ? googleState : mapLibreState;
-
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={mapState} style={styles.map}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="polyline"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+      >
         <Polyline state={polylineState} />
         <Markers states={waypointMarkers} />
       </MapViewContainer>

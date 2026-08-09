@@ -1,7 +1,6 @@
 import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
-import { GoogleMapDesign, useGoogleMapViewState } from '@mapconductor/reactnative-for-googlemaps';
-import { MapLibreDesign, useMapLibreViewState } from '@mapconductor/reactnative-for-maplibre';
-import type { MapProvider } from '../../screens/MapScreen';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
+import type { ProviderDesignOverrides } from '../../providers/types';
 
 export const BASIC_GEOJSON = `
 {
@@ -59,24 +58,7 @@ export const LAYER_INIT_CAMERA = MapCameraPosition.from({
   tilt: 0,
 });
 
-export function useGeoJSONMapStates(idPrefix: string, initCamera: MapCameraPosition) {
-  const mapLibreState = useMapLibreViewState({
-    id: `${idPrefix}-maplibre`,
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: initCamera,
-  });
-  const googleState = useGoogleMapViewState({
-    id: `${idPrefix}-google`,
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: initCamera,
-  });
-
-  return { mapLibreState, googleState };
-}
-
-export function resolveGeoJSONMapState(
-  provider: MapProvider,
-  states: ReturnType<typeof useGeoJSONMapStates>,
-) {
-  return provider === 'google-maps' ? states.googleState : states.mapLibreState;
-}
+/** GeoJSON の線色が見えるよう、MapLibre は起伏の少ない DemoTiles で描く。 */
+export const GEOJSON_DESIGN_TYPES: ProviderDesignOverrides = {
+  maplibre: MapLibreDesign.DemoTiles,
+};

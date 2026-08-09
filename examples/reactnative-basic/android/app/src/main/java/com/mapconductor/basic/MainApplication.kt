@@ -14,6 +14,8 @@ import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint
 import expo.modules.ApplicationLifecycleDispatcher
 import expo.modules.ExpoReactHostFactory
 
+import com.mapconductor.react.geojson.GeoJSONStyleProviderRegistry
+
 class MainApplication : Application(), ReactApplication {
 
   override val reactHost: ReactHost by lazy {
@@ -29,6 +31,13 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    // The application owns GeoJSON feature styling. JS references this provider by id
+    // (`GeoJSONLayerState({ styleProviderId: 'example-n02-route' })`); the same id is
+    // registered in ios/MapConductorBasic/AppDelegate.swift.
+    GeoJSONStyleProviderRegistry.register("example-n02-route") { context, sourceUri ->
+      requireNotNull(sourceUri) { "example-n02-route needs the GeoJSON zip's sourceUri" }
+      ExampleGeoJSONStyler.fromZip(context, sourceUri)
+    }
     DefaultNewArchitectureEntryPoint.releaseLevel = try {
       ReleaseLevel.valueOf(BuildConfig.REACT_NATIVE_RELEASE_LEVEL.uppercase())
     } catch (e: IllegalArgumentException) {

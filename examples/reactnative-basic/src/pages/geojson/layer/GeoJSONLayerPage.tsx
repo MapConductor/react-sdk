@@ -9,21 +9,18 @@ import {
 import { GeoPoint } from '@mapconductor/js-sdk-core';
 import { InfoBubble } from '@mapconductor/js-sdk-react/native';
 import { GeoJSONLayer, GeoJSONLayerState, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
-import type { MapProvider } from '../../../screens/MapScreen';
+import type { MapProvider } from '../../../providers/types';
 import { MapViewContainer } from '../../MapViewContainer';
 import { loadGeoJSONZipAsset } from '../loadGeoJSONZip';
 import {
   LAYER_INIT_CAMERA,
-  resolveGeoJSONMapState,
-  useGeoJSONMapStates,
+  GEOJSON_DESIGN_TYPES,
 } from '../geojsonShared';
 
 const GEOJSON_ZIP_ASSET = require('../../../../assets/geojson/N02-22_GML.zip');
 const GEOJSON_ZIP_NAME = 'N02-22_GML.zip';
 
 export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
-  const states = useGeoJSONMapStates('geojson-layer', LAYER_INIT_CAMERA);
-  const state = resolveGeoJSONMapState(provider, states);
   const [sourceUri, setSourceUri] = useState<string | null>(null);
   const [isSourceLoading, setIsSourceLoading] = useState(true);
   const [isLayerLoading, setIsLayerLoading] = useState(false);
@@ -66,8 +63,11 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
   return (
     <View style={styles.mapContainer}>
       <MapViewContainer
-        state={state}
+        provider={provider}
+        cameraPosition={LAYER_INIT_CAMERA}
+        mapId="geojson-layer"
         style={styles.map}
+        designTypes={GEOJSON_DESIGN_TYPES}
         onMapClick={() => {
           setSelectedFeature(null);
           setTappedPosition(null);

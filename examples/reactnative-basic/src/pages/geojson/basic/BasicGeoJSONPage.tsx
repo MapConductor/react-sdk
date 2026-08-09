@@ -1,18 +1,11 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { GeoJSONLayer, GeoJSONLayerState, GeoJSONParser } from '@mapconductor/react-geojson-layer';
-import type { MapProvider } from '../../../screens/MapScreen';
+import type { MapProvider } from '../../../providers/types';
 import { MapViewContainer } from '../../MapViewContainer';
-import {
-  BASIC_GEOJSON,
-  BASIC_INIT_CAMERA,
-  resolveGeoJSONMapState,
-  useGeoJSONMapStates,
-} from '../geojsonShared';
+import { BASIC_GEOJSON, BASIC_INIT_CAMERA, GEOJSON_DESIGN_TYPES } from '../geojsonShared';
 
 export function BasicGeoJSONPage({ provider }: { provider: MapProvider }) {
-  const states = useGeoJSONMapStates('geojson-basic', BASIC_INIT_CAMERA);
-  const state = resolveGeoJSONMapState(provider, states);
   const layerState = useMemo(
     () =>
       new GeoJSONLayerState({
@@ -26,7 +19,13 @@ export function BasicGeoJSONPage({ provider }: { provider: MapProvider }) {
 
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={state} style={styles.map}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={BASIC_INIT_CAMERA}
+        mapId="geojson-basic"
+        style={styles.map}
+        designTypes={GEOJSON_DESIGN_TYPES}
+      >
         <GeoJSONLayer state={layerState} features={features} />
       </MapViewContainer>
 

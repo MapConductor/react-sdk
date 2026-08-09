@@ -13,37 +13,29 @@ import {
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
 import { GroundImage, Marker } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
-import type { MapProvider } from '../../screens/MapScreen';
+import type { MapProvider } from '../../providers/types';
 import { MapViewContainer } from '../MapViewContainer';
 
 const ANDROID_PACKAGE = 'com.mapconductor.basic';
-const DEFAULT_IMAGE_URI = Platform.OS === 'ios'
-  ? 'bundle://newark_nj_1922_0'
-  : `android.resource://${ANDROID_PACKAGE}/drawable/newark_nj_1922_0`;
-const CLICKED_IMAGE_URI = Platform.OS === 'ios'
-  ? 'bundle://newark_nj_1922_1'
-  : `android.resource://${ANDROID_PACKAGE}/drawable/newark_nj_1922_1`;
+// Drone imagery over the University of Eswatini campus — the same sample content
+// as examples/basic (web) and android-sdk / ios-sdk's GroundImage pages.
+const GROUND_IMAGE_URI = Platform.OS === 'ios'
+  ? 'bundle://university_of_eswatini'
+  : `android.resource://${ANDROID_PACKAGE}/drawable/university_of_eswatini`;
 
 const INITIAL_SOUTH_WEST = createGeoPoint({
-  latitude: 40.712216,
-  longitude: -74.22655,
+  latitude: -26.484901389754125,
+  longitude: 31.2995982170105,
 });
 const INITIAL_NORTH_EAST = createGeoPoint({
-  latitude: 40.773941,
-  longitude: -74.12544,
+  latitude: -26.473569450536356,
+  longitude: 31.31288051605225,
 });
 const INIT_CAMERA = createMapCameraPosition({
-  position: createGeoPoint({ latitude: 40.7430785, longitude: -74.175995 }),
-  zoom: 12,
+  position: createGeoPoint({ latitude: -26.479235, longitude: 31.306239 }),
+  zoom: 15,
 });
 
 function markerLabels(southWest: MarkerState, northEast: MarkerState): [string, string] {
@@ -74,7 +66,7 @@ function showGroundImageToast(): void {
 }
 
 export function GroundImagePage({ provider }: { provider: MapProvider }) {
-  const [opacity, setOpacity] = useState(0.5);
+  const [opacity, setOpacity] = useState(1.0);
   const groundImageRef = useRef<GroundImageState | null>(null);
   const markersRef = useRef<MarkerState[]>([]);
 
@@ -101,17 +93,9 @@ export function GroundImagePage({ provider }: { provider: MapProvider }) {
           southWest: INITIAL_SOUTH_WEST,
           northEast: INITIAL_NORTH_EAST,
         }),
-        imageUrl: DEFAULT_IMAGE_URI,
-        opacity: 0.5,
-        onClick: () => {
-          const groundImage = groundImageRef.current;
-          if (!groundImage) return;
-          groundImage.imageUrl =
-            groundImage.imageUrl === DEFAULT_IMAGE_URI
-              ? CLICKED_IMAGE_URI
-              : DEFAULT_IMAGE_URI;
-          showGroundImageToast();
-        },
+        imageUrl: GROUND_IMAGE_URI,
+        opacity: 1.0,
+        onClick: () => showGroundImageToast(),
       })
   );
   groundImageRef.current = groundImageState;
@@ -136,18 +120,6 @@ export function GroundImagePage({ provider }: { provider: MapProvider }) {
   );
   markersRef.current = markers;
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'ground-image-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'ground-image-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-  const mapState = provider === 'google-maps' ? googleState : mapLibreState;
-
   const handleOpacityChange = (value: number) => {
     groundImageState.opacity = value;
     setOpacity(value);
@@ -155,13 +127,19 @@ export function GroundImagePage({ provider }: { provider: MapProvider }) {
 
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={mapState} style={styles.map}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="ground-image"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+      >
         <GroundImage state={groundImageState} />
         {markers.map((marker) => <Marker key={marker.id} state={marker} />)}
       </MapViewContainer>
 
       <View style={styles.controlPanel}>
-        <Text style={styles.title}>GroundImage Example</Text>
+        <Text style={styles.title}>Ground Image</Text>
         <Text style={styles.label}>opacity: {opacity.toFixed(2)}</Text>
         <Slider
           style={styles.slider}
@@ -173,6 +151,11 @@ export function GroundImagePage({ provider }: { provider: MapProvider }) {
           thumbTintColor="#2563eb"
           onValueChange={handleOpacityChange}
         />
+        <Text style={styles.note}>南西／北東マーカーをドラッグして画像範囲を変更できます。</Text>
+        <Text style={styles.note}>
+          Aerial imagery (c) Open Imagery Network contributors, accessed via OpenAerialMap,
+          licensed under CC BY 4.0.
+        </Text>
       </View>
     </View>
   );
@@ -217,5 +200,11 @@ const styles = StyleSheet.create({
   slider: {
     width: '100%',
     height: 38,
+  },
+  note: {
+    marginTop: 6,
+    color: '#64748b',
+    fontSize: 11,
+    lineHeight: 15,
   },
 });

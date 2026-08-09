@@ -23,6 +23,7 @@ export function HereProviderView({
   onCameraMoveEnd,
   onMapLoaded,
   markerTilingOptions,
+  cameraRestriction,
   onStateReady,
 }: HereProviderViewProps) {
   const state = useHereViewState({
@@ -42,6 +43,7 @@ export function HereProviderView({
       accessKeyId={HERE_ACCESS_KEY_ID}
       accessKeySecret={HERE_ACCESS_KEY_SECRET}
       markerTilingOptions={markerTilingOptions}
+      cameraRestriction={cameraRestriction}
       onMapLoaded={onMapLoaded}
       onMapClick={onMapClick}
       onCameraMoveStart={onCameraMoveStart}

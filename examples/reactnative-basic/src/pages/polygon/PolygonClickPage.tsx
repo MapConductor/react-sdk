@@ -10,17 +10,10 @@ import {
   type PolygonEvent,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
 import { california } from './click/California';
-import type { MapProvider } from '../../screens/MapScreen';
+import type { MapProvider } from '../../providers/types';
 import { MapViewContainer } from '../MapViewContainer';
 
 const INIT_CAMERA = MapCameraPosition.from({
@@ -79,21 +72,16 @@ export function PolygonClickPage({ provider }: { provider: MapProvider }) {
     )
   );
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'polygon-click-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'polygon-click-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-  const mapState = provider === 'google-maps' ? googleState : mapLibreState;
-
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={mapState} style={styles.map} onMapClick={handleMapClick}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="polygon-click"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+        onMapClick={handleMapClick}
+      >
         {polygons.map((polygon) => <Polygon key={polygon.id} state={polygon} />)}
         {markerVisible ? (
           <>

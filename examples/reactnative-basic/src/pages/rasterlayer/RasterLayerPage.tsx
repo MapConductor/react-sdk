@@ -10,16 +10,9 @@ import {
   createRasterLayerState,
 } from '@mapconductor/js-sdk-core';
 import { RasterLayer } from '@mapconductor/js-sdk-react/native';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 
-import type { MapProvider } from '../../screens/MapScreen';
+import type { MapProvider } from '../../providers/types';
 import { MapViewContainer } from '../MapViewContainer';
 import {
   GSI_RELIEF_ATTRIBUTION_RULES,
@@ -39,18 +32,6 @@ type GsiLayer = 'relief' | 'standard';
 export function RasterLayerPage({ provider }: { provider: MapProvider }) {
   const [selectedLayer, setSelectedLayer] = useState<GsiLayer>('relief');
   const [opacity, setOpacity] = useState(0.75);
-  const mapLibreState = useMapLibreViewState({
-    id: 'raster-layer-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'raster-layer-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
   const rasterLayerState = useMemo(() => createRasterLayerState({
     id: 'gsi-raster',
     source: selectedLayer === 'relief'
@@ -73,7 +54,13 @@ export function RasterLayerPage({ provider }: { provider: MapProvider }) {
 
   return (
     <View style={styles.mapContainer}>
-      <MapViewContainer state={state} style={styles.map}>
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="raster-layer"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+      >
         <RasterLayer state={rasterLayerState} />
       </MapViewContainer>
 

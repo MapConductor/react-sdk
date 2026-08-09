@@ -8,17 +8,10 @@ import {
   type MapDesignTypeInterface,
   type MapViewStateInterface,
 } from '@mapconductor/js-sdk-core';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
-
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
+import { useMapStateRef } from '../../../providers/useMapStateRef';
+import type { MapProvider } from '../../../providers/types';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 21.3069, longitude: -157.8583, altitude: 0 }),
@@ -29,19 +22,6 @@ const INIT_CAMERA = MapCameraPosition.from({
 
 const TILT_PRESETS = [-60, -30, 0, 30, 60];
 const TILT_DURATION_MS = 400;
-
-function TiltMap({
-  provider,
-  mapLibreState,
-  googleState,
-}: {
-  provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
-}) {
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
-  return <MapViewContainer state={state} style={styles.map} />;
-}
 
 function moveTilt(
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>,
@@ -57,27 +37,15 @@ function moveTilt(
 export function TiltPage({ provider }: { provider: MapProvider }) {
   const [tilt, setTilt] = useState(0);
   const cameraPositionRef = useRef(INIT_CAMERA);
-
-  const mapLibreState = useMapLibreViewState({
-    id: 'tilt-maplibre',
-    mapDesignType: MapLibreDesign.OsmBright,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'tilt-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-
-  const currentState = (
-    provider === 'google-maps' ? googleState : mapLibreState
-  ) as MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+  const { stateRef, onStateReady } = useMapStateRef();
 
   const setCameraTilt = (nextTilt: number, durationMillis = 0) => {
     const clampedTilt = Math.max(-60, Math.min(60, nextTilt));
     setTilt(clampedTilt);
+    const mapViewState = stateRef.current;
+    if (!mapViewState) return;
     cameraPositionRef.current = moveTilt(
-      currentState,
+      mapViewState,
       cameraPositionRef.current,
       clampedTilt,
       durationMillis
@@ -86,7 +54,14 @@ export function TiltPage({ provider }: { provider: MapProvider }) {
 
   return (
     <View style={styles.mapContainer}>
-      <TiltMap provider={provider} mapLibreState={mapLibreState} googleState={googleState} />
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="tilt"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.OsmBright }}
+        onStateReady={onStateReady}
+      />
 
       <View style={styles.controlPanel}>
         <Text style={styles.controlPanelTitle}>Tilt</Text>

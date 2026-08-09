@@ -7,17 +7,9 @@ import {
   type GeoPointInterface,
   type GeoRectBounds,
 } from '@mapconductor/js-sdk-core';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
-
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
+import type { MapProvider } from '../../../providers/types';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 21.3069, longitude: -157.8583, altitude: 0 }),
@@ -74,20 +66,18 @@ function VisibleRegionPanel({ cameraPosition }: { cameraPosition: MapCameraPosit
 
 function VisibleRegionMap({
   provider,
-  mapLibreState,
-  googleState,
   onCameraMove,
 }: {
   provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
   onCameraMove: (camera: MapCameraPosition) => void;
 }) {
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
   return (
     <MapViewContainer
-      state={state}
+      provider={provider}
+      cameraPosition={INIT_CAMERA}
+      mapId="visible-region"
       style={styles.map}
+      designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMove}
     />
@@ -97,25 +87,9 @@ function VisibleRegionMap({
 export function VisibleRegionPage({ provider }: { provider: MapProvider }) {
   const [cameraPosition, setCameraPosition] = useState<MapCameraPosition | null>(null);
 
-  const mapLibreState = useMapLibreViewState({
-    id: 'visible-region-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'visible-region-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-
   return (
     <View style={styles.mapContainer}>
-      <VisibleRegionMap
-        provider={provider}
-        mapLibreState={mapLibreState}
-        googleState={googleState}
-        onCameraMove={setCameraPosition}
-      />
+      <VisibleRegionMap provider={provider} onCameraMove={setCameraPosition} />
       <VisibleRegionPanel cameraPosition={cameraPosition} />
     </View>
   );

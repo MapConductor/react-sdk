@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { StyleProp, ViewStyle } from 'react-native';
 import type {
+  CameraRestriction,
   GeoPoint,
   MapCameraPosition,
   MapDesignTypeInterface,
@@ -34,5 +35,7 @@ export interface ProviderViewProps {
   onCameraMoveEnd?: (camera: MapCameraPosition) => void;
   onMapLoaded?: () => void;
   markerTilingOptions?: MarkerTilingOptions;
+  /** カメラの可動範囲。SDK 側で実行時に適用される（web の restrictBounds と同じ役割）。 */
+  cameraRestriction?: CameraRestriction | null;
   onStateReady?: (state: CommonMapViewState) => void;
 }

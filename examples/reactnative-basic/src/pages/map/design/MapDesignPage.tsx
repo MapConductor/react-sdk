@@ -6,29 +6,11 @@ import {
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
-import {
-  GeoPoint,
-  MapCameraPosition,
-  type MapDesignTypeInterface,
-} from '@mapconductor/js-sdk-core';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-  type GoogleMapDesignType,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-  type MapLibreMapDesignType,
-} from '@mapconductor/reactnative-for-maplibre';
+import { GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
 import { MapViewContainer } from '../../MapViewContainer';
-
-export type MapProvider = 'maplibre' | 'google-maps' | 'here';
-
-interface MapDesignOption {
-  label: string;
-  design: MapDesignTypeInterface<unknown>;
-}
+import { useMapStateRef } from '../../../providers/useMapStateRef';
+import { DESIGN_OPTIONS, providerLabel } from '../../../providers/designOptions';
+import type { MapProvider } from '../../../providers/types';
 
 const INIT_CAMERA = MapCameraPosition.from({
   position: GeoPoint.from({ latitude: 21.382314, longitude: -157.933097, altitude: 0 }),
@@ -37,82 +19,37 @@ const INIT_CAMERA = MapCameraPosition.from({
   tilt: 0,
 });
 
-const GOOGLE_MAP_2D_DESIGNS: MapDesignOption[] = [
-  { label: 'Normal', design: GoogleMapDesign.Normal },
-  { label: 'Satellite', design: GoogleMapDesign.Satellite },
-  { label: 'Hybrid', design: GoogleMapDesign.Hybrid },
-  { label: 'Terrain', design: GoogleMapDesign.Terrain },
-  { label: 'None', design: GoogleMapDesign.None },
-];
-
-const MAPLIBRE_DESIGNS: MapDesignOption[] = [
-  { label: 'DemoTiles', design: MapLibreDesign.DemoTiles },
-  { label: 'MapTilerBasicEn', design: MapLibreDesign.MapTilerBasicEn },
-  { label: 'MapTilerBasicJa', design: MapLibreDesign.MapTilerBasicJa },
-  { label: 'MapTilerTonerEn', design: MapLibreDesign.MapTilerTonerEn },
-  { label: 'MapTilerTonerJa', design: MapLibreDesign.MapTilerTonerJa },
-  { label: 'OsmBright', design: MapLibreDesign.OsmBright },
-  { label: 'OsmBrightEn', design: MapLibreDesign.OsmBrightEn },
-  { label: 'OsmBrightJa', design: MapLibreDesign.OsmBrightJa },
-  { label: 'OpenMapTiles', design: MapLibreDesign.OpenMapTiles },
-];
-
-function providerLabel(provider: MapProvider): string {
-  return provider === 'google-maps' ? 'Google Maps' : 'MapLibre';
-}
-
-function providerDesignOptions(provider: MapProvider): MapDesignOption[] {
-  return provider === 'google-maps' ? GOOGLE_MAP_2D_DESIGNS : MAPLIBRE_DESIGNS;
-}
-
-function DesignMap({
-  provider,
-  mapLibreState,
-  googleState,
-}: {
-  provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
-}) {
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
-  return <MapViewContainer state={state} style={styles.map} />;
-}
-
 export function MapDesignPage({ provider }: { provider: MapProvider }) {
-  const mapLibreState = useMapLibreViewState({
-    id: 'map-design-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'map-design-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
+  const { stateRef, onStateReady } = useMapStateRef();
+  const mapDesignOptions = useMemo(() => DESIGN_OPTIONS[provider] ?? [], [provider]);
+  const [selectedDesignId, setSelectedDesignId] = useState(
+    () => String(mapDesignOptions[0]?.design.id ?? '')
+  );
 
-  const mapDesignOptions = useMemo(() => providerDesignOptions(provider), [provider]);
-  const currentState = provider === 'google-maps' ? googleState : mapLibreState;
-  const [selectedDesignId, setSelectedDesignId] = useState(String(mapLibreState.mapDesignType.id));
-
+  // プロバイダを切り替えると MapViewContainer がビューを作り直し、
+  // 新しい state を onStateReady で返す。ピッカーの選択値もそれに合わせる。
   useEffect(() => {
-    setSelectedDesignId(String(currentState.mapDesignType.id));
-  }, [currentState, provider]);
+    setSelectedDesignId(String(stateRef.current?.mapDesignType.id ?? mapDesignOptions[0]?.design.id ?? ''));
+  }, [provider, mapDesignOptions, stateRef]);
 
   function handleDesignChange(designId: string) {
     const option = mapDesignOptions.find((item) => String(item.design.id) === designId);
-    if (!option) return;
+    const mapViewState = stateRef.current;
+    if (!option || !mapViewState) return;
 
-    if (provider === 'google-maps') {
-      googleState.mapDesignType = option.design as GoogleMapDesignType;
-    } else {
-      mapLibreState.mapDesignType = option.design as MapLibreMapDesignType;
-    }
+    mapViewState.mapDesignType = option.design;
     setSelectedDesignId(String(option.design.id));
   }
 
   return (
     <View style={styles.mapContainer}>
-      <DesignMap provider={provider} mapLibreState={mapLibreState} googleState={googleState} />
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="map-design"
+        style={styles.map}
+        onStateReady={onStateReady}
+      />
 
       <View style={styles.mapDesignSelector}>
         <Text style={styles.mapDesignLabel}>Map design</Text>

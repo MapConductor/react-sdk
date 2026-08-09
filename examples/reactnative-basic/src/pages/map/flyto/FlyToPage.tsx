@@ -12,17 +12,10 @@ import {
   type MapDesignTypeInterface,
   type MapViewStateInterface,
 } from '@mapconductor/js-sdk-core';
-import {
-  GoogleMapDesign,
-  useGoogleMapViewState,
-} from '@mapconductor/reactnative-for-googlemaps';
-import {
-  MapLibreDesign,
-  useMapLibreViewState,
-} from '@mapconductor/reactnative-for-maplibre';
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
-
-type MapProvider = 'maplibre' | 'google-maps' | 'here';
+import { useMapStateRef } from '../../../providers/useMapStateRef';
+import type { MapProvider } from '../../../providers/types';
 
 interface CityLocation {
   id: string;
@@ -64,19 +57,6 @@ function createCityLocations(): CityLocation[] {
   ];
 }
 
-function FlyToMap({
-  provider,
-  mapLibreState,
-  googleState,
-}: {
-  provider: MapProvider;
-  mapLibreState: ReturnType<typeof useMapLibreViewState>;
-  googleState: ReturnType<typeof useGoogleMapViewState>;
-}) {
-  const state = provider === 'google-maps' ? googleState : mapLibreState;
-  return <MapViewContainer state={state} style={styles.map} />;
-}
-
 function flyToCity(
   city: CityLocation,
   mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>
@@ -94,25 +74,18 @@ function flyToCity(
 
 export function FlyToPage({ provider }: { provider: MapProvider }) {
   const cities = useMemo(createCityLocations, []);
-
-  const mapLibreState = useMapLibreViewState({
-    id: 'fly-to-maplibre',
-    mapDesignType: MapLibreDesign.DemoTiles,
-    cameraPosition: INIT_CAMERA,
-  });
-  const googleState = useGoogleMapViewState({
-    id: 'fly-to-google',
-    mapDesignType: GoogleMapDesign.Normal,
-    cameraPosition: INIT_CAMERA,
-  });
-
-  const currentState = (
-    provider === 'google-maps' ? googleState : mapLibreState
-  ) as MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+  const { stateRef, onStateReady } = useMapStateRef();
 
   return (
     <View style={styles.mapContainer}>
-      <FlyToMap provider={provider} mapLibreState={mapLibreState} googleState={googleState} />
+      <MapViewContainer
+        provider={provider}
+        cameraPosition={INIT_CAMERA}
+        mapId="fly-to"
+        style={styles.map}
+        designTypes={{ maplibre: MapLibreDesign.DemoTiles }}
+        onStateReady={onStateReady}
+      />
 
       <View style={styles.controlPanel}>
         <Text style={styles.controlPanelTitle}>Fly To</Text>
@@ -122,7 +95,10 @@ export function FlyToPage({ provider }: { provider: MapProvider }) {
               key={city.id}
               style={styles.cityButton}
               activeOpacity={0.75}
-              onPress={() => flyToCity(city, currentState)}
+              onPress={() => {
+                const mapViewState = stateRef.current;
+                if (mapViewState) flyToCity(city, mapViewState);
+              }}
             >
               <Text style={styles.cityButtonText} numberOfLines={1}>
                 {city.label}

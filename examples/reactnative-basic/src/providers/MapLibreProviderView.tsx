@@ -18,6 +18,7 @@ export function MapLibreProviderView({
   onCameraMoveEnd,
   onMapLoaded,
   markerTilingOptions,
+  cameraRestriction,
   onStateReady,
 }: MapLibreProviderViewProps) {
   const state = useMapLibreViewState({
@@ -35,6 +36,7 @@ export function MapLibreProviderView({
       state={state}
       style={style}
       markerTilingOptions={markerTilingOptions}
+      cameraRestriction={cameraRestriction}
       onMapLoaded={onMapLoaded}
       onMapClick={onMapClick}
       onCameraMoveStart={onCameraMoveStart}

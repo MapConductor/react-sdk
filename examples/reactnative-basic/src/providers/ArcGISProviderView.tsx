@@ -20,6 +20,7 @@ export function ArcGISProviderView({
   onCameraMoveEnd,
   onMapLoaded,
   markerTilingOptions,
+  cameraRestriction,
   onStateReady,
 }: ArcGISProviderViewProps) {
   const state = useArcGISViewState({
@@ -38,6 +39,7 @@ export function ArcGISProviderView({
       state={state}
       style={style}
       markerTilingOptions={markerTilingOptions}
+      cameraRestriction={cameraRestriction}
       onMapLoaded={onMapLoaded}
       onMapClick={onMapClick}
       onCameraMoveStart={onCameraMoveStart}
