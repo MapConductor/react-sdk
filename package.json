@@ -8,6 +8,7 @@
     "js-sdk-react/",
     "react-icons/",
     "react-for-googlemaps/",
+    "react-for-template/",
     "react-for-maplibre/",
     "react-for-mapbox/",
     "react-for-leaflet/",
