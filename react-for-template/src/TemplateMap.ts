@@ -3,6 +3,7 @@ import {
     MapViewHolderBase,
     type GeoPoint,
     type GeoPointInterface,
+    type MapDesignTypeInterface,
     type Offset,
     type OverlayKind,
 } from '@mapconductor/js-sdk-core';
@@ -145,13 +146,28 @@ export class TemplateMapViewHolder extends MapViewHolderBase<HTMLElement | null,
 // C. 地図デザイン型
 // ============================================================================
 
-/** 実装点 C。SDK のスタイル指定。文字列でも URL でも SDK の型そのままでもよい。 */
-export interface TemplateMapDesignType {
-    readonly type: string;
-    readonly value: string;
+/**
+ * 実装点 C。SDK のスタイル指定を表す型。
+ *
+ * `MapDesignTypeInterface` が要求するのは `id` と `getValue()` の 2 つだけ。
+ * `getValue()` は「同じ見た目か」の比較に使われるので、**見た目を決める要素を
+ * すべて含めた文字列**を返すこと（id だけだと、同じ id で URL 違いのデザインを
+ * 切り替えたときに再読み込みが走らない）。
+ */
+export interface TemplateMapDesignType extends MapDesignTypeInterface<string> {
+    readonly styleUrl: string;
 }
 
-export const TemplateDesign = {
-    Standard: { type: 'template', value: 'standard' } as TemplateMapDesignType,
-    Satellite: { type: 'template', value: 'satellite' } as TemplateMapDesignType,
-} as const;
+export class TemplateDesign implements TemplateMapDesignType {
+    constructor(
+        readonly id: string,
+        readonly styleUrl: string,
+    ) {}
+
+    getValue(): string {
+        return `mapDesign_id=${this.id},style=${this.styleUrl}`;
+    }
+
+    static readonly Standard = new TemplateDesign('standard', 'https://example.invalid/standard.json');
+    static readonly Satellite = new TemplateDesign('satellite', 'https://example.invalid/satellite.json');
+}

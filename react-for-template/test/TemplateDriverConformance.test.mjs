@@ -7,7 +7,7 @@ import {
     MutableMapServiceRegistry,
 } from '../../js-sdk-core/dist/index.mjs';
 import { TemplateMap, TemplateMapViewHolder } from '../dist/index.mjs';
-import { TemplateViewController } from '../dist/index.mjs';
+import { TemplateMapViewController } from '../dist/index.mjs';
 
 /**
  * 新しいドライバーを書いたら、**まずこのファイルをコピーして**
@@ -29,12 +29,12 @@ import { TemplateViewController } from '../dist/index.mjs';
  * 書かなくても型は通り、コンパイルでは止まらない。
  */
 test('every overlay kind is reachable from the Capable facade and the cascade', () => {
-    const controller = new TemplateViewController(new TemplateMap());
+    const controller = new TemplateMapViewController(new TemplateMap());
     MapDriverConformance.checkOverlaySlots(controller.overlayControllers);
 });
 
 test('zoom converter round-trips, is monotonic and clamps', () => {
-    const controller = new TemplateViewController(new TemplateMap());
+    const controller = new TemplateMapViewController(new TemplateMap());
     MapDriverConformance.checkZoomConverter(controller.zoomConverter);
 });
 
@@ -48,7 +48,7 @@ test('cascade order is canonical', () => {
  */
 test('capability declarations carry a reason', () => {
     const registry = new MutableMapServiceRegistry();
-    new TemplateViewController(new TemplateMap()).declareCapabilities(registry);
+    new TemplateMapViewController(new TemplateMap()).declareCapabilities(registry);
     MapDriverConformance.checkCapabilityDeclarations(registry);
 });
 
@@ -79,7 +79,7 @@ test('projection round-trips', () => {
  * ここがずれると、当たり判定の許容量が実際の縮尺と食い違う。
  */
 test('camera round-trips and carries a visible region', async () => {
-    const controller = new TemplateViewController(new TemplateMap());
+    const controller = new TemplateMapViewController(new TemplateMap());
     await controller.moveCamera({
         position: createGeoPoint({ latitude: 35.681, longitude: 139.767 }),
         center: createGeoPoint({ latitude: 35.681, longitude: 139.767 }),

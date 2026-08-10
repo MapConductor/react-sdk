@@ -1,7 +1,7 @@
 import {
     BaseMapViewController,
+    buildVisibleRegion,
     createGeoPoint,
-    createGeoRectBounds,
     createMapCameraPosition,
     MapCapabilityStatus,
     WebMercatorZoomAltitudeConverter,
@@ -45,7 +45,7 @@ import {
  *  - Capable ファサードの 22 メソッド … `registerOverlayController` するだけ
  *  - マーカーのドラッグの状態遷移 … `DefaultMarkerEventController`
  */
-export class TemplateViewController extends BaseMapViewController implements MapViewControllerInterface {
+export class TemplateMapViewController extends BaseMapViewController implements MapViewControllerInterface {
     readonly holder: TemplateMapViewHolder;
 
     private readonly circleController: TemplateCircleController;
@@ -128,16 +128,10 @@ export class TemplateViewController extends BaseMapViewController implements Map
 
     /** 4 隅を逆投影して可視範囲を組む。ホルダーの投影が唯一の入口。 */
     private buildVisibleRegion(): MapCameraPosition['visibleRegion'] {
-        const { width, height } = this.map.sizePx;
-        const nearLeft = this.holder.fromScreenOffsetSync({ x: 0, y: height });
-        const nearRight = this.holder.fromScreenOffsetSync({ x: width, y: height });
-        const farLeft = this.holder.fromScreenOffsetSync({ x: 0, y: 0 });
-        const farRight = this.holder.fromScreenOffsetSync({ x: width, y: 0 });
-        // bounds は 4 隅から extend する。`map.getBounds()` の軸並行矩形と違い、
-        // 地図が回転していても正しい。
-        const bounds = createGeoRectBounds();
-        [nearLeft, nearRight, farLeft, farRight].forEach((corner) => bounds.extend(corner));
-        return { bounds, nearLeft, nearRight, farLeft, farRight };
+        // 隅の割り当ても bounds の組み立てもコアの buildVisibleRegion が持つ。
+        // ここに自前で書くと、隅を取り違えても何も落ちない（4 点とも埋まるので
+        // bounds は正しく見える）。実際 ios-for-mapbox で入れ替わっていた。
+        return buildVisibleRegion(this.holder, this.map.sizePx);
     }
 
     async moveCamera(position: MapCameraPosition): Promise<boolean> {

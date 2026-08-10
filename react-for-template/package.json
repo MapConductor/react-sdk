@@ -15,7 +15,7 @@
   },
   "files": ["dist", "README.md"],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "build": "tsup src/index.tsx --format cjs,esm --dts",
     "clean": "rm -rf dist",
     "test": "node --test \"test/**/*.test.mjs\""
   },
