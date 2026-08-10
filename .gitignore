@@ -50,6 +50,8 @@ dist/*
 *.mts
 *.map
 *.mjs
+# 雛形の適合テストはバージョン管理する（外部の作者がコピーする出発点なので）。
+!react-for-template/test/*.mjs
 !examples/basic/server.mjs
 !examples/basic/scripts/generate-static.mjs
 !scripts/link-local-workspaces.mjs
