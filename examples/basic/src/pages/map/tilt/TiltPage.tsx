@@ -16,6 +16,13 @@ import { ControlPanel, SliderControl } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 
+/**
+ * ほとんどのプロバイダは 60 度で頭打ちになるが、ArcGIS だけは 90 度近くまで実際に傾く。
+ * その範囲を触れるようにするためスライダーは ±89 にしてある
+ * （android-sdk の TiltMapPage.kt / ios-sdk の TiltMapPage.swift と同じ範囲）。
+ */
+const TILT_LIMIT = 89;
+
 // Keep these in step with the Android and iOS tilt samples
 // (`TiltMapPageViewModel.kt` / `TiltMapPageViewModel.swift`). The three pages are
 // meant to be compared side by side, so the camera and the marker layout must match.
@@ -98,8 +105,8 @@ function TiltContent({ mapViewState }: { mapViewState: MapViewStateInterface<Map
       <SliderControl
         label={t('Tilt', '傾き')}
         value={tilt}
-        min={-60}
-        max={60}
+        min={-TILT_LIMIT}
+        max={TILT_LIMIT}
         step={1}
         format={value => `${value.toFixed(0)}°`}
         onChange={value => {

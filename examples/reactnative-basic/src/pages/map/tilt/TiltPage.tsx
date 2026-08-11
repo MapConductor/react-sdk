@@ -2,6 +2,13 @@ import React, { useRef, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Slider from '@react-native-community/slider';
 
+/**
+ * ほとんどのプロバイダは 60 度で頭打ちになるが、ArcGIS だけは 90 度近くまで実際に傾く。
+ * その範囲を触れるようにするためスライダーは ±89 にしてある
+ * （android-sdk の TiltMapPage.kt / ios-sdk の TiltMapPage.swift と同じ範囲）。
+ */
+const TILT_LIMIT = 89;
+
 import {
   GeoPoint,
   MapCameraPosition,
@@ -70,8 +77,8 @@ export function TiltPage({ provider }: { provider: MapProvider }) {
         </View>
         <Slider
           style={styles.slider}
-          minimumValue={-60}
-          maximumValue={60}
+          minimumValue={-TILT_LIMIT}
+          maximumValue={TILT_LIMIT}
           step={1}
           value={tilt}
           minimumTrackTintColor="#2563eb"
