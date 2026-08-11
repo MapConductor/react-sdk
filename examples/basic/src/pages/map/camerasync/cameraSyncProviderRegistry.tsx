@@ -57,6 +57,10 @@ import {
   LongdoMapView2D,
   type LongdoViewState,
 } from '@mapconductor/react-for-longdo';
+import {
+  MapplsMapView2D,
+  type MapplsViewState,
+} from '@mapconductor/react-for-mappls';
 
 interface MapViewRenderProps {
   paneState: PaneState;
@@ -186,6 +190,11 @@ const adapters: CameraSyncProviderAdapter[] = [
     id: 'longdo', label: 'Longdo', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
     render: props => renderLongdo(props),
   },
+  {
+    // Mappls renders through Mapbox GL; report the unified (Google-reference) altitude like MapLibre.
+    id: 'mappls', label: 'Mappls', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: props => renderMappls(props),
+  },
 ];
 
 export const cameraSyncProviders: readonly CameraSyncProviderAdapter[] = adapters;
@@ -236,4 +245,12 @@ function renderLongdo({ paneState: pane, children, ...events }: MapViewRenderPro
     return <MissingKey title="Longdo API Key is Missing" envName="VITE_LONGDO" />;
   }
   return <LongdoMapView2D state={state} {...events}>{children}</LongdoMapView2D>;
+}
+
+function renderMappls({ paneState: pane, children, ...events }: MapViewRenderProps): ReactNode {
+  const state = pane.mapState as MapplsViewState;
+  if (!state.apiKey || state.apiKey === 'your_api_key_here') {
+    return <MissingKey title="Mappls API Key is Missing" envName="VITE_MAPPLS_API_KEY" />;
+  }
+  return <MapplsMapView2D state={state} {...events}>{children}</MapplsMapView2D>;
 }

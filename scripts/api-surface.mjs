@@ -49,6 +49,7 @@ const PACKAGES = [
   "react-for-tomtom",
   "react-for-maptiler",
   "react-for-longdo",
+  "react-for-mappls",
   "reactnative-for-googlemaps",
   "reactnative-for-maplibre",
   "reactnative-for-arcgis",

@@ -112,6 +112,7 @@ export function MapViewContainer({
   const isTomTom = location.pathname.startsWith('/tomtom');
   const isMapTiler = location.pathname.startsWith('/maptiler');
   const isLongdo = location.pathname.startsWith('/longdo');
+  const isMappls = location.pathname.startsWith('/mappls');
 
   const commonProps: ProviderViewProps = {
     children,
@@ -176,6 +177,10 @@ export function MapViewContainer({
 
     case isLongdo: {
       return <SingletonProviderView id="longdo" {...commonProps} />;
+    }
+
+    case isMappls: {
+      return <SingletonProviderView id="mappls" {...commonProps} />;
     }
 
     default: {

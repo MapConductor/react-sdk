@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly VITE_MAPKIT_TOKEN: string;
   readonly VITE_AZURE_MAPS_SUBSCRIOTION_KEY: string;
   readonly VITE_TOMTOM_API_KEY: string;
+  readonly VITE_MAPPLS_API_KEY: string;
   readonly VITE_MAPTILER: string;
   // Add more environment variables here as needed
 }

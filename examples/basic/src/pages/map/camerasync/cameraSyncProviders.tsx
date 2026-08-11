@@ -44,6 +44,7 @@ import { HereMapDesign, useHereViewState } from '@mapconductor/react-for-here';
 import { TomTomDesign, useTomTomViewState } from '@mapconductor/react-for-tomtom';
 import { MapTilerDesign, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
 import { LongdoDesign, useLongdoViewState } from '@mapconductor/react-for-longdo';
+import { MapplsDesign, useMapplsViewState } from '@mapconductor/react-for-mappls';
 
 type ProviderStateMap = Record<PaneProvider, PaneState>;
 
@@ -60,6 +61,7 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
   const tomtomApiKey = import.meta.env.VITE_TOMTOM_API_KEY || '';
   const mapTilerApiKey = import.meta.env.VITE_MAPTILER || '';
   const longdoApiKey = import.meta.env.VITE_LONGDO || '';
+  const mapplsApiKey = import.meta.env.VITE_MAPPLS_API_KEY || '';
   const mapLibreState = useMapLibreViewState({ id: `camera-sync-${prefix}-maplibre`, mapDesignType: prefix === 'left' ? MapLibreDesign.OsmBrightJa : MapLibreDesign.MapTilerBasicJa, cameraPosition: INITIAL_CAMERA });
   const mapboxState = useMapboxViewState({ id: `camera-sync-${prefix}-mapbox`, accessToken: mapboxAccessToken, mapDesignType: prefix === 'left' ? MapboxDesign.Streets : MapboxDesign.Light, cameraPosition: INITIAL_CAMERA });
   const mapbox3DState = useMapboxViewState({ id: `camera-sync-${prefix}-mapbox-3d`, accessToken: mapboxAccessToken, mapDesignType: prefix === 'left' ? MapboxDesign.Outdoors : MapboxDesign.SatelliteStreets, cameraPosition: INITIAL_CAMERA });
@@ -76,6 +78,7 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
   const tomtomState = useTomTomViewState({ id: `camera-sync-${prefix}-tomtom`, apiKey: tomtomApiKey, mapDesignType: prefix === 'left' ? TomTomDesign.Standard : TomTomDesign.MonoLight, cameraPosition: INITIAL_CAMERA });
   const mapTilerState = useMapTilerViewState({ id: `camera-sync-${prefix}-maptiler`, apiKey: mapTilerApiKey, mapDesignType: prefix === 'left' ? MapTilerDesign.Streets : MapTilerDesign.StreetsLight, cameraPosition: INITIAL_CAMERA });
   const longdoState = useLongdoViewState({ id: `camera-sync-${prefix}-longdo`, apiKey: longdoApiKey, mapDesignType: LongdoDesign.Normal, cameraPosition: INITIAL_CAMERA });
+  const mapplsState = useMapplsViewState({ id: `camera-sync-${prefix}-mappls`, apiKey: mapplsApiKey, mapDesignType: MapplsDesign.Default, cameraPosition: INITIAL_CAMERA });
 
   return {
     maplibre: paneState('maplibre', mapLibreState),
@@ -94,5 +97,6 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
     tomtom: paneState('tomtom', tomtomState),
     maptiler: paneState('maptiler', mapTilerState),
     longdo: paneState('longdo', longdoState),
+    mappls: paneState('mappls', mapplsState),
   };
 }

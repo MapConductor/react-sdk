@@ -89,6 +89,7 @@ export function getProviderLabel(provider: string | undefined): string {
     case 'tomtom': return 'TomTom';
     case 'maptiler': return 'MapTiler';
     case 'longdo': return 'Longdo';
+    case 'mappls': return 'Mappls';
     default: return 'MapLibre';
   }
 }
