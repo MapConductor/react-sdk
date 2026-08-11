@@ -100,6 +100,21 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
   );
 }
 
+/**
+ * 国土数値情報の鉄道データ（N02）の属性名。
+ *
+ * 生の `N02_001` のままだと何の値か分からないので、吹き出しでは日本語名に置き換える。
+ * examples/basic（web）/ android / ios と**同じ文言**にしてある。
+ *
+ * ここに無いキーは生のキー名をそのまま出す。データ側に属性が増えても表から消えないように。
+ */
+const propertyLabels: Record<string, string> = {
+  N02_001: '鉄道区分(railway category)',
+  N02_002: '事業者区分(business category)',
+  N02_003: '路線名(railway name)',
+  N02_004: '運営会社(railway company)',
+};
+
 function PropertyTable({ properties }: { properties: Readonly<Record<string, unknown>> }) {
   const entries = Object.entries(properties);
 
@@ -112,7 +127,7 @@ function PropertyTable({ properties }: { properties: Readonly<Record<string, unk
       <ScrollView style={styles.tableScroll} nestedScrollEnabled>
         {entries.map(([key, value]) => (
           <View key={key} style={styles.tableRow}>
-            <Text style={[styles.tableCell, styles.keyCell]}>{key}</Text>
+            <Text style={[styles.tableCell, styles.keyCell]}>{propertyLabels[key] ?? key}</Text>
             <Text style={[styles.tableCell, styles.valueCell]}>{formatPropertyValue(value)}</Text>
           </View>
         ))}
@@ -212,9 +227,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   keyCell: {
-    width: '36%',
+    width: '50%',
   },
   valueCell: {
-    width: '64%',
+    width: '50%',
   },
 });
