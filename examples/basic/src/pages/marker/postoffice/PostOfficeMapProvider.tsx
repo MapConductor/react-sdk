@@ -39,11 +39,14 @@ interface PostOfficeMapProviderProps {
 
 function GoogleProvider({ cameraPosition, children }: PostOfficeMapProviderProps) {
   const isGoogle3D = useLocation().pathname.startsWith('/google-maps-3d');
-  const state = useSingletonMapState(isGoogle3D ? 'google-3d' : 'google-2d', cameraPosition);
+  const mapId = isGoogle3D ? ('google-3d' as const) : ('google-2d' as const);
+  const state = useSingletonMapState(mapId, cameraPosition);
   return children({
     mapViewState: state,
+    // state と slot の地図がずれると「見えている地図は動かず、隠れた地図だけが
+    // ズームする」ことになる（google-maps-3d のクラスタークリック不発の原因）。
     renderMapView: (content, onMapClick) => (
-      <SingletonMapSlot id="google-2d" onMapClick={onMapClick}>{content}</SingletonMapSlot>
+      <SingletonMapSlot id={mapId} onMapClick={onMapClick}>{content}</SingletonMapSlot>
     ),
   });
 }
