@@ -95,6 +95,49 @@ const ANCHOR_CIRCLES: CircleState[] = TILT_MARKERS.map(marker =>
   }),
 );
 
+// android の TiltMapPage.kt / ios の TiltMapPage.swift にある TiltCameraDiagram と
+// 同じ式・同じ配色。スライダーに追従してカメラ・注視点・視線が動く。
+function TiltCameraDiagram({ tilt }: { tilt: number }) {
+  const width = 280;
+  const height = 120;
+  const groundY = height * 0.78;
+  const originX = width * 0.5;
+  const baseCameraY = height * 0.22;
+  const tiltAbs = Math.min(Math.abs(tilt), 90);
+  const tiltRad = (tiltAbs * Math.PI) / 180;
+  const altitudePx = groundY - baseCameraY;
+  const targetDistance = Math.min(altitudePx * Math.tan(tiltRad), width * 0.44);
+  const targetX = tilt < 0 ? originX - targetDistance : originX;
+  const targetY = groundY;
+  const cameraX = tilt > 0 ? originX + targetDistance : originX;
+  const cameraY = baseCameraY;
+  const sightEndX = tilt === 0 ? cameraX : targetX;
+  const sightEndY = targetY;
+  const cameraBody = [
+    [cameraX - 12, cameraY - 8],
+    [cameraX + 14, cameraY - 4],
+    [cameraX + 10, cameraY + 10],
+    [cameraX - 12, cameraY + 8],
+  ].map(p => p.join(',')).join(' ');
+
+  return (
+    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', marginBottom: 4 }}>
+      <line x1={width * 0.08} y1={groundY} x2={width * 0.94} y2={groundY} stroke="#E4E0EC" strokeWidth={3} strokeLinecap="round" />
+      <line x1={cameraX} y1={cameraY} x2={cameraX} y2={groundY} stroke="#8E879A" strokeWidth={2} />
+      <circle cx={cameraX} cy={cameraY} r={8} fill="#5DA7FF" />
+      <circle cx={targetX} cy={targetY} r={7} fill="#FF6259" />
+      <line x1={cameraX} y1={cameraY} x2={sightEndX} y2={sightEndY} stroke="#FFC857" strokeWidth={4} strokeLinecap="round" />
+      <polygon points={cameraBody} fill="#2F2A38" stroke="rgba(255,255,255,0.7)" strokeWidth={1.5} />
+      <circle cx={originX} cy={groundY} r={3.5} fill="#8E879A" />
+      <line
+        x1={Math.min(cameraX, targetX)} y1={groundY + 12}
+        x2={Math.max(cameraX, targetX)} y2={groundY + 12}
+        stroke="#B8AFCA" strokeWidth={2} strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 function TiltContent({ mapViewState }: { mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>> }) {
   const { t } = useSampleI18n();
   const [tilt, setTilt] = useState(0);
@@ -102,6 +145,7 @@ function TiltContent({ mapViewState }: { mapViewState: MapViewStateInterface<Map
 
   return (
     <ControlPanel title={t('Tilt', '傾き')}>
+      <TiltCameraDiagram tilt={tilt} />
       <SliderControl
         label={t('Tilt', '傾き')}
         value={tilt}

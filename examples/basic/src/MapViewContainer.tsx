@@ -1,6 +1,7 @@
 import { useEffect, useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import type {
+  CameraRestriction,
   GeoPoint,
   GeoRectBounds,
   MapCameraPosition,
@@ -44,6 +45,11 @@ interface MapViewContainerProps {
    * page unmounts, so it never leaks into other pages for that provider.
    */
   restrictBounds?: GeoRectBounds;
+  /**
+   * 矩形だけでなく minZoom / maxZoom も指定したいページ向け（camera-restriction）。
+   * 指定された場合は restrictBounds より優先される。
+   */
+  cameraRestriction?: CameraRestriction | null;
 }
 
 function SingletonProviderView({
@@ -56,14 +62,15 @@ function SingletonProviderView({
   onCameraMoveEnd,
   onStateReady,
   restrictBounds,
+  cameraRestriction: cameraRestrictionProp,
 }: ProviderViewProps & { id: SingletonMapId }) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useSingletonMapState(id, cameraPosition);
   // The SDK normalizes `restrictBounds` / `minZoom` / `maxZoom` into a single
   // CameraRestriction, so a page that only needs a rectangle can pass just that.
   const cameraRestriction = useMemo(
-    () => (restrictBounds ? { bounds: restrictBounds } : null),
-    [restrictBounds],
+    () => cameraRestrictionProp ?? (restrictBounds ? { bounds: restrictBounds } : null),
+    [cameraRestrictionProp, restrictBounds],
   );
 
   useEffect(() => {
@@ -87,6 +94,7 @@ function SingletonProviderView({
 export function MapViewContainer({
   children,
   initialCamera = DEFAULT_CAMERA,
+  cameraRestriction,
   onMapClick,
   onCameraMoveStart,
   onCameraMove,
@@ -124,6 +132,7 @@ export function MapViewContainer({
     markerTilingOptions,
     onStateReady,
     restrictBounds,
+    cameraRestriction,
   };
 
   switch (true) {

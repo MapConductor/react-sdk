@@ -17,6 +17,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map-design', label: 'Map Design', labelJa: '地図デザイン', labelEs419: 'Diseño del mapa', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', labelJa: 'カメラ移動', labelEs419: 'Volar a un lugar', group: 'Map' },
   { id: 'fit-bounds', label: 'Fit Bounds', labelJa: '範囲にフィット', labelEs419: 'Ajustar a límites', group: 'Map' },
+  { id: 'camera-restriction', label: 'Camera Restriction', labelJa: 'カメラ制限', labelEs419: 'Restricción de cámara', group: 'Map' },
   { id: 'tilt', label: 'Tilt', labelJa: '傾き', labelEs419: 'Inclinación', group: 'Map', unavailableProviders: ['google-maps', 'mapkit'] },
   { id: 'ui-settings', label: 'UI Settings', labelJa: 'UI設定', labelEs419: 'Ajustes de interfaz', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', labelJa: '表示領域', labelEs419: 'Región visible', group: 'Map' },

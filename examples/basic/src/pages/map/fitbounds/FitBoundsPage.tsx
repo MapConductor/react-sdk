@@ -1,123 +1,106 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import {
-  ColorDefaultIcon,
   createGeoPoint,
   createGeoRectBounds,
   createMarkerState,
-  type GeoRectBounds,
+  createPolygonState,
+  type GeoPointInterface,
   type MapDesignTypeInterface,
   type MapViewStateInterface,
+  type MarkerState,
+  type PolygonState,
 } from '@mapconductor/js-sdk-core';
-import { Markers, Polyline } from '@mapconductor/js-sdk-react';
+import { Marker, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 
-const INIT_CAMERA = { lat: 20, lng: 60, zoom: 2 };
+// android / ios の FitBounds サンプルと同一仕様:
+// マーカーをドラッグすると開始点→現在点の矩形が赤いポリゴンで表示され、
+// ドロップすると その範囲へ fitBounds し、1.5 秒後に矩形が消える。
+const INITIAL_POSITION = { latitude: 35.68, longitude: 139.76 };
+const INIT_CAMERA = { lat: INITIAL_POSITION.latitude, lng: INITIAL_POSITION.longitude, zoom: 10 };
 
-const CITIES = [
-  { id: 'tokyo', label: 'Tokyo', short: 'T', latitude: 35.6762, longitude: 139.6503, color: '#e6194B' },
-  { id: 'osaka', label: 'Osaka', short: 'O', latitude: 34.6937, longitude: 135.5023, color: '#f58231' },
-  { id: 'honolulu', label: 'Honolulu', short: 'H', latitude: 21.3099, longitude: -157.8581, color: '#3cb44b' },
-  { id: 'new-york', label: 'New York', short: 'N', latitude: 40.7128, longitude: -74.006, color: '#4363d8' },
-  { id: 'london', label: 'London', short: 'L', latitude: 51.5074, longitude: -0.1278, color: '#911eb4' },
-  { id: 'sydney', label: 'Sydney', short: 'S', latitude: -33.8688, longitude: 151.2093, color: '#f032e6' },
-] as const;
-
-type CityId = (typeof CITIES)[number]['id'];
-
-const PRESETS: { id: string; label: string; labelJa: string; cities: CityId[] }[] = [
-  { id: 'world', label: 'World (all)', labelJa: '世界（全都市）', cities: ['tokyo', 'osaka', 'honolulu', 'new-york', 'london', 'sydney'] },
-  { id: 'pacific', label: 'Pacific', labelJa: '太平洋', cities: ['tokyo', 'honolulu', 'sydney'] },
-  { id: 'atlantic', label: 'Atlantic', labelJa: '大西洋', cities: ['new-york', 'london'] },
-  { id: 'japan', label: 'Japan', labelJa: '日本', cities: ['tokyo', 'osaka'] },
-];
-
-const PADDINGS = [0, 40, 80, 160];
-
-function boundsForPreset(cityIds: CityId[]): GeoRectBounds {
-  const bounds = createGeoRectBounds({});
-  for (const id of cityIds) {
-    const city = CITIES.find(c => c.id === id)!;
-    bounds.extend(createGeoPoint({ latitude: city.latitude, longitude: city.longitude }));
-  }
-  return bounds;
+function buildRectPolygon(a: GeoPointInterface, b: GeoPointInterface): PolygonState {
+  const minLat = Math.min(a.latitude, b.latitude);
+  const maxLat = Math.max(a.latitude, b.latitude);
+  const minLng = Math.min(a.longitude, b.longitude);
+  const maxLng = Math.max(a.longitude, b.longitude);
+  return createPolygonState({
+    id: 'fitbounds_polygon',
+    points: [
+      createGeoPoint({ latitude: minLat, longitude: minLng }),
+      createGeoPoint({ latitude: minLat, longitude: maxLng }),
+      createGeoPoint({ latitude: maxLat, longitude: maxLng }),
+      createGeoPoint({ latitude: maxLat, longitude: minLng }),
+    ],
+    strokeColor: '#ff0000',
+    strokeWidth: 2,
+    fillColor: 'rgba(255, 0, 0, 0.3)',
+  });
 }
 
 function FitBoundsContent({ mapViewState }: { mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>> }) {
   const { t } = useSampleI18n();
-  const [padding, setPadding] = useState<number>(80);
-  const [presetId, setPresetId] = useState<string>('world');
+  const [boundsPolygon, setBoundsPolygon] = useState<PolygonState | null>(null);
+  const dragStartRef = useRef<GeoPointInterface | null>(null);
+  const clearTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const markers = useMemo(
-    () => CITIES.map(city => createMarkerState({
-      id: city.id,
-      position: createGeoPoint({ latitude: city.latitude, longitude: city.longitude }),
-      extra: city.label,
-      icon: new ColorDefaultIcon({ fillColor: city.color, label: city.short }),
-    })),
-    [],
+  const onDragStart = useCallback((state: MarkerState) => {
+    if (clearTimerRef.current) {
+      clearTimeout(clearTimerRef.current);
+      clearTimerRef.current = null;
+    }
+    dragStartRef.current = createGeoPoint({
+      latitude: state.position.latitude,
+      longitude: state.position.longitude,
+    });
+  }, []);
+
+  const onDrag = useCallback((state: MarkerState) => {
+    const start = dragStartRef.current;
+    if (!start) return;
+    setBoundsPolygon(buildRectPolygon(start, state.position));
+  }, []);
+
+  const onDragEnd = useCallback((state: MarkerState) => {
+    const start = dragStartRef.current;
+    dragStartRef.current = null;
+    if (!start) return;
+    const bounds = createGeoRectBounds({});
+    bounds.extend(start);
+    bounds.extend(createGeoPoint({
+      latitude: state.position.latitude,
+      longitude: state.position.longitude,
+    }));
+    mapViewState.fitBounds(bounds);
+    clearTimerRef.current = setTimeout(() => {
+      setBoundsPolygon(null);
+      clearTimerRef.current = null;
+    }, 1500);
+  }, [mapViewState]);
+
+  const marker = useMemo(
+    () => createMarkerState({
+      id: 'fitbounds_marker',
+      position: createGeoPoint(INITIAL_POSITION),
+      draggable: true,
+      onDragStart,
+      onDrag,
+      onDragEnd,
+    }),
+    [onDragStart, onDrag, onDragEnd],
   );
-
-  // Visualize the target bounds as an unfilled rectangle outline.
-  const targetBounds = useMemo<GeoRectBounds | null>(() => {
-    const preset = PRESETS.find(p => p.id === presetId);
-    return preset ? boundsForPreset(preset.cities) : null;
-  }, [presetId]);
-
-  const fit = (id: string, pad: number): void => {
-    const preset = PRESETS.find(p => p.id === id);
-    if (!preset) return;
-    mapViewState.fitBounds(boundsForPreset(preset.cities), pad);
-  };
 
   return (
     <>
-      <Markers states={markers} />
-      {targetBounds && (
-        <Polyline bounds={targetBounds} strokeColor="#1d4ed8" strokeWidth={2} geodesic={false} />
-      )}
+      <Marker state={marker} />
+      {boundsPolygon && <Polygon state={boundsPolygon} />}
       <ControlPanel title={t('Fit Bounds', '範囲にフィット')}>
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>{t('Bounds', '範囲')}</div>
-          <div className="button-grid">
-            {PRESETS.map(preset => (
-              <button
-                key={preset.id}
-                aria-pressed={presetId === preset.id}
-                style={presetId === preset.id ? { fontWeight: 700 } : undefined}
-                onClick={() => { setPresetId(preset.id); fit(preset.id, padding); }}
-              >
-                {t(preset.label, preset.labelJa)}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 12, opacity: 0.7, marginBottom: 6 }}>{t('Padding (px)', 'パディング (px)')}</div>
-          <div className="button-grid">
-            {PADDINGS.map(pad => (
-              <button
-                key={pad}
-                aria-pressed={padding === pad}
-                style={padding === pad ? { fontWeight: 700 } : undefined}
-                onClick={() => { setPadding(pad); fit(presetId, pad); }}
-              >
-                {pad}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <button onClick={() => fit(presetId, padding)}>
-          {t('Fit Bounds', '範囲にフィット')}
-        </button>
-
-        <p style={{ fontSize: 12, opacity: 0.75, margin: '8px 0 0', lineHeight: 1.5 }}>
+        <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
           {t(
-            'Tip: rotate or tilt the map first, then Fit — the current bearing/pitch is preserved.',
-            'ヒント: 先に地図を回転・傾けてから「範囲にフィット」を押すと、現在の bearing/pitch を保ったままフィットします。',
+            'Drag the marker to define a rectangle, then drop it — the map fits to that bounds.',
+            'マーカーをドラッグして範囲を指定し、ドロップすると fitBounds で地図が移動します。',
           )}
         </p>
       </ControlPanel>

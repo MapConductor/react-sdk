@@ -30,6 +30,7 @@ const StyledInfoBubblePage = lazy(() => import('./pages/infobubble/StyledInfoBub
 const MapDesignPage = lazy(() => import('./pages/map/design/MapDesignPage').then(m => ({ default: m.MapDesignPage })));
 const FlyToPage = lazy(() => import('./pages/map/flyto/FlyToPage').then(m => ({ default: m.FlyToPage })));
 const FitBoundsPage = lazy(() => import('./pages/map/fitbounds/FitBoundsPage').then(m => ({ default: m.FitBoundsPage })));
+const CameraRestrictionPage = lazy(() => import('./pages/map/camerarestriction/CameraRestrictionPage').then(m => ({ default: m.CameraRestrictionPage })));
 const TiltPage = lazy(() => import('./pages/map/tilt/TiltPage').then(m => ({ default: m.TiltPage })));
 const UISettingsPage = lazy(() => import('./pages/map/uisettings/UISettingsPage').then(m => ({ default: m.UISettingsPage })));
 const VisibleRegionPage = lazy(() => import('./pages/map/visibleregion/VisibleRegionPage').then(m => ({ default: m.VisibleRegionPage })));
@@ -76,6 +77,7 @@ function pageContent(page: string | undefined) {
     case 'map-design': return <MapDesignPage />;
     case 'fly-to': return <FlyToPage />;
     case 'fit-bounds': return <FitBoundsPage />;
+    case 'camera-restriction': return <CameraRestrictionPage />;
     case 'tilt': return <TiltPage />;
     case 'ui-settings': return <UISettingsPage />;
     case 'visible-region': return <VisibleRegionPage />;
