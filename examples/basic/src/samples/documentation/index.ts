@@ -33,6 +33,7 @@ import infoBubbleMultiple from './pages/info-bubble-multiple';
 import infoBubbleRich from './pages/info-bubble-rich';
 import geojsonBasic from './pages/geojson-basic';
 import geojsonLayer from './pages/geojson-layer';
+import kmlLayer from './pages/kml-layer';
 import heatmapLayer from './pages/heatmap-layer';
 import threejsObject from './pages/threejs-object';
 
@@ -66,6 +67,7 @@ const DOCUMENTATION: Record<string, SamplePageDoc> = {
   'info-bubble-rich': infoBubbleRich,
   'geojson-basic': geojsonBasic,
   'geojson-layer': geojsonLayer,
+  'kml-layer': kmlLayer,
   'heatmap-layer': heatmapLayer,
   'threejs-object': threejsObject,
 };
@@ -171,6 +173,11 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
     source: '@mapconductor/react-geojson-layer',
     values: ['GeoJSONLayer', 'GeoJSONLayerState'],
     types: ['GeoJSONFeatureData'],
+  },
+  {
+    source: '@mapconductor/react-kml',
+    values: ['KMLLayer', 'KMLLayerState', 'KMLParser', 'KMLLoader'],
+    types: ['KMLFeatureData'],
   },
   {
     source: '@mapconductor/react-heatmap',

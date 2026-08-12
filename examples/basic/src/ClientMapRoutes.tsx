@@ -46,6 +46,7 @@ const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage')
 const HeatmapLayerPage = lazy(() => import('./pages/heatmaplayer/HeatmapLayerPage').then(m => ({ default: m.HeatmapLayerPage })));
 const BasicGeoJSONPage = lazy(() => import('./pages/geojson/basic/BasicGeoJSONPage').then(m => ({ default: m.BasicGeoJSONPage })));
 const GeoJSONLayerPage = lazy(() => import('./pages/geojson/layer/GeoJSONLayerPage').then(m => ({ default: m.GeoJSONLayerPage })));
+const KMLLayerPage = lazy(() => import('./pages/kml/layer/KMLLayerPage').then(m => ({ default: m.KMLLayerPage })));
 const ThreeJsObjectPage = lazy(() => import('./pages/threejs/ThreeJsObjectPage').then(m => ({ default: m.ThreeJsObjectPage })));
 const HelloMapTutorialPage = lazy(() => import('./pages/hellomap/HelloMapTutorialPage').then(m => ({ default: m.HelloMapTutorialPage })));
 
@@ -102,6 +103,7 @@ function pageContent(page: string | undefined) {
     case 'heatmap-layer': return <HeatmapLayerPage />;
     case 'geojson-basic': return <BasicGeoJSONPage />;
     case 'geojson-layer': return <GeoJSONLayerPage />;
+    case 'kml-layer': return <KMLLayerPage />;
     case 'threejs-object': return <ThreeJsObjectPage />;
     default: return <MapPage />;
   }

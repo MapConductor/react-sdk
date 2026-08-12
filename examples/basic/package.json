@@ -27,6 +27,7 @@
     "@mapconductor/react-for-here": "*",
     "@mapconductor/react-for-tomtom": "*",
     "@mapconductor/react-geojson-layer": "*",
+    "@mapconductor/react-kml": "*",
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-icons": "*",
     "@mapconductor/react-marker-clustering": "*",

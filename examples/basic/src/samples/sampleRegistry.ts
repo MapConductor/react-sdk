@@ -41,6 +41,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'info-bubble-rich', label: 'Rich Bubble', labelJa: 'リッチ吹き出し', labelEs419: 'Globo enriquecido', group: 'Info Bubble' },
   { id: 'geojson-basic', label: 'GeoJSON Basic', labelJa: 'GeoJSON 基本', labelEs419: 'GeoJSON básico', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
   { id: 'geojson-layer', label: 'GeoJSON Layer', labelJa: 'GeoJSON レイヤー', labelEs419: 'Capa GeoJSON', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
+  { id: 'kml-layer', label: 'KML Layer', labelJa: 'KML レイヤー', labelEs419: 'Capa KML', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
   { id: 'heatmap-layer', label: 'Heatmap Layer', labelJa: 'ヒートマップレイヤー', labelEs419: 'Capa de mapa de calor', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
   { id: 'threejs-object', label: 'Three.js Object (web only)', labelJa: 'Three.js (web only)', labelEs419: 'Objeto Three.js (solo web)', group: 'Extensions', unavailableProviders: ['cesium'] },
 ];

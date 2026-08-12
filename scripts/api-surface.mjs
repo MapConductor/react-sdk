@@ -55,6 +55,7 @@ const PACKAGES = [
   "reactnative-for-arcgis",
   "reactnative-for-here",
   "react-geojson-layer",
+  "react-kml",
   "react-heatmap",
   "react-marker-clustering",
 ];
