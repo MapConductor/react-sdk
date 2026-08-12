@@ -121,7 +121,7 @@ function TiltCameraDiagram({ tilt }: { tilt: number }) {
   ].map(p => p.join(',')).join(' ');
 
   return (
-    <svg width="100%" viewBox={`0 0 ${width} ${height}`} style={{ display: 'block', marginBottom: 4 }}>
+    <svg className="tilt-camera-diagram" width="100%" viewBox={`0 0 ${width} ${height}`} style={{ marginBottom: 4 }}>
       <line x1={width * 0.08} y1={groundY} x2={width * 0.94} y2={groundY} stroke="#E4E0EC" strokeWidth={3} strokeLinecap="round" />
       <line x1={cameraX} y1={cameraY} x2={cameraX} y2={groundY} stroke="#8E879A" strokeWidth={2} />
       <circle cx={cameraX} cy={cameraY} r={8} fill="#5DA7FF" />
