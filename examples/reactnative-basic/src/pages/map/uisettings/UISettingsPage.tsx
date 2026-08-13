@@ -7,6 +7,7 @@ import {
   MapUISettings,
 } from '@mapconductor/js-sdk-core';
 
+import { MapLibreDesign } from '@mapconductor/reactnative-for-maplibre';
 import { MapViewContainer } from '../../MapViewContainer';
 import { useMapStateRef } from '../../../providers/useMapStateRef';
 import type { MapProvider } from '../../../providers/types';
@@ -50,6 +51,9 @@ export function UISettingsPage({ provider }: { provider: MapProvider }) {
         cameraPosition={INIT_CAMERA}
         mapId="ui-settings"
         style={styles.map}
+        // MapLibre の既定 DemoTiles はこの地域のタイルを持たず真っ白になるため、
+        // 他の RN サンプル（TiltPage 等）と同じく OsmBright を使う。
+        designTypes={{ maplibre: MapLibreDesign.OsmBright }}
         onStateReady={onStateReady}
       />
 
