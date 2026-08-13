@@ -37,16 +37,18 @@ export function hitTestGeometry(wx: number, wy: number, geometry: WorldGeometry,
         case 'Line':
             return hitTestRings(wx, wy, geometry.rings, lineTolSq);
         case 'Polygon': {
-            // lineTolSq が指定されたときは「輪郭に近いか」を見る（線として扱う）。
+            // 内部（穴を除く）はタップ位置そのものを当たりにする。内部でなければ、
+            // lineTolSq が指定されているときに限り輪郭の近傍（すぐ外側のタップ）も拾う。
             // Android の `lineTolSq != null` と同じく、JS の null も「未指定」扱いにする。
+            const rings = geometry.rings;
+            const inside = rings.length > 0 &&
+                pointInRing(wx, wy, rings[0].coords) &&
+                !rings.slice(1).some(hole => pointInRing(wx, wy, hole.coords));
+            if (inside) return { wx, wy, distanceSq: 0 };
             if (lineTolSq != null) {
                 return hitTestRings(wx, wy, geometry.rings, lineTolSq);
             }
-            const rings = geometry.rings;
-            const containsPoint = rings.length > 0 &&
-                pointInRing(wx, wy, rings[0].coords) &&
-                !rings.slice(1).some(hole => pointInRing(wx, wy, hole.coords));
-            return containsPoint ? { wx, wy, distanceSq: 0 } : null;
+            return null;
         }
         case 'Collection': {
             let best: GeometryHit | null = null;

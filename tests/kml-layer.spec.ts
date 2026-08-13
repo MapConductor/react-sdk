@@ -452,6 +452,50 @@ test.describe('KMLLoader', () => {
     });
 });
 
+// ─── KMLHitTester (polygon) ──────────────────────────────────────────────────
+
+// ポリゴンのヒット判定。ピクセル許容差（lineTolSq）を渡しても内部（穴を除く）は
+// 当たり、輪郭のすぐ外側は許容差の範囲で拾い、穴の中と遠方は外れる。
+// android-sdk / ios-sdk の同名テストと同じ期待値。
+test.describe('KMLHitTester polygon', () => {
+    test('interior hits, hole and far-outside miss, near-outline hits', async ({ page }) => {
+        const result = await evalInKml(page, (kml) => {
+            const polygonKml = `<?xml version="1.0"?><kml><Document><Placemark><name>poly</name>
+                <Polygon>
+                  <outerBoundaryIs><LinearRing><coordinates>
+                    139.744,35.688 139.762,35.688 139.762,35.676 139.744,35.676 139.744,35.688
+                  </coordinates></LinearRing></outerBoundaryIs>
+                  <innerBoundaryIs><LinearRing><coordinates>
+                    139.750,35.685 139.756,35.685 139.756,35.680 139.750,35.680 139.750,35.685
+                  </coordinates></LinearRing></innerBoundaryIs>
+                </Polygon></Placemark></Document></kml>`;
+            const features = kml.KMLParser.parse(polygonKml);
+            const renderer = new kml.KMLTileRenderer(512);
+            renderer.update(features, [], { strokeColor: 1, fillColor: 2, strokeWidth: 3, pointRadius: 8 });
+            // processClick(point, 12, 13) が計算するのと同じ許容差
+            const worldSize = 512 * Math.pow(2, 13);
+            const lineTolSq = (12 / worldSize) ** 2;
+            const name = (hit: any) => hit?.feature?.properties?.name ?? null;
+            return {
+                interiorWithTol: name(renderer.hitTest(139.746, 35.683, lineTolSq, undefined)),
+                holeWithTol: name(renderer.hitTest(139.753, 35.6825, lineTolSq, undefined)),
+                nearOutlineWithTol: name(renderer.hitTest(139.7435, 35.683, lineTolSq, undefined)),
+                farOutsideWithTol: name(renderer.hitTest(139.735, 35.683, lineTolSq, undefined)),
+                interiorDefault: name(renderer.hitTest(139.746, 35.683)),
+                holeDefault: name(renderer.hitTest(139.753, 35.6825)),
+                interiorNullTol: name(renderer.hitTest(139.746, 35.683, null, null)),
+            };
+        });
+        expect(result.interiorWithTol).toBe('poly');
+        expect(result.holeWithTol).toBeNull();
+        expect(result.nearOutlineWithTol).toBe('poly');
+        expect(result.farOutsideWithTol).toBeNull();
+        expect(result.interiorDefault).toBe('poly');
+        expect(result.holeDefault).toBeNull();
+        expect(result.interiorNullTol).toBe('poly');
+    });
+});
+
 // ─── KMLStyleProvider ────────────────────────────────────────────────────────
 
 test.describe('DefaultKMLStyleProvider', () => {
