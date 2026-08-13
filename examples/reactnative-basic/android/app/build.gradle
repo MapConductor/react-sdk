@@ -90,7 +90,7 @@ android {
     namespace 'com.mapconductor.basic'
     defaultConfig {
         applicationId 'com.mapconductor.basic'
-        minSdkVersion 26
+        minSdkVersion 28  // com.mapconductor:for-arcgis:1.2.0 (ArcGIS Maps SDK 300.x) が minSdk 28 を要求
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
@@ -187,5 +187,15 @@ dependencies {
         implementation("com.facebook.react:hermes-android")
     } else {
         implementation jscFlavor
+    }
+}
+
+// MapLibre Android 13.x の AAR は prefab メタデータで「共有ライブラリ + 静的 STL」を
+// 宣言しており、RN(New Architecture) の CMake 構成が prefab 検査 (CXX1211) で落ちる。
+// アプリの C++ コードは MapLibre の prefab を一切使わないので、CMake が読む
+// compile classpath からだけ除外する（runtime classpath には残るため実行時は正常）。
+configurations.configureEach { configuration ->
+    if (configuration.name.endsWith('CompileClasspath')) {
+        configuration.exclude group: 'org.maplibre.gl', module: 'android-sdk'
     }
 }
