@@ -80,7 +80,7 @@ PODS:
   - MapConductorForArcGIS (1.2.0):
     - MapConductorCore
   - MapConductorForGoogleMaps (1.2.0):
-    - GoogleMaps (~> 10.0)
+    - GoogleMaps (< 12.0, >= 10.15)
     - MapConductorCore
   - MapConductorForHERE (1.2.0):
     - MapConductorCore
@@ -2438,14 +2438,14 @@ SPEC CHECKSUMS:
   FBLazyVector: b3e7ad108f0d882e30445c5527d774e3fd432f3d
   GoogleMaps: 306f6ea18af2dc9ef85d98b0d1b41bc7d506df5f
   hermes-engine: fb6a0b9dffad1faa9bfb366cf22f07e33cee658b
-  MapConductorCore: c06836381dd2babbb2217578956382919c13c644
+  MapConductorCore: 367226825f20f7ef4582991fe8cdb7a605accdc8
   MapConductorForArcGIS: bce1354509c7766c82ece579a3c72c76590b0a39
-  MapConductorForGoogleMaps: 3f26d255285688e7ea5cc81c4046de92a1ff1616
-  MapConductorForHERE: 50e8eb2bdb481838b8193e72236533d506dbbb1d
-  MapConductorForMapLibre: 6c06ce79bf30b2ef07cb37dab15cbb824640f5a4
-  MapConductorGeoJSON: 0111f6eab3cede34ee99b48ed3fc25e06cdb12be
-  MapConductorHeatmap: 3a76fd745bccfd405ce2bcc380e83d6d9b644c79
-  MapConductorMarkerClustering: 358374b6f4b301f42086a93805ccdd29b84aaaa5
+  MapConductorForGoogleMaps: d49da281ab975b4281774273991a9f8600d538c0
+  MapConductorForHERE: 27821cc4ad107c3d7ba55361565dfa8bcdf30048
+  MapConductorForMapLibre: 5b3d60b62b6c5bb46d68bd4bd21f17e51d801fb4
+  MapConductorGeoJSON: cf966e0a16c42ef534557ce178c12942f39ab170
+  MapConductorHeatmap: ccb5f67c2f7c47edd64fe99d61726ceda57df169
+  MapConductorMarkerClustering: a83916674bf6ab8ffcf0b0266c1d29acfa38ab0a
   MapConductorReactForArcGIS: 381d0726a4e7fd8eda628f0d84710aa3ca1ee1c4
   MapConductorReactForGoogleMaps: 81267038f5728c972e5555cc8665af38d236681b
   MapConductorReactForHere: 796fd922ba460ff4bcfb2cc4c09418012bf93ee4

@@ -6,6 +6,7 @@ import { CameraSyncPage } from 'src/pages/map/camerasync/CameraSyncPage';
 import { MapDesignPage } from 'src/pages/map/design/MapDesignPage';
 import { FlyToPage } from 'src/pages/map/flyto/FlyToPage';
 import { TiltPage } from 'src/pages/map/tilt/TiltPage';
+import { UISettingsPage } from 'src/pages/map/uisettings/UISettingsPage';
 import { VisibleRegionPage } from 'src/pages/map/visibleregion/VisibleRegionPage';
 import { FitBoundsPage } from 'src/pages/map/fitbounds/FitBoundsPage';
 import { SimpleInfoBubblePage } from 'src/pages/infobubble/SimpleInfoBubblePage';
@@ -53,6 +54,8 @@ export function MapScreen({ provider, page }: { provider: MapProvider; page: Sam
       return <FlyToPage provider={provider} />;
     case 'tilt':
       return <TiltPage provider={provider} />;
+    case 'ui-settings':
+      return <UISettingsPage provider={provider} />;
     case 'visible-region':
       return <VisibleRegionPage provider={provider} />;
     case 'fit-bounds':

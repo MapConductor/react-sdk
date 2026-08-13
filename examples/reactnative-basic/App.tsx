@@ -27,6 +27,7 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map-design', label: 'Map Design', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', group: 'Map' },
   { id: 'tilt', label: 'Tilt', group: 'Map' },
+  { id: 'ui-settings', label: 'UI Settings', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', group: 'Map' },
   { id: 'fit-bounds', label: 'Fit Bounds', group: 'Map' },
   { id: 'camera-sync', label: 'Camera Sync', group: 'Map', showProviderSelector: false },
