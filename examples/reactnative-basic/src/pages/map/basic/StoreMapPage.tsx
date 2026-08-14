@@ -80,7 +80,13 @@ function StoreInfoView({ info }: { info: StoreInfo }) {
   };
 
   return (
-    <View style={styles.infoBubbleContent}>
+    <View
+      style={styles.infoBubbleContent}
+      // 実機の UI テスト（ios-uitests/）が「吹き出しが出たか」をこれで判定する。
+      // 中の Text は要素ツリーで名前の無い Other になり、外から見えない。
+      accessible
+      accessibilityLabel={`InfoBubble ${info.name}`}
+    >
       <Text style={styles.infoTitle} numberOfLines={2}>
         {info.name}
       </Text>

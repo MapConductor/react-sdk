@@ -69,6 +69,10 @@ function PostOfficeInfoView({
       style={styles.infoBubbleContent}
       activeOpacity={0.78}
       onPress={() => onZoom(marker)}
+      // 実機の UI テスト（ios-uitests/）が「吹き出しが出たか」をこれで判定する。
+      // 中の Text は要素ツリーで名前の無い Other になり、外から見えない。
+      accessibilityRole="button"
+      accessibilityLabel={`InfoBubble ${info.name}`}
     >
       <Text style={styles.infoTitle} numberOfLines={2}>
         {info.name}

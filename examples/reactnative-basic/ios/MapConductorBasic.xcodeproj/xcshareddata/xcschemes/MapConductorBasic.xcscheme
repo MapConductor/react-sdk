@@ -38,6 +38,16 @@
                ReferencedContainer = "container:MapConductorBasic.xcodeproj">
             </BuildableReference>
          </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "84BC0D1BE1840D2C06D71692"
+               BuildableName = "MapConductorBasicUITests.xctest"
+               BlueprintName = "MapConductorBasicUITests"
+               ReferencedContainer = "container:MapConductorBasic.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
