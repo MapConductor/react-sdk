@@ -16,10 +16,11 @@ export function LongdoMapView(props: LongdoMapViewProps) {
       {...props}
       nativeComponent={NativeLongdoMapView}
       mapDesignValue={props.state.mapDesignType.id}
-      // Longdo は WebView（Longdo Map API3）ベースで、ネイティブのホルダーは
-      // 同期投影を持たない（toScreenOffset が null）。地図は Web Mercator なので
-      // 画面座標は JS 側で計算する。これを指定しないと InfoBubble が出ない。
-      screenProjection="webMercator"
+      // 投影は JS ではなくネイティブ側（LongdoMapHost）が持つ。ホルダーの
+      // toScreenOffset は null を返すが、ホストは自前のカメラ計算で投影できていて、
+      // SwiftUI / Compose 版の InfoBubble もその経路で動いている。
+      // ここで JS の投影に切り替えると、同じ計算が 2 か所に増えるうえ、
+      // タップの当たり判定（ネイティブ側にしかない）と食い違う。
       createController={(ref, camera) => new LongdoViewController(ref, camera)}
     />
   );

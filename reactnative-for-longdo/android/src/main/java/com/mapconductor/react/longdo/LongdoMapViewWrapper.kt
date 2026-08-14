@@ -85,12 +85,12 @@ private class LongdoReactNativeHost : MapConductorReactNativeHost {
     }
 
     /**
-     * Longdo のホルダーは同期投影を持たない（WebView ブリッジ越しのため）。
-     * **黙って null を返しているのではなく、これがこの SDK の性質**である。
-     * RN 側は JS で Web Mercator の投影を行うので InfoBubble は出る
-     * （`LongdoMapView.native.tsx` の `screenProjection="webMercator"`）。
+     * 投影はコントローラのホルダーが持つ（コアの `WebMercatorScreenProjection`）。
+     * ここで JS 側の投影に逃がさないこと。同じ式が 2 か所に増えるうえ、
+     * タップの当たり判定（ネイティブ側にしかない）と食い違う。
      */
-    override fun toScreenOffset(position: GeoPointInterface): Offset? = null
+    override fun toScreenOffset(position: GeoPointInterface): Offset? =
+        controller?.holder?.toScreenOffset(position)
 
     override fun destroy() {
         controller?.destroy()

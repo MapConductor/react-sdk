@@ -78,12 +78,13 @@ final class LongdoReactNativeHost: MCReactNativeMapHost {
         state.uiSettings = settings
     }
 
-    /// Longdo のホルダーは同期投影を持たない（WebView ブリッジ越しのため）。
-    /// **黙って nil を返しているのではなく、これがこの SDK の性質**である。
-    /// RN 側は JS で Web Mercator の投影を行うので InfoBubble は出る
-    /// （`LongdoMapView.native.tsx` の `screenProjection="webMercator"`）。android と同じ。
+    /// **ホルダーではなくホストへ聞く。**
+    /// `LongdoMapViewHolder.toScreenOffset` は WebView ブリッジに同期 API が無いので
+    /// nil を返すが、投影そのものは `LongdoMapHost` のカメラ計算で成立していて、
+    /// SwiftUI 版の InfoBubble もマーカー追従もその経路で動いている。
+    /// ここでホルダーを見ると、動いている投影を捨てて RN だけ機能が落ちる。
     func mcToScreenOffset(_ position: GeoPointProtocol) -> CGPoint? {
-        state.getMapViewHolder()?.toScreenOffset(position: position)
+        mapHost.toScreenOffset(position)
     }
 
     func mcMakeLocalExtensionRenderer(
