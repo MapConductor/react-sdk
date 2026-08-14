@@ -30,6 +30,50 @@ const withGoogleMapsApiKeys: ConfigPlugin = (config) => {
   });
 };
 
+/**
+ * Longdo Map API3 のキーを AndroidManifest と Info.plist へ入れる。
+ * ネイティブ側（`LongdoInitSDK`）が Android は `longdo.map.key`、
+ * iOS は `LONGDO_API_KEY` を読む。
+ *
+ * **どちらもプレースホルダしか書かない。** prebuild が生成する
+ * AndroidManifest.xml / Info.plist は git 管理下なので、鍵を直に入れると漏れる。
+ * 実値は android が gradle の manifestPlaceholders、iOS が xcodebuild のビルド設定
+ * （`LONGDO_API_KEY=...`）から来る。どちらも .env.local（git 管理外）が出所。
+ */
+const withLongdoApiKey: ConfigPlugin = (config) => {
+  config = withInfoPlist(config, (mod) => {
+    // Xcode は Info.plist の値に含まれる $(...) をビルド設定で展開する。
+    // 展開されなかった場合は `LongdoInitSDK.resolveApiKey` が "$(" を見て弾く
+    // （プレースホルダのまま API キーとして使われるのを防ぐため）。
+    mod.modResults.LONGDO_API_KEY = '$(LONGDO_API_KEY)';
+    return mod;
+  });
+
+  return withAndroidManifest(config, (mod) => {
+    // 値そのものではなく manifest プレースホルダを入れる。prebuild で生成される
+    // AndroidManifest.xml は git 管理下なので、鍵を直接書くと漏れる。
+    // 実際の値は app/build.gradle が manifestPlaceholders で埋める。
+    const apiKey = '${LONGDO_API_KEY}';
+
+    const application = mod.modResults.manifest.application![0];
+    application['meta-data'] ??= [];
+    const metadata = application['meta-data'];
+    const entry = metadata.find((item) => item.$?.['android:name'] === 'longdo.map.key');
+    if (entry) {
+      entry.$!['android:value'] = apiKey;
+    } else {
+      metadata.push({
+        $: {
+          'android:name': 'longdo.map.key',
+          'android:value': apiKey,
+          'tools:replace': 'android:value',
+        },
+      });
+    }
+    return mod;
+  });
+};
+
 export default {
   expo: {
     name: 'MapConductor Basic',
@@ -58,6 +102,7 @@ export default {
     },
     plugins: [
       withGoogleMapsApiKeys,
+      withLongdoApiKey,
       // Link marker images as native resources. iOS resolves their asset-catalog
       // names through bundle:// URIs; Android can keep using expo-asset file URIs.
       ['expo-asset', { assets: ['./assets/images'] }],

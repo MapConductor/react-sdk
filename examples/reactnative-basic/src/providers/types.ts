@@ -13,8 +13,9 @@ import type { GoogleMapDesignType } from '@mapconductor/reactnative-for-googlema
 import type { HereMapDesignType } from '@mapconductor/reactnative-for-here';
 import type { ArcGISDesignType } from '@mapconductor/reactnative-for-arcgis';
 import type { TemplateMapDesignType } from '@mapconductor/reactnative-for-template';
+import type { LongdoMapDesignType } from '@mapconductor/reactnative-for-longdo';
 
-export type MapProvider = 'maplibre' | 'google-maps' | 'here' | 'arcgis' | 'template';
+export type MapProvider = 'maplibre' | 'google-maps' | 'here' | 'arcgis' | 'template' | 'longdo';
 
 export type CommonMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 
@@ -24,6 +25,7 @@ export type ProviderDesignOverrides = {
   here?: HereMapDesignType;
   arcgis?: ArcGISDesignType;
   template?: TemplateMapDesignType;
+  longdo?: LongdoMapDesignType;
 };
 
 export interface ProviderViewProps {

@@ -2,6 +2,7 @@ import React from 'react';
 import type { ProviderDesignOverrides, ProviderViewProps, MapProvider } from '../providers/types';
 import { MapLibreProviderView } from '../providers/MapLibreProviderView';
 import { TemplateProviderView } from '../providers/TemplateProviderView';
+import { LongdoProviderView } from '../providers/LongdoProviderView';
 import { GoogleMapsProviderView } from '../providers/GoogleMapsProviderView';
 import { HereProviderView } from '../providers/HereProviderView';
 import { ArcGISProviderView } from '../providers/ArcGISProviderView';
@@ -15,6 +16,8 @@ interface MapViewContainerProps extends ProviderViewProps {
 
 export function MapViewContainer({ provider, designTypes, ...rest }: MapViewContainerProps) {
   switch (provider) {
+    case 'longdo':
+      return <LongdoProviderView mapDesignType={designTypes?.longdo} {...rest} />;
     case 'template':
       return <TemplateProviderView mapDesignType={designTypes?.template} {...rest} />;
     case 'maplibre':

@@ -82,6 +82,12 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
+  // Longdo Map API3 のキー。値は .env.local（git 管理外）から来る。
+  // manifest には ${LONGDO_API_KEY} のプレースホルダだけを置き、鍵は git に入れない。
+  defaultConfig {
+    manifestPlaceholders += [LONGDO_API_KEY: (System.getenv('LONGDO_API_KEY') ?: '')]
+  }
+
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -198,4 +204,11 @@ configurations.configureEach { configuration ->
     if (configuration.name.endsWith('CompileClasspath')) {
         configuration.exclude group: 'org.maplibre.gl', module: 'android-sdk'
     }
+}
+
+// Longdo Map SDK（com.longdo.map:sdk3）は gson を AAR の中に同梱しており、外から入る
+// gson と dex 時に衝突する（android-sdk の example-app も同じ対処をしている）。
+// 同梱側は record / sql アダプタを含む新しめの版なので、外側を落とす。
+configurations.configureEach {
+  exclude group: 'com.google.code.gson', module: 'gson'
 }

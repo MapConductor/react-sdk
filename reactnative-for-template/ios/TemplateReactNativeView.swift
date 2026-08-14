@@ -49,7 +49,8 @@ final class TemplateReactNativeHost: MCReactNativeMapHost {
     }
 
     func mcSetMapDesign(id: String?) {
-        state.mapDesignType = TemplateDesign(id: id ?? "plain")
+        // 本物のプロバイダは `XxxDesign.fromId(id)` のように SDK のデザイン型へ訳す。
+        state.mapDesignType = id.map { TemplateMapDesignType(id: $0) } ?? TemplateMapDesign.standard
     }
 
     func mcMoveCamera(_ camera: MapCameraPosition, durationMillis: Int64?) {

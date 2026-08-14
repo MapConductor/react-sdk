@@ -61,6 +61,12 @@ target 'MapConductorBasic' do
   pod 'MapConductorForArcGIS', :path => '../../../../ios-sdk/ios-for-arcgis'
   pod 'MapConductorMarkerClustering', :path => '../../../../ios-sdk/ios-marker-clustering'
   pod 'MapConductorForMapLibre', :path => '../../../../ios-sdk/ios-for-maplibre'
+  # 雛形。実 SDK を持たないが、サンプルに載せておかないと腐る（android の
+  # `for-template` を publishToMavenLocal しているのと同じ理由）。
+  pod 'MapConductorForTemplate', :path => '../../../../ios-sdk/ios-for-template'
+  # MapConductorForLongdo も同じ理由の path pod。ベンダの LongdoMapFramework は dynamic で
+  # trunk にも出ているので、その podspec 側の s.dependency から普通に降ってくる。
+  pod 'MapConductorForLongdo', :path => '../../../../ios-sdk/ios-for-longdo'
   pod 'MapConductorHeatmap', :path => '../../../../ios-sdk/ios-heatmap'
   pod 'MapConductorGeoJSON', :path => '../../../../ios-sdk/ios-geojson-layer'
 

@@ -1,0 +1,48 @@
+{
+  "name": "@mapconductor/reactnative-for-longdo",
+  "version": "0.1.3",
+  "private": true,
+  "description": "Runnable reference bridge for the MapConductor React Native SDK - copy this to expose an existing native driver to React Native.",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "android",
+    "ios",
+    "MapConductorReactForLongdo.podspec",
+    "react-native.config.js",
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts --format cjs,esm --watch",
+    "clean": "rm -rf dist",
+    "test": "echo 'No tests yet'"
+  },
+  "keywords": ["maps", "longdo", "react-native", "typescript"],
+  "author": "MapConductor",
+  "license": "Apache2",
+  "peerDependencies": {
+    "@mapconductor/js-sdk-core": "^0.1.3",
+    "react": "^19.2.0",
+    "react-native": ">=0.73.0"
+  },
+  "dependencies": {
+    "@mapconductor/js-sdk-core": "^0.1.3",
+    "@mapconductor/js-sdk-react": "^0.1.3",
+    "@mapconductor/react-for-longdo": "^0.1.3"
+  },
+  "devDependencies": {
+    "react": "^19.2.7",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3"
+  }
+}

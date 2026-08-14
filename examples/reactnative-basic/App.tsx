@@ -76,7 +76,9 @@ function Header({
           ? 'ArcGISMapView'
           : provider === 'template'
             ? 'TemplateMapView'
-            : 'MapLibreMapView';
+            : provider === 'longdo'
+              ? 'LongdoMapView'
+              : 'MapLibreMapView';
 
   const selectProvider = (nextProvider: MapProvider) => {
     onProviderChange(nextProvider);
@@ -196,6 +198,20 @@ function Header({
                     ]}
                   >
                     TemplateMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'longdo' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('longdo')}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'longdo' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    LongdoMapView
                   </Text>
                 </TouchableOpacity>
               </View>

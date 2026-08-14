@@ -29,6 +29,8 @@ allprojects {
     // published only here - reactnative-for-arcgis/android/build.gradle declares this repo too,
     // but the :app project's own dependency resolution needs it listed at this (root) level.
     maven { url 'https://esri.jfrog.io/artifactory/arcgis' }
+    // com.mapconductor:for-longdo は com.longdo.map:sdk3 に依存する。ここでしか配布されていない。
+    maven { url 'https://maven.longdo.com/artifactory/libs-release-public' }
   }
 }
 

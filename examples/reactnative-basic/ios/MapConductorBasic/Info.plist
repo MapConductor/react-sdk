@@ -35,6 +35,8 @@
 	<string>1</string>
 	<key>GMSApiKey</key>
 	<string>AIzaSyCK52WVCJfSigjrp_VudgbNM1yZ49SKDV0</string>
+	<key>LONGDO_API_KEY</key>
+	<string>$(LONGDO_API_KEY)</string>
 	<key>LSMinimumSystemVersion</key>
 	<string>12.0</string>
 	<key>LSRequiresIPhoneOS</key>
