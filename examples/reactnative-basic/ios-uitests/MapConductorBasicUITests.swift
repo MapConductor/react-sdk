@@ -152,7 +152,7 @@ final class MapConductorBasicUITests: XCTestCase {
         waitForMapToSettle(seconds: 12)
         attach(name: "s01-before-tap")
 
-        app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         attach(name: "s02-right-after-tap")
         Thread.sleep(forTimeInterval: 1.0)
         attach(name: "s03-after-1s")
@@ -195,6 +195,17 @@ final class MapConductorBasicUITests: XCTestCase {
         item.tap()
     }
 
+    /// 座標タップの基準。**`app` ではなく window を使うこと。**
+    ///
+    /// iPad で iPhone 互換ウィンドウ（実測 375x667 論理 / 613x1092 画面）に入ると、
+    /// `app.coordinate(withNormalizedOffset:)` は論理サイズで正規化した点を
+    /// **画面座標として**配送してしまい、二重変換で別の場所に落ちる。
+    /// 中心 (0.5,0.5) を叩いたつもりが論理 (46.8,172.6)＝オアフ島北西の海上だった
+    /// （実機のログで確認）。要素のタップが効くのは、要素の frame も同じ空間で
+    /// 報告されて誤差が相殺されるため。
+    /// ios-sdk の既存 UI テスト（LongdoInfoBubbleUITests）も window を基準にしている。
+    private var mapAnchor: XCUIElement { app.windows.firstMatch }
+
     // MARK: - マーカーのタップ
 
     /// 地図の上を何点か叩いて、InfoBubble が出るまで試す。
@@ -223,7 +234,7 @@ final class MapConductorBasicUITests: XCTestCase {
         candidates.sort { distanceFromCenter($0) < distanceFromCenter($1) }
 
         for (index, offset) in candidates.enumerated() {
-            app.coordinate(withNormalizedOffset: offset).tap()
+            mapAnchor.coordinate(withNormalizedOffset: offset).tap()
             // 当たっていれば吹き出しはすぐ出る。長く待つと 25 点で数分かかる。
             if bubbleExists(matching: text, timeout: 1.5) {
                 attach(name: "tap-\(label)-hit-\(index)")
