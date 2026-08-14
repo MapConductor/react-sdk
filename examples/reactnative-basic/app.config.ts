@@ -35,7 +35,9 @@ export default {
     name: 'MapConductor Basic',
     slug: 'mapconductor-basic',
     version: '1.0.0',
-    orientation: 'portrait',
+    // 横向きにも対応する。地図は縦横比が変わるので、回転はプロバイダごとの
+    // リサイズ経路を通す数少ないサンプルでもある。
+    orientation: 'default',
     platforms: ['ios', 'android'],
     // Include the marker images in standalone/native builds.  Metro's `require`
     // references are still used by the page, while expo-asset copies these
