@@ -74,7 +74,9 @@ function Header({
         ? 'HereMapView'
         : provider === 'arcgis'
           ? 'ArcGISMapView'
-          : 'MapLibreMapView';
+          : provider === 'template'
+            ? 'TemplateMapView'
+            : 'MapLibreMapView';
 
   const selectProvider = (nextProvider: MapProvider) => {
     onProviderChange(nextProvider);
@@ -180,6 +182,20 @@ function Header({
                     ]}
                   >
                     ArcGISMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'template' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('template')}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'template' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    TemplateMapView
                   </Text>
                 </TouchableOpacity>
               </View>

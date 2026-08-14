@@ -26,6 +26,7 @@
     "reactnative-for-maplibre/",
     "reactnative-for-arcgis/",
     "reactnative-for-here/",
+    "reactnative-for-template/",
     "react-geojson-layer/",
     "react-kml/",
     "react-heatmap/",

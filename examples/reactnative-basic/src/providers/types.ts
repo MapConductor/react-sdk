@@ -12,8 +12,9 @@ import type { MapLibreMapDesignType } from '@mapconductor/reactnative-for-maplib
 import type { GoogleMapDesignType } from '@mapconductor/reactnative-for-googlemaps';
 import type { HereMapDesignType } from '@mapconductor/reactnative-for-here';
 import type { ArcGISDesignType } from '@mapconductor/reactnative-for-arcgis';
+import type { TemplateMapDesignType } from '@mapconductor/reactnative-for-template';
 
-export type MapProvider = 'maplibre' | 'google-maps' | 'here' | 'arcgis';
+export type MapProvider = 'maplibre' | 'google-maps' | 'here' | 'arcgis' | 'template';
 
 export type CommonMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 
@@ -22,6 +23,7 @@ export type ProviderDesignOverrides = {
   'google-maps'?: GoogleMapDesignType;
   here?: HereMapDesignType;
   arcgis?: ArcGISDesignType;
+  template?: TemplateMapDesignType;
 };
 
 export interface ProviderViewProps {
