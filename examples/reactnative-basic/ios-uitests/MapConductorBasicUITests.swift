@@ -165,6 +165,49 @@ final class MapConductorBasicUITests: XCTestCase {
         XCTAssertTrue(found, "Store Map: 中心のマーカーを 1 回叩いても InfoBubble が出ない")
     }
 
+    /// InfoBubble が地図のパンに追従するかを見る。
+    ///
+    /// 吹き出しは JS が描き、位置はネイティブが `infoBubbleScreenPositions` として
+    /// 送る。カメラが動くたびに送り直されないと、地図だけ動いて吹き出しが取り残される。
+    func testInfoBubbleFollowsPan() throws {
+        selectProvider("LongdoMapView")
+        openPage("Store Map")
+        waitForMapToSettle(seconds: 12)
+
+        mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        let bubble = app.descendants(matching: .any)
+            .matching(NSPredicate(format: "label BEGINSWITH 'InfoBubble'")).firstMatch
+        XCTAssertTrue(bubble.waitForExistence(timeout: 5), "マーカータップで吹き出しが出ない")
+        let before = bubble.frame
+        attach(name: "p01-bubble-open")
+
+        // 地図をパンする。気をつける点が 2 つある。
+        //  - **吹き出しの上を通らないこと。** 吹き出しは RN のビューなので
+        //    ジェスチャを吸う（実際に始点と終点の片方が重なって空振りした）。
+        //  - **速いドラッグは WebView に取られない。** ゆっくり引いて少し止める。
+        let from = mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.22, dy: 0.84))
+        let to = mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.72, dy: 0.84))
+        from.press(
+            forDuration: 0.6,
+            thenDragTo: to,
+            withVelocity: .slow,
+            thenHoldForDuration: 0.4
+        )
+        waitForMapToSettle(seconds: 3)
+        attach(name: "p02-after-pan")
+
+        XCTAssertTrue(bubble.exists, "パンしたら吹き出しが消えた")
+        let after = bubble.frame
+        NSLog("[MCBubbleTrace] bubbleFrame before=\(before) after=\(after)")
+
+        // 地図が動いたのに吹き出しが 1pt も動かないなら、追従していない。
+        let moved = abs(after.origin.x - before.origin.x) + abs(after.origin.y - before.origin.y)
+        XCTAssertGreaterThan(
+            moved, 1.0,
+            "地図をパンしても InfoBubble が動かない（before=\(before) after=\(after)）"
+        )
+    }
+
     // MARK: - 画面操作
 
     /// 右上のプロバイダ切り替え。
