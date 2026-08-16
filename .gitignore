@@ -54,7 +54,10 @@ dist/*
 !react-for-template/test/*.mjs
 !examples/basic/server.mjs
 !examples/basic/scripts/generate-static.mjs
-!scripts/link-local-workspaces.mjs
+# scripts/ はソースしか置かないので丸ごと追跡する。1 本ずつ negation を足す運用だと
+# 足し忘れたスクリプトが `git add -A` で無言のまま無視され、CI のチェックアウトにだけ
+# 存在しない状態になる（unlink-local-workspaces.mjs で実際に踏んだ）。
+!scripts/*.mjs
 *.cjs
 !eslint.config.cjs
 dist/*.d.ts
