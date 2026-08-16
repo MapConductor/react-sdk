@@ -19,7 +19,10 @@ concurrency:
 jobs:
   publish-dry-run:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    # Publishing itself takes ~3 min. The rest of the budget is the anonymous
+    # visibility gate, which waits up to 15 min per newly-created package name
+    # (already-published ones answer on the first try and cost nothing).
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -212,8 +215,13 @@ jobs:
             # even though publish already returned success (react-geojson,
             # react-kml and react-for-mappls all 404'd for ~5 minutes in 0.2.0),
             # so retry instead of failing the release on propagation lag.
+            #
+            # 10 attempts (5 min) was still too short: react-for-arcgis failed
+            # this gate and was readable minutes later. The gate exists to catch
+            # "never created", so err toward waiting rather than crying wolf -
+            # a false failure here teaches people to ignore a real one.
             code=000
-            for attempt in $(seq 1 10); do
+            for attempt in $(seq 1 30); do
               code="$(curl -s -o /dev/null -w '%{http_code}' \
                 "https://registry.npmjs.org/$(printf '%s' "${package}" | sed 's|/|%2F|')")"
               [ "${code}" = "200" ] && break
