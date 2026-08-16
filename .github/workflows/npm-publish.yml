@@ -62,11 +62,18 @@ jobs:
         run: |
           set -euo pipefail
           if grep -rn '"@mapconductor/[a-z0-9-]*": "\*"' --include=package.json . \
-               | grep -v node_modules | grep -v '^\./\?examples/'; then
+               | grep -v node_modules | grep -vE '(^|\./)examples/'; then
             echo "::error::internal dependency left as \"*\" outside examples/"
             exit 1
           fi
           echo "no wildcard internal dependencies outside examples/"
+
+      # Inspect the actual tarballs before anything is uploaded: version,
+      # license, internal dep pins, and that each one really contains dist/.
+      # react-for-mapkit@0.1.3 shipped with no code because it was missing from
+      # build:packages, and npm published it without complaint.
+      - name: Preflight publishable packages
+        run: node scripts/preflight-publish.mjs
 
       - name: Preview npm packages
         shell: bash
