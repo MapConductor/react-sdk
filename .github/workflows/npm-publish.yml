@@ -162,3 +162,56 @@ jobs:
         env:
           # npm checks authentication even for a publish.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # `npm publish` printed "+ @mapconductor/react-geojson@0.2.0" and exited 0
+      # for the three packages whose NAME was new (react-geojson, react-kml,
+      # react-for-mappls), yet an anonymous GET of the packument returned 404
+      # while the 17 packages that were only new VERSIONS were fine.
+      #
+      # A scoped package that ends up "restricted" is invisible to anonymous
+      # requests, which is indistinguishable from "never created" unless you
+      # ask with the token. So: report the authenticated visibility, force
+      # public, then verify anonymously. Anonymous 404 is the only check that
+      # actually proves a user can install it.
+      - name: Force public access and verify anonymous visibility
+        shell: bash
+        run: |
+          set -uo pipefail
+
+          mapfile -t packages < <(
+            npm query .workspace --json | node -e '
+              let input = "";
+              process.stdin.on("data", chunk => input += chunk);
+              process.stdin.on("end", () => {
+                for (const workspace of JSON.parse(input)) {
+                  if (!workspace.private) console.log(workspace.name);
+                }
+              });
+            '
+          )
+
+          failed=()
+          for package in "${packages[@]}"; do
+            status="$(npm access get status "${package}" 2>&1 || echo 'unknown')"
+            if [ "${status}" != "public" ]; then
+              echo "${package}: access=${status}, forcing public"
+              npm access set status=public "${package}" || echo "::warning::npm access set failed for ${package}"
+            fi
+
+            # Anonymous, unauthenticated read - what an installing user sees.
+            code="$(curl -s -o /dev/null -w '%{http_code}' \
+              "https://registry.npmjs.org/$(printf '%s' "${package}" | sed 's|/|%2F|')")"
+            if [ "${code}" = "200" ]; then
+              echo "ok   ${package} (anonymous ${code}, access=${status})"
+            else
+              echo "::error::${package} is not anonymously readable (HTTP ${code}, access=${status})"
+              failed+=("${package}")
+            fi
+          done
+
+          if [ ${#failed[@]} -gt 0 ]; then
+            echo "::error::${#failed[@]} package(s) not publicly installable: ${failed[*]}"
+            exit 1
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
