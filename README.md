@@ -51,6 +51,43 @@ npm install \
 
 For React Native, normal package autolinking discovers the Android provider modules. Google Maps API keys must be supplied through `local.properties`, Gradle properties, or `GOOGLE_MAPS_API_KEY`; do not put keys in source files.
 
+## Module formats and SSR
+
+**These packages target a bundler.** Vite, webpack, Next.js and Metro all resolve
+them correctly, and every provider is verified rendering in a real browser before
+release. Loading a provider through Node's own resolver — plain `node`, an SSR
+entry that is not processed by a bundler, or Vitest with the `node` environment —
+is a different matter, because the underlying map SDKs are browser libraries.
+
+Measured on 0.2.0 by importing each published package in an empty project. The
+same results hold for 0.1.3, so none of this is new:
+
+| Package | `import` in Node | `require()` in Node | Why |
+| --- | --- | --- | --- |
+| `react-for-arcgis` | fails | fails | `@arcgis/core/views/MapView` imports `.css`, which Node cannot load. Unavoidable: any map needs `MapView` |
+| `react-for-leaflet` | fails | fails | `leaflet` touches `window` at module scope |
+| `react-for-azuremaps` | fails | fails | `azure-maps-control` touches `window` at module scope |
+| `react-for-tomtom` | fails | fails | reads `maplibre-gl/package.json`, which Node requires an import attribute for |
+| `react-for-mappls` | fails | works | `mappls-web-maps` is CJS; its named exports are not statically analysable |
+| `react-for-maplibre` | works | fails | `maplibre-gl` v6 is ESM-only and declares no CJS entry |
+| `react-for-maptiler` | works | fails | same as `react-for-maplibre` |
+| everything else | works | works | |
+
+Two consequences worth knowing:
+
+- **For SSR, import providers lazily on the client.** `examples/basic` does this
+  with `lazy(() => import('./providers/...'))`, which is why its Vite SSR build
+  passes. A static top-level import of a browser-only provider will break any
+  server render that is not bundler-processed.
+- **`react-for-maplibre`, `react-for-maptiler` and `react-for-tomtom` advertise a
+  CJS entry that cannot actually work,** because `maplibre-gl` v6 dropped CJS.
+  Use ESM with these three. The `require` condition should be removed from their
+  `exports` in a future release.
+
+`react-for-openlayers` used to fail Node ESM as well, because of a directory
+import (`ol/proj`) in its own source rather than anything upstream. Fixed in
+0.2.1.
+
 ## State-first API
 
 MapConductor state objects are mutable and observable. Create a state once, retain it for the component lifetime, and update its properties directly. Property updates are sent to the registered provider renderer without replacing the state or rebuilding the React overlay tree.

@@ -26,7 +26,11 @@ import { execSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-const expectedVersion = process.argv[2] ?? JSON.parse(readFileSync('package.json', 'utf8')).version;
+// Packages are NOT required to share one version. A single-package patch
+// release (react-for-openlayers 0.2.1 while everything else stays 0.2.0) is
+// normal, so each package is judged on its own version and internal ranges are
+// checked by semver satisfaction rather than string equality.
+import semver from 'semver';
 
 const sh = (cmd) => execSync(cmd, { maxBuffer: 1e9, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
 
@@ -41,14 +45,23 @@ const publishable = workspaces.filter((w) => !w.private);
 const problems = [];
 const add = (pkg, msg) => problems.push(`${pkg}: ${msg}`);
 
-console.log(`preflight: ${publishable.length} publishable package(s), expecting ${expectedVersion}\n`);
+// name -> version for every workspace, so internal ranges can be checked
+// against what this repo would actually publish.
+const versionOf = new Map(
+  workspaces.map((w) => [
+    JSON.parse(readFileSync(resolve(w.location, 'package.json'), 'utf8')).name,
+    JSON.parse(readFileSync(resolve(w.location, 'package.json'), 'utf8')).version,
+  ]),
+);
+
+console.log(`preflight: ${publishable.length} publishable package(s)\n`);
 
 for (const w of publishable) {
   const pkg = JSON.parse(readFileSync(resolve(w.location, 'package.json'), 'utf8'));
   const name = pkg.name;
   const local = [];
 
-  if (pkg.version !== expectedVersion) local.push(`version is ${pkg.version}`);
+  if (!semver.valid(pkg.version)) local.push(`version "${pkg.version}" is not valid semver`);
   if (pkg.license !== 'Apache-2.0') local.push(`license is ${JSON.stringify(pkg.license)}, want "Apache-2.0"`);
   if (!pkg.files) local.push('no "files" field');
   if (!inBuildScript.has(name)) local.push('missing from build:packages (will publish without dist/)');
@@ -56,7 +69,21 @@ for (const w of publishable) {
   for (const field of ['dependencies', 'peerDependencies', 'optionalDependencies']) {
     for (const [dep, spec] of Object.entries(pkg[field] ?? {})) {
       if (!dep.startsWith('@mapconductor/')) continue;
-      if (spec !== `^${expectedVersion}`) local.push(`${field}.${dep} is "${spec}", want "^${expectedVersion}"`);
+      if (spec === '*') {
+        local.push(`${field}.${dep} is "*" - unlink step did not run`);
+        continue;
+      }
+      const depVersion = versionOf.get(dep);
+      if (!depVersion) {
+        local.push(`${field}.${dep} is not a workspace in this repo`);
+      } else if (!semver.validRange(spec)) {
+        local.push(`${field}.${dep} spec "${spec}" is not a valid range`);
+      } else if (!semver.satisfies(depVersion, spec)) {
+        // The range must admit the version this repo is about to publish,
+        // otherwise consumers resolve an older copy than the code was built
+        // against.
+        local.push(`${field}.${dep} is "${spec}" but the workspace is ${depVersion}`);
+      }
     }
   }
 
@@ -86,4 +113,4 @@ if (problems.length) {
   console.error(`preflight FAILED: ${problems.length} problem(s) across ${new Set(problems.map((p) => p.split(':')[0])).size} package(s)`);
   process.exit(1);
 }
-console.log(`preflight OK: all ${publishable.length} packages ready to publish at ${expectedVersion}`);
+console.log(`preflight OK: all ${publishable.length} packages ready to publish`);
