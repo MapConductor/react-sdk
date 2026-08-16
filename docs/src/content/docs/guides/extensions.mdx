@@ -9,7 +9,7 @@ Extension packages build on the same map scope and state model as the core overl
 
 | Package | Purpose |
 | --- | --- |
-| `@mapconductor/react-geojson-layer` | Parse GeoJSON/GeoJSON Sequence data and render feature layers |
+| `@mapconductor/react-geojson` | Parse GeoJSON/GeoJSON Sequence data and render feature layers |
 | `@mapconductor/react-heatmap` | Density visualization from weighted geographic points |
 | `@mapconductor/react-marker-clustering` | Group nearby markers and render cluster icons |
 | `@mapconductor/react-icons` | Ready-made `MarkerIcon` shapes (circle, flag, info-bubble tails) |
@@ -19,8 +19,8 @@ Extension packages build on the same map scope and state model as the core overl
 `<GeoJSONLayer>` rasterizes features into tiles and renders them as a `RasterLayer` under the hood, so large feature sets stay off the main render path. Load static GeoJSON with `GeoJSONParser` and pass the parsed features directly:
 
 ```tsx
-import { GeoJSONLayer, GeoJSONLayerState, GeoJSONParser, colorArgb } from '@mapconductor/react-geojson-layer';
-import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+import { GeoJSONLayer, GeoJSONLayerState, GeoJSONParser, colorArgb } from '@mapconductor/react-geojson';
+import type { GeoJSONFeatureData } from '@mapconductor/react-geojson';
 
 const layerState = useMemo(() => new GeoJSONLayerState({
   fillColor: colorArgb(127, 0x3b, 0xb2, 0xd0),

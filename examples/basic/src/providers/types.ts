@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import type {
+  CameraRestriction,
   GeoPoint,
   GeoRectBounds,
   MapCameraPosition,
@@ -25,4 +26,6 @@ export interface ProviderViewProps {
    * unmounts — so it never leaks into other pages for that provider.
    */
   restrictBounds?: GeoRectBounds;
+  /** 矩形 + minZoom/maxZoom を丸ごと指定したいページ向け。restrictBounds より優先。 */
+  cameraRestriction?: CameraRestriction | null;
 }

@@ -50,9 +50,14 @@ dist/*
 *.mts
 *.map
 *.mjs
+# 雛形の適合テストはバージョン管理する（外部の作者がコピーする出発点なので）。
+!react-for-template/test/*.mjs
 !examples/basic/server.mjs
 !examples/basic/scripts/generate-static.mjs
-!scripts/link-local-workspaces.mjs
+# scripts/ はソースしか置かないので丸ごと追跡する。1 本ずつ negation を足す運用だと
+# 足し忘れたスクリプトが `git add -A` で無言のまま無視され、CI のチェックアウトにだけ
+# 存在しない状態になる（unlink-local-workspaces.mjs で実際に踏んだ）。
+!scripts/*.mjs
 *.cjs
 !eslint.config.cjs
 dist/*.d.ts
@@ -68,3 +73,8 @@ qiita.md
 # Firebase CLI cache
 .firebase/
 firebase-debug.log
+smoke-shots/
+
+# RN example build output (xcodebuild -derivedDataPath / Kotlin daemon state)
+examples/reactnative-basic/ios/build_*/
+examples/reactnative-basic/android/.kotlin/

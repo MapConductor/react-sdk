@@ -21,6 +21,7 @@ import { TomTomDesign, TomTomMapView2D, useTomTomViewState } from '@mapconductor
 import { MapTilerDesign, MapTilerMapView2D, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
 import '@mapconductor/react-for-maptiler/style.css';
 import { LongdoDesign, LongdoMapView2D, useLongdoViewState } from '@mapconductor/react-for-longdo';
+import { MapplsDesign, MapplsMapView2D, useMapplsViewState } from '@mapconductor/react-for-mappls';
 import { SingletonMapSlot, useSingletonMapState } from '../../../SingletonMaps';
 
 export type PostOfficeMapState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
@@ -38,11 +39,14 @@ interface PostOfficeMapProviderProps {
 
 function GoogleProvider({ cameraPosition, children }: PostOfficeMapProviderProps) {
   const isGoogle3D = useLocation().pathname.startsWith('/google-maps-3d');
-  const state = useSingletonMapState(isGoogle3D ? 'google-3d' : 'google-2d', cameraPosition);
+  const mapId = isGoogle3D ? ('google-3d' as const) : ('google-2d' as const);
+  const state = useSingletonMapState(mapId, cameraPosition);
   return children({
     mapViewState: state,
+    // state と slot の地図がずれると「見えている地図は動かず、隠れた地図だけが
+    // ズームする」ことになる（google-maps-3d のクラスタークリック不発の原因）。
     renderMapView: (content, onMapClick) => (
-      <SingletonMapSlot id="google-2d" onMapClick={onMapClick}>{content}</SingletonMapSlot>
+      <SingletonMapSlot id={mapId} onMapClick={onMapClick}>{content}</SingletonMapSlot>
     ),
   });
 }
@@ -236,11 +240,33 @@ function LongdoProvider({ cameraPosition, markerTilingOptions, children }: PostO
   });
 }
 
+function MapplsProvider({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
+  const state = useMapplsViewState({
+    apiKey: import.meta.env.VITE_MAPPLS_API_KEY ?? '',
+    mapDesignType: MapplsDesign.Default,
+    cameraPosition,
+  });
+  if (!state.apiKey) {
+    return (
+      <div className="sample-map-placeholder" role="status">
+        Add VITE_MAPPLS_API_KEY to examples/basic/.env to load the Mappls map.
+      </div>
+    );
+  }
+  return children({
+    mapViewState: state,
+    renderMapView: (content, onMapClick) => (
+      <MapplsMapView2D state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</MapplsMapView2D>
+    ),
+  });
+}
+
 export function PostOfficeMapProvider(props: PostOfficeMapProviderProps) {
   const pathname = useLocation().pathname;
   if (pathname.startsWith('/google-maps')) return <GoogleProvider {...props} />;
   if (pathname.startsWith('/maptiler')) return <MapTilerProvider {...props} />;
   if (pathname.startsWith('/longdo')) return <LongdoProvider {...props} />;
+  if (pathname.startsWith('/mappls')) return <MapplsProvider {...props} />;
   if (pathname.startsWith('/tomtom')) return <TomTomProvider {...props} />;
   if (pathname.startsWith('/mapbox')) return <MapboxProvider {...props} />;
   if (pathname.startsWith('/leaflet')) return <LeafletProvider {...props} />;

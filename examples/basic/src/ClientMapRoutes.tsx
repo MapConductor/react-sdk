@@ -30,6 +30,7 @@ const StyledInfoBubblePage = lazy(() => import('./pages/infobubble/StyledInfoBub
 const MapDesignPage = lazy(() => import('./pages/map/design/MapDesignPage').then(m => ({ default: m.MapDesignPage })));
 const FlyToPage = lazy(() => import('./pages/map/flyto/FlyToPage').then(m => ({ default: m.FlyToPage })));
 const FitBoundsPage = lazy(() => import('./pages/map/fitbounds/FitBoundsPage').then(m => ({ default: m.FitBoundsPage })));
+const CameraRestrictionPage = lazy(() => import('./pages/map/camerarestriction/CameraRestrictionPage').then(m => ({ default: m.CameraRestrictionPage })));
 const TiltPage = lazy(() => import('./pages/map/tilt/TiltPage').then(m => ({ default: m.TiltPage })));
 const UISettingsPage = lazy(() => import('./pages/map/uisettings/UISettingsPage').then(m => ({ default: m.UISettingsPage })));
 const VisibleRegionPage = lazy(() => import('./pages/map/visibleregion/VisibleRegionPage').then(m => ({ default: m.VisibleRegionPage })));
@@ -45,6 +46,7 @@ const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage')
 const HeatmapLayerPage = lazy(() => import('./pages/heatmaplayer/HeatmapLayerPage').then(m => ({ default: m.HeatmapLayerPage })));
 const BasicGeoJSONPage = lazy(() => import('./pages/geojson/basic/BasicGeoJSONPage').then(m => ({ default: m.BasicGeoJSONPage })));
 const GeoJSONLayerPage = lazy(() => import('./pages/geojson/layer/GeoJSONLayerPage').then(m => ({ default: m.GeoJSONLayerPage })));
+const KMLLayerPage = lazy(() => import('./pages/kml/layer/KMLLayerPage').then(m => ({ default: m.KMLLayerPage })));
 const ThreeJsObjectPage = lazy(() => import('./pages/threejs/ThreeJsObjectPage').then(m => ({ default: m.ThreeJsObjectPage })));
 const HelloMapTutorialPage = lazy(() => import('./pages/hellomap/HelloMapTutorialPage').then(m => ({ default: m.HelloMapTutorialPage })));
 
@@ -76,6 +78,7 @@ function pageContent(page: string | undefined) {
     case 'map-design': return <MapDesignPage />;
     case 'fly-to': return <FlyToPage />;
     case 'fit-bounds': return <FitBoundsPage />;
+    case 'camera-restriction': return <CameraRestrictionPage />;
     case 'tilt': return <TiltPage />;
     case 'ui-settings': return <UISettingsPage />;
     case 'visible-region': return <VisibleRegionPage />;
@@ -100,6 +103,7 @@ function pageContent(page: string | undefined) {
     case 'heatmap-layer': return <HeatmapLayerPage />;
     case 'geojson-basic': return <BasicGeoJSONPage />;
     case 'geojson-layer': return <GeoJSONLayerPage />;
+    case 'kml-layer': return <KMLLayerPage />;
     case 'threejs-object': return <ThreeJsObjectPage />;
     default: return <MapPage />;
   }
@@ -115,7 +119,7 @@ function ProviderPageRoute() {
   if (requestedPage === 'camera-sync' || requestedPage === 'hello-map') {
     return <Navigate to={samplePath(provider ?? 'maplibre', requestedPage, language)} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here' && provider !== 'tomtom' && provider !== 'maptiler' && provider !== 'longdo') {
+  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here' && provider !== 'tomtom' && provider !== 'maptiler' && provider !== 'longdo' && provider !== 'mappls') {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 

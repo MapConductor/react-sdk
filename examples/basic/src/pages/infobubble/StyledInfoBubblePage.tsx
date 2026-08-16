@@ -1,49 +1,118 @@
-import { useMemo, useState } from 'react';
-import { ColorDefaultIcon, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
-import { InfoBubbleCustom, Markers } from '@mapconductor/js-sdk-react';
+import { useEffect, useMemo, useState } from 'react';
+import { DefaultMarkerIcon, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
+import { InfoBubble, Marker } from '@mapconductor/js-sdk-react';
+import { ControlPanel, SliderControl } from '../../components/ControlPanel';
 import { MapViewContainer } from '../../MapViewContainer';
+import { useSampleI18n } from '../../samples/i18n';
 
-const INIT_CAMERA = { lat: 37.7849, lng: -122.4094, zoom: 15 };
+// android の StyledInfoBubblePage.kt / ios の StyledInfoBubblePage.swift と同一仕様:
+// マーカー 1 個と常時表示の InfoBubble を置き、パネルの 8 色スウォッチ 4 行
+// （バブル塗り / バブル枠線 / 文字 / マーカー）と 2 本のスライダー
+// （枠線幅・マーカースケール 0.5〜2.0、0.25 刻み）でスタイルを組み替える。
+const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 14 };
+const POSITION = createGeoPoint({ latitude: 35.6812, longitude: 139.7671 });
+
+// 4 行で共有する 8 色。白と黒を含めておくと塗り＝白 / 文字＝黒の既定も同じ列で選べる。
+const PALETTE = [
+  '#ffffff', '#111827', '#ef4444', '#f97316',
+  '#eab308', '#22c55e', '#3b82f6', '#a855f7',
+] as const;
+
+function SwatchRow({
+  label,
+  selected,
+  onSelect,
+}: {
+  label: string;
+  selected: string;
+  onSelect: (color: string) => void;
+}) {
+  return (
+    <div className="swatch-row">
+      <span className="swatch-row-label">{label}</span>
+      <div className="swatch-row-colors">
+        {PALETTE.map(color => (
+          <button
+            key={color}
+            type="button"
+            className={`color-swatch${selected === color ? ' selected' : ''}`}
+            style={{ background: color }}
+            aria-label={`${label} ${color}`}
+            data-testid={`swatch-${label}-${color}`}
+            onClick={() => onSelect(color)}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export function StyledInfoBubblePage() {
-  const [selectedMarkerId, setSelectedMarkerId] = useState<string | null>('marker1');
-  const markers = useMemo(() => {
-    const marker1 = createMarkerState({
-      id: 'marker1',
-      position: createGeoPoint({ latitude: 37.7749, longitude: -122.4194 }),
-      icon: new ColorDefaultIcon({ fillColor: '#2563eb', label: '1',
-        labelTextColor: '#ffffff',
-        infoAnchor: { x: 0.5, y: 0.25 },
-      }),
-      draggable: true,
-      onClick: state => setSelectedMarkerId(state.id),
-      onDragStart: state => console.log(`マーカーのドラッグを開始: ${state.id}`),
-      onDrag: state => console.log('マーカーをドラッグ中:', state.position),
-      onDragEnd: state => console.log(`マーカーのドラッグが終了: ${state.id}`),
-    });
-    const marker2 = createMarkerState({
-      id: 'marker2',
-      position: createGeoPoint({ latitude: 37.7849, longitude: -122.4094 }),
-      icon: new ColorDefaultIcon({ fillColor: '#ef4444', label: '2',
-        labelTextColor: '#ffffff',
-        infoAnchor: { x: 0.5, y: 0.25 },
-      }),
-      onClick: state => setSelectedMarkerId(state.id),
-    });
-    return [marker1, marker2];
-  }, []);
-  const activeMarker = markers.find(marker => marker.id === selectedMarkerId);
+  const { t } = useSampleI18n();
+  const [fillColor, setFillColor] = useState<string>('#ffffff');
+  const [strokeColor, setStrokeColor] = useState<string>('#111827');
+  const [fontColor, setFontColor] = useState<string>('#111827');
+  const [markerColor, setMarkerColor] = useState<string>('#ef4444');
+  const [strokeWidth, setStrokeWidth] = useState(2.0);
+  const [markerScale, setMarkerScale] = useState(1.0);
+
+  const marker = useMemo(
+    () => createMarkerState({
+      id: 'styled-bubble-marker',
+      position: POSITION,
+      icon: new DefaultMarkerIcon({ fillColor: '#ef4444' }),
+    }),
+    [],
+  );
+
+  useEffect(() => {
+    marker.icon = new DefaultMarkerIcon({ fillColor: markerColor, scale: markerScale });
+  }, [marker, markerColor, markerScale]);
+
+  // InfoBubble はスタイルとマーカーアイコンを登録時に焼き込むので、
+  // 変更のたびに key で再マウントして最新の見た目・配置に揃える。
+  const bubbleKey = `${fillColor}|${strokeColor}|${fontColor}|${strokeWidth}|${markerScale}`;
 
   return (
-    <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelectedMarkerId(null)}>
-      <Markers states={markers} />
-      {activeMarker && (
-        <InfoBubbleCustom marker={activeMarker} tailOffset={{ x: 0, y: 0.5 }}>
-          <div className="right-tail-info-bubble">
-            {activeMarker.position.toUrlValue(6)}
-          </div>
-        </InfoBubbleCustom>
-      )}
+    <MapViewContainer initialCamera={INIT_CAMERA}>
+      <Marker state={marker} />
+      <InfoBubble
+        key={bubbleKey}
+        marker={marker}
+        bubbleColor={fillColor}
+        borderColor={strokeColor}
+        borderWidth={strokeWidth}
+        cornerRadius={6}
+        contentPadding={10}
+      >
+        <div style={{ color: fontColor, fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>
+          {t('Custom Styled Bubble', 'カスタムスタイル吹き出し')}
+        </div>
+      </InfoBubble>
+      <ControlPanel title={t('Styled Bubble', 'スタイル付き吹き出し')}>
+        <SwatchRow label={t('Fill', '塗り')} selected={fillColor} onSelect={setFillColor} />
+        <SwatchRow label={t('Stroke', '枠線')} selected={strokeColor} onSelect={setStrokeColor} />
+        <SwatchRow label={t('Font', '文字')} selected={fontColor} onSelect={setFontColor} />
+        <SwatchRow label={t('Marker', 'マーカー')} selected={markerColor} onSelect={setMarkerColor} />
+        <SliderControl
+          label={t('Stroke Width', '枠線幅')}
+          value={strokeWidth}
+          min={0.5}
+          max={2.0}
+          step={0.25}
+          format={value => value.toFixed(2)}
+          onChange={setStrokeWidth}
+        />
+        <SliderControl
+          label={t('Marker Scale', 'マーカースケール')}
+          value={markerScale}
+          min={0.5}
+          max={2.0}
+          step={0.25}
+          format={value => value.toFixed(2)}
+          onChange={setMarkerScale}
+        />
+      </ControlPanel>
     </MapViewContainer>
   );
 }

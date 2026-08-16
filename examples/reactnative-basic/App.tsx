@@ -27,6 +27,7 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map-design', label: 'Map Design', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', group: 'Map' },
   { id: 'tilt', label: 'Tilt', group: 'Map' },
+  { id: 'ui-settings', label: 'UI Settings', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', group: 'Map' },
   { id: 'fit-bounds', label: 'Fit Bounds', group: 'Map' },
   { id: 'camera-sync', label: 'Camera Sync', group: 'Map', showProviderSelector: false },
@@ -52,6 +53,21 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions' },
 ];
 
+/**
+ * プロバイダの表示名。切り替えボタンの文字・一覧の文字・
+ * アクセシビリティラベル（実機の UI テストがこれで叩く）の**唯一の出所**。
+ * 3 か所に散らすと、片方だけ直してテストが見つけられなくなる。
+ */
+const PROVIDER_LABELS: Record<MapProvider, string> = {
+  'google-maps': 'GoogleMapView',
+  maplibre: 'MapLibreMapView',
+  here: 'HereMapView',
+  arcgis: 'ArcGISMapView',
+  longdo: 'LongdoMapView',
+  maptiler: 'MapTilerMapView',
+  mapbox: 'MapboxMapView',
+};
+
 function Header({
   provider,
   showProviderSelector,
@@ -66,14 +82,7 @@ function Header({
   onProviderChange: (provider: MapProvider) => void;
 }) {
   const [isProviderMenuOpen, setIsProviderMenuOpen] = useState(false);
-  const providerLabel =
-    provider === 'google-maps'
-      ? 'GoogleMapView'
-      : provider === 'here'
-        ? 'HereMapView'
-        : provider === 'arcgis'
-          ? 'ArcGISMapView'
-          : 'MapLibreMapView';
+  const providerLabel = PROVIDER_LABELS[provider];
 
   const selectProvider = (nextProvider: MapProvider) => {
     onProviderChange(nextProvider);
@@ -129,6 +138,8 @@ function Header({
                   style={[styles.providerMenuItem, provider === 'google-maps' && styles.providerMenuItemActive]}
                   activeOpacity={0.75}
                   onPress={() => selectProvider('google-maps')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['google-maps']}
                 >
                   <Text
                     style={[
@@ -143,6 +154,8 @@ function Header({
                   style={[styles.providerMenuItem, provider === 'maplibre' && styles.providerMenuItemActive]}
                   activeOpacity={0.75}
                   onPress={() => selectProvider('maplibre')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['maplibre']}
                 >
                   <Text
                     style={[
@@ -157,6 +170,8 @@ function Header({
                   style={[styles.providerMenuItem, provider === 'here' && styles.providerMenuItemActive]}
                   activeOpacity={0.75}
                   onPress={() => selectProvider('here')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['here']}
                 >
                   <Text
                     style={[
@@ -171,6 +186,8 @@ function Header({
                   style={[styles.providerMenuItem, provider === 'arcgis' && styles.providerMenuItemActive]}
                   activeOpacity={0.75}
                   onPress={() => selectProvider('arcgis')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['arcgis']}
                 >
                   <Text
                     style={[
@@ -179,6 +196,54 @@ function Header({
                     ]}
                   >
                     ArcGISMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'longdo' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('longdo')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['longdo']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'longdo' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    LongdoMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'maptiler' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('maptiler')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['maptiler']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'maptiler' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    MapTilerMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'mapbox' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('mapbox')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['mapbox']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'mapbox' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    MapboxMapView
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -225,6 +290,11 @@ function Sidebar({ activePageId, onSelectPage }: { activePageId: string; onSelec
                 style={[styles.sidebarItem, isActive && styles.sidebarItemActive]}
                 activeOpacity={0.72}
                 onPress={() => onSelectPage(page.id)}
+                // 実機の UI テスト（ios-uitests/）がページ名で叩けるようにする。
+                // これが無いと RN のこの行は要素ツリーで名前の無い Other になり、
+                // 座標決め打ちでしか触れなくなる（端末ごとに外れる）。
+                accessibilityRole="button"
+                accessibilityLabel={page.label}
               >
                 <Text
                   style={[styles.sidebarItemText, isActive && styles.sidebarItemTextActive]}

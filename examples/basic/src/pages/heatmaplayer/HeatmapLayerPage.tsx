@@ -8,6 +8,7 @@ import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState, type Op
 import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { TomTomDesign, TomTomMapView2D, useTomTomViewState, type TomTomViewState } from '@mapconductor/react-for-tomtom';
 import { MapTilerDesign, MapTilerMapView2D, useMapTilerViewState, type MapTilerViewState } from '@mapconductor/react-for-maptiler';
+import { MapplsDesign, MapplsMapView2D, useMapplsViewState, type MapplsViewState } from '@mapconductor/react-for-mappls';
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
 import { SingletonMapSlot, useSingletonMapState } from '../../SingletonMaps';
@@ -161,6 +162,19 @@ function TomTomHeatmapLayerPage() {
   );
 }
 
+function MapplsHeatmapLayerPage() {
+  const mapViewState = useMapplsViewState({
+    apiKey: import.meta.env.VITE_MAPPLS_API_KEY ?? '',
+    mapDesignType: MapplsDesign.Default,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => <MapplsMapView2D state={mapViewState as MapplsViewState}>{children}</MapplsMapView2D>}
+    />
+  );
+}
+
 function MapTilerHeatmapLayerPage() {
   const mapViewState = useMapTilerViewState({
     apiKey: import.meta.env.VITE_MAPTILER ?? '',
@@ -179,6 +193,7 @@ export function HeatmapLayerPage() {
   if (location.pathname.startsWith('/google-maps')) return <GoogleHeatmapLayerPage />;
   if (location.pathname.startsWith('/maptiler')) return <MapTilerHeatmapLayerPage />;
   if (location.pathname.startsWith('/tomtom')) return <TomTomHeatmapLayerPage />;
+  if (location.pathname.startsWith('/mappls')) return <MapplsHeatmapLayerPage />;
   if (location.pathname.startsWith('/mapbox')) return <MapboxHeatmapLayerPage />;
   if (location.pathname.startsWith('/leaflet')) return <LeafletHeatmapLayerPage />;
   if (location.pathname.startsWith('/openlayers')) return <OpenLayersHeatmapLayerPage />;

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   ActivityIndicator,
+  NativeModules,
   ScrollView,
   StyleSheet,
   Text,
@@ -8,7 +9,7 @@ import {
 } from 'react-native';
 import { GeoPoint } from '@mapconductor/js-sdk-core';
 import { InfoBubble } from '@mapconductor/js-sdk-react/native';
-import { GeoJSONLayer, GeoJSONLayerState, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+import { GeoJSONLayer, GeoJSONLayerState, type GeoJSONFeatureData } from '@mapconductor/react-geojson';
 import type { MapProvider } from '../../../providers/types';
 import { MapViewContainer } from '../../MapViewContainer';
 import { loadGeoJSONZipAsset } from '../loadGeoJSONZip';
@@ -100,20 +101,63 @@ export function GeoJSONLayerPage({ provider }: { provider: MapProvider }) {
   );
 }
 
+/**
+ * 国土数値情報の鉄道データ（N02）の属性名。
+ *
+ * 生の `N02_001` のままだと何の値か分からないので、吹き出しでは名前に置き換える。
+ * examples/basic（web）/ android / ios と**同じ文言**にしてある。
+ *
+ * ここに無いキーは生のキー名をそのまま出す。データ側に属性が増えても表から消えないように。
+ */
+const propertyLabels: Record<string, { ja: string; en: string }> = {
+  N02_001: { ja: '鉄道区分', en: 'Railway category' },
+  N02_002: { ja: '事業者区分', en: 'Business category' },
+  N02_003: { ja: '路線名', en: 'Railway name' },
+  N02_004: { ja: '運営会社', en: 'Railway company' },
+};
+
+/**
+ * 値の英語表記が入っている属性の接尾辞。
+ *
+ * geojson 側が `N02_003`（路線名）に対して `N02_003_en` を持っている。アプリに
+ * 対訳表を置くと 4 プラットフォーム分そろえる羽目になるので、データに持たせてある。
+ */
+const ENGLISH_SUFFIX = '_en';
+
+/** 端末の言語。`react-native-localize` を足さずに済ませるため NativeModules から取る。 */
+function isJapaneseDevice(): boolean {
+  const settings = NativeModules.SettingsManager?.settings;
+  const locale: unknown =
+    settings?.AppleLocale ?? settings?.AppleLanguages?.[0] ?? NativeModules.I18nManager?.localeIdentifier;
+  return typeof locale === 'string' && locale.startsWith('ja');
+}
+
+/**
+ * 端末の言語が日本語なら日本語、それ以外は英語で出す。
+ * 英語のときは値も `N02_003_en` の側へ差し替え、`_en` の行そのものは出さない
+ * （同じ項目が 2 行に増えてしまうため）。
+ */
 function PropertyTable({ properties }: { properties: Readonly<Record<string, unknown>> }) {
-  const entries = Object.entries(properties);
+  const ja = isJapaneseDevice();
+  const entries = Object.entries(properties).filter(([key]) => !key.endsWith(ENGLISH_SUFFIX));
 
   return (
     <View style={styles.tableShell}>
       <View style={styles.tableHeader}>
-        <Text style={[styles.tableCell, styles.tableHeaderText, styles.keyCell]}>Property</Text>
-        <Text style={[styles.tableCell, styles.tableHeaderText, styles.valueCell]}>Value</Text>
+        <Text style={[styles.tableCell, styles.tableHeaderText, styles.keyCell]}>
+          {ja ? 'プロパティ' : 'Property'}
+        </Text>
+        <Text style={[styles.tableCell, styles.tableHeaderText, styles.valueCell]}>{ja ? '値' : 'Value'}</Text>
       </View>
       <ScrollView style={styles.tableScroll} nestedScrollEnabled>
         {entries.map(([key, value]) => (
           <View key={key} style={styles.tableRow}>
-            <Text style={[styles.tableCell, styles.keyCell]}>{key}</Text>
-            <Text style={[styles.tableCell, styles.valueCell]}>{formatPropertyValue(value)}</Text>
+            <Text style={[styles.tableCell, styles.keyCell]}>
+              {(ja ? propertyLabels[key]?.ja : propertyLabels[key]?.en) ?? key}
+            </Text>
+            <Text style={[styles.tableCell, styles.valueCell]}>
+              {formatPropertyValue(ja ? value : properties[key + ENGLISH_SUFFIX] ?? value)}
+            </Text>
           </View>
         ))}
       </ScrollView>
@@ -212,9 +256,9 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   keyCell: {
-    width: '36%',
+    width: '50%',
   },
   valueCell: {
-    width: '64%',
+    width: '50%',
   },
 });

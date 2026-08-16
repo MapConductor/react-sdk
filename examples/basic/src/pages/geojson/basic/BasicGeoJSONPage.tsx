@@ -4,8 +4,8 @@ import {
   GeoJSONLayerState,
   GeoJSONParser,
   colorArgb,
-} from '@mapconductor/react-geojson-layer';
-import type { GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+} from '@mapconductor/react-geojson';
+import type { GeoJSONFeatureData } from '@mapconductor/react-geojson';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';

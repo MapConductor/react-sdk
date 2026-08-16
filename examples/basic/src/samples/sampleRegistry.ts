@@ -17,6 +17,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'map-design', label: 'Map Design', labelJa: '地図デザイン', labelEs419: 'Diseño del mapa', group: 'Map' },
   { id: 'fly-to', label: 'Fly To', labelJa: 'カメラ移動', labelEs419: 'Volar a un lugar', group: 'Map' },
   { id: 'fit-bounds', label: 'Fit Bounds', labelJa: '範囲にフィット', labelEs419: 'Ajustar a límites', group: 'Map' },
+  { id: 'camera-restriction', label: 'Camera Restriction', labelJa: 'カメラ制限', labelEs419: 'Restricción de cámara', group: 'Map' },
   { id: 'tilt', label: 'Tilt', labelJa: '傾き', labelEs419: 'Inclinación', group: 'Map', unavailableProviders: ['google-maps', 'mapkit'] },
   { id: 'ui-settings', label: 'UI Settings', labelJa: 'UI設定', labelEs419: 'Ajustes de interfaz', group: 'Map' },
   { id: 'visible-region', label: 'Visible Region', labelJa: '表示領域', labelEs419: 'Región visible', group: 'Map' },
@@ -40,6 +41,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'info-bubble-rich', label: 'Rich Bubble', labelJa: 'リッチ吹き出し', labelEs419: 'Globo enriquecido', group: 'Info Bubble' },
   { id: 'geojson-basic', label: 'GeoJSON Basic', labelJa: 'GeoJSON 基本', labelEs419: 'GeoJSON básico', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
   { id: 'geojson-layer', label: 'GeoJSON Layer', labelJa: 'GeoJSON レイヤー', labelEs419: 'Capa GeoJSON', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
+  { id: 'kml-layer', label: 'KML Layer', labelJa: 'KML レイヤー', labelEs419: 'Capa KML', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
   { id: 'heatmap-layer', label: 'Heatmap Layer', labelJa: 'ヒートマップレイヤー', labelEs419: 'Capa de mapa de calor', group: 'Extensions', unavailableProviders: ['google-maps-3d', 'cesium'] },
   { id: 'threejs-object', label: 'Three.js Object (web only)', labelJa: 'Three.js (web only)', labelEs419: 'Objeto Three.js (solo web)', group: 'Extensions', unavailableProviders: ['cesium'] },
 ];
@@ -89,6 +91,7 @@ export function getProviderLabel(provider: string | undefined): string {
     case 'tomtom': return 'TomTom';
     case 'maptiler': return 'MapTiler';
     case 'longdo': return 'Longdo';
+    case 'mappls': return 'Mappls';
     default: return 'MapLibre';
   }
 }

@@ -26,7 +26,8 @@
     "@mapconductor/react-for-cesium": "*",
     "@mapconductor/react-for-here": "*",
     "@mapconductor/react-for-tomtom": "*",
-    "@mapconductor/react-geojson-layer": "*",
+    "@mapconductor/react-geojson": "*",
+    "@mapconductor/react-kml": "*",
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-icons": "*",
     "@mapconductor/react-marker-clustering": "*",
@@ -36,7 +37,8 @@
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
-    "three": "^0.185.1"
+    "three": "^0.185.1",
+    "@mapconductor/react-for-mappls": "*"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

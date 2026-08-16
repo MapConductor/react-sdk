@@ -5,6 +5,9 @@ import {
 } from '@mapconductor/reactnative-for-maplibre';
 import { HereMapDesign, type HereMapDesignType } from '@mapconductor/reactnative-for-here';
 import { ArcGISDesign, type ArcGISDesignType } from '@mapconductor/reactnative-for-arcgis';
+import { LongdoDesign, type LongdoMapDesignType } from '@mapconductor/reactnative-for-longdo';
+import { MapTilerDesign, type MapTilerMapDesignType } from '@mapconductor/reactnative-for-maptiler';
+import { MapboxDesign, type MapboxMapDesignType } from '@mapconductor/reactnative-for-mapbox';
 import type { MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
 import type { MapProvider } from './types';
 
@@ -90,11 +93,71 @@ const ARCGIS_DESIGNS: MapDesignOption[] = [
   { label: 'OSM Navigation Dark', design: ArcGISDesign.OsmNavigationDark },
 ];
 
+// First entry must match LongdoProviderView's default (Normal).
+const LONGDO_DESIGNS: MapDesignOption[] = [
+  { label: 'Normal', design: LongdoDesign.Normal },
+  { label: 'Easy', design: LongdoDesign.Easy },
+  { label: 'Pastel', design: LongdoDesign.Pastel },
+  { label: 'Pastel Gray', design: LongdoDesign.PastelGray },
+  { label: 'Hard', design: LongdoDesign.Hard },
+  { label: 'Gray', design: LongdoDesign.Gray },
+  { label: 'Light', design: LongdoDesign.Light },
+  { label: 'Night', design: LongdoDesign.Night },
+  { label: 'Dark', design: LongdoDesign.Dark },
+  { label: 'Political', design: LongdoDesign.Political },
+  { label: 'OpenStreetMap', design: LongdoDesign.Osm },
+  { label: 'Satellite', design: LongdoDesign.Satellite },
+  { label: 'Hybrid', design: LongdoDesign.Hybrid },
+];
+
+// First entry must match MapTilerProviderView's default (Streets).
+// android は MTMapReferenceStyle、iOS は MapTiler Cloud のスタイル id と、
+// 同じ名前で別の実体に解決される。**id の綴りが両者の唯一の接点**なので変えないこと。
+const MAPTILER_DESIGNS: MapDesignOption[] = [
+  { label: 'Streets', design: MapTilerDesign.Streets },
+  { label: 'Streets Dark', design: MapTilerDesign.StreetsDark },
+  { label: 'Streets Light', design: MapTilerDesign.StreetsLight },
+  { label: 'Basic', design: MapTilerDesign.Basic },
+  { label: 'Bright', design: MapTilerDesign.Bright },
+  { label: 'Satellite', design: MapTilerDesign.Satellite },
+  { label: 'Outdoor', design: MapTilerDesign.Outdoor },
+  { label: 'Winter', design: MapTilerDesign.Winter },
+  { label: 'Topo', design: MapTilerDesign.Topo },
+  { label: 'Toner', design: MapTilerDesign.Toner },
+  { label: 'Dataviz', design: MapTilerDesign.Dataviz },
+  { label: 'Backdrop', design: MapTilerDesign.Backdrop },
+  { label: 'Ocean', design: MapTilerDesign.Ocean },
+  { label: 'Landscape', design: MapTilerDesign.Landscape },
+  { label: 'Aquarelle', design: MapTilerDesign.Aquarelle },
+  { label: 'OpenStreetMap', design: MapTilerDesign.OpenStreetMap },
+];
+
+// First entry must match MapboxProviderView's default (Streets).
+// **id は 3 プラットフォームで揃っていない**（web は "streets"、android/iOS は
+// "streets-v12"）。RN が渡すのは `styleJsonURL`（スタイル URI）なので、
+// ここで id を合わせにいく必要はない。
+const MAPBOX_DESIGNS: MapDesignOption[] = [
+  { label: 'Streets', design: MapboxDesign.Streets },
+  { label: 'Outdoors', design: MapboxDesign.Outdoors },
+  { label: 'Light', design: MapboxDesign.Light },
+  { label: 'Dark', design: MapboxDesign.Dark },
+  { label: 'Satellite Streets', design: MapboxDesign.SatelliteStreets },
+  { label: 'OSM Bright', design: MapboxDesign.OsmBright },
+  { label: 'OSM Bright EN', design: MapboxDesign.OsmBrightEn },
+  { label: 'OSM Bright JA', design: MapboxDesign.OsmBrightJa },
+  { label: 'MapTiler Toner JA', design: MapboxDesign.MapTilerTonerJa },
+  { label: 'MapTiler Basic JA', design: MapboxDesign.MapTilerBasicJa },
+  { label: 'OpenMapTiles', design: MapboxDesign.OpenMapTiles },
+];
+
 export const DESIGN_OPTIONS: Partial<Record<MapProvider, MapDesignOption[]>> = {
   maplibre: MAPLIBRE_DESIGNS,
   'google-maps': GOOGLE_MAP_2D_DESIGNS,
   here: HERE_DESIGNS,
   arcgis: ARCGIS_DESIGNS,
+  longdo: LONGDO_DESIGNS,
+  maptiler: MAPTILER_DESIGNS,
+  mapbox: MAPBOX_DESIGNS,
 };
 
 export function providerLabel(provider: MapProvider): string {
@@ -105,6 +168,12 @@ export function providerLabel(provider: MapProvider): string {
       return 'HERE';
     case 'arcgis':
       return 'ArcGIS';
+    case 'longdo':
+      return 'Longdo';
+    case 'maptiler':
+      return 'MapTiler';
+    case 'mapbox':
+      return 'Mapbox';
     default:
       return 'MapLibre';
   }
@@ -115,4 +184,7 @@ export type {
   MapLibreMapDesignType,
   HereMapDesignType,
   ArcGISDesignType,
+  LongdoMapDesignType,
+  MapTilerMapDesignType,
+  MapboxMapDesignType,
 };

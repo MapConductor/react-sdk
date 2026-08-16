@@ -5,8 +5,10 @@ import {
   ColorDefaultIcon,
   GeoPoint,
   MapCameraPosition,
+  MarkerAnimation,
   createMarkerState,
   createPolygonState,
+  type MarkerState,
   type PolygonEvent,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Marker, Polygon } from '@mapconductor/js-sdk-react/native';
@@ -21,26 +23,38 @@ const INIT_CAMERA = MapCameraPosition.from({
   zoom: 5,
 });
 
+const CLICK_MARKER_ICON = new ColorDefaultIcon({
+  fillColor: '#ef4444',
+  label: 'P',
+  labelTextColor: '#ffffff',
+});
+
 export function PolygonClickPage({ provider }: { provider: MapProvider }) {
   const [message, setMessage] = useState('Tap inside or outside the polygon.');
-  const [markerVisible, setMarkerVisible] = useState(false);
+  const [markerState, setMarkerState] = useState<MarkerState | null>(null);
+  const [bubbleVisible, setBubbleVisible] = useState(false);
+  const activeMarkerRef = useRef<MarkerState | null>(null);
+  const markerSequenceRef = useRef(0);
   const lastPolygonClickRef = useRef<{ point: GeoPoint; time: number } | null>(null);
-  const [markerState] = useState(() =>
-    createMarkerState({
-      id: 'polygon-clicked',
-      position: INIT_CAMERA.position,
-      icon: new ColorDefaultIcon({ fillColor: '#ef4444', label: 'P',
-        labelTextColor: '#ffffff',
-      }),
-    })
-  );
 
   const showClickedMarker = useCallback((point: GeoPoint, inside: boolean) => {
-    markerState.position = point;
-    markerState.animation = null;
     setMessage(inside ? `Inside\n${point.toUrlValue(5)}` : 'Outside');
-    setMarkerVisible(true);
-  }, [markerState]);
+    setBubbleVisible(false);
+
+    const marker = createMarkerState({
+      id: `polygon-clicked-${++markerSequenceRef.current}`,
+      position: point,
+      icon: CLICK_MARKER_ICON,
+      animation: MarkerAnimation.Drop,
+      onAnimateEnd: (completedMarker) => {
+        if (activeMarkerRef.current === completedMarker) {
+          setBubbleVisible(true);
+        }
+      },
+    });
+    activeMarkerRef.current = marker;
+    setMarkerState(marker);
+  }, []);
 
   const handlePolygonClick = useCallback((event: PolygonEvent) => {
     lastPolygonClickRef.current = { point: event.clicked, time: Date.now() };
@@ -83,12 +97,16 @@ export function PolygonClickPage({ provider }: { provider: MapProvider }) {
         onMapClick={handleMapClick}
       >
         {polygons.map((polygon) => <Polygon key={polygon.id} state={polygon} />)}
-        {markerVisible ? (
+        {markerState ? (
           <>
             <Marker state={markerState} />
-            <InfoBubble position={markerState.position}>
-              <Text style={styles.bubbleText}>{message}</Text>
-            </InfoBubble>
+            {bubbleVisible ? (
+              <InfoBubble marker={markerState}>
+                <Text accessibilityLabel="InfoBubble Polygon Click" style={styles.bubbleText}>
+                  {message}
+                </Text>
+              </InfoBubble>
+            ) : null}
           </>
         ) : null}
       </MapViewContainer>

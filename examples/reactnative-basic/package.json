@@ -17,7 +17,7 @@
     "@mapconductor/reactnative-for-maplibre": "*",
     "@mapconductor/reactnative-for-here": "*",
     "@mapconductor/reactnative-for-arcgis": "*",
-    "@mapconductor/react-geojson-layer": "*",
+    "@mapconductor/react-geojson": "*",
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-marker-clustering": "*",
     "@react-native-community/slider": "^5.2.0",
@@ -27,7 +27,11 @@
     "expo-status-bar": "~57.0.0",
     "react": "19.2.3",
     "react-native": "0.86.0",
-    "react-native-safe-area-context": "^5.8.0"
+    "react-native-safe-area-context": "^5.8.0",
+    "@mapconductor/reactnative-for-template": "*",
+    "@mapconductor/reactnative-for-longdo": "*",
+    "@mapconductor/reactnative-for-maptiler": "*",
+    "@mapconductor/reactnative-for-mapbox": "*"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",

@@ -1,6 +1,13 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
 buildscript {
+  ext {
+    // android-sdk (mavenLocal の com.mapconductor:* 1.2.0) が Kotlin 2.4 でコンパイル
+    // されているため、RN 側は 2.3 系（Expo の pika-compiler が対応する最新）に上げる。Kotlin は +1 マイナーの
+    // メタデータ前方互換があるため 2.3 で 2.4.0 メタデータを読める。RN 既定 (2.1.x) のままだと
+    // "Module was compiled with an incompatible version of Kotlin" で落ちる。
+    kotlinVersion = '2.3.20'
+  }
   repositories {
     google()
     mavenCentral()
@@ -8,7 +15,7 @@ buildscript {
   dependencies {
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
-    classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
+    classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
   }
 }
 
@@ -22,6 +29,10 @@ allprojects {
     // published only here - reactnative-for-arcgis/android/build.gradle declares this repo too,
     // but the :app project's own dependency resolution needs it listed at this (root) level.
     maven { url 'https://esri.jfrog.io/artifactory/arcgis' }
+    // com.mapconductor:for-longdo は com.longdo.map:sdk3 に依存する。ここでしか配布されていない。
+    maven { url 'https://maven.longdo.com/artifactory/libs-release-public' }
+    // Mapbox Maven repository（v11 は認証不要）
+    maven { url 'https://api.mapbox.com/downloads/v2/releases/maven' }
   }
 }
 

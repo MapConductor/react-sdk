@@ -76,22 +76,43 @@ PODS:
   - hermes-engine (250829098.0.14):
     - hermes-engine/Pre-built (= 250829098.0.14)
   - hermes-engine/Pre-built (250829098.0.14)
-  - MapConductorCore (1.2.0)
-  - MapConductorForArcGIS (1.2.0):
+  - LongdoMapFramework (4.1.4):
+    - Swifter (~> 1.5.0)
+  - MapboxCommon (24.28.2):
+    - Turf (= 4.0.0)
+  - MapboxCoreMaps (11.28.2):
+    - MapboxCommon (= 24.28.2)
+  - MapboxMaps (11.28.2):
+    - MapboxCommon (= 24.28.2)
+    - MapboxCoreMaps (= 11.28.2)
+    - Turf (= 4.0.0)
+  - MapConductorCore (1.3.1)
+  - MapConductorForArcGIS (1.3.1):
     - MapConductorCore
-  - MapConductorForGoogleMaps (1.2.0):
-    - GoogleMaps (~> 10.0)
+  - MapConductorForGoogleMaps (1.3.1):
+    - GoogleMaps (< 12.0, >= 10.15)
     - MapConductorCore
-  - MapConductorForHERE (1.2.0):
+  - MapConductorForHERE (1.3.1):
     - MapConductorCore
-  - MapConductorForMapLibre (1.2.0):
+  - MapConductorForLongdo (1.3.1):
+    - LongdoMapFramework (~> 4.1)
+    - MapConductorCore
+  - MapConductorForMapbox (1.3.1):
+    - MapboxMaps (~> 11.26)
+    - MapConductorCore
+  - MapConductorForMapLibre (1.3.1):
     - MapConductorCore
     - MapLibre (~> 6.20)
-  - MapConductorGeoJSON (1.2.0):
+  - MapConductorForMapTiler (1.3.1):
     - MapConductorCore
-  - MapConductorHeatmap (1.2.0):
+    - MapLibre (~> 6.20)
+  - MapConductorForTemplate (1.3.1):
     - MapConductorCore
-  - MapConductorMarkerClustering (1.2.0):
+  - MapConductorGeoJSON (1.3.1):
+    - MapConductorCore
+  - MapConductorHeatmap (1.3.1):
+    - MapConductorCore
+  - MapConductorMarkerClustering (1.3.1):
     - MapConductorCore
   - MapConductorReactForArcGIS (0.1.3):
     - MapConductorForArcGIS
@@ -110,12 +131,37 @@ PODS:
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
+  - MapConductorReactForLongdo (0.1.3):
+    - MapConductorCore
+    - MapConductorForLongdo
+    - MapConductorReactMarkerClustering
+    - MapConductorReactNativeCore
+    - React-Core
+  - MapConductorReactForMapbox (0.1.3):
+    - MapboxMaps (~> 11.26)
+    - MapConductorCore
+    - MapConductorForMapbox
+    - MapConductorReactMarkerClustering
+    - MapConductorReactNativeCore
+    - React-Core
   - MapConductorReactForMapLibre (0.1.3):
     - MapConductorCore
     - MapConductorForMapLibre
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - MapLibre (~> 6.20)
+    - React-Core
+  - MapConductorReactForMapTiler (0.1.3):
+    - MapConductorCore
+    - MapConductorForMapTiler
+    - MapConductorReactMarkerClustering
+    - MapConductorReactNativeCore
+    - MapLibre (~> 6.20)
+    - React-Core
+  - MapConductorReactForTemplate (0.1.3):
+    - MapConductorCore
+    - MapConductorForTemplate
+    - MapConductorReactNativeCore
     - React-Core
   - MapConductorReactGeoJSONLayer (0.1.3):
     - MapConductorCore
@@ -2095,6 +2141,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - Swifter (1.5.0)
+  - Turf (4.0.0)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
@@ -2115,14 +2163,22 @@ DEPENDENCIES:
   - MapConductorForArcGIS (from `../../../../ios-sdk/ios-for-arcgis`)
   - MapConductorForGoogleMaps (from `../../../../ios-sdk/ios-for-googlemaps`)
   - MapConductorForHERE (from `../../../../ios-sdk/ios-for-here`)
+  - MapConductorForLongdo (from `../../../../ios-sdk/ios-for-longdo`)
+  - MapConductorForMapbox (from `../../../../ios-sdk/ios-for-mapbox`)
   - MapConductorForMapLibre (from `../../../../ios-sdk/ios-for-maplibre`)
-  - MapConductorGeoJSON (from `../../../../ios-sdk/ios-geojson-layer`)
+  - MapConductorForMapTiler (from `../../../../ios-sdk/ios-for-maptiler`)
+  - MapConductorForTemplate (from `../../../../ios-sdk/ios-for-template`)
+  - MapConductorGeoJSON (from `../../../../ios-sdk/ios-geojson`)
   - MapConductorHeatmap (from `../../../../ios-sdk/ios-heatmap`)
   - MapConductorMarkerClustering (from `../../../../ios-sdk/ios-marker-clustering`)
   - MapConductorReactForArcGIS (from `../../../reactnative-for-arcgis`)
   - MapConductorReactForGoogleMaps (from `../../../reactnative-for-googlemaps`)
   - MapConductorReactForHere (from `../../../reactnative-for-here`)
+  - MapConductorReactForLongdo (from `../../../reactnative-for-longdo`)
+  - MapConductorReactForMapbox (from `../../../reactnative-for-mapbox`)
   - MapConductorReactForMapLibre (from `../../../reactnative-for-maplibre`)
+  - MapConductorReactForMapTiler (from `../../../reactnative-for-maptiler`)
+  - MapConductorReactForTemplate (from `../../../reactnative-for-template`)
   - MapConductorReactGeoJSONLayer (from `../../../react-geojson-layer`)
   - MapConductorReactHeatmap (from `../../../react-heatmap`)
   - MapConductorReactMarkerClustering (from `../../../react-marker-clustering`)
@@ -2208,7 +2264,13 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - GoogleMaps
+    - LongdoMapFramework
+    - MapboxCommon
+    - MapboxCoreMaps
+    - MapboxMaps
     - MapLibre
+    - Swifter
+    - Turf
 
 EXTERNAL SOURCES:
   EXConstants:
@@ -2246,10 +2308,18 @@ EXTERNAL SOURCES:
     :path: "../../../../ios-sdk/ios-for-googlemaps"
   MapConductorForHERE:
     :path: "../../../../ios-sdk/ios-for-here"
+  MapConductorForLongdo:
+    :path: "../../../../ios-sdk/ios-for-longdo"
+  MapConductorForMapbox:
+    :path: "../../../../ios-sdk/ios-for-mapbox"
   MapConductorForMapLibre:
     :path: "../../../../ios-sdk/ios-for-maplibre"
+  MapConductorForMapTiler:
+    :path: "../../../../ios-sdk/ios-for-maptiler"
+  MapConductorForTemplate:
+    :path: "../../../../ios-sdk/ios-for-template"
   MapConductorGeoJSON:
-    :path: "../../../../ios-sdk/ios-geojson-layer"
+    :path: "../../../../ios-sdk/ios-geojson"
   MapConductorHeatmap:
     :path: "../../../../ios-sdk/ios-heatmap"
   MapConductorMarkerClustering:
@@ -2260,8 +2330,16 @@ EXTERNAL SOURCES:
     :path: "../../../reactnative-for-googlemaps"
   MapConductorReactForHere:
     :path: "../../../reactnative-for-here"
+  MapConductorReactForLongdo:
+    :path: "../../../reactnative-for-longdo"
+  MapConductorReactForMapbox:
+    :path: "../../../reactnative-for-mapbox"
   MapConductorReactForMapLibre:
     :path: "../../../reactnative-for-maplibre"
+  MapConductorReactForMapTiler:
+    :path: "../../../reactnative-for-maptiler"
+  MapConductorReactForTemplate:
+    :path: "../../../reactnative-for-template"
   MapConductorReactGeoJSONLayer:
     :path: "../../../react-geojson-layer"
   MapConductorReactHeatmap:
@@ -2438,22 +2516,34 @@ SPEC CHECKSUMS:
   FBLazyVector: b3e7ad108f0d882e30445c5527d774e3fd432f3d
   GoogleMaps: 306f6ea18af2dc9ef85d98b0d1b41bc7d506df5f
   hermes-engine: fb6a0b9dffad1faa9bfb366cf22f07e33cee658b
-  MapConductorCore: c06836381dd2babbb2217578956382919c13c644
-  MapConductorForArcGIS: bce1354509c7766c82ece579a3c72c76590b0a39
-  MapConductorForGoogleMaps: 3f26d255285688e7ea5cc81c4046de92a1ff1616
-  MapConductorForHERE: 50e8eb2bdb481838b8193e72236533d506dbbb1d
-  MapConductorForMapLibre: 6c06ce79bf30b2ef07cb37dab15cbb824640f5a4
-  MapConductorGeoJSON: 0111f6eab3cede34ee99b48ed3fc25e06cdb12be
-  MapConductorHeatmap: 3a76fd745bccfd405ce2bcc380e83d6d9b644c79
-  MapConductorMarkerClustering: 358374b6f4b301f42086a93805ccdd29b84aaaa5
+  LongdoMapFramework: 5ec7766e2683282f8a59c3069f8f2f52cba3ef42
+  MapboxCommon: 69219036896e94b356757391629e586944ad2b97
+  MapboxCoreMaps: 77311833fc3d61407777a6d9b1d49422b6962d9a
+  MapboxMaps: 70192a3581956efae80a0ce4dedd09cc25b02d22
+  MapConductorCore: f4a8fe706da64fc05e72c0d387ec60a48dcf1eeb
+  MapConductorForArcGIS: b833af71e47a9f2547ef8845dbdbcca32155c169
+  MapConductorForGoogleMaps: 483f312109c462dc1fc309cfd693bfff4dee034b
+  MapConductorForHERE: d5df68892f4039ee9bb0469d64470355ac0eb8af
+  MapConductorForLongdo: 1d203bf49f1e99fd6695b33acc376c5ff239e0bc
+  MapConductorForMapbox: e45bed934a7e307efc08d9aa51aa6c8a48f042d5
+  MapConductorForMapLibre: 9ac83b0358ba70f1b901e44e9d2f98ae4fbea9be
+  MapConductorForMapTiler: 882ab9b984a63fa8b244ac3d38917d1071163ad9
+  MapConductorForTemplate: 722f6c4ad3df55aa9dc295301e549142f2bacded
+  MapConductorGeoJSON: 188c5fab5dc8d5db24e7fe77f9ee3eac707d1a55
+  MapConductorHeatmap: cc0c6348088b76b4e1bc74eea8e19bd5ca491f86
+  MapConductorMarkerClustering: 62baa375da0aafc1ff0a67f516ab3cddf10e4a39
   MapConductorReactForArcGIS: 381d0726a4e7fd8eda628f0d84710aa3ca1ee1c4
   MapConductorReactForGoogleMaps: 81267038f5728c972e5555cc8665af38d236681b
   MapConductorReactForHere: 796fd922ba460ff4bcfb2cc4c09418012bf93ee4
+  MapConductorReactForLongdo: bdc4fd303f789ec4b212f7b08bbb5c1e490e6e44
+  MapConductorReactForMapbox: 8cd541eef46d41070dc3833d0b8b5831000321c9
   MapConductorReactForMapLibre: d2c32db38d5802268e8c985c8865b6a0e0095844
+  MapConductorReactForMapTiler: 12d4e781c1d21abda1c8611f132689902356acb7
+  MapConductorReactForTemplate: 9b743980036944c0d8a535fa346c2339f40c5e23
   MapConductorReactGeoJSONLayer: 9dab648eb76d7aab663042af8e7ad601f41a1827
   MapConductorReactHeatmap: eed367e002f5f8d88d2123286dccad141238f834
   MapConductorReactMarkerClustering: ab7df70ac75b2aaf82ec03bf56325ff8127d5b3f
-  MapConductorReactNativeCore: 0932c886507c570e77dfd1d151200a1928903aa0
+  MapConductorReactNativeCore: 02b5a105a516b983aa45686136b2892ef98136ea
   MapLibre: 96726270455ffd183688cf0bd2a3881b0212a57e
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0
@@ -2530,8 +2620,10 @@ SPEC CHECKSUMS:
   ReactCommon: d5c1bb4427bf51c443de5926aac332c89ddd9363
   ReactNativeDependencies: fa0a54b3f5319ae0e3b9aff32bfee7a424b88e66
   RNCPicker: d74667bdfc08ed389a2a277d95b8faf2349290a9
+  Swifter: e71dd674404923d7f03ebb03f3f222d1c570bc8e
+  Turf: c9eb11a65d96af58cac523460fd40fec5061b081
   Yoga: fe50ab299e578f397fef753cf309c6703a4db29b
 
-PODFILE CHECKSUM: 629317f01eb8403b555ded456d9cb4167a44b692
+PODFILE CHECKSUM: 83609dab8c99e50d9335088beeda160651b5a9f3
 
 COCOAPODS: 1.17.0

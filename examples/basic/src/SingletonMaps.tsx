@@ -38,6 +38,7 @@ import { HereMapDesign, useHereViewState } from '@mapconductor/react-for-here';
 import { TomTomDesign, useTomTomViewState } from '@mapconductor/react-for-tomtom';
 import { MapTilerDesign, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
 import { LongdoDesign, useLongdoViewState } from '@mapconductor/react-for-longdo';
+import { MapplsDesign, useMapplsViewState } from '@mapconductor/react-for-mappls';
 import type { SingletonMapContent } from './providers/singleton/types';
 
 export type { SingletonMapContent };
@@ -58,7 +59,8 @@ export type SingletonMapId =
   | 'here'
   | 'tomtom'
   | 'maptiler'
-  | 'longdo';
+  | 'longdo'
+  | 'mappls';
 
 type AnyMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 type AnyMapDesignType = MapDesignTypeInterface<unknown>;
@@ -124,6 +126,7 @@ const LazyCesiumSingletonView = lazy(() => import('./providers/singleton/CesiumS
 const LazyHereSingletonView = lazy(() => import('./providers/singleton/HereSingletonView'));
 const LazyTomTomSingletonView = lazy(() => import('./providers/singleton/TomTomSingletonView'));
 const LazyMapTilerSingletonView = lazy(() => import('./providers/singleton/MapTilerSingletonView'));
+const LazyMapplsSingletonView = lazy(() => import('./providers/singleton/MapplsSingletonView'));
 const LazyLongdoSingletonView = lazy(() => import('./providers/singleton/LongdoSingletonView'));
 
 export function SingletonMapsProvider({ children }: { children: ReactNode }) {
@@ -135,6 +138,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const tomtomApiKey = import.meta.env.VITE_TOMTOM_API_KEY || '';
   const mapTilerApiKey = import.meta.env.VITE_MAPTILER || '';
   const longdoApiKey = import.meta.env.VITE_LONGDO || '';
+  const mapplsApiKey = import.meta.env.VITE_MAPPLS_API_KEY || '';
 
   // Each use<Provider>ViewState() hook only creates lightweight camera/config
   // state (no heavy SDK import), so calling all of them eagerly here is
@@ -157,6 +161,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const tomtomState = useTomTomViewState({ apiKey: tomtomApiKey, mapDesignType: TomTomDesign.Standard, cameraPosition: DEFAULT_CAMERA });
   const mapTilerState = useMapTilerViewState({ apiKey: mapTilerApiKey, mapDesignType: MapTilerDesign.Streets, cameraPosition: DEFAULT_CAMERA });
   const longdoState = useLongdoViewState({ apiKey: longdoApiKey, mapDesignType: LongdoDesign.Normal, cameraPosition: DEFAULT_CAMERA });
+  const mapplsState = useMapplsViewState({ apiKey: mapplsApiKey, mapDesignType: MapplsDesign.Default, cameraPosition: DEFAULT_CAMERA });
 
   const statesById = useMemo<Record<SingletonMapId, AnyMapViewState>>(() => ({
     'google-2d': google2DState,
@@ -175,9 +180,10 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     tomtom: tomtomState,
     maptiler: mapTilerState,
     longdo: longdoState,
+    mappls: mapplsState,
   }), [
     google2DState, google3DState, maplibre2DState, maplibre3DState, mapboxState,
-    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState, tomtomState, mapTilerState, longdoState,
+    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState, tomtomState, mapTilerState, longdoState, mapplsState,
   ]);
 
   // Capture each provider's default map design once, up front, before any page
@@ -340,6 +346,10 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     {
       id: 'longdo',
       node: <Suspense fallback={null}><LazyLongdoSingletonView state={longdoState} content={content['longdo'] ?? null} /></Suspense>,
+    },
+    {
+      id: 'mappls',
+      node: <Suspense fallback={null}><LazyMapplsSingletonView state={mapplsState} content={content['mappls'] ?? null} /></Suspense>,
     },
   ];
 

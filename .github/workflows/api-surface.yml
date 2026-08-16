@@ -1,0 +1,53 @@
+name: Public API Surface
+
+# 公開 API サーフェスの凍結ゲート。
+#
+# ドライバー層の共通化中、アプリ開発者向け API を変えていないことを機械的に保証する。
+# 意図した変更なら `node scripts/api-surface.mjs dump <package>` でベースラインを
+# 更新してコミットすること。android-sdk の lint.yml の apiCheck ステップ、
+# ios-sdk の api-surface.yml に対応する。
+#
+# 読むのは各パッケージの `dist/index.d.ts`。`/** @internal */` が付いた宣言は
+# 記録から除かれる（= ドライバー実装点は自由に変えてよい）。
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      packages:
+        description: "空白区切りのパッケージ名。空なら全パッケージ。"
+        required: false
+        default: ""
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  api-surface:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    name: Check public API surface
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install
+        run: npm ci
+
+      - name: Check
+        env:
+          PACKAGES: ${{ github.event.inputs.packages }}
+        run: node scripts/api-surface.mjs check ${PACKAGES:-}

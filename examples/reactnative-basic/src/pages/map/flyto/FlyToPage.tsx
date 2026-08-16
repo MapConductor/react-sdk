@@ -95,6 +95,11 @@ export function FlyToPage({ provider }: { provider: MapProvider }) {
               key={city.id}
               style={styles.cityButton}
               activeOpacity={0.75}
+              // 中の `Text` は要素ツリーに名前の無い Other としてしか出ないので、
+              // ラベルが無いと UI テストから掴めない（このアプリの他の要素も
+              // すべて accessibilityLabel で掴んでいる）。
+              accessibilityRole="button"
+              accessibilityLabel={`Fly To ${city.label}`}
               onPress={() => {
                 const mapViewState = stateRef.current;
                 if (mapViewState) flyToCity(city, mapViewState);

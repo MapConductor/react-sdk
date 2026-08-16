@@ -4,6 +4,20 @@ apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
+// Expo reads .env.local while bundling JavaScript, after Gradle has already
+// resolved manifest placeholders. Read it here as well so native SDK keys are
+// available during manifest merging. An explicitly exported environment
+// variable still takes precedence (for CI and release builds).
+def localEnv = new Properties()
+def localEnvFile = file("${projectRoot}/.env.local")
+if (localEnvFile.exists()) {
+    localEnvFile.withInputStream { localEnv.load(it) }
+}
+def longdoApiKey = System.getenv('LONGDO_API_KEY') ?: localEnv.getProperty('LONGDO_API_KEY', '')
+def maptilerApiKey = System.getenv('MAPTILER_API_KEY') ?: localEnv.getProperty('MAPTILER_API_KEY', '')
+def mapboxAccessToken = System.getenv('MAPBOX_ACCESS_TOKEN') ?: localEnv.getProperty('MAPBOX_ACCESS_TOKEN', '')
+def androidGoogleMapsApiKey = System.getenv('ANDROID_GOOGLE_MAPS_API_KEY') ?: localEnv.getProperty('ANDROID_GOOGLE_MAPS_API_KEY', '')
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -82,6 +96,18 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
+  // Google Maps / Longdo Map API3 / MapTiler / Mapbox のキー。
+  // 値は .env.local（git 管理外）から来る。manifest には ${...} のプレースホルダ
+  // だけを置き、鍵は git に入れない。
+  defaultConfig {
+    manifestPlaceholders += [
+      ANDROID_GOOGLE_MAPS_API_KEY: androidGoogleMapsApiKey,
+      LONGDO_API_KEY: longdoApiKey,
+      MAPTILER_API_KEY: maptilerApiKey,
+      MAPBOX_ACCESS_TOKEN: mapboxAccessToken,
+    ]
+  }
+
     ndkVersion rootProject.ext.ndkVersion
 
     buildToolsVersion rootProject.ext.buildToolsVersion
@@ -90,7 +116,7 @@ android {
     namespace 'com.mapconductor.basic'
     defaultConfig {
         applicationId 'com.mapconductor.basic'
-        minSdkVersion 26
+        minSdkVersion 28  // com.mapconductor:for-arcgis:1.2.0 (ArcGIS Maps SDK 300.x) が minSdk 28 を要求
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0.0"
@@ -188,4 +214,21 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+}
+
+// MapLibre Android 13.x の AAR は prefab メタデータで「共有ライブラリ + 静的 STL」を
+// 宣言しており、RN(New Architecture) の CMake 構成が prefab 検査 (CXX1211) で落ちる。
+// アプリの C++ コードは MapLibre の prefab を一切使わないので、CMake が読む
+// compile classpath からだけ除外する（runtime classpath には残るため実行時は正常）。
+configurations.configureEach { configuration ->
+    if (configuration.name.endsWith('CompileClasspath')) {
+        configuration.exclude group: 'org.maplibre.gl', module: 'android-sdk'
+    }
+}
+
+// Longdo Map SDK（com.longdo.map:sdk3）は gson を AAR の中に同梱しており、外から入る
+// gson と dex 時に衝突する（android-sdk の example-app も同じ対処をしている）。
+// 同梱側は record / sql アダプタを含む新しめの版なので、外側を落とす。
+configurations.configureEach {
+  exclude group: 'com.google.code.gson', module: 'gson'
 }

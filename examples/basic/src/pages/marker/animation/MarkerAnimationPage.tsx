@@ -1,47 +1,38 @@
-import { useMemo, useState } from 'react';
-import { ColorDefaultIcon, MarkerAnimation, createMarkerState } from '@mapconductor/js-sdk-core';
-import { Marker } from '@mapconductor/js-sdk-react';
+import { DefaultMarkerIcon, MarkerAnimation, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
+import { Markers } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
-import { HONOLULU } from '../../common/sampleHelpers';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 
-const INIT_CAMERA = { lat: 21.3825, lng: -157.9330, zoom: 14 };
+// android の AnimationPageViewModel.kt / ios の AnimationPageViewModel.swift と同一仕様:
+// Drop / Bounce のラベルを持つ 2 マーカーを表示し、タップすると各マーカーに
+// 紐づいたアニメーションが実行される。
+const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 9 };
+
+const SPOTS = [
+  { id: 's1', name: 'Bounce', animation: MarkerAnimation.Bounce, latitude: 21.3069, longitude: -157.8583 },
+  { id: 's2', name: 'Drop', animation: MarkerAnimation.Drop, latitude: 21.4513, longitude: -158.0152 },
+] as const;
+
+const MARKERS = SPOTS.map(spot =>
+  createMarkerState({
+    id: spot.id,
+    position: createGeoPoint({ latitude: spot.latitude, longitude: spot.longitude }),
+    icon: new DefaultMarkerIcon({ label: spot.name }),
+    onClick: state => state.animate(spot.animation),
+  }),
+);
 
 export function MarkerAnimationPage() {
   const { t } = useSampleI18n();
-  const [animation, setAnimation] = useState<MarkerAnimation | null>(null);
-
-  const triggerAnimation = (nextAnimation: MarkerAnimation) => {
-    setAnimation(nextAnimation);
-    window.setTimeout(() => setAnimation(null), 900);
-  };
-
-  const marker = useMemo(() => createMarkerState({
-    id: 'animated-marker',
-    position: HONOLULU,
-    icon: new ColorDefaultIcon({ fillColor: '#e74c3c', label: animation === MarkerAnimation.Drop ? 'D' : animation === MarkerAnimation.Bounce ? 'B' : 'M',
-      labelTextColor: '#ffffff',
-    }),
-    animation,
-    onClick: state => {
-      state.animate(MarkerAnimation.Bounce);
-      triggerAnimation(MarkerAnimation.Bounce);
-    },
-  }), [animation]);
-
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
-      <Marker state={marker} />
+      <Markers states={MARKERS} />
       <ControlPanel title={t('Marker Animation', 'マーカーアニメーション')}>
-        <div className="button-grid">
-          <button onClick={() => triggerAnimation(MarkerAnimation.Drop)}>{t('Drop marker', 'ドロップ')}</button>
-          <button onClick={() => triggerAnimation(MarkerAnimation.Bounce)}>{t('Bounce marker', 'バウンド')}</button>
-        </div>
         <p className="control-panel-note">
           {t(
-            'Tap the marker or a button to trigger an animation.',
-            'マーカーまたはボタンをタップしてアニメーションを実行します。',
+            'Tap a marker to run its animation (Drop / Bounce).',
+            'マーカーをタップすると、そのマーカーのアニメーション（Drop / Bounce）が実行されます。',
           )}
         </p>
       </ControlPanel>

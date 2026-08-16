@@ -23,7 +23,8 @@ export type PaneProvider =
   | 'here'
   | 'tomtom'
   | 'maptiler'
-  | 'longdo';
+  | 'longdo'
+  | 'mappls';
 
 export interface CameraLocationInfo {
   name: string;

@@ -61,8 +61,26 @@ target 'MapConductorBasic' do
   pod 'MapConductorForArcGIS', :path => '../../../../ios-sdk/ios-for-arcgis'
   pod 'MapConductorMarkerClustering', :path => '../../../../ios-sdk/ios-marker-clustering'
   pod 'MapConductorForMapLibre', :path => '../../../../ios-sdk/ios-for-maplibre'
+  # 雛形。実 SDK を持たないので**プロバイダの選択肢には出さない**が、pod は残す。
+  # `@mapconductor/reactnative-for-template` の autolinking と合わせて、雛形の
+  # ネイティブ側（Swift / Kotlin）をコンパイルし続けるための唯一の仕組み。
+  # 外すと雛形が壊れても誰も気づかない（android の `for-template` を
+  # publishToMavenLocal しているのと同じ理由）。
+  pod 'MapConductorForTemplate', :path => '../../../../ios-sdk/ios-for-template'
+  # MapConductorForLongdo も同じ理由の path pod。ベンダの LongdoMapFramework は dynamic で
+  # trunk にも出ているので、その podspec 側の s.dependency から普通に降ってくる。
+  pod 'MapConductorForLongdo', :path => '../../../../ios-sdk/ios-for-longdo'
+  # MapTiler も同じ理由の path pod。**iOS の MapTiler は MapLibre ネイティブ**で、
+  # android の WebView SDK とは実装が違う。MapLibre は dynamic かつ trunk にあるので
+  # ios-for-maptiler の podspec の s.dependency から普通に降ってくる。
+  pod 'MapConductorForMapTiler', :path => '../../../../ios-sdk/ios-for-maptiler'
+  # Mapbox も同じ理由の path pod。ベンダの `MapboxMaps` は CocoaPods trunk にあり、
+  # その依存（MapboxCoreMaps / MapboxCommon）は Mapbox の CDN から降りてくる
+  # （Maps SDK v11 はダウンロードトークン不要）。実行時の公開アクセストークンは
+  # Info.plist の MBXAccessToken から入る。
+  pod 'MapConductorForMapbox', :path => '../../../../ios-sdk/ios-for-mapbox'
   pod 'MapConductorHeatmap', :path => '../../../../ios-sdk/ios-heatmap'
-  pod 'MapConductorGeoJSON', :path => '../../../../ios-sdk/ios-geojson-layer'
+  pod 'MapConductorGeoJSON', :path => '../../../../ios-sdk/ios-geojson'
 
   use_frameworks! :linkage => podfile_properties['ios.useFrameworks'].to_sym if podfile_properties['ios.useFrameworks']
   use_frameworks! :linkage => ENV['USE_FRAMEWORKS'].to_sym if ENV['USE_FRAMEWORKS']
