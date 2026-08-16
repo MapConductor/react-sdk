@@ -1,8 +1,11 @@
-name: npm publish 
+name: npm publish
 
-# Packages are intentionally not published by this workflow yet. Once the
-# generated package contents have been verified, remove --dry-run from the
-# publish command and update the workflow name.
+# Publishes every non-private workspace to npm. RN packages are all
+# private: true, so they are excluded by construction.
+#
+# Order matters: link -> install -> build -> unlink -> assert -> preflight ->
+# preview -> publish -> verify. The build must happen while internal deps are
+# still linked to "*", and nothing may be published until they are restored.
 on:
   workflow_dispatch:
 
@@ -192,19 +195,35 @@ jobs:
 
           failed=()
           for package in "${packages[@]}"; do
-            status="$(npm access get status "${package}" 2>&1 || echo 'unknown')"
+            # `npm access get status <pkg>` prints "<pkg>: public", not "public".
+            # Comparing the whole line to "public" never matched, so every
+            # package took the "force" branch and got a 403 from the access API
+            # (the publish token cannot manage access). Harmless, but it buried
+            # the real result in noise.
+            status="$(npm access get status "${package}" 2>/dev/null | awk '{print $NF}')"
+            status="${status:-unknown}"
             if [ "${status}" != "public" ]; then
               echo "${package}: access=${status}, forcing public"
               npm access set status=public "${package}" || echo "::warning::npm access set failed for ${package}"
             fi
 
             # Anonymous, unauthenticated read - what an installing user sees.
-            code="$(curl -s -o /dev/null -w '%{http_code}' \
-              "https://registry.npmjs.org/$(printf '%s' "${package}" | sed 's|/|%2F|')")"
+            # A brand-new package NAME takes minutes to appear on the read path
+            # even though publish already returned success (react-geojson,
+            # react-kml and react-for-mappls all 404'd for ~5 minutes in 0.2.0),
+            # so retry instead of failing the release on propagation lag.
+            code=000
+            for attempt in $(seq 1 10); do
+              code="$(curl -s -o /dev/null -w '%{http_code}' \
+                "https://registry.npmjs.org/$(printf '%s' "${package}" | sed 's|/|%2F|')")"
+              [ "${code}" = "200" ] && break
+              sleep 30
+            done
+
             if [ "${code}" = "200" ]; then
               echo "ok   ${package} (anonymous ${code}, access=${status})"
             else
-              echo "::error::${package} is not anonymously readable (HTTP ${code}, access=${status})"
+              echo "::error::${package} is not anonymously readable after retries (HTTP ${code}, access=${status})"
               failed+=("${package}")
             fi
           done
