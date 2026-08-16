@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { GeoPoint } from '@mapconductor/js-sdk-core';
 import { InfoBubble } from '@mapconductor/js-sdk-react/native';
-import { GeoJSONLayer, GeoJSONLayerState, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+import { GeoJSONLayer, GeoJSONLayerState, type GeoJSONFeatureData } from '@mapconductor/react-geojson';
 import type { MapProvider } from '../../../providers/types';
 import { MapViewContainer } from '../../MapViewContainer';
 import { loadGeoJSONZipAsset } from '../loadGeoJSONZip';

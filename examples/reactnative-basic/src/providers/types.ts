@@ -12,10 +12,20 @@ import type { MapLibreMapDesignType } from '@mapconductor/reactnative-for-maplib
 import type { GoogleMapDesignType } from '@mapconductor/reactnative-for-googlemaps';
 import type { HereMapDesignType } from '@mapconductor/reactnative-for-here';
 import type { ArcGISDesignType } from '@mapconductor/reactnative-for-arcgis';
-import type { TemplateMapDesignType } from '@mapconductor/reactnative-for-template';
 import type { LongdoMapDesignType } from '@mapconductor/reactnative-for-longdo';
+import type { MapTilerMapDesignType } from '@mapconductor/reactnative-for-maptiler';
+import type { MapboxMapDesignType } from '@mapconductor/reactnative-for-mapbox';
 
-export type MapProvider = 'maplibre' | 'google-maps' | 'here' | 'arcgis' | 'template' | 'longdo';
+/**
+ * サンプルに載せるプロバイダ。**`reactnative-for-template` は載せない。**
+ * 雛形は「実在の地図SDKではなく、ディスプレイリストを描くだけの代役」なので、
+ * アプリ開発者に見せる選択肢としては意味がない（web の `examples/basic` も
+ * `react-for-template` を登録していない）。
+ * ただし依存自体は package.json に残してある。RN の autolinking が雛形の
+ * ネイティブ側（Swift / Kotlin）を**コンパイルし続ける**ための唯一の仕組みで、
+ * これを外すと雛形が壊れても誰も気づかなくなる。
+ */
+export type MapProvider = 'maplibre' | 'google-maps' | 'here' | 'arcgis' | 'longdo' | 'maptiler' | 'mapbox';
 
 export type CommonMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 
@@ -24,8 +34,9 @@ export type ProviderDesignOverrides = {
   'google-maps'?: GoogleMapDesignType;
   here?: HereMapDesignType;
   arcgis?: ArcGISDesignType;
-  template?: TemplateMapDesignType;
   longdo?: LongdoMapDesignType;
+  maptiler?: MapTilerMapDesignType;
+  mapbox?: MapboxMapDesignType;
 };
 
 export interface ProviderViewProps {

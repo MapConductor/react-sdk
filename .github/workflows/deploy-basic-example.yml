@@ -6,10 +6,21 @@ name: Deploy basic example
 #   FIREBASE_SERVICE_ACCOUNT      - JSON key of a service account for the
 #                                   `mapconductor` Firebase project with the
 #                                   "Firebase Hosting Admin" role
-#   VITE_GOOGLE_MAPS_API_KEY      - Google Maps JavaScript API key
-#   VITE_ARCGIS_API_KEY           - ArcGIS Location Platform API key
-#   VITE_MAPBOX_ACCESS_TOKEN      - Mapbox access token
-#   VITE_HERE_API_KEY             - HERE platform API key
+#   VITE_GOOGLE_MAPS_API_KEY         - Google Maps JavaScript API key
+#   VITE_ARCGIS_API_KEY              - ArcGIS Location Platform API key
+#   VITE_MAPBOX_ACCESS_TOKEN         - Mapbox access token
+#   VITE_HERE_API_KEY                - HERE platform API key
+#   VITE_MAPKIT_TOKEN                - Apple MapKit JS JWT
+#   VITE_AZURE_MAPS_SUBSCRIOTION_KEY - Azure Maps subscription key (typo is the
+#                                      committed spelling; examples/basic reads
+#                                      this exact name)
+#   VITE_TOMTOM_API_KEY              - TomTom Maps SDK key
+#   VITE_MAPTILER                    - MapTiler Cloud key
+#   VITE_LONGDO                      - Longdo Map key
+#   VITE_MAPPLS_API_KEY              - Mappls (MapmyIndia) REST/Map SDK key
+#
+# The list must stay in sync with examples/basic/.env; a missing entry does not
+# fail the build, it just ships a bundle where that one provider is blank.
 # The VITE_* values are embedded into the static bundle at build time.
 
 on:
@@ -69,6 +80,7 @@ jobs:
           VITE_TOMTOM_API_KEY: ${{ secrets.VITE_TOMTOM_API_KEY }}
           VITE_MAPTILER: ${{ secrets.VITE_MAPTILER }}
           VITE_LONGDO: ${{ secrets.VITE_LONGDO }}
+          VITE_MAPPLS_API_KEY: ${{ secrets.VITE_MAPPLS_API_KEY }}
 
       - name: Deploy to Firebase Hosting
         uses: FirebaseExtended/action-hosting-deploy@v0

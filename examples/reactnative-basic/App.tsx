@@ -63,8 +63,9 @@ const PROVIDER_LABELS: Record<MapProvider, string> = {
   maplibre: 'MapLibreMapView',
   here: 'HereMapView',
   arcgis: 'ArcGISMapView',
-  template: 'TemplateMapView',
   longdo: 'LongdoMapView',
+  maptiler: 'MapTilerMapView',
+  mapbox: 'MapboxMapView',
 };
 
 function Header({
@@ -198,22 +199,6 @@ function Header({
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.providerMenuItem, provider === 'template' && styles.providerMenuItemActive]}
-                  activeOpacity={0.75}
-                  onPress={() => selectProvider('template')}
-                  accessibilityRole="button"
-                  accessibilityLabel={PROVIDER_LABELS['template']}
-                >
-                  <Text
-                    style={[
-                      styles.providerMenuItemText,
-                      provider === 'template' && styles.providerMenuItemTextActive,
-                    ]}
-                  >
-                    TemplateMapView
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   style={[styles.providerMenuItem, provider === 'longdo' && styles.providerMenuItemActive]}
                   activeOpacity={0.75}
                   onPress={() => selectProvider('longdo')}
@@ -227,6 +212,38 @@ function Header({
                     ]}
                   >
                     LongdoMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'maptiler' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('maptiler')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['maptiler']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'maptiler' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    MapTilerMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'mapbox' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('mapbox')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['mapbox']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'mapbox' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    MapboxMapView
                   </Text>
                 </TouchableOpacity>
               </View>

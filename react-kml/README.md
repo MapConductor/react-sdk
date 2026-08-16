@@ -7,7 +7,7 @@ documents (and KMZ archives) into feature models and renders them as a tiled
 overlay inside any provider map view (`react-for-googlemaps`,
 `react-for-maplibre`, `react-for-here`, …), with KML styling and click
 hit-testing. It shares the tile-rendering architecture of
-`@mapconductor/react-geojson-layer`, so it scales to large KML datasets.
+`@mapconductor/react-geojson`, so it scales to large KML datasets.
 
 React Native support is not yet available — this package is web-only for now.
 

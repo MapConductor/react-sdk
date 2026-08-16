@@ -31,6 +31,8 @@ allprojects {
     maven { url 'https://esri.jfrog.io/artifactory/arcgis' }
     // com.mapconductor:for-longdo は com.longdo.map:sdk3 に依存する。ここでしか配布されていない。
     maven { url 'https://maven.longdo.com/artifactory/libs-release-public' }
+    // Mapbox Maven repository（v11 は認証不要）
+    maven { url 'https://api.mapbox.com/downloads/v2/releases/maven' }
   }
 }
 

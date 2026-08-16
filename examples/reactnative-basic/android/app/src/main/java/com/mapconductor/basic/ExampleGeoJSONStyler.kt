@@ -19,7 +19,7 @@ import java.util.zip.ZipInputStream
  *
  * This is the Android counterpart of `ios/MapConductorBasic/ExampleGeoJSONStyler.swift`
  * and of android-sdk's `example-app/.../geojson/layer/ExampleGeoJSONStyler.kt`. The point of
- * the sample is that **the application picks the colors**: `react-geojson-layer` only ships a
+ * the sample is that **the application picks the colors**: `react-geojson` only ships a
  * uniform fallback style, and the app registers a provider under an id which the JS side
  * references via `GeoJSONLayerState({ styleProviderId })`.
  */

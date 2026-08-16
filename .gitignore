@@ -70,3 +70,8 @@ qiita.md
 # Firebase CLI cache
 .firebase/
 firebase-debug.log
+smoke-shots/
+
+# RN example build output (xcodebuild -derivedDataPath / Kotlin daemon state)
+examples/reactnative-basic/ios/build_*/
+examples/reactnative-basic/android/.kotlin/

@@ -43,10 +43,30 @@ jobs:
         run: npm run build:packages
 
       # link-local-workspaces.mjs changes internal dependency specs to "*".
-      # Restore the committed manifests after the build so those temporary
-      # specs are never included in a published package.
+      # Restore them before publishing so no package ships a "*" dependency on
+      # another @mapconductor package.
+      #
+      # This used to be `git submodule foreach 'git restore -- package.json'`,
+      # which only covered submodules. react-for-mappls, react-kml and every
+      # reactnative-for-* package live directly in this repo, so their "*"
+      # specs survived and would have been published verbatim. None of them had
+      # been published before, so it never shipped - but react-for-mappls and
+      # react-kml publish for the first time in 0.2.0.
       - name: Restore package manifests for publishing
-        run: git submodule foreach --recursive 'git restore --source=HEAD -- package.json'
+        run: node scripts/unlink-local-workspaces.mjs
+
+      # Nothing may reach the registry depending on "*". Fail loudly rather
+      # than publish an unpinned graph.
+      - name: Assert no wildcard internal dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -rn '"@mapconductor/[a-z0-9-]*": "\*"' --include=package.json . \
+               | grep -v node_modules | grep -v '^\./\?examples/'; then
+            echo "::error::internal dependency left as \"*\" outside examples/"
+            exit 1
+          fi
+          echo "no wildcard internal dependencies outside examples/"
 
       - name: Preview npm packages
         shell: bash

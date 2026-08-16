@@ -16,9 +16,9 @@
 [submodule "reactnative-for-maplibre"]
 	path = reactnative-for-maplibre
 	url = git@github.com:mapconductor/reactnative-for-maplibre.git
-[submodule "react-geojson-layer"]
-	path = react-geojson-layer
-	url = git@github.com:mapconductor/react-geojson-layer.git
+[submodule "react-geojson"]
+	path = react-geojson
+	url = git@github.com:mapconductor/react-geojson.git
 [submodule "react-heatmap"]
 	path = react-heatmap
 	url = git@github.com:mapconductor/react-heatmap.git
@@ -67,3 +67,15 @@
 [submodule "react-for-maptiler"]
 	path = react-for-maptiler
 	url = git@github.com:mapconductor/react-for-maptiler
+[submodule "react-for-mappls"]
+	path = react-for-mappls
+	url = git@github.com:MapConductor/react-for-mappls.git
+[submodule "react-icons-jp"]
+	path = react-icons-jp
+	url = git@github.com:MapConductor/react-icons-jp.git
+[submodule "react-icons-us"]
+	path = react-icons-us
+	url = git@github.com:MapConductor/react-icons-us.git
+[submodule "react-icons-weather"]
+	path = react-icons-weather
+	url = git@github.com:MapConductor/react-icons-weather.git

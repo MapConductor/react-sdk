@@ -6,7 +6,7 @@ MapConductor React SDK 向けの KML レイヤー拡張です。OGC KML 2.2 ド�
 （および KMZ アーカイブ）をフィーチャーモデルへ解析し、任意のプロバイダ地図
 （`react-for-googlemaps`、`react-for-maplibre`、`react-for-here` など）の中に
 タイルオーバーレイとして描画します。KML スタイルとクリック当たり判定に対応し、
-`@mapconductor/react-geojson-layer` と同じタイル描画アーキテクチャを共有する
+`@mapconductor/react-geojson` と同じタイル描画アーキテクチャを共有する
 ため、大きな KML データセットにもスケールします。
 
 React Native 対応はまだありません — 現時点では Web 専用パッケージです。

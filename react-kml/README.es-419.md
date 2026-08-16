@@ -7,7 +7,7 @@ KML 2.2 (y archivos KMZ) en modelos de elementos y los renderiza como una
 superposición de mosaicos dentro de cualquier vista de mapa de proveedor
 (`react-for-googlemaps`, `react-for-maplibre`, `react-for-here`, …), con
 estilos KML y detección de clics. Comparte la arquitectura de renderizado por
-mosaicos de `@mapconductor/react-geojson-layer`, por lo que escala a conjuntos
+mosaicos de `@mapconductor/react-geojson`, por lo que escala a conjuntos
 de datos KML grandes.
 
 El soporte para React Native aún no está disponible — por ahora este paquete es

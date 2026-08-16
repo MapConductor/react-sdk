@@ -4,6 +4,20 @@ apply plugin: "com.facebook.react"
 
 def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 
+// Expo reads .env.local while bundling JavaScript, after Gradle has already
+// resolved manifest placeholders. Read it here as well so native SDK keys are
+// available during manifest merging. An explicitly exported environment
+// variable still takes precedence (for CI and release builds).
+def localEnv = new Properties()
+def localEnvFile = file("${projectRoot}/.env.local")
+if (localEnvFile.exists()) {
+    localEnvFile.withInputStream { localEnv.load(it) }
+}
+def longdoApiKey = System.getenv('LONGDO_API_KEY') ?: localEnv.getProperty('LONGDO_API_KEY', '')
+def maptilerApiKey = System.getenv('MAPTILER_API_KEY') ?: localEnv.getProperty('MAPTILER_API_KEY', '')
+def mapboxAccessToken = System.getenv('MAPBOX_ACCESS_TOKEN') ?: localEnv.getProperty('MAPBOX_ACCESS_TOKEN', '')
+def androidGoogleMapsApiKey = System.getenv('ANDROID_GOOGLE_MAPS_API_KEY') ?: localEnv.getProperty('ANDROID_GOOGLE_MAPS_API_KEY', '')
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -82,10 +96,16 @@ def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBu
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
-  // Longdo Map API3 のキー。値は .env.local（git 管理外）から来る。
-  // manifest には ${LONGDO_API_KEY} のプレースホルダだけを置き、鍵は git に入れない。
+  // Google Maps / Longdo Map API3 / MapTiler / Mapbox のキー。
+  // 値は .env.local（git 管理外）から来る。manifest には ${...} のプレースホルダ
+  // だけを置き、鍵は git に入れない。
   defaultConfig {
-    manifestPlaceholders += [LONGDO_API_KEY: (System.getenv('LONGDO_API_KEY') ?: '')]
+    manifestPlaceholders += [
+      ANDROID_GOOGLE_MAPS_API_KEY: androidGoogleMapsApiKey,
+      LONGDO_API_KEY: longdoApiKey,
+      MAPTILER_API_KEY: maptilerApiKey,
+      MAPBOX_ACCESS_TOKEN: mapboxAccessToken,
+    ]
   }
 
     ndkVersion rootProject.ext.ndkVersion

@@ -1,5 +1,5 @@
 import { ZipReaderStream } from '@zip.js/zip.js';
-import { colorArgb, GeoJSONParser, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+import { colorArgb, GeoJSONParser, type GeoJSONFeatureData } from '@mapconductor/react-geojson';
 
 interface RailroadStyleEntry {
   company: { name: string; lines: Array<{ name: string; color: string }> };

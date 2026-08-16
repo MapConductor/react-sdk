@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { GeoJSONLayer, GeoJSONLayerState, GeoJSONParser } from '@mapconductor/react-geojson-layer';
+import { GeoJSONLayer, GeoJSONLayerState, GeoJSONParser } from '@mapconductor/react-geojson';
 import type { MapProvider } from '../../../providers/types';
 import { MapViewContainer } from '../../MapViewContainer';
 import { BASIC_GEOJSON, BASIC_INIT_CAMERA, GEOJSON_DESIGN_TYPES } from '../geojsonShared';

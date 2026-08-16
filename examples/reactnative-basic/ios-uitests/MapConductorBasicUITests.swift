@@ -141,6 +141,209 @@ final class MapConductorBasicUITests: XCTestCase {
         attach(name: "05-longdo-store-map-bubble")
     }
 
+    /// MapTiler をオーバーレイ経路で通しで見る。
+    ///
+    /// **iOS の MapTiler は android と実装が違う。** iOS は MapLibre ネイティブ
+    /// （`MapTilerMapHost` が `MLNMapView` を作る）、android は MapTiler 独自の
+    /// WebView SDK を Compose で載せる。prop と振る舞いは揃えてあるが、
+    /// android で通ったからといって iOS が通る保証は無いので、両方で見ること。
+    ///
+    /// マーカーは MapLibre のシンボルレイヤなので XCUIElement として掴めない。
+    /// Longdo と同じく座標で叩く。
+    func testMapTilerMarkersAndInfoBubbles() throws {
+        selectProvider("MapTilerMapView")
+
+        openPage("Store Map")
+        waitForMapToSettle(seconds: 12)
+        attach(name: "10-maptiler-store-map")
+
+        // ★ 地図を一度も動かさずにタップする。カメラ未確定でタップが落ちる退行
+        //   （Longdo で実際にあった）を、パンで隠さないため。
+        let storeBubble = tapMarkerUntilBubbleAppears(matching: "", label: "maptiler-store-map")
+        XCTAssertTrue(storeBubble, "MapTiler: マーカーをタップしても InfoBubble が出ない")
+        attach(name: "11-maptiler-store-map-bubble")
+
+        // 回転しても吹き出しが残ること（投影がビューの大きさ変更に追従しているか）。
+        XCUIDevice.shared.orientation = .landscapeLeft
+        waitForMapToSettle(seconds: 6)
+        attach(name: "12-maptiler-store-map-landscape")
+        XCUIDevice.shared.orientation = .portrait
+        waitForMapToSettle(seconds: 4)
+
+        // デザイン切り替え。JS は `getValue()` ではなく id を送り、ネイティブは
+        // `MapTilerDesign.fromId` で引く。**この綴りがずれると黙って Streets のまま**になる。
+        openPage("Map Design")
+        waitForMapToSettle(seconds: 10)
+        attach(name: "13-maptiler-map-design")
+    }
+
+    /// Mapbox を通しで見る。
+    ///
+    /// **デザインは id でも `getValue()` でもなくスタイル URI で渡している**
+    /// （`MapboxView.native.tsx` を参照）。ここがずれると android では
+    /// `Failed to parse style` で真っ白、iOS でも同様にタイルが出ない。
+    /// Map Design ページまで開いて、切り替えても地図が残ることを見る。
+    func testMapboxMarkersAndInfoBubbles() throws {
+        selectProvider("MapboxMapView")
+
+        openPage("Store Map")
+        waitForMapToSettle(seconds: 15)
+        attach(name: "40-mapbox-store-map")
+
+        let storeBubble = tapMarkerUntilBubbleAppears(matching: "", label: "mapbox-store-map")
+        XCTAssertTrue(storeBubble, "Mapbox: マーカーをタップしても InfoBubble が出ない")
+        attach(name: "41-mapbox-store-map-bubble")
+
+        XCUIDevice.shared.orientation = .landscapeLeft
+        waitForMapToSettle(seconds: 6)
+        attach(name: "42-mapbox-store-map-landscape")
+        XCUIDevice.shared.orientation = .portrait
+        waitForMapToSettle(seconds: 4)
+
+        openPage("Map Design")
+        waitForMapToSettle(seconds: 12)
+        attach(name: "43-mapbox-map-design")
+        XCTAssertEqual(app.state, .runningForeground, "Mapbox: デザインページで落ちた")
+    }
+
+    /// Mapbox のクラスタータップ。MapTiler で踏んだコアの競合の対照でもある。
+    func testMapboxClusterTap() throws {
+        try testMapTilerClusterTapDoesNotCrash(provider: "MapboxMapView")
+    }
+
+    /// クラスタのタップでアプリが落ちないこと（実機で落ちる報告あり）。
+    ///
+    /// クラスタは `MarkerClusterExtensionRenderer<MapTilerActualMarker>` が描く。
+    /// タップの配送はネイティブのマーカーイベント経由なので、RN 層を疑う前に
+    /// **落ちるかどうか**をここで固定する。
+    func testMapTilerClusterTapDoesNotCrash(provider: String = "MapTilerMapView") throws {
+        selectProvider(provider)
+        openPage("Post Office Cluster")
+        waitForMapToSettle(seconds: 25)
+        attach(name: "20-\(provider)-cluster")
+
+        // **1 回では足りない。** クラッシュはヒープ破壊で間欠に出る（初回は落ちたが
+        // 同じバイナリで 3 回連続して通った）。しかも 1 タップでは、当たって
+        // ズームアニメーションが走ったのかどうかがテストからは分からない。
+        // クラスタを踏み込んでいく実際の操作に合わせて、中心付近を数回叩く。
+        let points: [CGVector] = [
+            CGVector(dx: 0.50, dy: 0.50),
+            CGVector(dx: 0.50, dy: 0.45),
+            CGVector(dx: 0.45, dy: 0.50),
+            CGVector(dx: 0.55, dy: 0.52),
+            CGVector(dx: 0.50, dy: 0.55),
+            CGVector(dx: 0.48, dy: 0.48),
+        ]
+        for (index, offset) in points.enumerated() {
+            guard app.state == .runningForeground else {
+                attach(name: "22-\(provider)-cluster-dead-at-\(index)")
+                return XCTFail("\(provider): \(index) 回目のタップより前に落ちている")
+            }
+            mapAnchor.coordinate(withNormalizedOffset: offset).tap()
+            // ズームアニメーション（600ms）と再クラスタリングが落ち着くまで待つ。
+            Thread.sleep(forTimeInterval: 4)
+        }
+        attach(name: "21-\(provider)-cluster-after-tap")
+
+        XCTAssertEqual(app.state, .runningForeground, "\(provider): クラスタのタップで落ちた")
+    }
+
+    func testMapTilerClusterTap() throws {
+        try testMapTilerClusterTapDoesNotCrash(provider: "MapTilerMapView")
+    }
+
+    /// クラスタータップの**途中の画**を残す。
+    ///
+    /// 「一瞬ズームアウトしてからズームインする」という報告は、前後の 2 枚では
+    /// 絶対に写らない（終わってしまえば同じ絵になる）。600ms のアニメーションの
+    /// 最中に連続で撮って、ズームが単調に寄っているかを目で見る。
+    /// android-for-maptiler は `flyTo`（van Wijk）で距離依存なので、
+    /// クラスターの `+2` 程度では引かない。iOS もそう見えなければならない。
+    func testMapTilerClusterZoomIsMonotonic() throws {
+        assertClusterZoomIsMonotonic(provider: "MapTilerMapView", label: "maptiler")
+    }
+
+    /// MapLibre も同じ。固定サインアーク（振幅 2.5）を van Wijk へ置き換えたので、
+    /// android-for-maplibre の `map.animateCamera` → `NativeMap.flyTo` と同じく
+    /// クラスターの `+2` 程度では引かないはず。
+    func testMapLibreClusterZoomIsMonotonic() throws {
+        assertClusterZoomIsMonotonic(provider: "MapLibreMapView", label: "maplibre")
+    }
+
+    /// Mapbox も同じ。対向は `map.flyTo(cameraOptions:animationOptions:)`。
+    func testMapboxClusterZoomIsMonotonic() throws {
+        assertClusterZoomIsMonotonic(provider: "MapboxMapView", label: "mapbox")
+    }
+
+    private func assertClusterZoomIsMonotonic(provider: String, label: String) {
+        selectProvider(provider)
+        openPage("Post Office Cluster")
+        waitForMapToSettle(seconds: 25)
+        attach(name: "30-\(label)-cluster-before")
+
+        mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        // 600ms のアニメーションを跨いで刻む。XCUITest のスクショは 1 枚 100ms 程度。
+        for index in 0..<8 {
+            attach(name: String(format: "31-\(label)-cluster-mid-%02d", index))
+        }
+        Thread.sleep(forTimeInterval: 3)
+        attach(name: "32-\(label)-cluster-after")
+        XCTAssertEqual(app.state, .runningForeground, "\(provider): クラスタータップで落ちた")
+    }
+
+    /// Fly To ページ。**こちらはアークが出るのが正しい。**
+    ///
+    /// van Wijk は距離依存なので、クラスタータップ（`+2`、パンほぼ無し）では引かず、
+    /// 画面数枚ぶんを跨ぐ Fly To では引いてから寄る。前者だけを見て
+    /// 「アークが消えた」と判断しないために、対になるこちらも撮っておく。
+    func testMapTilerFlyToArcs() throws {
+        assertFlyToCapturesMidFrames(provider: "MapTilerMapView", label: "maptiler")
+    }
+
+    func testMapLibreFlyToArcs() throws {
+        assertFlyToCapturesMidFrames(provider: "MapLibreMapView", label: "maplibre")
+    }
+
+    private func assertFlyToCapturesMidFrames(provider: String, label: String) {
+        selectProvider(provider)
+        openPage("Fly To")
+        waitForMapToSettle(seconds: 15)
+        attach(name: "40-\(label)-flyto-before")
+
+        // 行き先は **NY**。van Wijk は距離依存なので、アークが出ることを見るには
+        // 画面数枚ぶんでは足りず、地球規模の移動が要る（初期カメラは日本付近）。
+        // 見つからなければ画だけ残して失敗させる。当てずっぽうで座標を叩くと
+        // 地図が動いて後段の判定が濁る。
+        guard let trigger = flyToTrigger(city: "NY") else {
+            attach(name: "41-\(label)-flyto-no-trigger")
+            return XCTFail("\(provider): Fly To の行き先ボタンが見つからない")
+        }
+        trigger.tap()
+        for index in 0..<10 {
+            attach(name: String(format: "42-\(label)-flyto-mid-%02d", index))
+        }
+        Thread.sleep(forTimeInterval: 3)
+        attach(name: "43-\(label)-flyto-after")
+        XCTAssertEqual(app.state, .runningForeground, "\(provider): Fly To で落ちた")
+    }
+
+    /// Fly To ページの行き先ボタン。
+    ///
+    /// **`TouchableOpacity` の中の `Text` は要素ツリーに名前の無い Other としてしか
+    /// 出ない**（`testDumpAccessibilityTree` で確認済み）。そのため `FlyToPage.tsx` 側で
+    /// `accessibilityLabel="Fly To <都市名>"` を付けてある。ここはそれを引く。
+    private func flyToTrigger(city: String) -> XCUIElement? {
+        let button = app.buttons["Fly To \(city)"].firstMatch
+        if button.waitForExistence(timeout: 10) { return button }
+        return nil
+    }
+
+    /// 対照。MapLibre は iOS でも同じ MapLibre ネイティブなので、
+    /// ここも落ちるなら MapTiler 固有ではなく共通層の問題。
+    func testMapLibreClusterTap() throws {
+        try testMapTilerClusterTapDoesNotCrash(provider: "MapLibreMapView")
+    }
+
     /// Store Map（オーバーレイ経路）を 1 タップだけで確かめる調査用。
     ///
     /// 走査（複数タップ）は使えない。**外れるたびに地図がずれる**
@@ -206,6 +409,60 @@ final class MapConductorBasicUITests: XCTestCase {
             moved, 1.0,
             "地図をパンしても InfoBubble が動かない（before=\(before) after=\(after)）"
         )
+    }
+
+    /// Polygon Clickで、タップ位置へDropしたマーカーにInfoBubbleが接続されることを確認する。
+    func testLongdoPolygonClickDropInfoBubble() throws {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        selectProvider("LongdoMapView")
+        openPage("Polygon Click")
+        waitForMapToSettle(seconds: 12)
+        attach(name: "polygon-01-before-tap")
+
+        // 初期カメラはCalifornia中央なので、地図中央はポリゴン内にある。
+        mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        waitForMapToSettle(seconds: 2)
+
+        let bubble = app.staticTexts["InfoBubble Polygon Click"].firstMatch
+        XCTAssertTrue(
+            bubble.waitForExistence(timeout: 5),
+            "Drop完了後、マーカー上にInfoBubbleが表示されない"
+        )
+        NSLog("[MCBubbleTrace] polygonBubbleFrame=\(bubble.frame)")
+        attach(name: "polygon-02-marker-and-bubble")
+    }
+
+    /// ArcGIS の Polygon Click。`reactnative-for-arcgis` のバレル経由でネイティブ
+    /// ビューが解決され、オーバーレイ・クリックカスケード・InfoBubble まで通ることを見る。
+    func testArcGISPolygonClickDropInfoBubble() throws {
+        assertPolygonClickDropsBubble(provider: "ArcGISMapView", label: "arcgis")
+    }
+
+    /// GoogleMaps の Polygon Click。見るところは ArcGIS と同じ。
+    func testGoogleMapsPolygonClickDropInfoBubble() throws {
+        assertPolygonClickDropsBubble(provider: "GoogleMapView", label: "googlemaps")
+    }
+
+    /// Polygon Click ページを開き、ポリゴン内をタップして InfoBubble が出るまでを見る。
+    /// プロバイダ間で手順が同じなので 1 本にまとめてある。
+    private func assertPolygonClickDropsBubble(provider: String, label: String) {
+        XCUIDevice.shared.orientation = .landscapeLeft
+        selectProvider(provider)
+        openPage("Polygon Click")
+        waitForMapToSettle(seconds: 12)
+        attach(name: "polygon-\(label)-01-before-tap")
+
+        // 初期カメラはCalifornia中央なので、地図中央はポリゴン内にある。
+        mapAnchor.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
+        waitForMapToSettle(seconds: 2)
+
+        let bubble = app.staticTexts["InfoBubble Polygon Click"].firstMatch
+        XCTAssertTrue(
+            bubble.waitForExistence(timeout: 5),
+            "\(provider): Drop完了後、マーカー上にInfoBubbleが表示されない"
+        )
+        NSLog("[MCBubbleTrace] \(label)PolygonBubbleFrame=\(bubble.frame)")
+        attach(name: "polygon-\(label)-02-marker-and-bubble")
     }
 
     // MARK: - 画面操作

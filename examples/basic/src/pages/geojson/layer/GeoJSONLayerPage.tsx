@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { createGeoPoint, type GeoPoint, type MapDesignTypeInterface, type MapViewStateInterface } from '@mapconductor/js-sdk-core';
 import { InfoBubble } from '@mapconductor/js-sdk-react';
-import { GeoJSONLayer, GeoJSONLayerState, colorArgb, type GeoJSONFeatureData } from '@mapconductor/react-geojson-layer';
+import { GeoJSONLayer, GeoJSONLayerState, colorArgb, type GeoJSONFeatureData } from '@mapconductor/react-geojson';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';

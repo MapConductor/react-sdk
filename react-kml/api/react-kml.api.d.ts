@@ -229,7 +229,9 @@ declare class KMLLayerState {
      *
      * Pass `pixelTolerance` and `zoom` to use a pixel-based hit threshold instead of
      * the default world-coordinate tolerances. For example, `processClick(point, 10, zoom)`
-     * fires only when the click is within 10 pixels of the nearest segment.
+     * fires when the click is within 10 pixels of the nearest line segment or point.
+     * Polygons always hit on interior containment (holes excluded); the threshold only
+     * widens their outline.
      */
     processClick(position: GeoPointInterface, pixelTolerance?: number, zoom?: number): boolean;
 }

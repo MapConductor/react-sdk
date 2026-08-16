@@ -43,9 +43,13 @@ class LongdoMapViewWrapper(context: Context) : MapConductorMapViewWrapperBase(co
 private class LongdoReactNativeHost : MapConductorReactNativeHost {
     override val providerName = "Longdo"
     override val extensionScope = LongdoMapViewScope()
-    override val serviceRegistry = MutableMapServiceRegistry()
+    override val deliversCameraEventsDirectly = true
 
     private val state = LongdoViewState(mapDesignType = LongdoDesign.Normal, id = "rn-longdo")
+    // LongdoMapSurface は marker rendering capability を state 側へ登録する。
+    // RN 拡張ホストにも同じインスタンスを渡さないと clustering 等が解決できない。
+    override val serviceRegistry: MutableMapServiceRegistry
+        get() = state.serviceRegistry
     private var controller: LongdoMapViewController? = null
     private val mapDesign = mutableStateOf<LongdoMapDesignTypeInterface>(LongdoDesign.Normal)
 
@@ -65,15 +69,25 @@ private class LongdoReactNativeHost : MapConductorReactNativeHost {
                     // （他プロバイダと同じ規則）。ここで独自のゲートを作らないこと。
                     markerTiling = markerTiling,
                     onControllerReady = { viewController ->
+                        if (!delegate.isAttached) return@LongdoMapSurface
                         controller = viewController
                         delegate.onControllerReady(viewController)
                     },
                     // 地図の準備完了は WebView のブリッジ（bridge.onReady）から来る。
                     // コントローラ生成時に鳴らしてはいけない（まだ何も描けない）。
                     onMapLoaded = {
+                        if (!delegate.isAttached) return@LongdoMapSurface
                         android.util.Log.d("MCMarkerTrace", "[Longdo][RN] bridge.onReady -> onMapLoaded")
                         delegate.onMapLoaded()
                     },
+                    // LongdoMapSurface が JS のイベントから start / move / end を合成する。
+                    // コントローラの汎用リスナーだけでは move-end 時の move しか取れないため、
+                    // iOS の LongdoMapHost と同じくホスト delegate へ直接返す。
+                    onMapClick = { if (delegate.isAttached) delegate.onMapClick(it) },
+                    onMapLongClick = { if (delegate.isAttached) delegate.onMapLongClick(it) },
+                    onCameraMoveStart = { if (delegate.isAttached) delegate.onCameraMoveStart(it) },
+                    onCameraMove = { if (delegate.isAttached) delegate.onCameraMove(it) },
+                    onCameraMoveEnd = { if (delegate.isAttached) delegate.onCameraMoveEnd(it) },
                 )
             }
         }

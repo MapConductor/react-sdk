@@ -170,7 +170,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   // adding a provider needs no change here.
   ...PROVIDER_IMPORTS,
   {
-    source: '@mapconductor/react-geojson-layer',
+    source: '@mapconductor/react-geojson',
     values: ['GeoJSONLayer', 'GeoJSONLayerState'],
     types: ['GeoJSONFeatureData'],
   },
