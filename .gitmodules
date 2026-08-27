@@ -10,9 +10,21 @@
 [submodule "react-for-maplibre"]
 	path = react-for-maplibre
 	url = git@github.com:mapconductor/react-for-maplibre.git
+[submodule "reactnative-for-tomtom"]
+	path = reactnative-for-tomtom
+	url = git@github.com:mapconductor/reactnative-for-tomtom.git
+[submodule "reactnative-for-maptiler"]
+	path = reactnative-for-maptiler
+	url = git@github.com:mapconductor/reactnative-for-maptiler.git
+[submodule "reactnative-for-mapbox"]
+	path = reactnative-for-mapbox
+	url = git@github.com:mapconductor/reactnative-for-mapbox.git
 [submodule "reactnative-for-googlemaps"]
 	path = reactnative-for-googlemaps
 	url = git@github.com:mapconductor/reactnative-for-googlemaps.git
+[submodule "reactnative-for-longdo"]
+	path = reactnative-for-longdo
+	url = git@github.com:mapconductor/reactnative-for-longdo.git
 [submodule "reactnative-for-maplibre"]
 	path = reactnative-for-maplibre
 	url = git@github.com:mapconductor/reactnative-for-maplibre.git
