@@ -33,6 +33,21 @@ useEffect(() => {
       'Un useEffect obtiene postoffices.json y convierte cada coordenada en un HeatmapPointState guardado en el estado de React.',
       'El <HeatmapPoints> dentro de <HeatmapOverlay> compone todo el conjunto de una vez, y la extensión dibuja el mapa de densidad en cualquier proveedor.',
     ],
+    de: [
+      'Gewichtete geografische Punkte im Heatmap-Erweiterungs-Overlay zusammensetzen.',
+      'Ein useEffect holt postoffices.json und bildet jede Koordinate auf einen HeatmapPointState im React-State ab.',
+      'Das <HeatmapPoints> innerhalb von <HeatmapOverlay> setzt den ganzen Satz auf einmal zusammen, und die Erweiterung zeichnet die Dichtekarte bei jedem Anbieter.',
+    ],
+    th: [
+      'ประกอบจุดภูมิศาสตร์แบบถ่วงน้ำหนักไว้ในโอเวอร์เลย์ส่วนขยายฮีตแมป',
+      'useEffect ดึง postoffices.json แล้วแปลงแต่ละพิกัดเป็น HeatmapPointState ที่เก็บไว้ในสถานะของ React',
+      '<HeatmapPoints> ภายใน <HeatmapOverlay> ประกอบชุดข้อมูลทั้งหมดในคราวเดียว และส่วนขยายจะเรนเดอร์แผนที่ความหนาแน่นได้บนผู้ให้บริการทุกเจ้า',
+    ],
+    hi: [
+      'भारित भौगोलिक बिंदुओं को हीटमैप एक्सटेंशन के ओवरले के भीतर जोड़ें।',
+      'एक useEffect postoffices.json लाता है और हर निर्देशांक को React स्टेट में रखे HeatmapPointState में बदल देता है।',
+      '<HeatmapOverlay> के भीतर का <HeatmapPoints> पूरा सेट एक साथ जोड़ता है, और एक्सटेंशन घनत्व का मैप किसी भी प्रोवाइडर पर रेंडर कर देता है।',
+    ],
   },
 };
 

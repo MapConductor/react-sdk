@@ -144,10 +144,10 @@ function TiltContent({ mapViewState }: { mapViewState: MapViewStateInterface<Map
   const cameraPositionRef = useRef(mapViewState.cameraPosition);
 
   return (
-    <ControlPanel title={t('Tilt', '傾き')}>
+    <ControlPanel title={t({ en: 'Tilt', ja: '傾き', 'es-419': 'Inclinación', de: 'Neigung', th: 'การเอียง', hi: 'झुकाव' })}>
       <TiltCameraDiagram tilt={tilt} />
       <SliderControl
-        label={t('Tilt', '傾き')}
+        label={t({ en: 'Tilt', ja: '傾き', 'es-419': 'Inclinación', de: 'Neigung', th: 'การเอียง', hi: 'झुकाव' })}
         value={tilt}
         min={-TILT_LIMIT}
         max={TILT_LIMIT}

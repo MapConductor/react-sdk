@@ -165,16 +165,43 @@ export function CirclePage() {
           {radius.toFixed(0)} m
         </div>
       )}
-      <ControlPanel title={t('Circle Example', '円のサンプル')}>
+      <ControlPanel title={t(
+        {
+          en: 'Circle Example',
+          ja: '円のサンプル',
+          'es-419': 'Ejemplo de círculo',
+          de: 'Kreis-Beispiel',
+          th: 'ตัวอย่างวงกลม',
+          hi: 'वृत्त का उदाहरण',
+        },
+      )}>
         <SliderControl
-          label={t('Fill Opacity', '塗りの透明度')}
+          label={t(
+            {
+              en: 'Fill Opacity',
+              ja: '塗りの透明度',
+              'es-419': 'Opacidad del relleno',
+              de: 'Fülldeckkraft',
+              th: 'ความทึบของสีเติม',
+              hi: 'भराव की अपारदर्शिता',
+            },
+          )}
           value={fillOpacity}
           min={0}
           max={1}
           onChange={setFillOpacity}
         />
         <SliderControl
-          label={t('Stroke Width', '線の太さ')}
+          label={t(
+            {
+              en: 'Stroke Width',
+              ja: '線の太さ',
+              'es-419': 'Grosor del trazo',
+              de: 'Linienbreite',
+              th: 'ความหนาเส้น',
+              hi: 'रेखा की मोटाई',
+            },
+          )}
           value={strokeWidth}
           min={1}
           max={10}

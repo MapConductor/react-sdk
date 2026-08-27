@@ -53,11 +53,17 @@ export function PolylineClickPage() {
       <Polyline state={polyline} />
       <Polyline state={straightPolyline} />
       <Markers states={clickMarkers} />
-      <ControlPanel title={t('Description', '説明')}>
+      <ControlPanel title={t({ en: 'Description', ja: '説明', 'es-419': 'Descripción', de: 'Beschreibung', th: 'คำอธิบาย', hi: 'विवरण' })}>
         <p className="control-panel-note">
           {t(
-            'Tap the curved polyline. A marker is placed at the tapped position.',
-            '曲線のポリラインをタップすると、タップした位置にマーカーが追加されます。',
+            {
+              en: 'Tap the curved polyline. A marker is placed at the tapped position.',
+              ja: '曲線のポリラインをタップすると、タップした位置にマーカーが追加されます。',
+              'es-419': 'Toca la polilínea curva: se coloca un marcador en el punto tocado.',
+              de: 'Tippen Sie auf die gebogene Polylinie — an der getippten Stelle erscheint ein Marker.',
+              th: 'แตะโพลีไลน์โค้ง แล้วจะมีมาร์กเกอร์วางที่ตำแหน่งที่แตะ',
+              hi: 'घुमावदार पॉलीलाइन पर टैप करें — टैप की गई जगह पर मार्कर लग जाता है।',
+            },
           )}
         </p>
       </ControlPanel>

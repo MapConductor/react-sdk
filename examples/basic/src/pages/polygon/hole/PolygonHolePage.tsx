@@ -102,9 +102,27 @@ export function PolygonHolePage() {
     <MapViewContainer initialCamera={INIT_CAMERA} restrictBounds={RESTRICT_BOUNDS}>
       <Polygon state={state} />
       <Markers states={vertexMarkers} />
-      <ControlPanel title={t('Polygon with Holes', '穴付きポリゴン')}>
+      <ControlPanel title={t(
+        {
+          en: 'Polygon with Holes',
+          ja: '穴付きポリゴン',
+          'es-419': 'Polígono con huecos',
+          de: 'Polygon mit Löchern',
+          th: 'โพลีกอนแบบมีรู',
+          hi: 'छेद वाला पॉलीगॉन',
+        },
+      )}>
         <p className="control-panel-note">
-          {t('Drag hole vertex markers to reshape the holes.', '穴の頂点マーカーをドラッグして形を変更できます。')}
+          {t(
+            {
+              en: 'Drag hole vertex markers to reshape the holes.',
+              ja: '穴の頂点マーカーをドラッグして形を変更できます。',
+              'es-419': 'Arrastra los marcadores de vértice de los huecos para cambiar su forma.',
+              de: 'Ziehen Sie die Eckpunkt-Marker der Löcher, um sie umzuformen.',
+              th: 'ลากมาร์กเกอร์จุดยอดของรูเพื่อเปลี่ยนรูปทรงของรู',
+              hi: 'छेद के शीर्ष मार्कर खींचकर छेदों का आकार बदलें।',
+            },
+          )}
         </p>
       </ControlPanel>
     </MapViewContainer>

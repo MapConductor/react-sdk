@@ -74,6 +74,21 @@ const doc: SamplePageDoc = {
       'useMapLoaded retiene el efecto hasta que el mapa existe, y luego getMapViewHolder() devuelve un holder cuyo lienzo WebGL se agrega sobre el mapa.',
       'En cada fotograma holder.toScreenOffset(position) convierte la coordenada geográfica en un desplazamiento en píxeles, de modo que el objeto 3D permanece fijo mientras el mapa se mueve, con la misma llamada en cada proveedor.',
     ],
+    de: [
+      'Eine durchsichtige Three.js-Leinwand über die Karte legen und ihr 3D-Objekt mit der anbieterunabhängigen Projektion MapViewHolder.toScreenOffset() verankern.',
+      'useMapLoaded hält den Effekt zurück, bis die Karte existiert; dann liefert getMapViewHolder() einen Holder, dessen WebGL-Canvas über der Karte eingehängt wird.',
+      'In jedem Bild wandelt holder.toScreenOffset(position) die geografische Koordinate in einen Pixelversatz um, sodass das 3D-Objekt beim Bewegen der Karte an seinem Ort bleibt — derselbe Aufruf bei jedem Anbieter.',
+    ],
+    th: [
+      'วางแคนวาส Three.js แบบโปร่งใสไว้เหนือแผนที่ และตรึงอ็อบเจกต์ 3D ด้วยการฉาย MapViewHolder.toScreenOffset() ที่ไม่ผูกกับผู้ให้บริการ',
+      'useMapLoaded หน่วงเอฟเฟกต์ไว้จนกว่าแผนที่จะมีอยู่จริง จากนั้น getMapViewHolder() จะคืนโฮลเดอร์ที่มีแคนวาส WebGL ต่อทับอยู่เหนือแผนที่',
+      'ในทุกเฟรม holder.toScreenOffset(position) แปลงพิกัดภูมิศาสตร์เป็นออฟเซ็ตพิกเซล อ็อบเจกต์ 3D จึงตรึงอยู่กับที่ขณะแผนที่เลื่อน โดยเรียกแบบเดียวกันบนผู้ให้บริการทุกเจ้า',
+    ],
+    hi: [
+      'मैप के ऊपर एक पारदर्शी Three.js कैनवास रेंडर करें, और उसके 3D ऑब्जेक्ट को प्रोवाइडर-निरपेक्ष MapViewHolder.toScreenOffset() प्रोजेक्शन से बाँधें।',
+      'useMapLoaded इफ़ेक्ट को तब तक रोके रखता है जब तक मैप मौजूद न हो; फिर getMapViewHolder() एक होल्डर देता है, जिसका WebGL कैनवास मैप के ऊपर जोड़ दिया जाता है।',
+      'हर फ़्रेम पर holder.toScreenOffset(position) भौगोलिक निर्देशांक को पिक्सेल ऑफ़सेट में बदलता है, इसलिए मैप हिलने पर भी 3D ऑब्जेक्ट अपनी जगह टिका रहता है — वही कॉल हर प्रोवाइडर पर।',
+    ],
   },
 };
 

@@ -74,9 +74,27 @@ export function BasicGeoJSONPage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <GeoJSONLayer state={layerState} features={features} />
-      <ControlPanel title={t('GeoJSON Basic', 'GeoJSON 基本')}>
+      <ControlPanel title={t(
+        {
+          en: 'GeoJSON Basic',
+          ja: 'GeoJSON 基本',
+          'es-419': 'GeoJSON básico',
+          de: 'GeoJSON-Grundlagen',
+          th: 'GeoJSON เบื้องต้น',
+          hi: 'GeoJSON बुनियादी',
+        },
+      )}>
         <p className="control-panel-note">
-          {t('A GeoJSON polygon with a hole is displayed.', 'GeoJSONポリゴン（穴付き）を表示しています。')}
+          {t(
+            {
+              en: 'A GeoJSON polygon with a hole is displayed.',
+              ja: 'GeoJSONポリゴン（穴付き）を表示しています。',
+              'es-419': 'Se muestra un polígono GeoJSON con un hueco.',
+              de: 'Ein GeoJSON-Polygon mit einem Loch wird angezeigt.',
+              th: 'แสดงโพลีกอน GeoJSON ที่มีรู',
+              hi: 'छेद वाला एक GeoJSON पॉलीगॉन दिखाया गया है।',
+            },
+          )}
         </p>
       </ControlPanel>
     </MapViewContainer>

@@ -103,9 +103,27 @@ export function PolygonClickPage() {
           </InfoBubble>
         </>
       )}
-      <ControlPanel title={t('Polygon Click', 'ポリゴンのクリック')}>
+      <ControlPanel title={t(
+        {
+          en: 'Polygon Click',
+          ja: 'ポリゴンのクリック',
+          'es-419': 'Clic en polígono',
+          de: 'Polygon-Klick',
+          th: 'การคลิกโพลีกอน',
+          hi: 'पॉलीगॉन क्लिक',
+        },
+      )}>
         <p className="control-panel-note">
-          {t('Tap inside or outside California.', 'カリフォルニア州の内側または外側をタップしてください。')}
+          {t(
+            {
+              en: 'Tap inside or outside California.',
+              ja: 'カリフォルニア州の内側または外側をタップしてください。',
+              'es-419': 'Toca dentro o fuera de California.',
+              de: 'Tippen Sie innerhalb oder außerhalb von Kalifornien.',
+              th: 'แตะด้านในหรือด้านนอกรัฐแคลิฟอร์เนีย',
+              hi: 'कैलिफ़ोर्निया के अंदर या बाहर टैप करें।',
+            },
+          )}
         </p>
       </ControlPanel>
     </MapViewContainer>

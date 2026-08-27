@@ -81,11 +81,17 @@ export function PolylinePage() {
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polyline state={polylineState} />
       <Markers states={wayPointMarkers} />
-      <ControlPanel title={t('Description', '説明')}>
+      <ControlPanel title={t({ en: 'Description', ja: '説明', 'es-419': 'Descripción', de: 'Beschreibung', th: 'คำอธิบาย', hi: 'विवरण' })}>
         <p className="control-panel-note">
           {t(
-            'Drag the waypoint markers to reshape the polyline.',
-            'ウェイポイントのマーカーをドラッグすると、ポリラインの形を変更できます。',
+            {
+              en: 'Drag the waypoint markers to reshape the polyline.',
+              ja: 'ウェイポイントのマーカーをドラッグすると、ポリラインの形を変更できます。',
+              'es-419': 'Arrastra los marcadores de punto de paso para cambiar la forma de la polilínea.',
+              de: 'Ziehen Sie die Wegpunkt-Marker, um die Polylinie umzuformen.',
+              th: 'ลากมาร์กเกอร์จุดผ่านเพื่อเปลี่ยนรูปทรงของโพลีไลน์',
+              hi: 'वेपॉइंट के मार्कर खींचकर पॉलीलाइन का आकार बदलें।',
+            },
           )}
         </p>
       </ControlPanel>

@@ -63,7 +63,17 @@ export function SampleIntroOverlay({
     >
       <div className="sample-intro-dialog" onClick={event => event.stopPropagation()}>
         <h2 id="sample-intro-title" className="sample-intro-title">
-          {translate(language, 'How to try this sample', 'このサンプルの使い方', 'Cómo probar este ejemplo')}
+          {translate(
+            language,
+            {
+              en: 'How to try this sample',
+              ja: 'このサンプルの使い方',
+              'es-419': 'Cómo probar este ejemplo',
+              de: 'So probieren Sie dieses Beispiel aus',
+              th: 'วิธีลองตัวอย่างนี้',
+              hi: 'यह सैंपल कैसे आज़माएँ',
+            },
+          )}
         </h2>
         {intro.gif && gifOk && (
           <img
@@ -81,7 +91,17 @@ export function SampleIntroOverlay({
           className="sample-intro-close"
           onClick={dismiss}
         >
-          {translate(language, 'Got it', '閉じる', 'Entendido')}
+          {translate(
+            language,
+            {
+              en: 'Got it',
+              ja: '閉じる',
+              'es-419': 'Entendido',
+              de: 'Verstanden',
+              th: 'เข้าใจแล้ว',
+              hi: 'समझ गया',
+            },
+          )}
         </button>
       </div>
     </div>

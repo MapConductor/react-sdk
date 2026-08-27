@@ -80,6 +80,9 @@ const FALLBACK: SamplePageDoc = {
     en: ['Render provider-independent overlays inside the shared MapConductor map view.'],
     ja: ['MapConductorの共通地図ビュー内へ、プロバイダー非依存のオーバーレイを描画します。'],
     'es-419': ['Renderiza capas independientes del proveedor dentro de la vista de mapa compartida de MapConductor.'],
+    de: ['Zeichnen Sie anbieterunabhängige Overlays in die gemeinsame Kartenansicht von MapConductor.'],
+    th: ['วาดโอเวอร์เลย์ที่ไม่ผูกกับผู้ให้บริการไว้ภายในมุมมองแผนที่ร่วมของ MapConductor'],
+    hi: ['प्रोवाइडर से स्वतंत्र ओवरले MapConductor के साझा मैप व्यू के भीतर रेंडर करें।'],
   },
 };
 
@@ -102,6 +105,21 @@ const SECTION_COMMENTS: Record<SupportedLanguage, {
     map: 'Crear el mapa',
     state: 'Preparar los datos y el estado de interacción',
     render: 'Renderizar el mapa y sus capas',
+  },
+  de: {
+    map: 'Die Karte erzeugen',
+    state: 'Daten und Interaktionszustand vorbereiten',
+    render: 'Die Karte und ihre Overlays rendern',
+  },
+  th: {
+    map: 'สร้างแผนที่',
+    state: 'เตรียมข้อมูลและสถานะการโต้ตอบ',
+    render: 'เรนเดอร์แผนที่และโอเวอร์เลย์',
+  },
+  hi: {
+    map: 'मैप बनाएँ',
+    state: 'डेटा और इंटरैक्शन स्टेट तैयार करें',
+    render: 'मैप और उसके ओवरले रेंडर करें',
   },
 };
 

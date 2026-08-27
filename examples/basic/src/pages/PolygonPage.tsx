@@ -69,9 +69,27 @@ export function PolygonPage() {
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polygon state={polygonState} />
       <Markers states={vertexMarkers} />
-      <ControlPanel title={t('Polygon Example', 'ポリゴンのサンプル')}>
+      <ControlPanel title={t(
+        {
+          en: 'Polygon Example',
+          ja: 'ポリゴンのサンプル',
+          'es-419': 'Ejemplo de polígono',
+          de: 'Polygon-Beispiel',
+          th: 'ตัวอย่างโพลีกอน',
+          hi: 'पॉलीगॉन का उदाहरण',
+        },
+      )}>
         <SliderControl
-          label={t('Fill Opacity', '塗りの透明度')}
+          label={t(
+            {
+              en: 'Fill Opacity',
+              ja: '塗りの透明度',
+              'es-419': 'Opacidad del relleno',
+              de: 'Fülldeckkraft',
+              th: 'ความทึบของสีเติม',
+              hi: 'भराव की अपारदर्शिता',
+            },
+          )}
           value={fillOpacity}
           min={0}
           max={1}
@@ -79,7 +97,16 @@ export function PolygonPage() {
           onChange={setFillOpacity}
         />
         <SliderControl
-          label={t('Stroke Width', '線の太さ')}
+          label={t(
+            {
+              en: 'Stroke Width',
+              ja: '線の太さ',
+              'es-419': 'Grosor del trazo',
+              de: 'Linienbreite',
+              th: 'ความหนาเส้น',
+              hi: 'रेखा की मोटाई',
+            },
+          )}
           value={strokeWidth}
           min={1}
           max={10}
@@ -88,7 +115,16 @@ export function PolygonPage() {
           onChange={setStrokeWidth}
         />
         <p className="control-panel-note">
-          {t('Drag vertex markers to reshape the polygon.', '頂点マーカーをドラッグしてポリゴンの形を変更できます。')}
+          {t(
+            {
+              en: 'Drag vertex markers to reshape the polygon.',
+              ja: '頂点マーカーをドラッグしてポリゴンの形を変更できます。',
+              'es-419': 'Arrastra los marcadores de vértice para cambiar la forma del polígono.',
+              de: 'Ziehen Sie die Eckpunkt-Marker, um das Polygon umzuformen.',
+              th: 'ลากมาร์กเกอร์ที่จุดยอดเพื่อเปลี่ยนรูปทรงของโพลีกอน',
+              hi: 'शीर्ष के मार्कर खींचकर पॉलीगॉन का आकार बदलें।',
+            },
+          )}
         </p>
       </ControlPanel>
       <Toast messages={messages} onDismiss={dismissToast} />

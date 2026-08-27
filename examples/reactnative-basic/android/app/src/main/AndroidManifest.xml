@@ -16,6 +16,7 @@
     <meta-data android:name="longdo.map.key" android:value="${LONGDO_API_KEY}" tools:replace="android:value"/>
     <meta-data android:name="MAPTILER_API_KEY" android:value="${MAPTILER_API_KEY}" tools:replace="android:value"/>
     <meta-data android:name="MAPBOX_ACCESS_TOKEN" android:value="${MAPBOX_ACCESS_TOKEN}" tools:replace="android:value"/>
+    <meta-data android:name="TOMTOM_API_KEY" android:value="${TOMTOM_API_KEY}" tools:replace="android:value"/>
     <meta-data android:name="expo.modules.updates.ENABLED" android:value="false"/>
     <meta-data android:name="expo.modules.updates.ENABLE_BSDIFF_PATCH_SUPPORT" android:value="true"/>
     <meta-data android:name="expo.modules.updates.EXPO_UPDATES_CHECK_ON_LAUNCH" android:value="ALWAYS"/>

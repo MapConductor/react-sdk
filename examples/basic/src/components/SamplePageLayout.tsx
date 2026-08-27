@@ -34,7 +34,17 @@ export function SamplePageLayout({
         <div className="sample-map-stage">
           {children ?? (
             <div className="sample-map-placeholder" aria-hidden="true">
-              {translate(language, 'Loading map…', '地図を読み込んでいます…', 'Cargando el mapa…')}
+              {translate(
+                language,
+                {
+                  en: 'Loading map…',
+                  ja: '地図を読み込んでいます…',
+                  'es-419': 'Cargando el mapa…',
+                  de: 'Karte wird geladen…',
+                  th: 'กำลังโหลดแผนที่…',
+                  hi: 'मैप लोड हो रहा है…',
+                },
+              )}
             </div>
           )}
           <SampleIntroOverlay page={page} language={language} />

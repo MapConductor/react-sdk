@@ -13,13 +13,17 @@
   "dependencies": {
     "@mapconductor/js-sdk-core": "*",
     "@mapconductor/js-sdk-react": "*",
-    "@mapconductor/reactnative-for-googlemaps": "*",
-    "@mapconductor/reactnative-for-maplibre": "*",
-    "@mapconductor/reactnative-for-here": "*",
-    "@mapconductor/reactnative-for-arcgis": "*",
     "@mapconductor/react-geojson": "*",
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-marker-clustering": "*",
+    "@mapconductor/reactnative-for-arcgis": "*",
+    "@mapconductor/reactnative-for-googlemaps": "*",
+    "@mapconductor/reactnative-for-longdo": "*",
+    "@mapconductor/reactnative-for-mapbox": "*",
+    "@mapconductor/reactnative-for-maplibre": "*",
+    "@mapconductor/reactnative-for-maptiler": "*",
+    "@mapconductor/reactnative-for-template": "*",
+    "@mapconductor/reactnative-for-tomtom": "*",
     "@react-native-community/slider": "^5.2.0",
     "@react-native-picker/picker": "2.11.4",
     "expo": "~57.0.1",
@@ -27,15 +31,12 @@
     "expo-status-bar": "~57.0.0",
     "react": "19.2.3",
     "react-native": "0.86.0",
-    "react-native-safe-area-context": "^5.8.0",
-    "@mapconductor/reactnative-for-template": "*",
-    "@mapconductor/reactnative-for-longdo": "*",
-    "@mapconductor/reactnative-for-maptiler": "*",
-    "@mapconductor/reactnative-for-mapbox": "*"
+    "react-native-safe-area-context": "^5.8.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.0",
     "@types/react": "~19.2.17",
+    "babel-preset-expo": "~57.0.7",
     "typescript": "~6.0.3"
   }
 }

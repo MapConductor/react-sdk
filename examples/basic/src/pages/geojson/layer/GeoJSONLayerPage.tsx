@@ -45,10 +45,37 @@ export function GeoJSONLayerPage({ source = railroadGeoJSONSource }: { source?: 
     <MapViewContainer initialCamera={{ lat: 35.68, lng: 139.77, zoom: 13 }} onStateReady={setMapState} onMapClick={handleMapClick}>
       <GeoJSONLayer state={layerState} features={features} />
       {selected && <InfoBubble position={selected.position}><PropertyTable properties={selected.properties} /></InfoBubble>}
-      <ControlPanel title={t('GeoJSON Layer', 'GeoJSON レイヤー')}>
+      <ControlPanel title={t(
+        {
+          en: 'GeoJSON Layer',
+          ja: 'GeoJSON レイヤー',
+          'es-419': 'Capa GeoJSON',
+          de: 'GeoJSON-Ebene',
+          th: 'เลเยอร์ GeoJSON',
+          hi: 'GeoJSON लेयर',
+        },
+      )}>
         <p className="control-panel-note">{isLoading
-          ? t('Loading GeoJSON…', 'GeoJSONを読み込んでいます…')
-          : t('Tap a railway line to display its properties.', '路線をタップするとプロパティが表示されます。')}
+          ? t(
+            {
+              en: 'Loading GeoJSON…',
+              ja: 'GeoJSONを読み込んでいます…',
+              'es-419': 'Cargando GeoJSON…',
+              de: 'GeoJSON wird geladen…',
+              th: 'กำลังโหลด GeoJSON…',
+              hi: 'GeoJSON लोड हो रहा है…',
+            },
+          )
+          : t(
+            {
+              en: 'Tap a railway line to display its properties.',
+              ja: '路線をタップするとプロパティが表示されます。',
+              'es-419': 'Toca una línea de ferrocarril para ver sus propiedades.',
+              de: 'Tippen Sie auf eine Bahnlinie, um ihre Eigenschaften anzuzeigen.',
+              th: 'แตะเส้นทางรถไฟเพื่อดูคุณสมบัติของเส้นนั้น',
+              hi: 'किसी रेल लाइन पर टैप करने से उसकी प्रॉपर्टी दिखती हैं।',
+            },
+          )}
         </p>
       </ControlPanel>
     </MapViewContainer>

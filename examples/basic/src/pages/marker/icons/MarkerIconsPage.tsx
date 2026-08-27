@@ -9,7 +9,7 @@ import {
   type MarkerIcon,
   type MarkerState,
 } from '@mapconductor/js-sdk-core';
-import { CircleIcon, FlagIcon, RightTailInfoBubbleIcon, RoundInfoBubbleIcon } from '@mapconductor/react-icons';
+import { CircleIcon, FlagIcon, PhotoCardPinIcon, RightTailInfoBubbleIcon, RoundInfoBubbleIcon, RoundedSquarePinIcon, TeardropPinIcon, ThumbnailPinIcon } from '@mapconductor/react-icons';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
 
@@ -43,6 +43,15 @@ const LAUNCHER_ICON_URL = svgDataUrl(`
   </svg>
 `);
 
+const THUMBNAIL_PHOTO_URL = svgDataUrl(`
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 72">
+    <rect width="96" height="72" fill="#7dd3fc"/>
+    <circle cx="22" cy="18" r="10" fill="#fef08a"/>
+    <path d="M0 72 L30 30 L52 56 L68 38 L96 72 Z" fill="#15803d"/>
+    <path d="M0 72 L26 40 L48 72 Z" fill="#166534"/>
+  </svg>
+`);
+
 const DEFAULT_MARKER_ICON_URL = svgDataUrl(`
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
     <path d="M32 60S13 38 13 25a19 19 0 1 1 38 0c0 13-19 35-19 35z" fill="#ef4444"/>
@@ -64,6 +73,7 @@ export function MarkerIconsPage() {
   const launcherImage = useLoadedImage(LAUNCHER_ICON_URL);
   const weatherPngUrl = useRasterizedDataUrl(WEATHER_ICON_URL);
   const defaultMarkerPngUrl = useRasterizedDataUrl(DEFAULT_MARKER_ICON_URL);
+  const thumbnailPngUrl = useRasterizedDataUrl(THUMBNAIL_PHOTO_URL);
   const labelImage = useLabeledMarkerImage('Label');
   const [selected, setSelected] = useState<MarkerState | null>(null);
 
@@ -171,6 +181,47 @@ export function MarkerIconsPage() {
 )`,
       },
       {
+        id: 'teardrop-pin-icon',
+        lat: 0.002,
+        lng: 0.008,
+        icon: new TeardropPinIcon('#d62b4c', { holeColor: '#ffffff' }),
+        extra: `TeardropPinIcon(
+  fillColor = Color(red = 0xD6, green = 0x2B, blue = 0x4C),
+  holeColor = Color.White,
+)`,
+      },
+      {
+        id: 'rounded-square-pin-icon',
+        lat: 0.002,
+        lng: 0.012,
+        icon: new RoundedSquarePinIcon('#d22a44', { holeColor: '#ffffff' }),
+        extra: `RoundedSquarePinIcon(
+  fillColor = Color(red = 0xD2, green = 0x2A, blue = 0x44),
+  holeColor = Color.White,
+)`,
+      },
+      {
+        id: 'thumbnail-pin-icon',
+        lat: 0.002,
+        lng: 0.004,
+        icon: new ThumbnailPinIcon(thumbnailPngUrl ?? THUMBNAIL_PHOTO_URL, { iconSize: 56 }),
+        extra: `ThumbnailPinIcon(
+  imageUrl = photoDataUrl,
+  iconSize = 56,
+)`,
+      },
+      {
+        id: 'photo-card-pin-icon',
+        lat: 0.008,
+        lng: 0.019,
+        icon: new PhotoCardPinIcon(thumbnailPngUrl ?? THUMBNAIL_PHOTO_URL, 'ホテル藍', '¥12,800'),
+        extra: `PhotoCardPinIcon(
+  imageUrl = photoDataUrl,
+  title = "ホテル藍",
+  subtitle = "¥12,800",
+)`,
+      },
+      {
         id: 'round-info-bubble-icon',
         lat: 0.006,
         lng: 0.012,
@@ -259,7 +310,7 @@ export function MarkerIconsPage() {
     }
 
     return definitions;
-  }, [defaultMarkerPngUrl, humanImage, labelImage, launcherImage, weatherImage, weatherPngUrl]);
+  }, [defaultMarkerPngUrl, humanImage, labelImage, launcherImage, thumbnailPngUrl, weatherImage, weatherPngUrl]);
 
   const markers = useMemo(
     () =>

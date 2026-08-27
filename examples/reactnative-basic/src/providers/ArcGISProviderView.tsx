@@ -1,9 +1,17 @@
 import React, { useEffect } from 'react';
-import { ArcGISDesign, ArcGISMapView, useArcGISViewState, type ArcGISDesignType } from '@mapconductor/reactnative-for-arcgis';
+import {
+  ArcGISDesign,
+  ArcGISMapView,
+  ArcGISMapView2D,
+  useArcGISViewState,
+  type ArcGISDesignType,
+} from '@mapconductor/reactnative-for-arcgis';
 import type { ProviderViewProps } from './types';
 
 interface ArcGISProviderViewProps extends ProviderViewProps {
   mapDesignType?: ArcGISDesignType;
+  /** true なら 3D（`ArcGISMapView`）。既定は 2D（`ArcGISMapView2D`）。 */
+  useSceneView?: boolean;
 }
 
 const ARCGIS_API_KEY = process.env.EXPO_PUBLIC_ARCGIS_API_KEY;
@@ -14,6 +22,7 @@ export function ArcGISProviderView({
   mapId,
   cameraPosition,
   mapDesignType,
+  useSceneView = false,
   onMapClick,
   onCameraMoveStart,
   onCameraMove,
@@ -23,6 +32,7 @@ export function ArcGISProviderView({
   cameraRestriction,
   onStateReady,
 }: ArcGISProviderViewProps) {
+  const MapView = useSceneView ? ArcGISMapView : ArcGISMapView2D;
   const state = useArcGISViewState({
     id: mapId,
     apiKey: ARCGIS_API_KEY,
@@ -35,7 +45,7 @@ export function ArcGISProviderView({
   }, [state, onStateReady]);
 
   return (
-    <ArcGISMapView
+    <MapView
       state={state}
       style={style}
       markerTilingOptions={markerTilingOptions}
@@ -47,6 +57,6 @@ export function ArcGISProviderView({
       onCameraMoveEnd={onCameraMoveEnd}
     >
       {children}
-    </ArcGISMapView>
+    </MapView>
   );
 }

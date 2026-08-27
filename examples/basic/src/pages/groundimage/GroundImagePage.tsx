@@ -112,10 +112,37 @@ export function GroundImagePage() {
       <GroundImage state={image} />
       <Markers states={markers} />
       <Polyline state={polylineState} />
-      <ControlPanel title={t('Ground Image', '地表画像')}>
-        <SliderControl label={t('Opacity', '透明度')} value={opacity} min={0} max={1} onChange={setOpacity} />
+      <ControlPanel title={t(
+        {
+          en: 'Ground Image',
+          ja: '地表画像',
+          'es-419': 'Imagen sobre el terreno',
+          de: 'Bodenbild',
+          th: 'ภาพบนพื้นผิว',
+          hi: 'ग्राउंड इमेज',
+        },
+      )}>
+        <SliderControl label={t(
+          {
+            en: 'Opacity',
+            ja: '透明度',
+            'es-419': 'Opacidad',
+            de: 'Deckkraft',
+            th: 'ความทึบ',
+            hi: 'अपारदर्शिता',
+          },
+        )} value={opacity} min={0} max={1} onChange={setOpacity} />
         <p className="control-panel-note">
-          {t('Drag the SW/NE markers to change image bounds.', '南西／北東マーカーをドラッグして画像範囲を変更できます。')}
+          {t(
+            {
+              en: 'Drag the SW/NE markers to change image bounds.',
+              ja: '南西／北東マーカーをドラッグして画像範囲を変更できます。',
+              'es-419': 'Arrastra los marcadores SO/NE para cambiar los límites de la imagen.',
+              de: 'Ziehen Sie die SW-/NO-Marker, um die Bildgrenzen zu ändern.',
+              th: 'ลากมาร์กเกอร์ SW/NE เพื่อเปลี่ยนขอบเขตของภาพ',
+              hi: 'SW/NE मार्कर खींचकर इमेज की सीमा बदलें।',
+            },
+          )}
         </p>
         <p className="control-panel-note">
           Aerial imagery © Open Imagery Network contributors, accessed via OpenAerialMap, licensed under CC BY 4.0.

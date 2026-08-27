@@ -38,6 +38,21 @@ const markerTilingOptions = {
       'El mismo arreglo postOfficeMarkers alimenta a MarkerClusterGroup en lugar de <Markers>, de modo que las oficinas cercanas se agrupan automáticamente al alejar el mapa.',
       'clusterIconProvider dibuja la insignia del grupo, onClusterClick ejecuta zoomToCluster para expandirlo, y minClusterSize con clusterRadiusPx ajustan la intensidad con que se combinan los puntos.',
     ],
+    de: [
+      'Eine große Markersammlung clustern und über die Erweiterungs-API ein eigenes Cluster-Icon und Klickverhalten mitgeben.',
+      'Dasselbe postOfficeMarkers-Array speist MarkerClusterGroup statt <Markers>, sodass nahe beieinanderliegende Filialen beim Herauszoomen automatisch gruppiert werden.',
+      'clusterIconProvider zeichnet das Cluster-Abzeichen, onClusterClick führt zoomToCluster aus, um eine Gruppe zu öffnen, und minClusterSize zusammen mit clusterRadiusPx regelt, wie stark Punkte zusammengefasst werden.',
+    ],
+    th: [
+      'จัดกลุ่มมาร์กเกอร์จำนวนมาก และกำหนดไอคอนกลุ่มกับพฤติกรรมการคลิกเองผ่าน API ของส่วนขยาย',
+      'อาร์เรย์ postOfficeMarkers ชุดเดิมถูกป้อนให้ MarkerClusterGroup แทน <Markers> ที่ทำการที่อยู่ใกล้กันจึงถูกจัดกลุ่มอัตโนมัติเมื่อซูมออก',
+      'clusterIconProvider วาดป้ายของกลุ่ม onClusterClick เรียก zoomToCluster เพื่อเปิดกลุ่ม ส่วน minClusterSize กับ clusterRadiusPx ใช้ปรับว่าจะรวมจุดเข้าด้วยกันมากแค่ไหน',
+    ],
+    hi: [
+      'बहुत सारे मार्कर का क्लस्टर बनाएँ, और एक्सटेंशन API से अपना क्लस्टर आइकन तथा क्लिक व्यवहार दें।',
+      'वही postOfficeMarkers सरणी <Markers> की जगह MarkerClusterGroup को दी जाती है, इसलिए ज़ूम आउट करते ही पास-पास के डाकघर अपने आप समूह बन जाते हैं।',
+      'clusterIconProvider क्लस्टर का बैज खींचता है, onClusterClick zoomToCluster चलाकर समूह खोलता है, और minClusterSize तथा clusterRadiusPx तय करते हैं कि बिंदु कितनी सख़्ती से जुड़ें।',
+    ],
   },
 };
 

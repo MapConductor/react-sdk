@@ -47,11 +47,38 @@ function PostOfficeContent({
     <>
       <Markers states={markerStates} />
       {selected && <PostOfficeInfoBubble marker={selected} mapViewState={mapViewState} />}
-      <ControlPanel title={t('Post Offices (24,526 markers)', '郵便局（24,526件）')}>
+      <ControlPanel title={t(
+        {
+          en: 'Post Offices (24,526 markers)',
+          ja: '郵便局（24,526件）',
+          'es-419': 'Oficinas postales (24,526 marcadores)',
+          de: 'Postfilialen (24.526 Marker)',
+          th: 'ที่ทำการไปรษณีย์ (24,526 มาร์กเกอร์)',
+          hi: 'डाकघर (24,526 मार्कर)',
+        },
+      )}>
         <p className="control-panel-note">
           {records
-            ? t('Click a marker to display postal-office information.', 'マーカーをクリックすると郵便局情報が表示されます。')
-            : t('Loading data…', 'データを読み込んでいます…')}
+            ? t(
+              {
+                en: 'Click a marker to display postal-office information.',
+                ja: 'マーカーをクリックすると郵便局情報が表示されます。',
+                'es-419': 'Haz clic en un marcador para ver la información de la oficina postal.',
+                de: 'Klicken Sie auf einen Marker, um die Angaben zur Postfiliale zu sehen.',
+                th: 'คลิกมาร์กเกอร์เพื่อดูข้อมูลที่ทำการไปรษณีย์',
+                hi: 'किसी मार्कर पर क्लिक करने से डाकघर की जानकारी दिखती है।',
+              },
+            )
+            : t(
+              {
+                en: 'Loading data…',
+                ja: 'データを読み込んでいます…',
+                'es-419': 'Cargando datos…',
+                de: 'Daten werden geladen…',
+                th: 'กำลังโหลดข้อมูล…',
+                hi: 'डेटा लोड हो रहा है…',
+              },
+            )}
         </p>
       </ControlPanel>
     </>,

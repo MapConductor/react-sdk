@@ -29,6 +29,21 @@ const marker = useMemo(() => createMarkerState({
       'Una bandera booleana vive en useState y el onClick del marcador la pone en true; onMapClick la restablece para cerrar el globo al tocar en otro lugar.',
       'El InfoBubble se dibuja solo mientras la bandera es true y queda anclado al marcador: el patrón central de superposiciones dirigidas por estado.',
     ],
+    de: [
+      'Das einfachste MapConductor-Beispiel: ein Marker, der beim Antippen eine „Hello, MapConductor“-Sprechblase öffnet.',
+      'Ein boolesches Flag liegt in useState, und das onClick des Markers setzt es auf true; onMapClick setzt es zurück, sodass sich die Sprechblase schließt, wenn Sie woanders tippen.',
+      'Die InfoBubble wird nur gerendert, solange das Flag true ist, und hängt am Marker — das Grundmuster zustandsgetriebener Overlays.',
+    ],
+    th: [
+      'ตัวอย่าง MapConductor ที่ง่ายที่สุด มีมาร์กเกอร์หนึ่งอันที่เปิดบับเบิล “Hello, MapConductor” เมื่อแตะ',
+      'ค่าบูลีนเก็บอยู่ใน useState และ onClick ของมาร์กเกอร์เปลี่ยนค่าเป็น true ส่วน onMapClick รีเซ็ตกลับ บับเบิลจึงปิดเมื่อแตะที่อื่น',
+      'InfoBubble จะเรนเดอร์เฉพาะตอนที่ค่าเป็น true และตรึงอยู่กับมาร์กเกอร์ ซึ่งเป็นแบบแผนหลักของโอเวอร์เลย์ที่ขับด้วยสถานะ',
+    ],
+    hi: [
+      'MapConductor का सबसे सरल उदाहरण: एक मार्कर, जो टैप करने पर “Hello, MapConductor” का बबल खोलता है।',
+      'एक बूलियन फ़्लैग useState में रहता है, और मार्कर का onClick उसे true कर देता है; onMapClick उसे वापस कर देता है, इसलिए कहीं और टैप करने पर बबल बंद हो जाता है।',
+      'InfoBubble तभी रेंडर होता है जब फ़्लैग true है, और मार्कर से बँधा रहता है — स्टेट से चलने वाले ओवरले का मूल ढाँचा।',
+    ],
   },
 };
 

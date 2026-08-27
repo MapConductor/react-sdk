@@ -28,6 +28,21 @@ const layerState = useMemo(() => new GeoJSONLayerState({ id: 'railways' }), []);
       'Tanto los features como el elemento seleccionado viven en el estado de React, y layerState es un GeoJSONLayerState con los datos ferroviarios.',
       'handleMapClick determina qué elemento se tocó y lo almacena, luego InfoBubble ancla un PropertyTable de sus propiedades en la coordenada tocada.',
     ],
+    de: [
+      'Klicks gegen GeoJSON-Features auswerten und die Eigenschaften des getroffenen Features an der geografischen Klickposition zeigen.',
+      'Sowohl die Features als auch das ausgewählte Feature liegen im React-State, und layerState ist ein GeoJSONLayerState mit den Bahndaten.',
+      'handleMapClick ermittelt das getroffene Feature und merkt es sich, dann verankert InfoBubble eine PropertyTable seiner Eigenschaften an der angeklickten Koordinate.',
+    ],
+    th: [
+      'ประมวลผลการคลิกกับฟีเจอร์ GeoJSON แล้วแสดงคุณสมบัติของฟีเจอร์ที่เลือกไว้ ณ ตำแหน่งภูมิศาสตร์ที่คลิก',
+      'ทั้งฟีเจอร์และฟีเจอร์ที่เลือกอยู่ในสถานะของ React ส่วน layerState คือ GeoJSONLayerState ที่ถือข้อมูลเส้นทางรถไฟ',
+      'handleMapClick หาว่าโดนฟีเจอร์ใดแล้วเก็บไว้ จากนั้น InfoBubble จะตรึง PropertyTable ของคุณสมบัตินั้นไว้ที่พิกัดที่คลิก',
+    ],
+    hi: [
+      'क्लिक को GeoJSON फ़ीचर के विरुद्ध जाँचें और चुने गए फ़ीचर की प्रॉपर्टी उसी भौगोलिक जगह पर दिखाएँ।',
+      'फ़ीचर और चुना गया फ़ीचर दोनों React स्टेट में रहते हैं, और layerState एक GeoJSONLayerState है जिसमें रेलवे का डेटा है।',
+      'handleMapClick तय करता है कि कौन-सा फ़ीचर लगा और उसे रख लेता है; फिर InfoBubble उसकी प्रॉपर्टी की PropertyTable क्लिक किए गए निर्देशांक पर टिका देता है।',
+    ],
   },
 };
 

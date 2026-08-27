@@ -3,11 +3,11 @@ import {
   MapLibreDesign,
   type MapLibreMapDesignType,
 } from '@mapconductor/reactnative-for-maplibre';
-import { HereMapDesign, type HereMapDesignType } from '@mapconductor/reactnative-for-here';
 import { ArcGISDesign, type ArcGISDesignType } from '@mapconductor/reactnative-for-arcgis';
 import { LongdoDesign, type LongdoMapDesignType } from '@mapconductor/reactnative-for-longdo';
 import { MapTilerDesign, type MapTilerMapDesignType } from '@mapconductor/reactnative-for-maptiler';
 import { MapboxDesign, type MapboxMapDesignType } from '@mapconductor/reactnative-for-mapbox';
+import { TomTomDesign, type TomTomMapDesignType } from '@mapconductor/reactnative-for-tomtom';
 import type { MapDesignTypeInterface } from '@mapconductor/js-sdk-core';
 import type { MapProvider } from './types';
 
@@ -34,25 +34,6 @@ const MAPLIBRE_DESIGNS: MapDesignOption[] = [
   { label: 'OsmBrightEn', design: MapLibreDesign.OsmBrightEn },
   { label: 'OsmBrightJa', design: MapLibreDesign.OsmBrightJa },
   { label: 'OpenMapTiles', design: MapLibreDesign.OpenMapTiles },
-];
-
-// First entry must match HereProviderView's default (NormalDay) so the picker's
-// initial value aligns with the design the map actually mounts with.
-const HERE_DESIGNS: MapDesignOption[] = [
-  { label: 'Normal Day', design: HereMapDesign.NormalDay },
-  { label: 'Normal Night', design: HereMapDesign.NormalNight },
-  { label: 'Satellite', design: HereMapDesign.Satellite },
-  { label: 'Hybrid Day', design: HereMapDesign.HybridDay },
-  { label: 'Hybrid Night', design: HereMapDesign.HybridNight },
-  { label: 'Lite Day', design: HereMapDesign.LiteDay },
-  { label: 'Lite Night', design: HereMapDesign.LiteNight },
-  { label: 'Lite Hybrid Day', design: HereMapDesign.LiteHybridDay },
-  { label: 'Lite Hybrid Night', design: HereMapDesign.LiteHybridNight },
-  { label: 'Logistics Day', design: HereMapDesign.LogisticsDay },
-  { label: 'Logistics Night', design: HereMapDesign.LogisticsNight },
-  { label: 'Logistics Hybrid Day', design: HereMapDesign.LogisticsHybridDay },
-  { label: 'Road Network Day', design: HereMapDesign.RoadNetworkDay },
-  { label: 'Road Network Night', design: HereMapDesign.RoadNetworkNight },
 ];
 
 // First entry must match ArcGISProviderView's default (Streets). Only complete,
@@ -150,30 +131,44 @@ const MAPBOX_DESIGNS: MapDesignOption[] = [
   { label: 'OpenMapTiles', design: MapboxDesign.OpenMapTiles },
 ];
 
+// First entry must match TomTomProviderView's default (Standard).
+// **ネイティブのカタログは 3 つだけ。** web の TomTomDesign は standard-light /
+// mono-dark 等の派生も持つが、android / iOS は standard / driving / satellite しか
+// 引けず、それ以外の id は Standard に丸められる。ここに派生を並べると
+// 「選べるのに何も変わらない」選択肢になるので載せない。
+const TOMTOM_DESIGNS: MapDesignOption[] = [
+  { label: 'Standard', design: TomTomDesign.Standard },
+  { label: 'Driving', design: TomTomDesign.Driving },
+  { label: 'Satellite', design: TomTomDesign.Satellite },
+];
+
 export const DESIGN_OPTIONS: Partial<Record<MapProvider, MapDesignOption[]>> = {
   maplibre: MAPLIBRE_DESIGNS,
   'google-maps': GOOGLE_MAP_2D_DESIGNS,
-  here: HERE_DESIGNS,
   arcgis: ARCGIS_DESIGNS,
+  'arcgis-3d': ARCGIS_DESIGNS,
   longdo: LONGDO_DESIGNS,
   maptiler: MAPTILER_DESIGNS,
   mapbox: MAPBOX_DESIGNS,
+  tomtom: TOMTOM_DESIGNS,
 };
 
 export function providerLabel(provider: MapProvider): string {
   switch (provider) {
     case 'google-maps':
       return 'Google Maps';
-    case 'here':
-      return 'HERE';
     case 'arcgis':
       return 'ArcGIS';
+    case 'arcgis-3d':
+      return 'ArcGIS 3D';
     case 'longdo':
       return 'Longdo';
     case 'maptiler':
       return 'MapTiler';
     case 'mapbox':
       return 'Mapbox';
+    case 'tomtom':
+      return 'TomTom';
     default:
       return 'MapLibre';
   }
@@ -182,9 +177,9 @@ export function providerLabel(provider: MapProvider): string {
 export type {
   GoogleMapDesignType,
   MapLibreMapDesignType,
-  HereMapDesignType,
   ArcGISDesignType,
   LongdoMapDesignType,
   MapTilerMapDesignType,
   MapboxMapDesignType,
+  TomTomMapDesignType,
 };

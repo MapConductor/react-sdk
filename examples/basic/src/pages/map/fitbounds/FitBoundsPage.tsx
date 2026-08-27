@@ -96,11 +96,26 @@ function FitBoundsContent({ mapViewState }: { mapViewState: MapViewStateInterfac
     <>
       <Marker state={marker} />
       {boundsPolygon && <Polygon state={boundsPolygon} />}
-      <ControlPanel title={t('Fit Bounds', '範囲にフィット')}>
+      <ControlPanel title={t(
+        {
+          en: 'Fit Bounds',
+          ja: '範囲にフィット',
+          'es-419': 'Ajustar a límites',
+          de: 'An Bereich anpassen',
+          th: 'ปรับให้พอดีขอบเขต',
+          hi: 'सीमा में फ़िट करें',
+        },
+      )}>
         <p style={{ fontSize: 13, margin: 0, lineHeight: 1.6 }}>
           {t(
-            'Drag the marker to define a rectangle, then drop it — the map fits to that bounds.',
-            'マーカーをドラッグして範囲を指定し、ドロップすると fitBounds で地図が移動します。',
+            {
+              en: 'Drag the marker to define a rectangle, then drop it — the map fits to that bounds.',
+              ja: 'マーカーをドラッグして範囲を指定し、ドロップすると fitBounds で地図が移動します。',
+              'es-419': 'Arrastra el marcador para definir un rectángulo y suéltalo: el mapa se ajusta a esos límites.',
+              de: 'Ziehen Sie den Marker, um ein Rechteck aufzuspannen, und lassen Sie los — die Karte passt sich diesem Bereich an.',
+              th: 'ลากมาร์กเกอร์เพื่อกำหนดสี่เหลี่ยม แล้วปล่อย แผนที่จะปรับให้พอดีกับขอบเขตนั้น',
+              hi: 'मार्कर खींचकर आयत तय करें और छोड़ दें — मैप उसी सीमा में फ़िट हो जाएगा।',
+            },
           )}
         </p>
       </ControlPanel>

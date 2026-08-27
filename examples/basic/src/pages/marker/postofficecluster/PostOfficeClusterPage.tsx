@@ -69,15 +69,51 @@ function ClusterContent({
         debugHullPolygons={debugHullPolygons}
       />
       {selected && <PostOfficeInfoBubble marker={selected} mapViewState={mapViewState} />}
-      <ControlPanel title={t('Post Office Clusters (24,526 markers)', '郵便局クラスタリング（24,526件）')}>
+      <ControlPanel title={t(
+        {
+          en: 'Post Office Clusters (24,526 markers)',
+          ja: '郵便局クラスタリング（24,526件）',
+          'es-419': 'Grupos de oficinas postales (24,526 marcadores)',
+          de: 'Postfilialen-Cluster (24.526 Marker)',
+          th: 'กลุ่มที่ทำการไปรษณีย์ (24,526 มาร์กเกอร์)',
+          hi: 'डाकघरों के क्लस्टर (24,526 मार्कर)',
+        },
+      )}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer', fontSize: 13 }}>
           <input type="checkbox" checked={debugHullPolygons} onChange={event => setDebugHullPolygons(event.target.checked)} />
-          {t('Show debug hull polygons', 'デバッグ用の外周ポリゴンを表示')}
+          {t(
+            {
+              en: 'Show debug hull polygons',
+              ja: 'デバッグ用の外周ポリゴンを表示',
+              'es-419': 'Mostrar polígonos de envolvente para depuración',
+              de: 'Debug-Hüllpolygone anzeigen',
+              th: 'แสดงโพลีกอนขอบเขตสำหรับดีบัก',
+              hi: 'डीबग के लिए बाहरी पॉलीगॉन दिखाएँ',
+            },
+          )}
         </label>
         <p className="control-panel-note">
           {records
-            ? t('Click a cluster to zoom in. Click an individual marker for details.', 'クラスターをクリックするとズームインし、個別マーカーで郵便局情報を表示します。')
-            : t('Loading data…', 'データを読み込んでいます…')}
+            ? t(
+              {
+                en: 'Click a cluster to zoom in. Click an individual marker for details.',
+                ja: 'クラスターをクリックするとズームインし、個別マーカーで郵便局情報を表示します。',
+                'es-419': 'Haz clic en un grupo para acercarte. Haz clic en un marcador individual para ver los detalles.',
+                de: 'Klicken Sie auf einen Cluster, um hineinzuzoomen. Für Details klicken Sie einen einzelnen Marker an.',
+                th: 'คลิกกลุ่มเพื่อซูมเข้า และคลิกมาร์กเกอร์เดี่ยวเพื่อดูรายละเอียด',
+                hi: 'क्लस्टर पर क्लिक करने से ज़ूम होता है; अलग मार्कर पर क्लिक करने से ब्योरा दिखता है।',
+              },
+            )
+            : t(
+              {
+                en: 'Loading data…',
+                ja: 'データを読み込んでいます…',
+                'es-419': 'Cargando datos…',
+                de: 'Daten werden geladen…',
+                th: 'กำลังโหลดข้อมูล…',
+                hi: 'डेटा लोड हो रहा है…',
+              },
+            )}
         </p>
       </ControlPanel>
     </>,

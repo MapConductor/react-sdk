@@ -40,6 +40,21 @@ const straightPolyline = useMemo(() => polyline.copy({
       'La polilínea roja es geodésica; su onClick agrega a clickMarkers un marcador con animación Drop en event.clicked, teñido con el propio strokeColor de la línea.',
       'straightPolyline es una .copy con geodesic:false y trazo azul, de modo que las rutas geodésica (roja) y recta (azul) entre los mismos tres puntos quedan lado a lado para comparar.',
     ],
+    de: [
+      'Auf die geodätische Polylinie tippen, um an der getippten Stelle einen Marker abzusetzen, und sie mit einer geraden Kopie derselben Route vergleichen.',
+      'Die rote Polylinie ist geodätisch; ihr onClick hängt an event.clicked einen Marker mit Drop-Animation — eingefärbt in der strokeColor der Linie selbst — an clickMarkers an.',
+      'straightPolyline ist eine .copy mit geodesic:false und blauer Kontur, sodass der geodätische (rote) und der gerade (blaue) Weg zwischen denselben drei Punkten zum Vergleich nebeneinanderliegen.',
+    ],
+    th: [
+      'แตะโพลีไลน์แบบจีโอเดสิกเพื่อวางมาร์กเกอร์ที่ตำแหน่งที่แตะ แล้วเทียบกับสำเนาแบบเส้นตรงของเส้นทางเดียวกัน',
+      'โพลีไลน์สีแดงเป็นแบบจีโอเดสิก โดย onClick ของมันจะเพิ่มมาร์กเกอร์ที่มีแอนิเมชัน Drop ลงใน clickMarkers ที่ event.clicked และย้อมด้วย strokeColor ของเส้นนั้นเอง',
+      'straightPolyline คือ .copy ที่ตั้ง geodesic:false และใช้เส้นสีน้ำเงิน เส้นทางแบบจีโอเดสิก (แดง) กับแบบตรง (น้ำเงิน) ระหว่างสามจุดเดียวกันจึงวางเทียบกันได้',
+    ],
+    hi: [
+      'जियोडेसिक पॉलीलाइन पर टैप करके उसी जगह मार्कर रखें, और उसी रास्ते की सीधी नकल से तुलना करें।',
+      'लाल पॉलीलाइन जियोडेसिक है; उसका onClick event.clicked पर Drop एनिमेशन वाला एक मार्कर clickMarkers में जोड़ देता है — रंग उसी रेखा के strokeColor का।',
+      'straightPolyline उसकी .copy है, geodesic:false और नीली रेखा के साथ, ताकि उन्हीं तीन बिंदुओं के बीच जियोडेसिक (लाल) और सीधा (नीला) रास्ता आमने-सामने तुलना के लिए रहें।',
+    ],
   },
 };
 

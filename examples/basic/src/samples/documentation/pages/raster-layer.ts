@@ -30,6 +30,21 @@ const tileSource = RasterLayerSource.UrlTemplate({
       'El tileSource es un RasterLayerSource.UrlTemplate que apunta a una URL de mosaicos {z}/{x}/{y}, mientras que opacity se guarda en el estado de React.',
       'createRasterLayerState envuelve ambos valores, y cambiar opacity actualiza la RasterLayer existente en el sitio en lugar de reconstruir el mapa.',
     ],
+    de: [
+      'Über den gemeinsamen Ebenen-State eine gekachelte Rasterquelle hinzufügen und ihre Deckkraft ändern, ohne die Karte zu ersetzen.',
+      'Die tileSource ist eine RasterLayerSource.UrlTemplate auf eine {z}/{x}/{y}-Kachel-URL, während die Deckkraft im React-State liegt.',
+      'createRasterLayerState fasst beide Werte zusammen, und eine Änderung der Deckkraft aktualisiert den bestehenden RasterLayer an Ort und Stelle, statt die Karte neu aufzubauen.',
+    ],
+    th: [
+      'เพิ่มแหล่งข้อมูลราสเตอร์แบบไทล์ผ่านสถานะเลเยอร์ร่วม และปรับความทึบได้โดยไม่ต้องเปลี่ยนแผนที่',
+      'tileSource คือ RasterLayerSource.UrlTemplate ที่ชี้ไปยัง URL ของไทล์แบบ {z}/{x}/{y} ส่วนความทึบเก็บอยู่ในสถานะของ React',
+      'createRasterLayerState ห่อค่าทั้งสองไว้ และการเปลี่ยนความทึบจะอัปเดต RasterLayer ตัวเดิมในที่ แทนที่จะสร้างแผนที่ใหม่',
+    ],
+    hi: [
+      'साझा लेयर स्टेट से टाइल वाला रास्टर स्रोत जोड़ें, और मैप बदले बिना उसकी अपारदर्शिता अपडेट करें।',
+      'tileSource एक RasterLayerSource.UrlTemplate है, जो {z}/{x}/{y} वाले टाइल URL की ओर इशारा करता है; अपारदर्शिता React स्टेट में रहती है।',
+      'createRasterLayerState दोनों मानों को लपेटता है, और अपारदर्शिता बदलने पर मौजूदा RasterLayer वहीं अपडेट हो जाता है — मैप दोबारा नहीं बनता।',
+    ],
   },
 };
 

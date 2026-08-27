@@ -6,7 +6,11 @@
     "cleanUrls": true,
     "rewrites": [
       {
-        "source": "**",
+        "regex": "^/(?:camera-sync|hello-map)(?:/(?:en|ja|es-419|de|th|hi))?/?$",
+        "destination": "/index.html"
+      },
+      {
+        "regex": "^/[a-z0-9-]+/[a-z0-9-]+(?:/(?:en|ja|es-419|de|th|hi))?/?$",
         "destination": "/index.html"
       }
     ],

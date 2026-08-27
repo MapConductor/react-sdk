@@ -31,6 +31,21 @@ const activeMarker = selectedMarkers.at(-1) ?? null;`,
       'selectedMarkers acumula cada MarkerState tocado en lugar de conservar solo el más reciente.',
       'Recorrer ese arreglo dibuja un InfoBubble por marcador, cada uno con clave marker.id y ubicado de forma independiente.',
     ],
+    de: [
+      'Mehrere Marker ausgewählt lassen und für jeden eine eigenständig positionierte Sprechblase rendern.',
+      'selectedMarkers sammelt jeden angeklickten MarkerState, statt nur den zuletzt angeklickten zu behalten.',
+      'Das Mappen über dieses Array rendert eine InfoBubble je Marker, jede mit marker.id als key und unabhängig positioniert.',
+    ],
+    th: [
+      'คงมาร์กเกอร์ที่เลือกไว้หลายอัน และเรนเดอร์บับเบิลที่วางตำแหน่งอิสระให้แต่ละอัน',
+      'selectedMarkers สะสม MarkerState ที่ถูกคลิกทุกอัน แทนที่จะเก็บเฉพาะอันล่าสุด',
+      'การวนอาร์เรย์นั้นจะเรนเดอร์ InfoBubble หนึ่งอันต่อมาร์กเกอร์หนึ่งอัน แต่ละอันใช้ marker.id เป็น key และวางตำแหน่งแยกกัน',
+    ],
+    hi: [
+      'कई मार्कर चुने रहने दें और हर एक के लिए स्वतंत्र रूप से टिका हुआ एक बबल रेंडर करें।',
+      'selectedMarkers सिर्फ़ आख़िरी नहीं, बल्कि क्लिक किए गए हर MarkerState को जमा करता रहता है।',
+      'उस सरणी पर मैप करने से हर मार्कर के लिए एक InfoBubble बनता है — हर एक का key marker.id, और हर एक की जगह अलग।',
+    ],
   },
 };
 

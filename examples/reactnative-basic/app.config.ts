@@ -157,6 +157,43 @@ const withMapboxAccessToken: ConfigPlugin = (config) => {
   });
 };
 
+/**
+ * TomTom Orbis の API キーを AndroidManifest と Info.plist へ入れる。
+ * android は `tomtomApiKey(context)` が `TOMTOM_API_KEY` の meta-data を読み、
+ * **未設定なら例外を投げて落ちる**。iOS は `TomTomMapHost.resolveApiKey` が
+ * Info.plist の `TomTomAPIKey` を読む（キー名が android と違う点に注意）。
+ *
+ * Longdo / MapTiler / Mapbox と同じくプレースホルダしか書かない。実値の出所は
+ * .env.local（git 管理外）。
+ */
+const withTomTomApiKey: ConfigPlugin = (config) => {
+  config = withInfoPlist(config, (mod) => {
+    mod.modResults.TomTomAPIKey = '$(TOMTOM_API_KEY)';
+    return mod;
+  });
+
+  return withAndroidManifest(config, (mod) => {
+    const apiKey = '${TOMTOM_API_KEY}';
+
+    const application = mod.modResults.manifest.application![0];
+    application['meta-data'] ??= [];
+    const metadata = application['meta-data'];
+    const entry = metadata.find((item) => item.$?.['android:name'] === 'TOMTOM_API_KEY');
+    if (entry) {
+      entry.$!['android:value'] = apiKey;
+    } else {
+      metadata.push({
+        $: {
+          'android:name': 'TOMTOM_API_KEY',
+          'android:value': apiKey,
+          'tools:replace': 'android:value',
+        },
+      });
+    }
+    return mod;
+  });
+};
+
 export default {
   expo: {
     name: 'MapConductor Basic',
@@ -179,6 +216,17 @@ export default {
     },
     ios: {
       bundleIdentifier: 'com.mapconductor.basic',
+      // iPad でも画面いっぱいに出す。false（既定）だと TARGETED_DEVICE_FAMILY が
+      // iPhone だけになり、iPad では iPhone サイズの互換表示に落ちる。
+      // **このリポジトリで prebuild は実行しない**ので、実際に効いているのは
+      // ios/MapConductorBasic.xcodeproj の TARGETED_DEVICE_FAMILY = "1,2" と
+      // Info.plist の UISupportedInterfaceOrientations~ipad。ここは食い違わせないための控え。
+      supportsTablet: true,
+      // iPad では常に全画面にする。false（既定）だと iPadOS 26 の
+      // ウィンドウ表示に入り、システムが憶えている幅（実測 468pt）の
+      // 縦長ウィンドウで開く。サンプルは画面いっぱいで見せたいので降りる。
+      // 引き換えに Split View / Stage Manager での分割は効かなくなる。
+      requireFullScreen: true,
       config: {
         googleMapsApiKey: process.env.IOS_GOOGLE_MAPS_API_KEY,
       },
@@ -188,6 +236,7 @@ export default {
       withLongdoApiKey,
       withMapTilerApiKey,
       withMapboxAccessToken,
+      withTomTomApiKey,
       // Link marker images as native resources. iOS resolves their asset-catalog
       // names through bundle:// URIs; Android can keep using expo-asset file URIs.
       ['expo-asset', { assets: ['./assets/images'] }],

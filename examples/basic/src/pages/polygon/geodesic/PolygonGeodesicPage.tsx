@@ -85,11 +85,26 @@ export function PolygonGeodesicPage() {
           </InfoBubble>
         </>
       )}
-      <ControlPanel title={t('Polygon Geodesic', '測地線ポリゴン')}>
+      <ControlPanel title={t(
+        {
+          en: 'Polygon Geodesic',
+          ja: '測地線ポリゴン',
+          'es-419': 'Polígono geodésico',
+          de: 'Geodätisches Polygon',
+          th: 'โพลีกอนแบบเส้นจีโอเดสิก',
+          hi: 'जियोडेसिक पॉलीगॉन',
+        },
+      )}>
         <p className="control-panel-note">
           {t(
-            'Blue uses straight screen-space edges. Orange uses geodesic interpolation.',
-            '青は画面上の直線、オレンジは測地線補間を使用します。',
+            {
+              en: 'Blue uses straight screen-space edges. Orange uses geodesic interpolation.',
+              ja: '青は画面上の直線、オレンジは測地線補間を使用します。',
+              'es-419': 'El azul usa bordes rectos en el espacio de pantalla; el naranja usa interpolación geodésica.',
+              de: 'Blau nutzt gerade Kanten im Bildschirmraum, Orange geodätische Interpolation.',
+              th: 'สีน้ำเงินใช้ขอบตรงบนพิกัดหน้าจอ ส่วนสีส้มใช้การประมาณค่าตามเส้นจีโอเดสิก',
+              hi: 'नीला स्क्रीन पर सीधी भुजाएँ लेता है; नारंगी जियोडेसिक इंटरपोलेशन।',
+            },
           )}
         </p>
       </ControlPanel>

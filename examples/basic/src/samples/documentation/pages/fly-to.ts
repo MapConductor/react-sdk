@@ -29,6 +29,21 @@ const destinations = [createMarkerState({ id: 'tokyo', position: destination.pos
       'El destination es un MapCameraPosition que fija a la vez una coordenada y un nivel de zoom, y el arreglo destinations coloca un marcador allí para que el objetivo sea visible.',
       'El botón llama a mapViewState.moveCameraTo(destination, 1000) y la animación de 1000 ms se reproduce igual sin importar qué proveedor dibuje el mapa.',
     ],
+    de: [
+      'Die Kamera mit einer Sekunde Animation an ein Ziel bewegen — mit derselben API für jeden Anbieter.',
+      'Das Ziel ist eine MapCameraPosition, die Koordinate und Zoomstufe zugleich festlegt, und das destinations-Array setzt dort einen Marker, damit das Ziel sichtbar ist.',
+      'Die Schaltfläche ruft mapViewState.moveCameraTo(destination, 1000) auf; die 1000-ms-Animation läuft gleich ab, egal welcher Anbieter die Karte rendert.',
+    ],
+    th: [
+      'เคลื่อนกล้องไปยังจุดหมายด้วยแอนิเมชันหนึ่งวินาที โดยใช้ API เดียวกันกับผู้ให้บริการทุกเจ้า',
+      'จุดหมายคือ MapCameraPosition ที่กำหนดทั้งพิกัดและระดับซูม และอาร์เรย์ destinations วางมาร์กเกอร์ไว้ตรงนั้นเพื่อให้เห็นเป้าหมาย',
+      'ปุ่มนี้เรียก mapViewState.moveCameraTo(destination, 1000) และแอนิเมชัน 1000 มิลลิวินาทีทำงานเหมือนกันไม่ว่าผู้ให้บริการรายใดจะเรนเดอร์แผนที่',
+    ],
+    hi: [
+      'एक सेकंड के एनिमेशन के साथ कैमरा गंतव्य तक ले जाएँ — हर प्रोवाइडर के लिए वही API।',
+      'गंतव्य एक MapCameraPosition है, जो निर्देशांक और ज़ूम स्तर दोनों तय करता है, और destinations सरणी वहाँ एक मार्कर रख देती है ताकि लक्ष्य दिखे।',
+      'बटन mapViewState.moveCameraTo(destination, 1000) बुलाता है, और 1000 ms का एनिमेशन एक जैसा चलता है — मैप चाहे कोई भी प्रोवाइडर रेंडर करे।',
+    ],
   },
 };
 

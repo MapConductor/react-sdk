@@ -40,6 +40,21 @@ const [selectedDesignId, setSelectedDesignId] = useState(
       'Las mapDesignOptions provienen de la lista de diseños del proveedor activo y selectedDesignId refleja mapViewState.mapDesignType.id para que el <select> siga siendo un componente controlado.',
       'handleDesignChange busca la opción elegida y asigna option.design a mapViewState.mapDesignType; el proveedor cambia entonces al estilo nativo equivalente sin reconstruir el mapa.',
     ],
+    de: [
+      'Das abstrakte Kartendesign am View-State ändern und jeden Anbieter es auf seinen entsprechenden nativen Stil auflösen lassen.',
+      'Die mapDesignOptions stammen aus der Designliste des aktiven Anbieters, und selectedDesignId spiegelt mapViewState.mapDesignType.id, damit das <select> eine kontrollierte Komponente bleibt.',
+      'handleDesignChange sucht die gewählte Option und weist option.design an mapViewState.mapDesignType zu; der Anbieter wechselt daraufhin zum passenden nativen Stil, ohne die Karte neu aufzubauen.',
+    ],
+    th: [
+      'เปลี่ยนดีไซน์แผนที่เชิงนามธรรมบนสถานะมุมมอง แล้วให้ผู้ให้บริการแต่ละรายแปลงเป็นสไตล์เนทีฟของตน',
+      'mapDesignOptions มาจากรายการดีไซน์ของผู้ให้บริการที่ใช้อยู่ และ selectedDesignId สะท้อน mapViewState.mapDesignType.id เพื่อให้ <select> ยังเป็นคอมโพเนนต์แบบควบคุม',
+      'handleDesignChange หาตัวเลือกที่เลือกแล้วกำหนด option.design ให้ mapViewState.mapDesignType จากนั้นผู้ให้บริการจะสลับไปใช้สไตล์เนทีฟที่ตรงกันโดยไม่ต้องสร้างแผนที่ใหม่',
+    ],
+    hi: [
+      'व्यू स्टेट पर अमूर्त मैप डिज़ाइन बदलें, और हर प्रोवाइडर को उसे अपने नेटिव स्टाइल में बदलने दें।',
+      'mapDesignOptions चालू प्रोवाइडर की डिज़ाइन सूची से आते हैं, और selectedDesignId mapViewState.mapDesignType.id की नकल रखता है ताकि <select> नियंत्रित कंपोनेंट बना रहे।',
+      'handleDesignChange चुना गया विकल्प ढूँढ़कर option.design को mapViewState.mapDesignType में डाल देता है; फिर प्रोवाइडर मैप दोबारा बनाए बिना उससे मेल खाते नेटिव स्टाइल पर चला जाता है।',
+    ],
   },
 };
 

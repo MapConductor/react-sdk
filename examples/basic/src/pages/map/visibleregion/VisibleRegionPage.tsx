@@ -14,39 +14,84 @@ function VisibleRegionContent({ cameraPosition }: { cameraPosition: MapCameraPos
   const { t } = useSampleI18n();
   const visibleRegion = cameraPosition?.visibleRegion ?? null;
   const bounds = visibleRegion?.bounds ?? null;
-  const unavailable = t('Unavailable', '取得できません');
+  const unavailable = t(
+    {
+      en: 'Unavailable',
+      ja: '取得できません',
+      'es-419': 'No disponible',
+      de: 'Nicht verfügbar',
+      th: 'ไม่มีข้อมูล',
+      hi: 'उपलब्ध नहीं',
+    },
+  );
 
   return (
-    <ControlPanel title={t('Visible Region', '表示領域')}>
+    <ControlPanel title={t(
+      {
+        en: 'Visible Region',
+        ja: '表示領域',
+        'es-419': 'Región visible',
+        de: 'Sichtbarer Bereich',
+        th: 'พื้นที่ที่มองเห็น',
+        hi: 'दृश्य क्षेत्र',
+      },
+    )}>
       <p className="control-panel-note">
-        {t('Move the map to update the current camera and visible region.', '地図を動かすと現在のカメラと表示領域が更新されます。')}
+        {t(
+          {
+            en: 'Move the map to update the current camera and visible region.',
+            ja: '地図を動かすと現在のカメラと表示領域が更新されます。',
+            'es-419': 'Mueve el mapa para actualizar la cámara y la región visible actuales.',
+            de: 'Bewegen Sie die Karte, um Kamera und sichtbaren Bereich zu aktualisieren.',
+            th: 'เลื่อนแผนที่เพื่ออัปเดตกล้องและพื้นที่ที่มองเห็นในขณะนั้น',
+            hi: 'मैप हिलाने पर मौजूदा कैमरा और दृश्य क्षेत्र अपडेट होते हैं।',
+          },
+        )}
       </p>
       <p className="control-panel-note">
-        {t('Center', '中心')}: {formatPoint(cameraPosition?.position ?? null, unavailable)}
+        {t({ en: 'Center', ja: '中心', 'es-419': 'Centro', de: 'Mittelpunkt', th: 'จุดกึ่งกลาง', hi: 'केंद्र' })}: {formatPoint(cameraPosition?.position ?? null, unavailable)}
       </p>
       <p className="control-panel-note">
-        {t('Zoom', 'ズーム')}: {cameraPosition?.zoom.toFixed(2) ?? unavailable}
+        {t({ en: 'Zoom', ja: 'ズーム', 'es-419': 'Zoom', de: 'Zoom', th: 'ซูม', hi: 'ज़ूम' })}: {cameraPosition?.zoom.toFixed(2) ?? unavailable}
       </p>
       <p className="control-panel-note">
-        {t('Bearing', '方位')}: {cameraPosition?.bearing.toFixed(1) ?? unavailable} {t('deg', '度')}
+        {t({ en: 'Bearing', ja: '方位', 'es-419': 'Rumbo', de: 'Ausrichtung', th: 'ทิศ', hi: 'दिशा' })}: {cameraPosition?.bearing.toFixed(1) ?? unavailable} {t(
+          {
+            en: 'deg',
+            ja: '度',
+            'es-419': 'grados',
+            de: 'Grad',
+            th: 'องศา',
+            hi: 'अंश',
+          },
+        )}
       </p>
       <p className="control-panel-note">
-        {t('Tilt', '傾き')}: {cameraPosition?.tilt.toFixed(1) ?? unavailable} {t('deg', '度')}
+        {t({ en: 'Tilt', ja: '傾き', 'es-419': 'Inclinación', de: 'Neigung', th: 'การเอียง', hi: 'झुकाव' })}: {cameraPosition?.tilt.toFixed(1) ?? unavailable} {t(
+          {
+            en: 'deg',
+            ja: '度',
+            'es-419': 'grados',
+            de: 'Grad',
+            th: 'องศา',
+            hi: 'अंश',
+          },
+        )}
       </p>
       <p className="control-panel-note">
-        {t('Bounds', '境界')}: {bounds?.toUrlValue(5) ?? unavailable}
+        {t({ en: 'Bounds', ja: '境界', 'es-419': 'Límites', de: 'Grenzen', th: 'ขอบเขต', hi: 'सीमा' })}: {bounds?.toUrlValue(5) ?? unavailable}
       </p>
       <p className="control-panel-note">
-        {t('Near Left', '手前左')}: {formatPoint(visibleRegion?.nearLeft ?? null, unavailable)}
+        {t({ en: 'Near Left', ja: '手前左', 'es-419': 'Cerca izquierda', de: 'Nah links', th: 'ใกล้ซ้าย', hi: 'पास बाएँ' })}: {formatPoint(visibleRegion?.nearLeft ?? null, unavailable)}
       </p>
       <p className="control-panel-note">
-        {t('Near Right', '手前右')}: {formatPoint(visibleRegion?.nearRight ?? null, unavailable)}
+        {t({ en: 'Near Right', ja: '手前右', 'es-419': 'Cerca derecha', de: 'Nah rechts', th: 'ใกล้ขวา', hi: 'पास दाएँ' })}: {formatPoint(visibleRegion?.nearRight ?? null, unavailable)}
       </p>
       <p className="control-panel-note">
-        {t('Far Left', '奥左')}: {formatPoint(visibleRegion?.farLeft ?? null, unavailable)}
+        {t({ en: 'Far Left', ja: '奥左', 'es-419': 'Lejos izquierda', de: 'Fern links', th: 'ไกลซ้าย', hi: 'दूर बाएँ' })}: {formatPoint(visibleRegion?.farLeft ?? null, unavailable)}
       </p>
       <p className="control-panel-note">
-        {t('Far Right', '奥右')}: {formatPoint(visibleRegion?.farRight ?? null, unavailable)}
+        {t({ en: 'Far Right', ja: '奥右', 'es-419': 'Lejos derecha', de: 'Fern rechts', th: 'ไกลขวา', hi: 'दूर दाएँ' })}: {formatPoint(visibleRegion?.farRight ?? null, unavailable)}
       </p>
     </ControlPanel>
   );

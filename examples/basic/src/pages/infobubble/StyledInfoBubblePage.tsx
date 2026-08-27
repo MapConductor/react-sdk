@@ -86,16 +86,43 @@ export function StyledInfoBubblePage() {
         contentPadding={10}
       >
         <div style={{ color: fontColor, fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>
-          {t('Custom Styled Bubble', 'カスタムスタイル吹き出し')}
+          {t(
+            {
+              en: 'Custom Styled Bubble',
+              ja: 'カスタムスタイル吹き出し',
+              'es-419': 'Globo con estilo personalizado',
+              de: 'Eigens gestaltete Sprechblase',
+              th: 'บับเบิลที่จัดสไตล์เอง',
+              hi: 'अपनी स्टाइल वाला बबल',
+            },
+          )}
         </div>
       </InfoBubble>
-      <ControlPanel title={t('Styled Bubble', 'スタイル付き吹き出し')}>
-        <SwatchRow label={t('Fill', '塗り')} selected={fillColor} onSelect={setFillColor} />
-        <SwatchRow label={t('Stroke', '枠線')} selected={strokeColor} onSelect={setStrokeColor} />
-        <SwatchRow label={t('Font', '文字')} selected={fontColor} onSelect={setFontColor} />
-        <SwatchRow label={t('Marker', 'マーカー')} selected={markerColor} onSelect={setMarkerColor} />
+      <ControlPanel title={t(
+        {
+          en: 'Styled Bubble',
+          ja: 'スタイル付き吹き出し',
+          'es-419': 'Globo con estilo',
+          de: 'Gestaltete Sprechblase',
+          th: 'บับเบิลแบบมีสไตล์',
+          hi: 'स्टाइल वाला बबल',
+        },
+      )}>
+        <SwatchRow label={t({ en: 'Fill', ja: '塗り', 'es-419': 'Relleno', de: 'Füllung', th: 'สีเติม', hi: 'भराव' })} selected={fillColor} onSelect={setFillColor} />
+        <SwatchRow label={t({ en: 'Stroke', ja: '枠線', 'es-419': 'Trazo', de: 'Kontur', th: 'เส้นขอบ', hi: 'रेखा' })} selected={strokeColor} onSelect={setStrokeColor} />
+        <SwatchRow label={t({ en: 'Font', ja: '文字', 'es-419': 'Fuente', de: 'Schrift', th: 'ตัวอักษร', hi: 'फ़ॉन्ट' })} selected={fontColor} onSelect={setFontColor} />
+        <SwatchRow label={t({ en: 'Marker', ja: 'マーカー', 'es-419': 'Marcador', de: 'Marker', th: 'มาร์กเกอร์', hi: 'मार्कर' })} selected={markerColor} onSelect={setMarkerColor} />
         <SliderControl
-          label={t('Stroke Width', '枠線幅')}
+          label={t(
+            {
+              en: 'Stroke Width',
+              ja: '枠線幅',
+              'es-419': 'Grosor del trazo',
+              de: 'Linienbreite',
+              th: 'ความหนาเส้น',
+              hi: 'रेखा की मोटाई',
+            },
+          )}
           value={strokeWidth}
           min={0.5}
           max={2.0}
@@ -104,7 +131,16 @@ export function StyledInfoBubblePage() {
           onChange={setStrokeWidth}
         />
         <SliderControl
-          label={t('Marker Scale', 'マーカースケール')}
+          label={t(
+            {
+              en: 'Marker Scale',
+              ja: 'マーカースケール',
+              'es-419': 'Escala del marcador',
+              de: 'Marker-Skalierung',
+              th: 'ขนาดมาร์กเกอร์',
+              hi: 'मार्कर स्केल',
+            },
+          )}
           value={markerScale}
           min={0.5}
           max={2.0}

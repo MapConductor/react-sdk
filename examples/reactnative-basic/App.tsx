@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { MapScreen } from 'src/screens/MapScreen';
 import type { MapProvider } from 'src/providers/types';
+import { PROVIDER_LABELS } from 'src/providers/providerCatalog';
 
 export interface SamplePageDefinition {
   id: string;
@@ -52,21 +53,6 @@ const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'geojson-layer', label: 'GeoJSON Layer', group: 'Extensions' },
   { id: 'heatmap-layer', label: 'Heatmap Layer', group: 'Extensions' },
 ];
-
-/**
- * プロバイダの表示名。切り替えボタンの文字・一覧の文字・
- * アクセシビリティラベル（実機の UI テストがこれで叩く）の**唯一の出所**。
- * 3 か所に散らすと、片方だけ直してテストが見つけられなくなる。
- */
-const PROVIDER_LABELS: Record<MapProvider, string> = {
-  'google-maps': 'GoogleMapView',
-  maplibre: 'MapLibreMapView',
-  here: 'HereMapView',
-  arcgis: 'ArcGISMapView',
-  longdo: 'LongdoMapView',
-  maptiler: 'MapTilerMapView',
-  mapbox: 'MapboxMapView',
-};
 
 function Header({
   provider,
@@ -167,22 +153,6 @@ function Header({
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={[styles.providerMenuItem, provider === 'here' && styles.providerMenuItemActive]}
-                  activeOpacity={0.75}
-                  onPress={() => selectProvider('here')}
-                  accessibilityRole="button"
-                  accessibilityLabel={PROVIDER_LABELS['here']}
-                >
-                  <Text
-                    style={[
-                      styles.providerMenuItemText,
-                      provider === 'here' && styles.providerMenuItemTextActive,
-                    ]}
-                  >
-                    HereMapView
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   style={[styles.providerMenuItem, provider === 'arcgis' && styles.providerMenuItemActive]}
                   activeOpacity={0.75}
                   onPress={() => selectProvider('arcgis')}
@@ -193,6 +163,22 @@ function Header({
                     style={[
                       styles.providerMenuItemText,
                       provider === 'arcgis' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    ArcGISMapView2D
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'arcgis-3d' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('arcgis-3d')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['arcgis-3d']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'arcgis-3d' && styles.providerMenuItemTextActive,
                     ]}
                   >
                     ArcGISMapView
@@ -244,6 +230,22 @@ function Header({
                     ]}
                   >
                     MapboxMapView
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.providerMenuItem, provider === 'tomtom' && styles.providerMenuItemActive]}
+                  activeOpacity={0.75}
+                  onPress={() => selectProvider('tomtom')}
+                  accessibilityRole="button"
+                  accessibilityLabel={PROVIDER_LABELS['tomtom']}
+                >
+                  <Text
+                    style={[
+                      styles.providerMenuItemText,
+                      provider === 'tomtom' && styles.providerMenuItemTextActive,
+                    ]}
+                  >
+                    TomTomMapView
                   </Text>
                 </TouchableOpacity>
               </View>

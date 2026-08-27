@@ -29,6 +29,21 @@ const polygons = [geodesicPolygon, straightPolygon];`,
       'geodesicPolygon se construye con geodesic:true, y straightPolygon es una .copy con geodesic:false sobre los mismos longDistancePoints.',
       'Dibujar ambos muestra cómo los bordes geodésicos se curvan para seguir la ruta más corta mientras que los rectos permanecen planos en la proyección del mapa.',
     ],
+    de: [
+      'Geodätische und nicht-geodätische Polygonkanten über große Entfernungen und über die Datumsgrenze hinweg vergleichen.',
+      'geodesicPolygon wird mit geodesic:true gebaut, und straightPolygon ist eine .copy davon mit geodesic:false über dieselben longDistancePoints.',
+      'Beide zusammen zu rendern zeigt, wie geodätische Kanten sich krümmen, um dem kürzesten Weg zu folgen, während gerade Kanten in der Kartenprojektion flach bleiben.',
+    ],
+    th: [
+      'เปรียบเทียบขอบโพลีกอนแบบจีโอเดสิกกับแบบไม่จีโอเดสิกในระยะไกลและข้ามเส้นแบ่งวันสากล',
+      'geodesicPolygon สร้างด้วย geodesic:true ส่วน straightPolygon เป็น .copy ของมันที่ตั้ง geodesic:false บนชุด longDistancePoints เดียวกัน',
+      'การเรนเดอร์ทั้งสองพร้อมกันทำให้เห็นว่าขอบแบบจีโอเดสิกโค้งตามเส้นทางที่สั้นที่สุด ขณะที่ขอบตรงยังคงราบไปตามการฉายของแผนที่',
+    ],
+    hi: [
+      'लंबी दूरियों पर और दिनांक रेखा के आर-पार, जियोडेसिक और ग़ैर-जियोडेसिक पॉलीगॉन भुजाओं की तुलना करें।',
+      'geodesicPolygon geodesic:true के साथ बनता है, और straightPolygon उसी की .copy है — geodesic:false के साथ, उन्हीं longDistancePoints पर।',
+      'दोनों को साथ रेंडर करने पर दिखता है कि जियोडेसिक भुजाएँ सबसे छोटे रास्ते के पीछे मुड़ती हैं, जबकि सीधी भुजाएँ मैप के प्रोजेक्शन में सपाट रहती हैं।',
+    ],
   },
 };
 

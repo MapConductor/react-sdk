@@ -27,6 +27,21 @@ const doc: SamplePageDoc = {
       'El marcador se crea con animation: MarkerAnimation.Drop, por lo que cae sobre su posición fija en cuanto se monta.',
       'Su onClick llama a state.animate(MarkerAnimation.Bounce), demostrando que las animaciones se ordenan mediante la misma API de MarkerState en cada proveedor.',
     ],
+    de: [
+      'Eine anfängliche Marker-Animation setzen und eine weitere über die gemeinsame Marker-State-API auslösen.',
+      'Der Marker wird mit animation: MarkerAnimation.Drop erzeugt und fällt daher beim Einhängen auf seine feste Position.',
+      'Sein onClick ruft state.animate(MarkerAnimation.Bounce) auf und zeigt damit, dass Animationen bei jedem Anbieter über dieselbe MarkerState-API angestoßen werden.',
+    ],
+    th: [
+      'กำหนดแอนิเมชันเริ่มต้นให้มาร์กเกอร์ และสั่งอีกแอนิเมชันหนึ่งผ่าน API ของสถานะมาร์กเกอร์ที่ใช้ร่วมกัน',
+      'มาร์กเกอร์ถูกสร้างด้วย animation: MarkerAnimation.Drop จึงหล่นลงสู่ตำแหน่งที่กำหนดทันทีที่ถูกเมานต์',
+      'onClick ของมาร์กเกอร์เรียก state.animate(MarkerAnimation.Bounce) แสดงให้เห็นว่าแอนิเมชันสั่งผ่าน API ของ MarkerState ตัวเดียวกันบนผู้ให้บริการทุกเจ้า',
+    ],
+    hi: [
+      'मार्कर को शुरुआती एनिमेशन दें, और साझा मार्कर-स्टेट API से दूसरा एनिमेशन चलाएँ।',
+      'मार्कर animation: MarkerAnimation.Drop के साथ बनता है, इसलिए माउंट होते ही वह अपनी तय जगह पर गिरता है।',
+      'उसका onClick state.animate(MarkerAnimation.Bounce) बुलाता है — यानी हर प्रोवाइडर पर एनिमेशन उसी MarkerState API से चलाए जाते हैं।',
+    ],
   },
 };
 

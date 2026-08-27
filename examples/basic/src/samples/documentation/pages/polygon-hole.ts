@@ -36,6 +36,21 @@ const vertexMarkers = useMemo(() => holes.flatMap((hole, holeIndex) =>
       'El polígono mantiene un único outerRing más un arreglo holes en el estado de React, y useMemo reconstruye el PolygonState cada vez que se mueve un vértice de un hueco.',
       'vertexMarkers se genera con flatMap a partir de cada anillo de hueco, y arrastrar uno reescribe solo ese anillo para que el recorte transparente se remodele en tiempo real.',
     ],
+    de: [
+      'Einen äußeren Ring und einen oder mehrere innere Ringe definieren, um durchsichtige Löcher in einem Polygon zu zeichnen.',
+      'Das Polygon hält im React-State einen einzelnen outerRing plus ein holes-Array, und useMemo baut den PolygonState neu, sobald sich ein Loch-Eckpunkt bewegt.',
+      'vertexMarkers wird aus allen Loch-Ringen flach zusammengeführt, und das Ziehen eines Punktes schreibt nur diesen Ring neu, sodass sich die durchsichtige Aussparung in Echtzeit umformt.',
+    ],
+    th: [
+      'กำหนดวงรอบนอกและวงรอบในหนึ่งวงหรือมากกว่า เพื่อเจาะรูโปร่งใสภายในโพลีกอน',
+      'โพลีกอนเก็บ outerRing หนึ่งวงพร้อมอาร์เรย์ holes ไว้ในสถานะของ React และ useMemo จะสร้าง PolygonState ใหม่ทุกครั้งที่จุดยอดของรูขยับ',
+      'vertexMarkers ถูกยุบรวมมาจากทุกวงของรู และการลากจุดหนึ่งจะเขียนเฉพาะวงนั้นใหม่ ส่วนที่เจาะจึงเปลี่ยนรูปแบบทันที',
+    ],
+    hi: [
+      'एक बाहरी रिंग और एक या अधिक भीतरी रिंग तय करें, ताकि पॉलीगॉन के भीतर पारदर्शी छेद बनें।',
+      'पॉलीगॉन React स्टेट में एक outerRing और एक holes सरणी रखता है, और छेद का कोई शीर्ष हिलते ही useMemo PolygonState दोबारा बना देता है।',
+      'vertexMarkers हर छेद की रिंग से चपटा करके जोड़ा जाता है, और कोई एक बिंदु खींचने पर सिर्फ़ वही रिंग दोबारा लिखी जाती है — इसलिए पारदर्शी कटाव तुरंत आकार बदलता है।',
+    ],
   },
 };
 

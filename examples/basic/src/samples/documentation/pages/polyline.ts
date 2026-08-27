@@ -28,6 +28,21 @@ const waypointMarkers = points.map((position, index) => createMarkerState({
       'El arreglo points es estado de React, y useMemo reconstruye el PolylineState —un trazo rojo de 4 píxeles— cada vez que esos puntos cambian.',
       'Cada punto se convierte además en un marcador de paso arrastrable, de modo que la ruta se puede remodelar directamente sobre el mapa.',
     ],
+    de: [
+      'Aus geografischen Punkten eine Route zeichnen und ihre Stützpunkte als ziehbare Wegpunkt-Marker anbieten.',
+      'Das points-Array ist React-State, und useMemo baut den PolylineState — eine rote Kontur von 4 Pixeln — neu, sobald sich diese Punkte ändern.',
+      'Jeder Punkt wird zugleich zu einem ziehbaren Wegpunkt-Marker, sodass sich die Route direkt auf der Karte umformen lässt.',
+    ],
+    th: [
+      'วาดเส้นทางจากจุดภูมิศาสตร์ และเปิดจุดยอดของเส้นทางออกมาเป็นมาร์กเกอร์จุดผ่านที่ลากได้',
+      'อาร์เรย์ points เป็นสถานะของ React และ useMemo จะสร้าง PolylineState ใหม่ทุกครั้งที่จุดเหล่านั้นเปลี่ยน โดยเป็นเส้นสีแดงหนา 4 พิกเซล',
+      'ทุกจุดยังกลายเป็นมาร์กเกอร์จุดผ่านที่ลากได้ เส้นทางจึงปรับรูปได้โดยตรงบนแผนที่',
+    ],
+    hi: [
+      'भौगोलिक बिंदुओं से एक रास्ता खींचें, और उसके शीर्षों को खींचे जा सकने वाले वेपॉइंट मार्कर के रूप में दें।',
+      'points सरणी React स्टेट है, और वे बिंदु बदलते ही useMemo PolylineState दोबारा बनाता है — 4 पिक्सेल की लाल रेखा।',
+      'हर बिंदु खींचे जा सकने वाला वेपॉइंट मार्कर भी बन जाता है, इसलिए रास्ता सीधे मैप पर ही बदला जा सकता है।',
+    ],
   },
 };
 

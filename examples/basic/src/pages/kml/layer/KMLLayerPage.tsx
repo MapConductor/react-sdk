@@ -48,19 +48,51 @@ export function KMLLayerPage() {
     if (mapState && !layerState.processClick(point, 12, mapState.cameraPosition.zoom)) setSelected(null);
   }, [layerState, mapState]);
 
-  if (error) return <div style={{ padding: '2rem', textAlign: 'center' }}><p>{t('Failed to load data:', 'データの読み込みに失敗しました:')} {error}</p></div>;
+  if (error) return <div style={{ padding: '2rem', textAlign: 'center' }}><p>{t(
+    {
+      en: 'Failed to load data:',
+      ja: 'データの読み込みに失敗しました:',
+      'es-419': 'No se pudieron cargar los datos:',
+      de: 'Daten konnten nicht geladen werden:',
+      th: 'โหลดข้อมูลไม่สำเร็จ:',
+      hi: 'डेटा लोड नहीं हो सका:',
+    },
+  )} {error}</p></div>;
   return (
     <MapViewContainer initialCamera={{ lat: 35.685, lng: 139.76, zoom: 13 }} onStateReady={setMapState} onMapClick={handleMapClick}>
       <KMLLayer state={layerState} features={features} />
       {selected && <InfoBubble position={selected.position}><PropertyTable properties={selected.properties} /></InfoBubble>}
-      <ControlPanel title={t('KML Layer', 'KML レイヤー')}>
+      <ControlPanel title={t(
+        {
+          en: 'KML Layer',
+          ja: 'KML レイヤー',
+          'es-419': 'Capa KML',
+          de: 'KML-Ebene',
+          th: 'เลเยอร์ KML',
+          hi: 'KML लेयर',
+        },
+      )}>
         <p className="control-panel-note">{isLoading
-          ? t('Loading KML…', 'KMLを読み込んでいます…', 'Cargando KML…')
+          ? t(
+            {
+              en: 'Loading KML…',
+              ja: 'KMLを読み込んでいます…',
+              'es-419': 'Cargando KML…',
+              de: 'KML wird geladen…',
+              th: 'กำลังโหลด KML…',
+              hi: 'KML लोड हो रहा है…',
+            },
+          )
           : t(
-              `Parsed from ${KML_ASSET}. Tap a feature to inspect its properties.`,
-              `${KML_ASSET} を解析しました。Feature をタップすると属性が表示されます。`,
-              `Analizado desde ${KML_ASSET}. Toca un elemento para inspeccionar sus propiedades.`,
-            )}
+            {
+              en: `Parsed from ${KML_ASSET}. Tap a feature to inspect its properties.`,
+              ja: `${KML_ASSET} を解析しました。Feature をタップすると属性が表示されます。`,
+              'es-419': `Analizado desde ${KML_ASSET}. Toca un elemento para inspeccionar sus propiedades.`,
+              de: `Aus ${KML_ASSET} eingelesen. Tippen Sie ein Feature an, um seine Eigenschaften zu sehen.`,
+              th: `อ่านจาก ${KML_ASSET} แล้ว แตะฟีเจอร์เพื่อดูคุณสมบัติ`,
+              hi: `${KML_ASSET} से पढ़ा गया। किसी फ़ीचर पर टैप करने से उसकी प्रॉपर्टी दिखती हैं।`,
+            },
+          )}
         </p>
       </ControlPanel>
     </MapViewContainer>

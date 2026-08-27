@@ -36,6 +36,21 @@ const resizeCircle = (markerState: MarkerState) => setEdge(markerState.position)
       'El punto edge es estado de React iniciado con Spherical.computeOffset, Spherical.computeDistanceBetween(center, edge) obtiene radiusMeters, y useMemo reconstruye el CircleState cada vez que ese radio cambia.',
       'Arrastrar el marcador del borde llama a resizeCircle para mover edge, mientras que la Polyline dibujada con zIndex 1 mantiene la línea del radio sobre el relleno y el círculo crece en consecuencia.',
     ],
+    de: [
+      'Einen Kreis zeichnen und seinen Radius durch Ziehen des Rand-Markers ändern; die Radiuslinie liegt über dem Kreis.',
+      'Der Randpunkt ist React-State, den Spherical.computeOffset vorbelegt, Spherical.computeDistanceBetween(center, edge) leitet radiusMeters ab, und useMemo baut den CircleState neu, sobald sich dieser Radius ändert.',
+      'Das Ziehen des Rand-Markers ruft resizeCircle auf, um edge zu verschieben, während die auf zIndex 1 gezeichnete Polyline die Radiuslinie über der Füllung hält und der Kreis entsprechend mitwächst.',
+    ],
+    th: [
+      'วาดวงกลมและปรับรัศมีด้วยการลากมาร์กเกอร์ที่ขอบ โดยเส้นรัศมีถูกจัดให้อยู่เหนือวงกลม',
+      'จุดที่ขอบเป็นสถานะของ React ซึ่งตั้งค่าเริ่มต้นด้วย Spherical.computeOffset ส่วน Spherical.computeDistanceBetween(center, edge) ใช้หา radiusMeters และ useMemo จะสร้าง CircleState ใหม่ทุกครั้งที่รัศมีเปลี่ยน',
+      'การลากมาร์กเกอร์ที่ขอบเรียก resizeCircle เพื่อย้าย edge ขณะที่ Polyline ซึ่งวาดที่ zIndex 1 ทำให้เส้นรัศมีอยู่เหนือสีเติม และวงกลมก็ขยายตามไปด้วย',
+    ],
+    hi: [
+      'एक वृत्त खींचें और किनारे का मार्कर खींचकर उसकी त्रिज्या बदलें; त्रिज्या की रेखा वृत्त के ऊपर रखी जाती है।',
+      'किनारे का बिंदु React स्टेट है, जिसे Spherical.computeOffset से भरा जाता है; Spherical.computeDistanceBetween(center, edge) से radiusMeters निकलता है, और वह त्रिज्या बदलते ही useMemo CircleState दोबारा बना देता है।',
+      'किनारे का मार्कर खींचने पर resizeCircle edge को हिलाता है, जबकि zIndex 1 पर खींची गई Polyline त्रिज्या की रेखा को भराव के ऊपर रखती है और वृत्त उसी के साथ बढ़ता है।',
+    ],
   },
 };
 

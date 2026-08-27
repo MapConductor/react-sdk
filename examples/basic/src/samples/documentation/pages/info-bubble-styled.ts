@@ -40,6 +40,21 @@ useEffect(() => {
       'El contenido del globo es JSX normal, así que el color de la fuente es solo un estilo en el elemento de contenido.',
       'El marcador se reestiliza asignando un nuevo DefaultMarkerIcon con fillColor y scale; el mapa aplica el cambio automáticamente.',
     ],
+    de: [
+      'InfoBubble nimmt bubbleColor, borderColor und borderWidth entgegen, sodass sich das Aussehen der Sprechblase — Schwanz eingeschlossen — umgestalten lässt, ohne sie selbst zu zeichnen.',
+      'Der Inhalt der Sprechblase ist gewöhnliches JSX, die Schriftfarbe also schlicht ein Inline-Style am Inhaltselement.',
+      'Der Marker wird umgestaltet, indem ein neues DefaultMarkerIcon mit fillColor und scale zugewiesen wird; die Karte übernimmt die Änderung von selbst.',
+    ],
+    th: [
+      'InfoBubble รับ bubbleColor, borderColor และ borderWidth จึงจัดสไตล์กรอบของบับเบิลรวมถึงหางได้โดยไม่ต้องวาดเอง',
+      'เนื้อหาของบับเบิลเป็น JSX ธรรมดา สีตัวอักษรจึงเป็นเพียงสไตล์อินไลน์บนอิลิเมนต์เนื้อหา',
+      'มาร์กเกอร์เปลี่ยนรูปลักษณ์ด้วยการกำหนด DefaultMarkerIcon ตัวใหม่พร้อม fillColor และ scale แผนที่จะรับการเปลี่ยนแปลงนั้นเอง',
+    ],
+    hi: [
+      'InfoBubble bubbleColor, borderColor और borderWidth लेता है, इसलिए बबल का ढाँचा — पूँछ सहित — खुद खींचे बिना बदला जा सकता है।',
+      'बबल की सामग्री सामान्य JSX है, इसलिए फ़ॉन्ट का रंग सामग्री एलिमेंट पर एक इनलाइन स्टाइल भर है।',
+      'मार्कर को fillColor और scale के साथ नया DefaultMarkerIcon देकर बदला जाता है; मैप वह बदलाव अपने आप उठा लेता है।',
+    ],
   },
 };
 

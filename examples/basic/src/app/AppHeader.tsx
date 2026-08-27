@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { SupportedLanguage } from '../sampleRegistry';
+import type { SupportedLanguage } from '../samples/sampleRegistry';
 import { translate } from '../samples/i18n';
 import type { MapProvider } from './appRouting';
 
@@ -26,6 +26,9 @@ const LANGUAGES: Array<{ value: SupportedLanguage; label: string; short: string 
   { value: 'en', label: 'English', short: 'EN' },
   { value: 'ja', label: '日本語', short: 'JA' },
   { value: 'es-419', label: 'Español (Latinoamérica)', short: 'ES' },
+  { value: 'de', label: 'Deutsch', short: 'DE' },
+  { value: 'th', label: 'ไทย', short: 'TH' },
+  { value: 'hi', label: 'हिन्दी', short: 'HI' },
 ];
 
 type IconMenu = 'provider' | 'language' | null;
@@ -107,7 +110,17 @@ export function AppHeader({ language, provider, showProviderSelector, onOpenMenu
             )}
           </div>
         )}
-        <label className="language-control"><span>{translate(language, 'Language', '言語', 'Idioma')}</span>
+        <label className="language-control"><span>{translate(
+          language,
+          {
+            en: 'Language',
+            ja: '言語',
+            'es-419': 'Idioma',
+            de: 'Sprache',
+            th: 'ภาษา',
+            hi: 'भाषा',
+          },
+        )}</span>
           <select value={language} onChange={event => onLanguageChange(event.target.value as SupportedLanguage)}>
             {LANGUAGES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
           </select>

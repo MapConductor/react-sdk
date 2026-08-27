@@ -1,4 +1,4 @@
-import { useSampleI18n } from '../../../samples/i18n';
+import { useSampleI18n, type Phrase } from '../../../samples/i18n';
 
 /**
  * 国土数値情報の鉄道データ（N02）の属性名。
@@ -9,11 +9,11 @@ import { useSampleI18n } from '../../../samples/i18n';
  *
  * ここに無いキーは生のキー名をそのまま出す。データ側に属性が増えても表から消えないように。
  */
-const labels: Record<string, { ja: string; en: string }> = {
-  N02_001: { ja: '鉄道区分', en: 'Railway category' },
-  N02_002: { ja: '事業者区分', en: 'Business category' },
-  N02_003: { ja: '路線名', en: 'Railway name' },
-  N02_004: { ja: '運営会社', en: 'Railway company' },
+const labels: Record<string, Phrase> = {
+  N02_001: { en: 'Railway category', ja: '鉄道区分', 'es-419': 'Categoría de ferrocarril', de: 'Bahnkategorie', th: 'ประเภทรถไฟ', hi: 'रेलवे श्रेणी' },
+  N02_002: { en: 'Business category', ja: '事業者区分', 'es-419': 'Categoría de operador', de: 'Betreiberkategorie', th: 'ประเภทผู้ประกอบการ', hi: 'संचालक श्रेणी' },
+  N02_003: { en: 'Railway name', ja: '路線名', 'es-419': 'Nombre de la línea', de: 'Streckenname', th: 'ชื่อเส้นทาง', hi: 'लाइन का नाम' },
+  N02_004: { en: 'Railway company', ja: '運営会社', 'es-419': 'Empresa operadora', de: 'Betreibergesellschaft', th: 'บริษัทผู้ให้บริการ', hi: 'संचालक कंपनी' },
 };
 
 /**
@@ -27,24 +27,32 @@ const ENGLISH_SUFFIX = '_en';
 const cellStyle: React.CSSProperties = { border: '1px solid #bbb', padding: '4px 8px', color: '#222' };
 
 /**
- * 表示言語が日本語なら日本語、それ以外は英語で出す。
- * 英語のときは値も `N02_003_en` の側へ差し替え、`_en` の行そのものは出さない
- * （同じ項目が 2 行に増えてしまうため）。
+ * 見出しは表示言語で出す。値の方は日本語か英語しか無い ── geojson が
+ * `N02_003` に対して `N02_003_en` を持っているだけで、独語・タイ語・
+ * ヒンディー語の対訳はデータ側に無い。なので日本語以外は `_en` の側へ
+ * 差し替え、`_en` の行そのものは出さない（同じ項目が 2 行に増えるため）。
  */
 export function PropertyTable({ properties }: { properties: Record<string, unknown> }) {
-  const { language } = useSampleI18n();
+  const { language, t } = useSampleI18n();
   const ja = language === 'ja';
   const entries = Object.entries(properties).filter(([key]) => !key.endsWith(ENGLISH_SUFFIX));
-  if (entries.length === 0) return <p style={{ margin: 0, fontSize: 13 }}>{ja ? 'プロパティなし' : 'No properties'}</p>;
+  if (entries.length === 0) {
+    return (
+      <p style={{ margin: 0, fontSize: 13 }}>
+        {t({ en: 'No properties', ja: 'プロパティなし', 'es-419': 'Sin propiedades', de: 'Keine Eigenschaften', th: 'ไม่มีคุณสมบัติ', hi: 'कोई प्रॉपर्टी नहीं' })}
+      </p>
+    );
+  }
   return (
     <table style={{ borderCollapse: 'collapse', fontSize: 13, minWidth: 220 }}>
       <thead><tr style={{ background: '#e0e0e0' }}>
-        <th style={cellStyle}>{ja ? 'プロパティ' : 'Property'}</th><th style={cellStyle}>{ja ? '値' : 'Value'}</th>
+        <th style={cellStyle}>{t({ en: 'Property', ja: 'プロパティ', 'es-419': 'Propiedad', de: 'Eigenschaft', th: 'คุณสมบัติ', hi: 'प्रॉपर्टी' })}</th>
+        <th style={cellStyle}>{t({ en: 'Value', ja: '値', 'es-419': 'Valor', de: 'Wert', th: 'ค่า', hi: 'मान' })}</th>
       </tr></thead>
       <tbody>{entries.map(([key, value]) => {
         const shown = ja ? value : properties[key + ENGLISH_SUFFIX] ?? value;
         return <tr key={key}>
-          <td style={cellStyle}>{(ja ? labels[key]?.ja : labels[key]?.en) ?? key}</td>
+          <td style={cellStyle}>{labels[key] ? t(labels[key]) : key}</td>
           <td style={cellStyle}>{shown == null ? '' : String(shown)}</td>
         </tr>;
       })}</tbody>

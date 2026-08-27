@@ -6,6 +6,7 @@ import {
   getSamplePageMetadata,
   resolveProviderForPage,
   SAMPLE_PAGES,
+  SUPPORTED_LANGUAGES,
   type SupportedLanguage,
 } from './samples/sampleRegistry';
 import { getLanguageFromPath } from './samples/i18n';
@@ -48,7 +49,7 @@ export function getStaticPaths(): string[] {
     'google-maps',
     'google-maps-3d',
   ];
-  const languages: SupportedLanguage[] = ['en', 'ja', 'es-419'];
+  const languages: readonly SupportedLanguage[] = SUPPORTED_LANGUAGES;
   const providerPages = SAMPLE_PAGES
     .filter(page => page.id !== 'camera-sync')
     .flatMap(page => {

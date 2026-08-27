@@ -83,7 +83,16 @@ function FlyToContent({ mapViewState }: { mapViewState: MapViewStateInterface<Ma
     <>
       {polylines.map(polyline => <Polyline key={polyline.id} state={polyline} />)}
       <Markers states={markers} />
-      <ControlPanel title={t('Fly To', 'カメラ移動')}>
+      <ControlPanel title={t(
+        {
+          en: 'Fly To',
+          ja: 'カメラ移動',
+          'es-419': 'Volar a un lugar',
+          de: 'Kamerafahrt',
+          th: 'การเคลื่อนกล้อง',
+          hi: 'किसी बिंदु तक उड़ान',
+        },
+      )}>
         <label className="toggle-control">
           <input
             className="toggle-control-input"

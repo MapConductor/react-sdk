@@ -13,8 +13,8 @@ Pod::Spec.new do |s|
   s.platform = :ios, "16.1"
   s.source_files = "ios/*.{h,m,mm,swift}"
   s.dependency "React-Core"
-  s.dependency "MapConductorCore"
+  s.dependency "MapConductorCore", "~> 1.3.0"
   s.dependency "MapConductorReactNativeCore"
   # 実際の地図SDK（MapLibre 等）はここに s.dependency を足す。
-  s.dependency "MapConductorForTemplate"
+  s.dependency "MapConductorForTemplate", "~> 1.3.0"
 end

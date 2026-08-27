@@ -34,9 +34,6 @@
 [submodule "react-for-here"]
 	path = react-for-here
 	url = git@github.com:mapconductor/react-for-here
-[submodule "reactnative-for-here"]
-	path = reactnative-for-here
-	url = git@github.com:mapconductor/reactnative-for-here
 [submodule "react-for-arcgis"]
 	path = react-for-arcgis
 	url = git@github.com:mapconductor/react-for-arcgis

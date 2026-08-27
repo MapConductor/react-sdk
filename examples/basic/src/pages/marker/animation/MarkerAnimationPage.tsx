@@ -28,11 +28,26 @@ export function MarkerAnimationPage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Markers states={MARKERS} />
-      <ControlPanel title={t('Marker Animation', 'マーカーアニメーション')}>
+      <ControlPanel title={t(
+        {
+          en: 'Marker Animation',
+          ja: 'マーカーアニメーション',
+          'es-419': 'Animación de marcadores',
+          de: 'Marker-Animation',
+          th: 'แอนิเมชันมาร์กเกอร์',
+          hi: 'मार्कर एनिमेशन',
+        },
+      )}>
         <p className="control-panel-note">
           {t(
-            'Tap a marker to run its animation (Drop / Bounce).',
-            'マーカーをタップすると、そのマーカーのアニメーション（Drop / Bounce）が実行されます。',
+            {
+              en: 'Tap a marker to run its animation (Drop / Bounce).',
+              ja: 'マーカーをタップすると、そのマーカーのアニメーション（Drop / Bounce）が実行されます。',
+              'es-419': 'Toca un marcador para ejecutar su animación (Drop / Bounce).',
+              de: 'Tippen Sie einen Marker an, um seine Animation abzuspielen (Drop / Bounce).',
+              th: 'แตะมาร์กเกอร์เพื่อเล่นแอนิเมชันของมาร์กเกอร์นั้น (Drop / Bounce)',
+              hi: 'किसी मार्कर पर टैप करने से उसका एनिमेशन चलता है (Drop / Bounce)।',
+            },
           )}
         </p>
       </ControlPanel>

@@ -81,7 +81,16 @@ export function CameraRestrictionPage() {
       onStateReady={setMapViewState}
     >
       <Polygon state={BOUNDS_POLYGON} />
-      <ControlPanel title={t('Camera Restriction', 'カメラ制限')}>
+      <ControlPanel title={t(
+        {
+          en: 'Camera Restriction',
+          ja: 'カメラ制限',
+          'es-419': 'Restricción de cámara',
+          de: 'Kamerabeschränkung',
+          th: 'การจำกัดกล้อง',
+          hi: 'कैमरा प्रतिबंध',
+        },
+      )}>
         <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, marginBottom: 8 }}>
           <input
             type="checkbox"
@@ -89,14 +98,23 @@ export function CameraRestrictionPage() {
             checked={enabled}
             onChange={e => setEnabled(e.target.checked)}
           />
-          {t('restriction', '制限')}
+          {t({ en: 'restriction', ja: '制限', 'es-419': 'restricción', de: 'Beschränkung', th: 'การจำกัด', hi: 'प्रतिबंध' })}
         </label>
         <div className="button-grid" style={{ marginBottom: 8 }}>
           <button data-testid="moveOutside" onClick={() => {
             // 矩形の北東よりさらに外側へ。
             moveCamera(36.20, 140.40, mapViewState?.cameraPosition.zoom ?? 14);
           }}>
-            {t('Move outside', '範囲外へ移動')}
+            {t(
+              {
+                en: 'Move outside',
+                ja: '範囲外へ移動',
+                'es-419': 'Salir del área',
+                de: 'Nach außen bewegen',
+                th: 'เลื่อนออกนอกขอบเขต',
+                hi: 'बाहर ले जाएँ',
+              },
+            )}
           </button>
           <button data-testid="zoomOverMax" onClick={() => moveCamera(START.latitude, START.longitude, 20)}>
             {'Zoom > max'}
@@ -105,7 +123,7 @@ export function CameraRestrictionPage() {
             {'Zoom < min'}
           </button>
           <button data-testid="resetCamera" onClick={() => moveCamera(START.latitude, START.longitude, 14)}>
-            {t('Reset', 'リセット')}
+            {t({ en: 'Reset', ja: 'リセット', 'es-419': 'Restablecer', de: 'Zurücksetzen', th: 'รีเซ็ต', hi: 'रीसेट' })}
           </button>
         </div>
         <div data-testid="cameraReadout" style={{ fontSize: 12, fontFamily: 'monospace' }}>{cameraText}</div>

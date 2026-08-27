@@ -31,6 +31,21 @@ const marker = useMemo(() => createMarkerState({
       'El contenido del globo es un <article> completo con un encabezado y un botón conectado a openDetails.',
       'bubbleColor define el fondo mientras que los hijos siguen siendo React normal, así que los clics y otros manejadores funcionan dentro del globo.',
     ],
+    de: [
+      'Interaktive React-Elemente innerhalb einer am Marker verankerten Sprechblase rendern, Überschriften und Schaltflächen eingeschlossen.',
+      'Der Inhalt der Sprechblase ist ein vollwertiges <article> mit Überschrift und einer Schaltfläche, die an openDetails hängt.',
+      'bubbleColor setzt den Hintergrund, während die Kinder gewöhnliches React bleiben — Klicks und andere Handler funktionieren in der Sprechblase ganz normal.',
+    ],
+    th: [
+      'เรนเดอร์อิลิเมนต์ React แบบโต้ตอบได้ภายในบับเบิลที่ตรึงกับมาร์กเกอร์ รวมถึงหัวข้อและปุ่ม',
+      'เนื้อหาของบับเบิลเป็น <article> เต็มรูปแบบ มีหัวข้อและปุ่มที่ผูกกับ openDetails',
+      'bubbleColor กำหนดพื้นหลัง ขณะที่ลูก ๆ ยังเป็น React ปกติ การคลิกและตัวจัดการอื่นจึงทำงานได้ตามปกติภายในบับเบิล',
+    ],
+    hi: [
+      'मार्कर से बँधे बबल के भीतर इंटरैक्टिव React एलिमेंट रेंडर करें — शीर्षक और बटन सहित।',
+      'बबल की सामग्री एक पूरा <article> है, जिसमें शीर्षक और openDetails से जुड़ा एक बटन है।',
+      'bubbleColor पृष्ठभूमि तय करता है, जबकि भीतर के एलिमेंट सामान्य React ही रहते हैं — इसलिए क्लिक और दूसरे हैंडलर बबल के अंदर भी सामान्य रूप से चलते हैं।',
+    ],
   },
 };
 

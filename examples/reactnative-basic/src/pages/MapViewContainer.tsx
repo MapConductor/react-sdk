@@ -5,8 +5,8 @@ import { LongdoProviderView } from '../providers/LongdoProviderView';
 import { MapTilerProviderView } from '../providers/MapTilerProviderView';
 import { MapboxProviderView } from '../providers/MapboxProviderView';
 import { GoogleMapsProviderView } from '../providers/GoogleMapsProviderView';
-import { HereProviderView } from '../providers/HereProviderView';
 import { ArcGISProviderView } from '../providers/ArcGISProviderView';
+import { TomTomProviderView } from '../providers/TomTomProviderView';
 
 export type { MapProvider, ProviderDesignOverrides };
 
@@ -27,10 +27,12 @@ export function MapViewContainer({ provider, designTypes, ...rest }: MapViewCont
       return <MapLibreProviderView mapDesignType={designTypes?.maplibre} {...rest} />;
     case 'google-maps':
       return <GoogleMapsProviderView mapDesignType={designTypes?.['google-maps']} {...rest} />;
-    case 'here':
-      return <HereProviderView mapDesignType={designTypes?.here} {...rest} />;
+    case 'tomtom':
+      return <TomTomProviderView mapDesignType={designTypes?.tomtom} {...rest} />;
     case 'arcgis':
       return <ArcGISProviderView mapDesignType={designTypes?.arcgis} {...rest} />;
+    case 'arcgis-3d':
+      return <ArcGISProviderView mapDesignType={designTypes?.['arcgis-3d']} useSceneView {...rest} />;
     default:
       return null;
   }

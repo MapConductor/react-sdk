@@ -1,7 +1,8 @@
 PODS:
-  - EXConstants (57.0.3):
+  - ArcGIS (300.1.0)
+  - EXConstants (57.0.11):
     - ExpoModulesCore
-  - Expo (57.0.4):
+  - Expo (57.0.13):
     - ExpoModulesCore
     - ExpoModulesJSI
     - hermes-engine
@@ -27,19 +28,19 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoAsset (57.0.3):
+  - ExpoAsset (57.0.11):
     - ExpoModulesCore
-  - ExpoDomWebView (57.0.0):
+  - ExpoDomWebView (57.0.1):
     - ExpoModulesCore
-  - ExpoFileSystem (57.0.0):
+  - ExpoFileSystem (57.0.4):
     - ExpoModulesCore
-  - ExpoFont (57.0.0):
+  - ExpoFont (57.0.1):
     - ExpoModulesCore
-  - ExpoKeepAwake (57.0.0):
+  - ExpoKeepAwake (57.0.1):
     - ExpoModulesCore
-  - ExpoLogBox (57.0.0):
+  - ExpoLogBox (57.0.2):
     - React-Core
-  - ExpoModulesCore (57.0.3):
+  - ExpoModulesCore (57.0.11):
     - ExpoModulesJSI
     - hermes-engine
     - RCTRequired
@@ -63,10 +64,10 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoModulesJSI (57.0.1):
+  - ExpoModulesJSI (57.0.4):
     - React-Core
     - ReactCommon
-  - ExpoModulesWorklets (57.0.3):
+  - ExpoModulesWorklets (57.0.11):
     - ExpoModulesCore
     - ExpoModulesJSI
   - FBLazyVector (0.86.0)
@@ -88,11 +89,10 @@ PODS:
     - Turf (= 4.0.0)
   - MapConductorCore (1.3.1)
   - MapConductorForArcGIS (1.3.1):
+    - ArcGIS (= 300.1.0)
     - MapConductorCore
   - MapConductorForGoogleMaps (1.3.1):
     - GoogleMaps (< 12.0, >= 10.15)
-    - MapConductorCore
-  - MapConductorForHERE (1.3.1):
     - MapConductorCore
   - MapConductorForLongdo (1.3.1):
     - LongdoMapFramework (~> 4.1)
@@ -108,78 +108,81 @@ PODS:
     - MapLibre (~> 6.20)
   - MapConductorForTemplate (1.3.1):
     - MapConductorCore
+  - MapConductorForTomTom (1.3.1):
+    - MapConductorCore
+    - TomTomSDKMapDisplay
   - MapConductorGeoJSON (1.3.1):
     - MapConductorCore
   - MapConductorHeatmap (1.3.1):
     - MapConductorCore
   - MapConductorMarkerClustering (1.3.1):
     - MapConductorCore
-  - MapConductorReactForArcGIS (0.1.3):
-    - MapConductorForArcGIS
+  - MapConductorReactForArcGIS (0.2.0):
+    - MapConductorForArcGIS (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForGoogleMaps (0.1.3):
-    - MapConductorCore
-    - MapConductorForGoogleMaps
+  - MapConductorReactForGoogleMaps (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForGoogleMaps (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForHere (0.1.3):
-    - MapConductorCore
-    - MapConductorForHERE
+  - MapConductorReactForLongdo (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForLongdo (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForLongdo (0.1.3):
-    - MapConductorCore
-    - MapConductorForLongdo
-    - MapConductorReactMarkerClustering
-    - MapConductorReactNativeCore
-    - React-Core
-  - MapConductorReactForMapbox (0.1.3):
+  - MapConductorReactForMapbox (0.2.0):
     - MapboxMaps (~> 11.26)
-    - MapConductorCore
-    - MapConductorForMapbox
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForMapbox (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForMapLibre (0.1.3):
-    - MapConductorCore
-    - MapConductorForMapLibre
-    - MapConductorReactMarkerClustering
-    - MapConductorReactNativeCore
-    - MapLibre (~> 6.20)
-    - React-Core
-  - MapConductorReactForMapTiler (0.1.3):
-    - MapConductorCore
-    - MapConductorForMapTiler
+  - MapConductorReactForMapLibre (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForMapLibre (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - MapLibre (~> 6.20)
     - React-Core
-  - MapConductorReactForTemplate (0.1.3):
-    - MapConductorCore
-    - MapConductorForTemplate
+  - MapConductorReactForMapTiler (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForMapTiler (~> 1.3.0)
+    - MapConductorReactMarkerClustering
+    - MapConductorReactNativeCore
+    - MapLibre (~> 6.20)
+    - React-Core
+  - MapConductorReactForTemplate (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForTemplate (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactGeoJSONLayer (0.1.3):
-    - MapConductorCore
-    - MapConductorGeoJSON
+  - MapConductorReactForTomTom (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorForTomTom (~> 1.3.0)
+    - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactHeatmap (0.1.3):
-    - MapConductorCore
-    - MapConductorHeatmap
+  - MapConductorReactGeoJSONLayer (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorGeoJSON (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactMarkerClustering (0.1.3):
-    - MapConductorCore
-    - MapConductorMarkerClustering
+  - MapConductorReactHeatmap (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorHeatmap (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactNativeCore (0.1.3):
-    - MapConductorCore
+  - MapConductorReactMarkerClustering (0.2.0):
+    - MapConductorCore (~> 1.3.0)
+    - MapConductorMarkerClustering (~> 1.3.0)
+    - MapConductorReactNativeCore
+    - React-Core
+  - MapConductorReactNativeCore (0.2.0):
+    - MapConductorCore (~> 1.3.0)
     - React-callinvoker
     - React-Core
     - React-jsi
@@ -1608,7 +1611,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context (5.8.0):
+  - react-native-safe-area-context (5.9.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1620,8 +1623,8 @@ PODS:
     - React-graphics
     - React-ImageManager
     - React-jsi
-    - react-native-safe-area-context/common (= 5.8.0)
-    - react-native-safe-area-context/fabric (= 5.8.0)
+    - react-native-safe-area-context/common (= 5.9.0)
+    - react-native-safe-area-context/fabric (= 5.9.0)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-renderercss
@@ -1632,7 +1635,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context/common (5.8.0):
+  - react-native-safe-area-context/common (5.9.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1654,7 +1657,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-safe-area-context/fabric (5.8.0):
+  - react-native-safe-area-context/fabric (5.9.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2142,18 +2145,52 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - Swifter (1.5.0)
+  - TomTomSDKBindingFrameworkLoggingInternal (0.74.0)
+  - TomTomSDKBindingMapDisplayElasticDataProviderInternal (0.74.0):
+    - TomTomSDKCommon (= 0.74.0)
+    - TomTomSDKTelemetry (= 0.74.0)
+  - TomTomSDKBindingMapDisplayEngineInternal (0.74.0)
+  - TomTomSDKCommon (0.74.0):
+    - TomTomSDKBindingFrameworkLoggingInternal (= 0.74.0)
+  - TomTomSDKFeatureToggle (0.74.0):
+    - TomTomSDKCommon (= 0.74.0)
+  - TomTomSDKLocationProvider (0.74.0):
+    - TomTomSDKCommon (= 0.74.0)
+  - TomTomSDKMapDisplay (0.74.0):
+    - TomTomSDKBindingMapDisplayEngineInternal (= 0.74.0)
+    - TomTomSDKCommon (= 0.74.0)
+    - TomTomSDKFeatureToggle (= 0.74.0)
+    - TomTomSDKLocationProvider (= 0.74.0)
+    - TomTomSDKMapTileStoreCommon (= 0.74.0)
+    - TomTomSDKTelemetry (= 0.74.0)
+  - TomTomSDKMapTileStoreCommon (0.74.0):
+    - TomTomSDKBindingMapDisplayElasticDataProviderInternal (= 0.74.0)
+    - TomTomSDKCommon (= 0.74.0)
+    - TomTomSDKTelemetry (= 0.74.0)
+  - TomTomSDKRoute (0.74.0):
+    - TomTomSDKCommon (= 0.74.0)
+    - TomTomSDKRoutingCommon (= 0.74.0)
+  - TomTomSDKRoutingCommon (0.74.0):
+    - TomTomSDKCommon (= 0.74.0)
+    - TomTomSDKFeatureToggle (= 0.74.0)
+  - TomTomSDKTelemetry (0.74.0):
+    - TomTomSDKCommon (= 0.74.0)
+    - TomTomSDKFeatureToggle (= 0.74.0)
+    - TomTomSDKLocationProvider (= 0.74.0)
+    - TomTomSDKRoute (= 0.74.0)
   - Turf (4.0.0)
   - Yoga (0.0.0)
 
 DEPENDENCIES:
+  - ArcGIS (from `../../../../ios-sdk/ios-for-arcgis/ArcGIS.podspec`)
   - EXConstants (from `../../../node_modules/expo-constants/ios`)
   - Expo (from `../../../node_modules/expo`)
   - ExpoAsset (from `../../../node_modules/expo-asset/ios`)
-  - "ExpoDomWebView (from `../../../node_modules/@expo/dom-webview/ios`)"
-  - ExpoFileSystem (from `../../../node_modules/expo-file-system/ios/ExpoFileSystem.podspec`)
-  - ExpoFont (from `../../../node_modules/expo-font/ios/ExpoFont.podspec`)
-  - ExpoKeepAwake (from `../../../node_modules/expo-keep-awake/ios`)
-  - "ExpoLogBox (from `../../../node_modules/@expo/log-box`)"
+  - "ExpoDomWebView (from `../../../node_modules/expo/node_modules/@expo/dom-webview/ios`)"
+  - ExpoFileSystem (from `../../../node_modules/expo/node_modules/expo-file-system/ios/ExpoFileSystem.podspec`)
+  - ExpoFont (from `../../../node_modules/expo/node_modules/expo-font/ios/ExpoFont.podspec`)
+  - ExpoKeepAwake (from `../../../node_modules/expo/node_modules/expo-keep-awake/ios`)
+  - "ExpoLogBox (from `../../../node_modules/expo/node_modules/@expo/log-box`)"
   - ExpoModulesCore (from `../../../node_modules/expo-modules-core/ExpoModulesCore.podspec`)
   - ExpoModulesJSI (from `../../../node_modules/expo-modules-jsi/apple`)
   - ExpoModulesWorklets (from `../../../node_modules/expo-modules-core/ExpoModulesWorklets.podspec`)
@@ -2162,24 +2199,24 @@ DEPENDENCIES:
   - MapConductorCore (from `../../../../ios-sdk/ios-sdk-core`)
   - MapConductorForArcGIS (from `../../../../ios-sdk/ios-for-arcgis`)
   - MapConductorForGoogleMaps (from `../../../../ios-sdk/ios-for-googlemaps`)
-  - MapConductorForHERE (from `../../../../ios-sdk/ios-for-here`)
   - MapConductorForLongdo (from `../../../../ios-sdk/ios-for-longdo`)
   - MapConductorForMapbox (from `../../../../ios-sdk/ios-for-mapbox`)
   - MapConductorForMapLibre (from `../../../../ios-sdk/ios-for-maplibre`)
   - MapConductorForMapTiler (from `../../../../ios-sdk/ios-for-maptiler`)
   - MapConductorForTemplate (from `../../../../ios-sdk/ios-for-template`)
+  - MapConductorForTomTom (from `../../../../ios-sdk/ios-for-tomtom`)
   - MapConductorGeoJSON (from `../../../../ios-sdk/ios-geojson`)
   - MapConductorHeatmap (from `../../../../ios-sdk/ios-heatmap`)
   - MapConductorMarkerClustering (from `../../../../ios-sdk/ios-marker-clustering`)
   - MapConductorReactForArcGIS (from `../../../reactnative-for-arcgis`)
   - MapConductorReactForGoogleMaps (from `../../../reactnative-for-googlemaps`)
-  - MapConductorReactForHere (from `../../../reactnative-for-here`)
   - MapConductorReactForLongdo (from `../../../reactnative-for-longdo`)
   - MapConductorReactForMapbox (from `../../../reactnative-for-mapbox`)
   - MapConductorReactForMapLibre (from `../../../reactnative-for-maplibre`)
   - MapConductorReactForMapTiler (from `../../../reactnative-for-maptiler`)
   - MapConductorReactForTemplate (from `../../../reactnative-for-template`)
-  - MapConductorReactGeoJSONLayer (from `../../../react-geojson-layer`)
+  - MapConductorReactForTomTom (from `../../../reactnative-for-tomtom`)
+  - MapConductorReactGeoJSONLayer (from `../../../react-geojson`)
   - MapConductorReactHeatmap (from `../../../react-heatmap`)
   - MapConductorReactMarkerClustering (from `../../../react-marker-clustering`)
   - MapConductorReactNativeCore (from `../../../js-sdk-react`)
@@ -2259,6 +2296,17 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../../../node_modules/react-native/ReactCommon`)
   - ReactNativeDependencies (from `../../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec`)
   - "RNCPicker (from `../../../node_modules/@react-native-picker/picker`)"
+  - TomTomSDKBindingFrameworkLoggingInternal (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKBindingFrameworkLoggingInternal.podspec`)
+  - TomTomSDKBindingMapDisplayElasticDataProviderInternal (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKBindingMapDisplayElasticDataProviderInternal.podspec`)
+  - TomTomSDKBindingMapDisplayEngineInternal (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKBindingMapDisplayEngineInternal.podspec`)
+  - TomTomSDKCommon (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKCommon.podspec`)
+  - TomTomSDKFeatureToggle (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKFeatureToggle.podspec`)
+  - TomTomSDKLocationProvider (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKLocationProvider.podspec`)
+  - TomTomSDKMapDisplay (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKMapDisplay.podspec`)
+  - TomTomSDKMapTileStoreCommon (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKMapTileStoreCommon.podspec`)
+  - TomTomSDKRoute (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKRoute.podspec`)
+  - TomTomSDKRoutingCommon (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKRoutingCommon.podspec`)
+  - TomTomSDKTelemetry (from `../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKTelemetry.podspec`)
   - Yoga (from `../../../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2273,6 +2321,8 @@ SPEC REPOS:
     - Turf
 
 EXTERNAL SOURCES:
+  ArcGIS:
+    :podspec: "../../../../ios-sdk/ios-for-arcgis/ArcGIS.podspec"
   EXConstants:
     :path: "../../../node_modules/expo-constants/ios"
   Expo:
@@ -2280,15 +2330,15 @@ EXTERNAL SOURCES:
   ExpoAsset:
     :path: "../../../node_modules/expo-asset/ios"
   ExpoDomWebView:
-    :path: "../../../node_modules/@expo/dom-webview/ios"
+    :path: "../../../node_modules/expo/node_modules/@expo/dom-webview/ios"
   ExpoFileSystem:
-    :podspec: "../../../node_modules/expo-file-system/ios/ExpoFileSystem.podspec"
+    :podspec: "../../../node_modules/expo/node_modules/expo-file-system/ios/ExpoFileSystem.podspec"
   ExpoFont:
-    :podspec: "../../../node_modules/expo-font/ios/ExpoFont.podspec"
+    :podspec: "../../../node_modules/expo/node_modules/expo-font/ios/ExpoFont.podspec"
   ExpoKeepAwake:
-    :path: "../../../node_modules/expo-keep-awake/ios"
+    :path: "../../../node_modules/expo/node_modules/expo-keep-awake/ios"
   ExpoLogBox:
-    :path: "../../../node_modules/@expo/log-box"
+    :path: "../../../node_modules/expo/node_modules/@expo/log-box"
   ExpoModulesCore:
     :podspec: "../../../node_modules/expo-modules-core/ExpoModulesCore.podspec"
   ExpoModulesJSI:
@@ -2306,8 +2356,6 @@ EXTERNAL SOURCES:
     :path: "../../../../ios-sdk/ios-for-arcgis"
   MapConductorForGoogleMaps:
     :path: "../../../../ios-sdk/ios-for-googlemaps"
-  MapConductorForHERE:
-    :path: "../../../../ios-sdk/ios-for-here"
   MapConductorForLongdo:
     :path: "../../../../ios-sdk/ios-for-longdo"
   MapConductorForMapbox:
@@ -2318,6 +2366,8 @@ EXTERNAL SOURCES:
     :path: "../../../../ios-sdk/ios-for-maptiler"
   MapConductorForTemplate:
     :path: "../../../../ios-sdk/ios-for-template"
+  MapConductorForTomTom:
+    :path: "../../../../ios-sdk/ios-for-tomtom"
   MapConductorGeoJSON:
     :path: "../../../../ios-sdk/ios-geojson"
   MapConductorHeatmap:
@@ -2328,8 +2378,6 @@ EXTERNAL SOURCES:
     :path: "../../../reactnative-for-arcgis"
   MapConductorReactForGoogleMaps:
     :path: "../../../reactnative-for-googlemaps"
-  MapConductorReactForHere:
-    :path: "../../../reactnative-for-here"
   MapConductorReactForLongdo:
     :path: "../../../reactnative-for-longdo"
   MapConductorReactForMapbox:
@@ -2340,8 +2388,10 @@ EXTERNAL SOURCES:
     :path: "../../../reactnative-for-maptiler"
   MapConductorReactForTemplate:
     :path: "../../../reactnative-for-template"
+  MapConductorReactForTomTom:
+    :path: "../../../reactnative-for-tomtom"
   MapConductorReactGeoJSONLayer:
-    :path: "../../../react-geojson-layer"
+    :path: "../../../react-geojson"
   MapConductorReactHeatmap:
     :path: "../../../react-heatmap"
   MapConductorReactMarkerClustering:
@@ -2498,21 +2548,44 @@ EXTERNAL SOURCES:
     :podspec: "../../../node_modules/react-native/third-party-podspecs/ReactNativeDependencies.podspec"
   RNCPicker:
     :path: "../../../node_modules/@react-native-picker/picker"
+  TomTomSDKBindingFrameworkLoggingInternal:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKBindingFrameworkLoggingInternal.podspec"
+  TomTomSDKBindingMapDisplayElasticDataProviderInternal:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKBindingMapDisplayElasticDataProviderInternal.podspec"
+  TomTomSDKBindingMapDisplayEngineInternal:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKBindingMapDisplayEngineInternal.podspec"
+  TomTomSDKCommon:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKCommon.podspec"
+  TomTomSDKFeatureToggle:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKFeatureToggle.podspec"
+  TomTomSDKLocationProvider:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKLocationProvider.podspec"
+  TomTomSDKMapDisplay:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKMapDisplay.podspec"
+  TomTomSDKMapTileStoreCommon:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKMapTileStoreCommon.podspec"
+  TomTomSDKRoute:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKRoute.podspec"
+  TomTomSDKRoutingCommon:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKRoutingCommon.podspec"
+  TomTomSDKTelemetry:
+    :podspec: "../../../../ios-sdk/ios-for-tomtom/podspecs/TomTomSDKTelemetry.podspec"
   Yoga:
     :path: "../../../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  EXConstants: d069b4a2dd469d5a3a4d3d7b09757e708fda8f64
-  Expo: cfb5f1189dfb9bd5ccc7701ceb2879d326c253e9
-  ExpoAsset: 586e89aeaab2e23bfa90b9dce4d7d5e36815c039
-  ExpoDomWebView: 73ba90107a5acc0017a09b06e66d8eb238e089b8
-  ExpoFileSystem: ffcd56066188802f263254b6b2e60f74b6a0bdae
-  ExpoFont: 35fd7ad72f697d3a9656545909972d8b9f60d5da
-  ExpoKeepAwake: 8a96e2075b75641001f55393d7e6600a5b808f09
-  ExpoLogBox: b39a76aab749833d58111c3be1264bb90f3b92d4
-  ExpoModulesCore: dd86477c30c8fc5b56c5ce63ed1360960c6cc48c
-  ExpoModulesJSI: 0fad44a0464a4469b83a06e34e529c13043f2f69
-  ExpoModulesWorklets: f6b71b8ddeb8dceb2ce3504544ecfbd708ba79a2
+  ArcGIS: 7f9653b961b16c7658bc83d429e4cf943be495af
+  EXConstants: 13cc6ad9324d81223386074a523d4e16aed32cd2
+  Expo: 092ab1f66de3246b5ffd87d85da9a78648013170
+  ExpoAsset: e046c820a585f46969182c2aa03c3a822dd55b6b
+  ExpoDomWebView: beaec034e51bd028428b98bb1f2633ab79c6d095
+  ExpoFileSystem: b3fb2457e75eddc87dcadcd4cd0e237d12f79de7
+  ExpoFont: 59e1faf66ba9bcd232ae1e2ce58d202a48b6f65e
+  ExpoKeepAwake: c26f14275017370cc8a4b7b43a0e23361f2053a5
+  ExpoLogBox: 6bb73c341aca22e699bd4da6cc61afc844e1a648
+  ExpoModulesCore: f6988782b544b539ccb1600ea2478f2b18b89a3d
+  ExpoModulesJSI: b20fefa4cdd9097e7e6b715466d1900b8c5d4711
+  ExpoModulesWorklets: eaf2898a6621e3c9a09c0479c1a4cb5f1b368d53
   FBLazyVector: b3e7ad108f0d882e30445c5527d774e3fd432f3d
   GoogleMaps: 306f6ea18af2dc9ef85d98b0d1b41bc7d506df5f
   hermes-engine: fb6a0b9dffad1faa9bfb366cf22f07e33cee658b
@@ -2521,29 +2594,29 @@ SPEC CHECKSUMS:
   MapboxCoreMaps: 77311833fc3d61407777a6d9b1d49422b6962d9a
   MapboxMaps: 70192a3581956efae80a0ce4dedd09cc25b02d22
   MapConductorCore: f4a8fe706da64fc05e72c0d387ec60a48dcf1eeb
-  MapConductorForArcGIS: b833af71e47a9f2547ef8845dbdbcca32155c169
+  MapConductorForArcGIS: 31dab782a4fbb6046f510dbe7d7ea19323092094
   MapConductorForGoogleMaps: 483f312109c462dc1fc309cfd693bfff4dee034b
-  MapConductorForHERE: d5df68892f4039ee9bb0469d64470355ac0eb8af
   MapConductorForLongdo: 1d203bf49f1e99fd6695b33acc376c5ff239e0bc
   MapConductorForMapbox: e45bed934a7e307efc08d9aa51aa6c8a48f042d5
   MapConductorForMapLibre: 9ac83b0358ba70f1b901e44e9d2f98ae4fbea9be
   MapConductorForMapTiler: 882ab9b984a63fa8b244ac3d38917d1071163ad9
   MapConductorForTemplate: 722f6c4ad3df55aa9dc295301e549142f2bacded
+  MapConductorForTomTom: 768935180c85c0cc420647730e8795ba17d79987
   MapConductorGeoJSON: 188c5fab5dc8d5db24e7fe77f9ee3eac707d1a55
   MapConductorHeatmap: cc0c6348088b76b4e1bc74eea8e19bd5ca491f86
   MapConductorMarkerClustering: 62baa375da0aafc1ff0a67f516ab3cddf10e4a39
-  MapConductorReactForArcGIS: 381d0726a4e7fd8eda628f0d84710aa3ca1ee1c4
-  MapConductorReactForGoogleMaps: 81267038f5728c972e5555cc8665af38d236681b
-  MapConductorReactForHere: 796fd922ba460ff4bcfb2cc4c09418012bf93ee4
-  MapConductorReactForLongdo: bdc4fd303f789ec4b212f7b08bbb5c1e490e6e44
-  MapConductorReactForMapbox: 8cd541eef46d41070dc3833d0b8b5831000321c9
-  MapConductorReactForMapLibre: d2c32db38d5802268e8c985c8865b6a0e0095844
-  MapConductorReactForMapTiler: 12d4e781c1d21abda1c8611f132689902356acb7
-  MapConductorReactForTemplate: 9b743980036944c0d8a535fa346c2339f40c5e23
-  MapConductorReactGeoJSONLayer: 9dab648eb76d7aab663042af8e7ad601f41a1827
-  MapConductorReactHeatmap: eed367e002f5f8d88d2123286dccad141238f834
-  MapConductorReactMarkerClustering: ab7df70ac75b2aaf82ec03bf56325ff8127d5b3f
-  MapConductorReactNativeCore: 02b5a105a516b983aa45686136b2892ef98136ea
+  MapConductorReactForArcGIS: 82a0eeb55de9ed386f0d6117441e1b25a06d4a99
+  MapConductorReactForGoogleMaps: bbf691aedad5c8f867ea691e8c9bb3beea70572e
+  MapConductorReactForLongdo: 8d91c04314a4c105db839071cfb930558e615223
+  MapConductorReactForMapbox: 1b423d99eb829c87b04e3edc57103e4e8b1d3659
+  MapConductorReactForMapLibre: 2f073b6a4c6918e5e225be9e1b2ce252452aeeda
+  MapConductorReactForMapTiler: dde283e47128af5a7a859b09badd867305aa5ce8
+  MapConductorReactForTemplate: 58c9908fe31eb43653eab0604749fdcca7a3a3de
+  MapConductorReactForTomTom: e9ad7bbe3000c1e153338589db9cf14a0723e854
+  MapConductorReactGeoJSONLayer: b81b6c631b08d6c3497b8d74cec04c9f90a1a6b9
+  MapConductorReactHeatmap: baffc663d7492848f323739ea09acec8dbf5507a
+  MapConductorReactMarkerClustering: 45aa7843f5118c1ec3d32bba3eeb2ba354c06a1e
+  MapConductorReactNativeCore: fe69325883c4bcf93d6dce6382c15bcfb8c4998e
   MapLibre: 96726270455ffd183688cf0bd2a3881b0212a57e
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0
@@ -2582,7 +2655,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: ce449ccdf3b80384415b925606be8a4bdcfc65d3
   React-microtasksnativemodule: 2eb3f49d0d8e77b5343455eccd057010b8d38b6b
   React-mutationobservernativemodule: f0a0d5ae9b51caf7becbeabf836d716cfedb6bf2
-  react-native-safe-area-context: fb5c8ee9f6dd62ef710611b3d370c501f42a4ac0
+  react-native-safe-area-context: 30934ff38025480021a6956a3eb8799f18ff835a
   react-native-slider: 08ecfc4e9cc16cc388a56dd9caeca51b55cd9bb7
   React-NativeModulesApple: a092d89b58f635ebfab88048b0eda9fb516819fd
   React-networking: 968bbbe73590149feb1e72b2af4f6a68e4796ece
@@ -2621,9 +2694,20 @@ SPEC CHECKSUMS:
   ReactNativeDependencies: fa0a54b3f5319ae0e3b9aff32bfee7a424b88e66
   RNCPicker: d74667bdfc08ed389a2a277d95b8faf2349290a9
   Swifter: e71dd674404923d7f03ebb03f3f222d1c570bc8e
+  TomTomSDKBindingFrameworkLoggingInternal: fbff4857ccb1204a079b0765b25e9841f7049273
+  TomTomSDKBindingMapDisplayElasticDataProviderInternal: 4b73a0c1ba3aaed2312992d7f5394169f318e00b
+  TomTomSDKBindingMapDisplayEngineInternal: 88fa78c367dff59ef80eb7292505bf45df6b442f
+  TomTomSDKCommon: 76f5126ccce0d5a50a472880a5deb96b0d2661e6
+  TomTomSDKFeatureToggle: 09200a40b13f6bdc09a8c2d9f3301732faad2833
+  TomTomSDKLocationProvider: 97abf707a9b6790011d924f64093403ce135f64e
+  TomTomSDKMapDisplay: a2bf862ecad9828c66816be1c8233a375dd14089
+  TomTomSDKMapTileStoreCommon: c96e506d4117de76f11fcaad3ed1ceb4ed5703de
+  TomTomSDKRoute: 6fbd67fd1d4b326e72cb24147c8d455eefda74f8
+  TomTomSDKRoutingCommon: 4dd510a4782992b2af86103fa9b1814780566f9a
+  TomTomSDKTelemetry: bca81819d7399fcf64416f6390071d3c8251fecb
   Turf: c9eb11a65d96af58cac523460fd40fec5061b081
   Yoga: fe50ab299e578f397fef753cf309c6703a4db29b
 
-PODFILE CHECKSUM: 83609dab8c99e50d9335088beeda160651b5a9f3
+PODFILE CHECKSUM: 1917e9c6b4085ff2a37b9ee48ae78f61895e2ad9
 
 COCOAPODS: 1.17.0

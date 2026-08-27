@@ -65,12 +65,39 @@ function HeatmapLayerPageContent({
         <HeatmapPoints states={heatmapPoints} />
       </HeatmapOverlay>
 
-      <ControlPanel title={t('Heatmap Layer (24,526 points)', 'ヒートマップレイヤー（24,526件）')}>
+      <ControlPanel title={t(
+        {
+          en: 'Heatmap Layer (24,526 points)',
+          ja: 'ヒートマップレイヤー（24,526件）',
+          'es-419': 'Capa de mapa de calor (24,526 puntos)',
+          de: 'Heatmap-Ebene (24.526 Punkte)',
+          th: 'เลเยอร์ฮีตแมป (24,526 จุด)',
+          hi: 'हीटमैप लेयर (24,526 बिंदु)',
+        },
+      )}>
         {isLoading ? (
-          <p className="control-panel-note">{t('Loading data…', 'データを読み込んでいます…')}</p>
+          <p className="control-panel-note">{t(
+            {
+              en: 'Loading data…',
+              ja: 'データを読み込んでいます…',
+              'es-419': 'Cargando datos…',
+              de: 'Daten werden geladen…',
+              th: 'กำลังโหลดข้อมูล…',
+              hi: 'डेटा लोड हो रहा है…',
+            },
+          )}</p>
         ) : (
           <p className="control-panel-note">
-            {t('Postal-office data is displayed as a heatmap.', '郵便局データをヒートマップで表示しています。')}
+            {t(
+              {
+                en: 'Postal-office data is displayed as a heatmap.',
+                ja: '郵便局データをヒートマップで表示しています。',
+                'es-419': 'Los datos de oficinas postales se muestran como un mapa de calor.',
+                de: 'Die Postfilialdaten werden als Heatmap dargestellt.',
+                th: 'แสดงข้อมูลที่ทำการไปรษณีย์เป็นฮีตแมป',
+                hi: 'डाकघरों का डेटा हीटमैप के रूप में दिखाया गया है।',
+              },
+            )}
           </p>
         )}
       </ControlPanel>

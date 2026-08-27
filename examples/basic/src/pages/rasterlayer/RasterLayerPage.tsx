@@ -83,18 +83,63 @@ export function RasterLayerPage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <RasterLayer state={state} />
-      <ControlPanel title={t('Raster Layer', 'ラスターレイヤー')}>
+      <ControlPanel title={t(
+        {
+          en: 'Raster Layer',
+          ja: 'ラスターレイヤー',
+          'es-419': 'Capa ráster',
+          de: 'Rasterebene',
+          th: 'เลเยอร์ราสเตอร์',
+          hi: 'रास्टर लेयर',
+        },
+      )}>
         <label className="slider-control">
-          <span className="slider-label">{t('GSI layer', '国土地理院レイヤー')}</span>
+          <span className="slider-label">{t(
+            {
+              en: 'GSI layer',
+              ja: '国土地理院レイヤー',
+              'es-419': 'Capa del GSI',
+              de: 'GSI-Ebene',
+              th: 'เลเยอร์ GSI',
+              hi: 'GSI लेयर',
+            },
+          )}</span>
           <select
             value={selectedLayer}
             onChange={event => setSelectedLayer(event.target.value as GsiLayer)}
           >
-            <option value="relief">{t('Relief map', '色別標高図')}</option>
-            <option value="standard">{t('Standard map', '標準地図（電子国土基本図）')}</option>
+            <option value="relief">{t(
+              {
+                en: 'Relief map',
+                ja: '色別標高図',
+                'es-419': 'Mapa de relieve',
+                de: 'Reliefkarte',
+                th: 'แผนที่ความสูงแบบแยกสี',
+                hi: 'उच्चावच मानचित्र',
+              },
+            )}</option>
+            <option value="standard">{t(
+              {
+                en: 'Standard map',
+                ja: '標準地図（電子国土基本図）',
+                'es-419': 'Mapa estándar',
+                de: 'Standardkarte',
+                th: 'แผนที่มาตรฐาน',
+                hi: 'मानक मानचित्र',
+              },
+            )}</option>
           </select>
         </label>
-        <SliderControl label={t('Opacity', '透明度')} value={opacity} min={0} max={1} onChange={setOpacity} />
+        <SliderControl label={t(
+          {
+            en: 'Opacity',
+            ja: '透明度',
+            'es-419': 'Opacidad',
+            de: 'Deckkraft',
+            th: 'ความทึบ',
+            hi: 'अपारदर्शिता',
+          },
+        )} value={opacity} min={0} max={1} onChange={setOpacity} />
       </ControlPanel>
     </MapViewContainer>
   );

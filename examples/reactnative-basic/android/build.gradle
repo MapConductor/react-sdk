@@ -2,7 +2,7 @@
 
 buildscript {
   ext {
-    // android-sdk (mavenLocal の com.mapconductor:* 1.2.0) が Kotlin 2.4 でコンパイル
+    // android-sdk (mavenLocal の com.mapconductor:* 1.3.1) が Kotlin 2.4 でコンパイル
     // されているため、RN 側は 2.3 系（Expo の pika-compiler が対応する最新）に上げる。Kotlin は +1 マイナーの
     // メタデータ前方互換があるため 2.3 で 2.4.0 メタデータを読める。RN 既定 (2.1.x) のままだと
     // "Module was compiled with an incompatible version of Kotlin" で落ちる。
@@ -33,6 +33,8 @@ allprojects {
     maven { url 'https://maven.longdo.com/artifactory/libs-release-public' }
     // Mapbox Maven repository（v11 は認証不要）
     maven { url 'https://api.mapbox.com/downloads/v2/releases/maven' }
+    // TomTom Orbis Maps Display SDK はここでしか配られていない。
+    maven { url 'https://repositories.tomtom.com/artifactory/maven' }
   }
 }
 
@@ -40,6 +42,6 @@ apply plugin: "expo-root-project"
 apply plugin: "com.facebook.react.rootproject"
 
 // com.mapconductor:for-googlemaps requires minSdk 26; this Expo app's generated default is 24.
-// (Pre-existing gap unrelated to reactnative-for-here - reactnative-for-googlemaps ships an Expo
+// (Pre-existing gap - reactnative-for-googlemaps ships an Expo
 // config plugin that's supposed to raise this but isn't wired into this app's app.config.ts.)
 ext.minSdkVersion = 26
