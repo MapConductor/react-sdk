@@ -11,7 +11,10 @@ const doc: SamplePageDoc = {
 </MapViewContainer>`,
   state: `const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
 const [selected, setSelected] = useState<SelectedFeature | null>(null);
-const layerState = useMemo(() => new GeoJSONLayerState({ id: 'railways' }), []);`,
+const layerState = useMemo(() => new GeoJSONLayerState({
+  strokeColor: colorArgb(200, 250, 36, 29),
+  strokeWidth: 6,
+}), []);`,
   explanation: {
     en: [
       "Process clicks against GeoJSON features and show the selected feature's properties at the geographic click position.",

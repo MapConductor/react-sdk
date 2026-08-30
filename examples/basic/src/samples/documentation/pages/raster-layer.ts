@@ -2,7 +2,7 @@ import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
   code: `const layer = createRasterLayerState({
-  tileSource,
+  source: tileSource,
   opacity,
 });
 

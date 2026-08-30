@@ -1,7 +1,7 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `<MapViewContainer initialCamera={INIT_CAMERA}>
+  code: `<MapViewContainer state={mapViewState}>
   <Marker state={marker} />
   <InfoBubble
     marker={marker}
@@ -20,6 +20,12 @@ const [fontColor, setFontColor] = useState('#111827');
 const [markerColor, setMarkerColor] = useState('#ef4444');
 const [strokeWidth, setStrokeWidth] = useState(2.0);
 const [markerScale, setMarkerScale] = useState(1.0);
+
+const marker = useMemo(() => createMarkerState({
+  id: 'styled-bubble-marker',
+  position: createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }),
+  icon: new DefaultMarkerIcon({ fillColor: '#ef4444' }),
+}), []);
 
 useEffect(() => {
   marker.icon = new DefaultMarkerIcon({ fillColor: markerColor, scale: markerScale });

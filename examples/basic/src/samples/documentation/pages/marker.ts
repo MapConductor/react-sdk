@@ -3,7 +3,7 @@ import type { SamplePageDoc } from '../types';
 const doc: SamplePageDoc = {
   code: `<MapViewContainer state={mapViewState}>
   <Markers states={markers} />
-  {selected && <InfoBubble marker={selected}>{selected.extra}</InfoBubble>}
+  {selected && <InfoBubble marker={selected}>{selected.extra as string}</InfoBubble>}
 </MapViewContainer>`,
   state: `const [selected, setSelected] = useState<MarkerState | null>(null);
 const markers = useMemo(() => markerData.map(item => createMarkerState({

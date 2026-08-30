@@ -144,6 +144,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
     source: '@mapconductor/js-sdk-core',
     values: [
       'ColorDefaultIcon',
+      'DefaultMarkerIcon',
       'MarkerAnimation',
       'MarkerTilingOptions',
       'PolygonManager',
@@ -189,7 +190,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   ...PROVIDER_IMPORTS,
   {
     source: '@mapconductor/react-geojson',
-    values: ['GeoJSONLayer', 'GeoJSONLayerState'],
+    values: ['GeoJSONLayer', 'GeoJSONLayerState', 'colorArgb'],
     types: ['GeoJSONFeatureData'],
   },
   {

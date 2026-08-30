@@ -5,7 +5,7 @@ const doc: SamplePageDoc = {
   <Markers states={markers} />
   {selectedMarkers.map(marker => (
     <InfoBubble key={marker.id} marker={marker}>
-      {marker.extra}
+      {marker.extra as string}
     </InfoBubble>
   ))}
 </MapViewContainer>`,

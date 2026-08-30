@@ -5,8 +5,11 @@ const doc: SamplePageDoc = {
   <GeoJSONLayer state={layer} features={features} />
 </MapViewContainer>`,
   state: `const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
-const style = { fillColor: '#2563eb', fillOpacity: 0.35 };
-const layer = useMemo(() => new GeoJSONLayerState({ id: 'places' }), []);`,
+const layer = useMemo(() => new GeoJSONLayerState({
+  fillColor: colorArgb(127, 0x3b, 0xb2, 0xd0),
+  strokeColor: colorArgb(255, 0x1d, 0x70, 0x82),
+  strokeWidth: 2,
+}), []);`,
   explanation: {
     en: [
       'Load GeoJSON features and render them with one provider-independent layer style.',
