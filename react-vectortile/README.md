@@ -1,10 +1,13 @@
 # @mapconductor/react-vectortile
 
-Draws a MapLibre vector style on any MapConductor backend, by rendering it to
-raster tiles in the browser and serving them through the SDK's local tile
-server. The backend only ever sees an ordinary raster layer — which is what
-makes this work on Google Maps, MapKit, Cesium, OpenLayers and the rest, none of
-which can render a vector style themselves.
+Renders a MapLibre vector style as raster tiles, so any MapConductor backend can
+display one — including the several that cannot read a vector style at all
+(Google Maps, MapKit, HERE, ArcGIS, Cesium).
+
+This package is a thin React component. The renderer itself is
+[`@mapconductor/vectortile`](../vectortile), which has **no framework
+dependency and no runtime dependencies**; use that directly from Vue, Svelte, or
+plain JavaScript.
 
 ```tsx
 import { VectorTileLayer } from '@mapconductor/react-vectortile';
@@ -18,19 +21,37 @@ import { VectorTileLayer } from '@mapconductor/react-vectortile';
 </MapView>;
 ```
 
-## Notes
+## Props
 
-- **Rendering runs in a Web Worker**, so a viewport's worth of tiles does not
-  stall the map. A 12-tile burst blocks the main thread for ~5 ms; rendering
-  in-process blocks it for the full render time.
-- **The tile service worker must be reachable** at `/tile-sw.js`, the same
-  requirement `@mapconductor/react-heatmap` has. `VectorTileLayer` registers it
-  and waits for it to take control before serving.
-- **Symbol layers are not drawn.** Label placement needs collision detection
-  that stays consistent across tile boundaries, which per-tile rendering cannot
-  do. `onDiagnostics` reports this and anything else about the style worth
-  knowing — a style this renderer cannot use says so rather than silently
-  producing blank tiles.
-- The renderer itself is a Rust core shared with the Android and iOS modules,
-  vendored under `vendor/`. It is built and synced from the
-  `mapconductor-vectortile` repo; do not edit it here.
+| prop | default | |
+| --- | --- | --- |
+| `style` | — | A `style.json` URL, its raw text, or the parsed object. |
+| `tileSize` | `512` | Output tile size in pixels. |
+| `opacity` | `1` | |
+| `visible` | `true` | |
+| `maxZoom` | `22` | |
+| `headers` | — | Sent with every source tile request — auth tokens, API keys. |
+| `onDiagnostics` | — | Reasons the style may not render as intended. |
+
+## Restyling
+
+Passing a new `style` recolours in place: the vector tiles already fetched are
+reused and only the rasterisation is redone, so a palette change costs no
+network traffic. `examples/basic` has a page that does this with colour pickers.
+
+`style` is compared by content, not object identity, so building it inline —
+which is what a colour picker does — is safe.
+
+## Requirements
+
+The tile service worker must be reachable at `/tile-sw.js`, the same requirement
+`@mapconductor/react-heatmap` has. `VectorTileLayer` registers it and waits for
+it to control the page before requesting a tile. Service workers need a secure
+context: `localhost` over plain HTTP is fine, but LAN access needs HTTPS.
+
+## Limits
+
+Symbol layers are not drawn — placing labels without collisions requires seeing
+what neighbouring tiles placed, which a tile rendered on its own cannot know.
+`onDiagnostics` reports this along with anything else about the style that will
+not render as intended.

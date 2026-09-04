@@ -27,6 +27,7 @@ import polygonGeodesic from './pages/polygon-geodesic';
 import polygonHole from './pages/polygon-hole';
 import groundImage from './pages/ground-image';
 import rasterLayer from './pages/raster-layer';
+import vectorTile from './pages/vector-tile';
 import infoBubbleSimple from './pages/info-bubble-simple';
 import infoBubbleStyled from './pages/info-bubble-styled';
 import infoBubbleMultiple from './pages/info-bubble-multiple';
@@ -61,6 +62,7 @@ const DOCUMENTATION: Record<string, SamplePageDoc> = {
   'polygon-hole': polygonHole,
   'ground-image': groundImage,
   'raster-layer': rasterLayer,
+  'vector-tile': vectorTile,
   'info-bubble-simple': infoBubbleSimple,
   'info-bubble-styled': infoBubbleStyled,
   'info-bubble-multiple': infoBubbleMultiple,

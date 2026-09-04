@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { TileServerRegistry, createRasterLayerState, TileScheme } from '@mapconductor/js-sdk-core';
 import { RasterLayer } from '@mapconductor/js-sdk-react';
-import { VectorTileProvider } from '../vendor/dist/index.js';
+import { VectorTileProvider } from '@mapconductor/vectortile';
 
 export interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
@@ -32,6 +32,9 @@ export interface VectorTileLayerProps {
  * Rendering runs in a Web Worker, so a viewport's worth of tiles does not stall
  * the map. Symbol layers are not drawn.
  *
+ * Changing `style` recolours in place rather than rebuilding: the vector tiles
+ * already fetched are reused, so only the rasterisation is redone.
+ *
  * ```tsx
  * <VectorTileLayer style="https://example.com/style.json" opacity={0.9} />
  * ```
@@ -53,6 +56,23 @@ export function VectorTileLayer({
     const providerRef = useRef<VectorTileProvider | null>(null);
     const [template, setTemplate] = useState<string | null>(null);
 
+    // Restyling keys off content, not object identity. A caller that builds its
+    // style inline — which is exactly what a colour picker does — produces a new
+    // object every render, and keying off identity would rerender the whole map
+    // on every unrelated state change.
+    const styleKey = useMemo(
+        () => (typeof style === 'string' ? style : JSON.stringify(style)),
+        [style],
+    );
+    // Read inside effects that must not re-run when the style changes.
+    const styleRef = useRef(style);
+    styleRef.current = style;
+
+    // Bumped on every restyle and threaded into the tile URL. Without it the
+    // new template is byte-identical to the old one, so the map serves the
+    // raster tiles it already holds and nothing appears to change.
+    const [styleVersion, setStyleVersion] = useState(0);
+
     // The service worker has to be controlling the page before any tile request
     // is made, otherwise the first requests 404 before the route exists.
     useEffect(() => {
@@ -63,7 +83,7 @@ export function VectorTileLayer({
             await tileServer.waitForController();
 
             const provider = await VectorTileProvider.create({
-                style,
+                style: styleRef.current,
                 tileSize,
                 headers,
                 onWarning: (message: string) => onDiagnostics?.([message]),
@@ -74,7 +94,7 @@ export function VectorTileLayer({
             }
             providerRef.current = provider;
             if (provider.diagnostics.length > 0) onDiagnostics?.(provider.diagnostics);
-            setTemplate(provider.attachTo(tileServer, routeId));
+            setTemplate(provider.attachTo(tileServer, routeId, '0'));
         })().catch((error: unknown) => {
             onDiagnostics?.([`style could not be loaded: ${String(error)}`]);
         });
@@ -85,10 +105,51 @@ export function VectorTileLayer({
             providerRef.current?.dispose();
             providerRef.current = null;
         };
+        // `style` is handled by the restyle effect below, not by rebuilding.
         // `headers` and `onDiagnostics` are deliberately not dependencies: a new
         // object identity each render would tear down and rebuild the renderer.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [routeId, tileServer, style, tileSize]);
+    }, [routeId, tileServer, tileSize]);
+
+    // Restyle in place. The vector tiles are unchanged — only the paint applied
+    // to them — so this costs a re-rasterise and no network traffic.
+    const appliedStyleKey = useRef<string | null>(null);
+    useEffect(() => {
+        const provider = providerRef.current;
+        if (!provider || !template) return;
+        // The boot effect already applied whatever style was current then.
+        if (appliedStyleKey.current === null) {
+            appliedStyleKey.current = styleKey;
+            return;
+        }
+        if (appliedStyleKey.current === styleKey) return;
+        appliedStyleKey.current = styleKey;
+
+        let cancelled = false;
+        provider
+            .setStyle(styleRef.current)
+            .then((diagnostics) => {
+                if (cancelled) return;
+                if (diagnostics.length > 0) onDiagnostics?.(diagnostics);
+                setStyleVersion((version) => version + 1);
+            })
+            .catch((error: unknown) => {
+                onDiagnostics?.([`style could not be applied: ${String(error)}`]);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [styleKey, template]);
+
+    // Re-derive the template when the style version moves, so the raster layer
+    // points at a URL the map has not cached.
+    useEffect(() => {
+        const provider = providerRef.current;
+        if (!provider || styleVersion === 0) return;
+        setTemplate(provider.attachTo(tileServer, routeId, String(styleVersion)));
+    }, [styleVersion, tileServer, routeId]);
 
     const state = useMemo(() => {
         if (!template) return null;
@@ -104,8 +165,8 @@ export function VectorTileLayer({
             opacity,
             visible,
         });
-        // Rebuilt only when the route changes; opacity and visibility are
-        // pushed onto the existing state below.
+        // Rebuilt when the route or the style version changes; opacity and
+        // visibility are pushed onto the existing state below.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [template, routeId, tileSize, maxZoom]);
 

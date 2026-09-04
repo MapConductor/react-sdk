@@ -1,0 +1,40 @@
+{
+  "name": "@mapconductor/vectortile",
+  "version": "0.1.0",
+  "description": "MapLibre vector styles rendered to raster tiles in the browser, via a Rust/wasm core. No framework dependency.",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./wasm": "./pkg/mvt_render_wasm_bg.wasm",
+    "./worker": {
+      "types": "./dist/worker.d.ts",
+      "import": "./dist/worker.js"
+    }
+  },
+  "files": [
+    "dist",
+    "pkg",
+    "README.md"
+  ],
+  "keywords": [
+    "maps",
+    "vector-tiles",
+    "maplibre",
+    "mvt",
+    "raster-tiles",
+    "wasm"
+  ],
+  "author": "MapConductor",
+  "license": "Apache-2.0",
+  "sideEffects": false,
+  "scripts": {
+    "build": "echo 'built in mapconductor-vectortile; run scripts/sync-sdk.sh'",
+    "test": "echo 'covered by the harness in mapconductor-vectortile'"
+  }
+}
