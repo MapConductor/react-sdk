@@ -30,6 +30,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'marker-animation', label: { en: 'Marker Animation', ja: 'マーカーアニメーション', 'es-419': 'Animación de marcadores', de: 'Marker-Animation', th: 'แอนิเมชันมาร์กเกอร์', hi: 'मार्कर एनिमेशन' }, group: 'Marker' },
   { id: 'post-office', label: { en: 'Post Office', ja: '郵便局', 'es-419': 'Oficinas postales', de: 'Postfilialen', th: 'ที่ทำการไปรษณีย์', hi: 'डाकघर' }, group: 'Marker', unavailableProviders: ['google-maps-3d'] },
   { id: 'post-office-cluster', label: { en: 'Post Office Cluster', ja: '郵便局クラスタリング', 'es-419': 'Agrupación de oficinas postales', de: 'Postfilialen-Clustering', th: 'การจัดกลุ่มที่ทำการไปรษณีย์', hi: 'डाकघरों की क्लस्टरिंग' }, group: 'Marker' },
+  { id: 'street-tree', label: { en: 'Street Trees', ja: '街路樹', 'es-419': 'Árboles urbanos', de: 'Straßenbäume', th: 'ต้นไม้ริมถนน', hi: 'सड़क के पेड़' }, group: 'Marker', unavailableProviders: ['google-maps-3d'] },
   { id: 'circle', label: { en: 'Circle', ja: '円', 'es-419': 'Círculo', de: 'Kreis', th: 'วงกลม', hi: 'वृत्त' }, group: 'Shape' },
   { id: 'polyline', label: { en: 'Polyline', ja: 'ポリライン', 'es-419': 'Polilínea', de: 'Polylinie', th: 'โพลีไลน์', hi: 'पॉलीलाइन' }, group: 'Shape' },
   { id: 'polyline-click', label: { en: 'Polyline Click', ja: 'ポリラインのクリック', 'es-419': 'Clic en polilínea', de: 'Polylinien-Klick', th: 'การคลิกโพลีไลน์', hi: 'पॉलीलाइन क्लिक' }, group: 'Shape' },
@@ -90,6 +91,7 @@ export function getProviderLabel(provider: string | undefined): string {
     case 'maptiler': return 'MapTiler';
     case 'longdo': return 'Longdo';
     case 'mappls': return 'Mappls';
+    case 'deckgl': return 'deck.gl';
     default: return 'MapLibre';
   }
 }

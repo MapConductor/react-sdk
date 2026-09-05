@@ -38,6 +38,7 @@ const CameraSyncPage = lazy(() => import('./pages/map/camerasync/CameraSyncPage'
 const MarkerAnimationPage = lazy(() => import('./pages/marker/animation/MarkerAnimationPage').then(m => ({ default: m.MarkerAnimationPage })));
 const PostOfficePage = lazy(() => import('./pages/marker/postoffice/PostOfficePage').then(m => ({ default: m.PostOfficePage })));
 const PostOfficeClusterPage = lazy(() => import('./pages/marker/postofficecluster/PostOfficeClusterPage').then(m => ({ default: m.PostOfficeClusterPage })));
+const StreetTreePage = lazy(() => import('./pages/marker/streettree/StreetTreePage').then(m => ({ default: m.StreetTreePage })));
 const PolygonClickPage = lazy(() => import('./pages/polygon/click/PolygonClickPage').then(m => ({ default: m.PolygonClickPage })));
 const PolygonGeodesicPage = lazy(() => import('./pages/polygon/geodesic/PolygonGeodesicPage').then(m => ({ default: m.PolygonGeodesicPage })));
 const PolygonHolePage = lazy(() => import('./pages/polygon/hole/PolygonHolePage').then(m => ({ default: m.PolygonHolePage })));
@@ -102,6 +103,7 @@ function pageContent(page: string | undefined) {
     case 'info-bubble-multiple': return <MultipleBubblesPage />;
     case 'info-bubble-rich': return <RichContentBubblePage />;
     case 'post-office-cluster': return <PostOfficeClusterPage />;
+    case 'street-tree': return <StreetTreePage />;
     case 'heatmap-layer': return <HeatmapLayerPage />;
     case 'geojson-basic': return <BasicGeoJSONPage />;
     case 'geojson-layer': return <GeoJSONLayerPage />;
@@ -121,7 +123,7 @@ function ProviderPageRoute() {
   if (requestedPage === 'camera-sync' || requestedPage === 'hello-map') {
     return <Navigate to={samplePath(provider ?? 'maplibre', requestedPage, language)} replace />;
   }
-  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here' && provider !== 'tomtom' && provider !== 'maptiler' && provider !== 'longdo' && provider !== 'mappls') {
+  if (provider !== 'maplibre' && provider !== 'maplibre-3d' && provider !== 'mapbox' && provider !== 'leaflet' && provider !== 'openlayers' && provider !== 'google-maps' && provider !== 'google-maps-3d' && provider !== 'arcgis' && provider !== 'arcgis-3d' && provider !== 'mapkit' && provider !== 'azuremaps' && provider !== 'cesium' && provider !== 'here' && provider !== 'tomtom' && provider !== 'maptiler' && provider !== 'longdo' && provider !== 'mappls' && provider !== 'deckgl') {
     return <Navigate to={`/maplibre/${DEFAULT_SAMPLE_PAGE}/${language}`} replace />;
   }
 
