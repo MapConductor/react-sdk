@@ -27,7 +27,9 @@ const TILT_LIMIT = 89;
 // (`TiltMapPageViewModel.kt` / `TiltMapPageViewModel.swift`). The three pages are
 // meant to be compared side by side, so the camera and the marker layout must match.
 //
-// The Eiffel Tower, looking west (bearing 270). A non-zero bearing is deliberate:
+// The Eiffel Tower with the map turned 270 degrees clockwise, so the camera looks
+// east (bearing is the map rotation; the camera heading is its opposite).
+// A non-zero bearing is deliberate:
 // it is what exposed a driver bug where marker anchors were rotated with the map
 // instead of the screen, and that only shows up when the map is not north-up.
 const INIT_CAMERA = { lat: 48.858140690309604, lng: 2.2945027576710344, zoom: 17, bearing: 270 };
