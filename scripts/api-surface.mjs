@@ -50,6 +50,7 @@ const PACKAGES = [
   "react-for-maptiler",
   "react-for-longdo",
   "react-for-mappls",
+  "react-for-deckgl",
   "reactnative-for-googlemaps",
   "reactnative-for-maplibre",
   "reactnative-for-arcgis",
@@ -61,6 +62,7 @@ const PACKAGES = [
   "react-kml",
   "react-heatmap",
   "react-marker-clustering",
+  "react-vectortile",
 ];
 
 /**

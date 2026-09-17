@@ -144,12 +144,12 @@ export function VectorTileLayerPage() {
                               hi: `स्टाइल लोड नहीं हो सकी: ${failure}`,
                           })
                         : t({
-                              en: 'Recolouring reuses the vector tiles already fetched — only the rasterisation is redone. Labels are not drawn.',
-                              ja: '色の変更は取得済みのベクタータイルを再利用し、ラスタライズだけをやり直します。ラベルは描画されません。',
-                              'es-419': 'Recolorear reutiliza las teselas vectoriales ya descargadas: solo se rehace la rasterización. Las etiquetas no se dibujan.',
-                              de: 'Das Umfärben nutzt die bereits geladenen Vektorkacheln weiter — nur die Rasterung wird wiederholt. Beschriftungen werden nicht gezeichnet.',
-                              th: 'การเปลี่ยนสีใช้เวกเตอร์ไทล์ที่ดาวน์โหลดไว้แล้ว โดยทำแรสเตอร์ใหม่เท่านั้น ป้ายชื่อจะไม่ถูกวาด',
-                              hi: 'रंग बदलने पर पहले से लाई गई वेक्टर टाइलें ही दोबारा उपयोग होती हैं — केवल रैस्टराइज़ेशन दोहराया जाता है। लेबल नहीं बनाए जाते।',
+                              en: 'Recolouring reuses the vector tiles already fetched — only the rasterisation is redone. Labels ride on a second, transparent layer above the ground.',
+                              ja: '色の変更は取得済みのベクタータイルを再利用し、ラスタライズだけをやり直します。ラベルは地物の上に重なる透明なレイヤーに描かれます。',
+                              'es-419': 'Recolorear reutiliza las teselas vectoriales ya descargadas: solo se rehace la rasterización. Las etiquetas van en una segunda capa transparente sobre el terreno.',
+                              de: 'Das Umfärben nutzt die bereits geladenen Vektorkacheln weiter — nur die Rasterung wird wiederholt. Beschriftungen liegen auf einer zweiten, transparenten Ebene darüber.',
+                              th: 'การเปลี่ยนสีใช้เวกเตอร์ไทล์ที่ดาวน์โหลดไว้แล้ว โดยทำแรสเตอร์ใหม่เท่านั้น ป้ายชื่อวาดบนเลเยอร์โปร่งใสอีกชั้นที่ซ้อนอยู่ด้านบน',
+                              hi: 'रंग बदलने पर पहले से लाई गई वेक्टर टाइलें ही दोबारा उपयोग होती हैं — केवल रैस्टराइज़ेशन दोहराया जाता है। लेबल ऊपर एक अलग पारदर्शी लेयर पर बनते हैं।',
                           })}
                 </p>
                 {diagnostics.length > 0 ? (

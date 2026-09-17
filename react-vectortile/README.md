@@ -49,9 +49,31 @@ The tile service worker must be reachable at `/tile-sw.js`, the same requirement
 it to control the page before requesting a tile. Service workers need a secure
 context: `localhost` over plain HTTP is fine, but LAN access needs HTTPS.
 
+## How it draws
+
+Two raster layers are mounted, not one:
+
+- the **ground** — fills, lines and circles, the half no font arriving can change
+- a transparent **label overlay** above it, replaced on its own when glyph ranges land
+
+To the map and the user they read as one map. The halves render in parallel, and
+a glyph range landing redraws only the transparent one, so a label appearing
+never blanks the map beneath it. Replacing a raster layer's URL is
+remove-then-add, so the replacement is mounted alongside its predecessor and the
+old one dropped a moment later — a handover rather than a gap.
+
+Attribution is handled for you: the credits the style's sources ask for are
+attached to both layers, so they appear in the map's attribution overlay without
+the host writing any UI and disappear when the layer unmounts. A basemap drawing
+OpenStreetMap requires the credit, so this is not cosmetic.
+
 ## Limits
 
-Symbol layers are not drawn — placing labels without collisions requires seeing
-what neighbouring tiles placed, which a tile rendered on its own cannot know.
-`onDiagnostics` reports this along with anything else about the style that will
-not render as intended.
+`onDiagnostics` reports layer types the renderer will not draw, sources it
+cannot fetch, and Mapbox `imports` — anything about the style that will not
+render as intended. The failure mode that matters is a blank tile, so it is
+worth surfacing.
+
+## License
+
+Apache License 2.0. See [LICENSE](./LICENSE).
