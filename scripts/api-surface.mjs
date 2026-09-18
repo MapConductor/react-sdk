@@ -25,7 +25,7 @@
 // 同じ理由で、ここでも除外はこのスクリプトの中だけで行う。
 
 import { execFileSync } from "node:child_process";
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -62,8 +62,63 @@ const PACKAGES = [
   "react-kml",
   "react-heatmap",
   "react-marker-clustering",
+  "vectortile",
   "react-vectortile",
+  "react-icons-jp",
+  "react-icons-us",
+  "react-icons-weather",
 ];
+
+/**
+ * 記録しないパッケージと、その理由。
+ *
+ * ここに載せるのは「凍結すると本来の用途を邪魔する」ものだけ。
+ * 単に面倒だから外す、はしない。
+ */
+const UNGATED = {
+  "react-for-template": "雛形。新しいプロバイダの出発点として丸ごと書き換える前提",
+  "reactnative-for-template": "雛形。新しいプロバイダの出発点として丸ごと書き換える前提",
+};
+
+/**
+ * PACKAGES にも UNGATED にも載っていない、publish されるワークスペースを返す。
+ *
+ * [PACKAGES] は手書きなので、パッケージを足して登録を忘れるとゲートは**そのパッケージを
+ * 黙って素通りする。** 落ちないので気づけない、という一番たちの悪い壊れ方をする。
+ * `reactnative-for-longdo` で一度起きていて、`vectortile` /
+ * `react-icons-{jp,us,weather}` / `react-vectortile` でも起きていた。
+ *
+ * private なワークスペース（`examples/*` と雛形）は対象外。publish しないものに
+ * アプリ開発者向けの凍結 API は無い。
+ */
+function coverageGaps() {
+  const manifest = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  const candidates = new Set();
+
+  for (const entry of manifest.workspaces ?? []) {
+    const pattern = entry.replace(/\/$/, "");
+    if (!pattern.endsWith("/*")) {
+      candidates.add(pattern);
+      continue;
+    }
+    // `examples/*` のような 1 段のグロブだけ展開できれば足りる。
+    const parent = pattern.slice(0, -2);
+    if (!existsSync(join(ROOT, parent))) continue;
+    for (const child of readdirSync(join(ROOT, parent), { withFileTypes: true })) {
+      if (child.isDirectory()) candidates.add(`${parent}/${child.name}`);
+    }
+  }
+
+  const gaps = [];
+  for (const pkg of candidates) {
+    if (PACKAGES.includes(pkg) || pkg in UNGATED) continue;
+    const packageJson = join(ROOT, pkg, "package.json");
+    if (!existsSync(packageJson)) continue;
+    if (JSON.parse(readFileSync(packageJson, "utf8")).private === true) continue;
+    gaps.push(pkg);
+  }
+  return gaps.sort();
+}
 
 /**
  * `/** @internal *\/` が付いた宣言を落とす。
@@ -145,9 +200,22 @@ function main() {
     existsSync(join(ROOT, pkg, "package.json")),
   );
 
-  build(packages);
-
   let failed = false;
+
+  // 登録漏れは、記録済みパッケージがどれだけ緑でも見つからない。先に見る。
+  const gaps = coverageGaps();
+  if (gaps.length > 0) {
+    for (const pkg of gaps) {
+      console.error(`  ! ${pkg} が PACKAGES にありません。ゲートは素通りしています`);
+    }
+    console.error(
+      "    記録するなら PACKAGES へ、記録しないなら UNGATED へ理由付きで足してください。",
+    );
+    // dump は「変更を受け入れる」操作なので、ここで止めると直す手が塞がる。
+    if (action === "check") failed = true;
+  }
+
+  build(packages);
   for (const pkg of packages) {
     process.stdout.write(`==> ${pkg}\n`);
     let actual;
