@@ -7,16 +7,24 @@ import { ImageIcon } from '@mapconductor/js-sdk-core';
  * generation rather than drawing, and there are 144,183 markers against a
  * hundred or so species.
  */
-export function createSpeciesIcons(count: number, sizePx = 14): ImageIcon[] {
+/**
+ * `sizeCssPx` は **CSS ピクセル**。タイルは 256px の canvas に描かれて 256 CSS px
+ * として表示されるので、ここは devicePixelRatio を掛けない -- 掛けると画面が
+ * 精細なほど大きくなってしまう。
+ *
+ * ios-sdk はポイント、android-sdk は dp で同じ 10 を使う。android は一時期ここだけ
+ * 生ピクセルで作っていて、端末が精細なほど小さく見えていた。
+ */
+export function createSpeciesIcons(count: number, sizeCssPx = 10): ImageIcon[] {
   return Array.from({ length: count }, (_unused, index) => {
     const canvas = document.createElement('canvas');
-    canvas.width = sizePx;
-    canvas.height = sizePx;
+    canvas.width = sizeCssPx;
+    canvas.height = sizeCssPx;
     const context = canvas.getContext('2d');
     if (context) {
-      const radius = sizePx / 2 - 1;
+      const radius = sizeCssPx / 2 - 1;
       context.beginPath();
-      context.arc(sizePx / 2, sizePx / 2, radius, 0, Math.PI * 2);
+      context.arc(sizeCssPx / 2, sizeCssPx / 2, radius, 0, Math.PI * 2);
       context.fillStyle = speciesColour(index, count);
       context.fill();
       context.strokeStyle = 'rgba(0, 0, 0, 0.43)';
@@ -24,7 +32,7 @@ export function createSpeciesIcons(count: number, sizePx = 14): ImageIcon[] {
       context.stroke();
     }
     return new ImageIcon(canvas, {
-      iconSize: sizePx,
+      iconSize: sizeCssPx,
       anchor: { x: 0.5, y: 0.5 },
       infoAnchor: { x: 0.5, y: 0 },
     });
