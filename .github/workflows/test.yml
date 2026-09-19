@@ -1,0 +1,55 @@
+name: Test
+
+# ユニットテストのゲート。
+#
+# これまで CI は api-surface.yml（公開 API の凍結）と deploy 系だけで、
+# **テストを走らせるワークフローが 1 つも無かった。** 凍結ゲートが見るのは
+# 型の形だけなので、シグネチャが同じまま中身が壊れる変更は素通りする。
+#
+# ブラウザを要する検証はここには入れない。`npm run smoke` は実 Chrome で
+# 全プロバイダを描画するもので、API キーと数分の実行時間を要する。CI に載せる
+# なら別ワークフロー・別トリガにすること。
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, ready_for_review]
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    name: Unit tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # ワークスペース横断。各パッケージの `pretest` が自分の dist を作るので、
+      # ここで先に build する必要はない。
+      - name: Test
+        run: npm test
+
+      - name: Lint
+        run: npm run lint
