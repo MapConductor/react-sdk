@@ -117,7 +117,9 @@ export class DeckGLRasterLayerRenderer {
               const request = { x: index.x, y: index.y, z: index.z };
               const dataUrl = server.handleFetchDataUrl(local.routeId, request);
               if (dataUrl) return loadDataUrl(dataUrl);
-              return toImage(await server.handleFetch(local.routeId, request));
+              // Throws on a failed render, which deck.gl reports as a failed
+              // tile and retries; an empty spot arrives as a transparent tile.
+              return toImage(await server.fetchTileOrThrow(local.routeId, request));
             }
             const url = template
               .replace(/\{z\}/g, String(index.z))
