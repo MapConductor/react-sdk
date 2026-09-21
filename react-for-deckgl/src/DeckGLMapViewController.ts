@@ -2,8 +2,6 @@ import {
   BaseMapViewController,
   MapUISettingsDiagnostics,
   buildVisibleRegion,
-  createGeoPoint,
-  createMapCameraPosition,
   isEmptyCameraRestriction,
   type CameraRestriction,
   type CircleCapable,
@@ -23,6 +21,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { WebMercatorViewport } from '@deck.gl/core';
 import { DeckGLMap } from './DeckGLMap';
+import { toDeckViewState, toMapCameraPosition } from './MapCameraPosition';
 import { DeckGLMapViewHolder } from './DeckGLMapViewHolder';
 import { DeckGLMarkerController } from './marker/DeckGLMarkerController';
 import { DeckGLMarkerEventController } from './marker/DeckGLMarkerEventController';
@@ -69,6 +68,12 @@ export class DeckGLMapViewController
   private destroyed = false;
   private moving = false;
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
+  /**
+   * 直近にアプリが要求した tilt。**負 tilt は deck.gl 側に残らない**ので、
+   * 見上げを要求されていたことはこの値でしか判別できない
+   * （{@link toMapCameraPosition} 参照）。
+   */
+  private logicalTiltHint: number | null;
 
   constructor(
     readonly holder: DeckGLMapViewHolder,
@@ -78,9 +83,11 @@ export class DeckGLMapViewController
     private readonly polygonController: DeckGLPolygonController,
     private readonly groundImageController: DeckGLGroundImageController,
     private readonly rasterLayerController: DeckGLRasterLayerController,
+    initialTilt: number | null = null,
   ) {
     super();
     this.map = holder.map;
+    this.logicalTiltHint = initialTilt;
 
     // ★ 登録を忘れると composition もクリックのカスケードも黙って効かなくなる。
     this.registerOverlayController(this.markerController);
@@ -182,20 +189,21 @@ export class DeckGLMapViewController
 
   // ── カメラ ─────────────────────────────────────────────────────────────────
 
+  /**
+   * **生ズームの統一ズームへの変換と bearing の符号反転を忘れない。** ズームがずれると
+   * 当たり判定の許容量が実際の縮尺と食い違い、「線や円をタップしても反応しない」形で
+   * 表面化する。変換はどちらも {@link toMapCameraPosition} が持つ。
+   */
   getCameraPosition(): MapCameraPosition {
     const viewState = this.map.getViewState();
-    return createMapCameraPosition({
-      position: createGeoPoint({
-        latitude: viewState.latitude,
-        longitude: viewState.longitude,
-      }),
-      // **生ズームを統一ズームへ直すのを忘れない。** ずれると当たり判定の許容量が
-      // 実際の縮尺と食い違い、「線や円をタップしても反応しない」形で表面化する。
-      zoom: this.zoomConverter.toUnifiedZoom(viewState.zoom, viewState.latitude),
+    return toMapCameraPosition({
+      longitude: viewState.longitude,
+      latitude: viewState.latitude,
+      zoom: viewState.zoom,
       bearing: viewState.bearing,
-      tilt: viewState.pitch,
-      visibleRegion: this.getVisibleRegion(),
-    });
+      pitch: viewState.pitch,
+      logicalTiltHint: this.logicalTiltHint,
+    }).copy({ visibleRegion: this.getVisibleRegion() });
   }
 
   /** レイアウト前（幅か高さが 0）は null。他プロバイダと同じ契約。 */
@@ -204,25 +212,17 @@ export class DeckGLMapViewController
   }
 
   async moveCamera(position: MapCameraPosition): Promise<boolean> {
-    this.map.setViewState(this.toDeckViewState(position));
+    this.logicalTiltHint = position.tilt;
+    this.map.setViewState(toDeckViewState(position));
     return true;
   }
 
   async animateCamera(position: MapCameraPosition, durationMillis: number): Promise<boolean> {
-    this.map.setViewState(this.toDeckViewState(position), {
+    this.logicalTiltHint = position.tilt;
+    this.map.setViewState(toDeckViewState(position), {
       durationMillis: durationMillis > 0 ? durationMillis : 500,
     });
     return true;
-  }
-
-  private toDeckViewState(position: MapCameraPosition) {
-    return {
-      longitude: position.position.longitude,
-      latitude: position.position.latitude,
-      zoom: this.zoomConverter.toNativeZoom(position.zoom, position.position.latitude),
-      bearing: position.bearing,
-      pitch: position.tilt,
-    };
   }
 
   async fitBounds(bounds: GeoRectBounds, padding: number): Promise<boolean> {

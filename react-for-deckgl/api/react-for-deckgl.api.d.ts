@@ -1,54 +1,9 @@
-import { MapDesignTypeInterface, AttributionRule, Offset, GeoPointInterface, GeoPoint, MapViewStateInterface, MapViewState, MapCameraPosition, MapViewControllerInterface, MapViewBaseProps, GeoRectBounds, MarkerTilingOptions, MapViewHolderBase, BitmapIcon, AbstractMarkerOverlayRenderer, AddParams, ChangeParams, MarkerEntity, AbstractMarkerController, RasterLayerState, MarkerState, CircleController, AbstractCircleOverlayRenderer, CircleState, CircleEntity, PolylineController, AbstractPolylineOverlayRenderer, PolylineState, PolylineEntity, PolygonController, AbstractPolygonOverlayRenderer, PolygonState, PolygonEntity, GroundImageController, AbstractGroundImageOverlayRenderer, GroundImageState, GroundImageEntity, RasterLayerController, RasterHeaderSupport, RasterLayerAddParams, RasterLayerChangeParams, RasterLayerEntity, BaseMapViewController, MarkerCapable, CircleCapable, PolylineCapable, PolygonCapable, GroundImageCapable, RasterLayerCapable, MapUISettings, CameraRestriction, OnMarkerEventHandler, MarkerAnimationOverlayHost, MapConfig, MapProvider } from '@mapconductor/js-sdk-core';
+import { DeckGLMapViewStateInterface, DeckGLMapDesignType } from './state.js';
+export { DeckGLDesign, DeckGLDesignParams, DeckGLMapViewState, DeckGLMapViewStateParams, useDeckGLMapViewState } from './state.js';
 import * as react from 'react';
 import { CSSProperties, ReactNode } from 'react';
+import { Offset, GeoPointInterface, GeoPoint, MapViewBaseProps, GeoRectBounds, MarkerTilingOptions, MapViewHolderBase, BitmapIcon, AbstractMarkerOverlayRenderer, AddParams, ChangeParams, MarkerEntity, AbstractMarkerController, RasterLayerState, MarkerState, CircleController, AbstractCircleOverlayRenderer, CircleState, CircleEntity, PolylineController, AbstractPolylineOverlayRenderer, PolylineState, PolylineEntity, PolygonController, AbstractPolygonOverlayRenderer, PolygonState, PolygonEntity, GroundImageController, AbstractGroundImageOverlayRenderer, GroundImageState, GroundImageEntity, RasterLayerController, RasterHeaderSupport, RasterLayerAddParams, RasterLayerChangeParams, RasterLayerEntity, MapCameraPosition, BaseMapViewController, MapViewControllerInterface, MarkerCapable, CircleCapable, PolylineCapable, PolygonCapable, GroundImageCapable, RasterLayerCapable, MapUISettings, CameraRestriction, OnMarkerEventHandler, MarkerAnimationOverlayHost, MapConfig, MapProvider } from '@mapconductor/js-sdk-core';
 import { LayersList, Layer, Deck, MapView, PickingInfo, WebMercatorViewport } from '@deck.gl/core';
-
-/**
- * deck.gl のベースマップ指定。
- *
- * deck.gl は「レイヤーを描く」ライブラリで、地図そのものは持たない。ベースマップは
- * このドライバーが `TileLayer` + `BitmapLayer` でラスタタイルとして敷く。
- * したがってデザイン = タイル URL テンプレート、という Leaflet と同じ形になる。
- */
-interface DeckGLMapDesignType extends MapDesignTypeInterface<string> {
-    /** `{z}/{x}/{y}` を含むテンプレート。`null` ならベースマップを敷かない。 */
-    readonly tileUrl: string | null;
-    readonly tileSize: number;
-    readonly minZoom: number | null;
-    readonly maxZoom: number | null;
-    /** タイルの下に敷く色。タイル読み込み中に地の色が透けるのを防ぐ。 */
-    readonly backgroundColor: string | null;
-}
-interface DeckGLDesignParams {
-    id: string;
-    tileUrl: string | null;
-    tileSize?: number;
-    minZoom?: number | null;
-    maxZoom?: number | null;
-    backgroundColor?: string | null;
-    attributionRules?: readonly AttributionRule[];
-}
-declare class DeckGLDesign implements DeckGLMapDesignType {
-    readonly id: string;
-    readonly tileUrl: string | null;
-    readonly tileSize: number;
-    readonly minZoom: number | null;
-    readonly maxZoom: number | null;
-    readonly backgroundColor: string | null;
-    readonly attributionRules: readonly AttributionRule[];
-    constructor({ id, tileUrl, tileSize, minZoom, maxZoom, backgroundColor, attributionRules, }: DeckGLDesignParams);
-    /**
-     * 「同じ見た目か」の比較に使われる値。**id だけを返さないこと。**
-     * 同じ id で URL 違いのデザインへ差し替えたときに再読み込みが走らなくなる。
-     */
-    getValue(): string;
-    static readonly Standard: DeckGLDesign;
-    static readonly Satellite: DeckGLDesign;
-    static readonly Dark: DeckGLDesign;
-    static readonly Light: DeckGLDesign;
-    /** ベースマップ無し。deck.gl のレイヤーだけを見せたいとき。 */
-    static readonly None: DeckGLDesign;
-}
 
 /** deck.gl のネイティブなカメラ表現。**ズームは 512px ワールド基準**（統一ズーム − 1）。 */
 interface DeckGLViewState {
@@ -186,28 +141,6 @@ declare class DeckGLMap {
     getCanvas(): HTMLCanvasElement;
     destroy(): void;
 }
-
-interface DeckGLMapViewStateInterface extends MapViewStateInterface<DeckGLMapDesignType> {
-}
-interface DeckGLMapViewStateParams {
-    id?: string;
-    mapDesignType?: DeckGLMapDesignType;
-    cameraPosition?: MapCameraPosition;
-}
-/**
- * 残るのは 3 つだけ——`mapDesignType`・ホルダーの型・接続時の扱い。
- * カメラの保持・`moveCameraTo`・`fitBounds`・`uiSettings` はコアの
- * `MapViewState` が持つ。
- */
-declare class DeckGLMapViewState extends MapViewState<DeckGLMapDesignType> implements DeckGLMapViewStateInterface {
-    private _mapDesignType;
-    constructor({ id, mapDesignType, cameraPosition, }?: DeckGLMapViewStateParams);
-    get mapDesignType(): DeckGLMapDesignType;
-    set mapDesignType(value: DeckGLMapDesignType);
-    /** 接続時にカメラを動かさない。初期位置は `Deck` の生成時に渡してある。 */
-    setController(controller: MapViewControllerInterface | null): void;
-}
-declare function useDeckGLMapViewState(params?: DeckGLMapViewStateParams): DeckGLMapViewStateInterface;
 
 interface DeckGLMapViewProps extends MapViewBaseProps<DeckGLMapViewStateInterface> {
     maxZoom?: number;
@@ -432,7 +365,13 @@ declare class DeckGLMapViewController extends BaseMapViewController implements M
     private destroyed;
     private moving;
     private idleTimer;
-    constructor(holder: DeckGLMapViewHolder, markerController: DeckGLMarkerController, circleController: DeckGLCircleController, polylineController: DeckGLPolylineController, polygonController: DeckGLPolygonController, groundImageController: DeckGLGroundImageController, rasterLayerController: DeckGLRasterLayerController);
+    /**
+     * 直近にアプリが要求した tilt。**負 tilt は deck.gl 側に残らない**ので、
+     * 見上げを要求されていたことはこの値でしか判別できない
+     * （{@link toMapCameraPosition} 参照）。
+     */
+    private logicalTiltHint;
+    constructor(holder: DeckGLMapViewHolder, markerController: DeckGLMarkerController, circleController: DeckGLCircleController, polylineController: DeckGLPolylineController, polygonController: DeckGLPolygonController, groundImageController: DeckGLGroundImageController, rasterLayerController: DeckGLRasterLayerController, initialTilt?: number | null);
     getMap(): DeckGLMap;
     private installListeners;
     private scheduleIdle;
@@ -441,12 +380,16 @@ declare class DeckGLMapViewController extends BaseMapViewController implements M
     private setMarkerListener;
     private applyMarkerListener;
     protected dispatchMarkerTap(position: GeoPoint): boolean;
+    /**
+     * **生ズームの統一ズームへの変換と bearing の符号反転を忘れない。** ズームがずれると
+     * 当たり判定の許容量が実際の縮尺と食い違い、「線や円をタップしても反応しない」形で
+     * 表面化する。変換はどちらも {@link toMapCameraPosition} が持つ。
+     */
     getCameraPosition(): MapCameraPosition;
     /** レイアウト前（幅か高さが 0）は null。他プロバイダと同じ契約。 */
     private getVisibleRegion;
     moveCamera(position: MapCameraPosition): Promise<boolean>;
     animateCamera(position: MapCameraPosition, durationMillis: number): Promise<boolean>;
-    private toDeckViewState;
     fitBounds(bounds: GeoRectBounds, padding: number): Promise<boolean>;
     /**
      * deck.gl の `dragRotate` は**回転と傾斜を 1 つのハンドラで持つ**。
@@ -485,4 +428,4 @@ declare class DeckGLProvider extends MapProvider {
     destroy(): void;
 }
 
-export { type DeckGLConfig, type DeckGLControllerOptions, DeckGLDesign, type DeckGLDesignParams, DeckGLMap, type DeckGLMapDesignType, DeckGLMapView, DeckGLMapViewController, DeckGLMapViewHolder, type DeckGLMapViewProps, DeckGLMapViewState, type DeckGLMapViewStateInterface, type DeckGLMapViewStateParams, DeckGLProvider, type DeckGLViewState, useDeckGLMapViewState };
+export { type DeckGLConfig, type DeckGLControllerOptions, DeckGLMap, DeckGLMapDesignType, DeckGLMapView, DeckGLMapViewController, DeckGLMapViewHolder, type DeckGLMapViewProps, DeckGLMapViewStateInterface, DeckGLProvider, type DeckGLViewState };

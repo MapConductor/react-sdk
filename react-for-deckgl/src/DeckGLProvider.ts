@@ -8,6 +8,7 @@ import {
 import { BitmapLayer } from '@deck.gl/layers';
 import { TileLayer } from '@deck.gl/geo-layers';
 import { DeckGLLayerOrder, DeckGLMap, type DeckGLControllerOptions } from './DeckGLMap';
+import { toDeckViewState } from './MapCameraPosition';
 import { DeckGLMapViewController } from './DeckGLMapViewController';
 import { DeckGLMapViewHolder } from './DeckGLMapViewHolder';
 import type { DeckGLMapDesignType } from './DeckGLDesign';
@@ -59,6 +60,11 @@ export class DeckGLProvider extends MapProvider {
     const initial = config.initCameraPosition;
     const latitude = initial?.position.latitude ?? 0;
     const restrict = config.restrictBounds;
+    // 初期カメラも moveCamera と同じ変換を通す。ここだけ素の値を渡すと
+    // 「最初は見上げにならず、1 度動かすと直る」ことになる。
+    const initialViewState = initial
+      ? toDeckViewState(initial)
+      : { longitude: 0, latitude: 0, zoom: converter.toNativeZoom(0, 0), bearing: 0, pitch: 0 };
 
     let loaded = false;
     let notifyLoaded: (() => void) | null = null;
@@ -66,11 +72,7 @@ export class DeckGLProvider extends MapProvider {
     const map = new DeckGLMap({
       container,
       initialViewState: {
-        longitude: initial?.position.longitude ?? 0,
-        latitude,
-        zoom: converter.toNativeZoom(initial?.zoom ?? 0, latitude),
-        bearing: initial?.bearing ?? 0,
-        pitch: initial?.tilt ?? 0,
+        ...initialViewState,
         minZoom: config.minZoom != null ? converter.toNativeZoom(config.minZoom, latitude) : 0,
         maxZoom: config.maxZoom != null ? converter.toNativeZoom(config.maxZoom, latitude) : 20,
       },
@@ -102,6 +104,7 @@ export class DeckGLProvider extends MapProvider {
       new DeckGLPolygonController(new DeckGLPolygonRenderer(holder)),
       new DeckGLGroundImageController(new DeckGLGroundImageRenderer(holder)),
       new DeckGLRasterLayerController(new DeckGLRasterLayerRenderer(holder)),
+      initial?.tilt ?? null,
     );
 
     notifyLoaded = () => controller.notifyLoaded();

@@ -12,6 +12,16 @@ HERE, TomTom, Longdo, or Mappls.
 npm install @mapconductor/react-for-deckgl @mapconductor/js-sdk-core @mapconductor/js-sdk-react
 ```
 
+Two entry points:
+
+| Import | Contents |
+| --- | --- |
+| `@mapconductor/react-for-deckgl` | everything, including the map view — evaluates deck.gl |
+| `@mapconductor/react-for-deckgl/state` | `DeckGLDesign` and the view state only — does **not** evaluate deck.gl |
+
+See [the Longdo note](#not-compatible-with-react-for-longdo-on-the-same-page) for
+why that split exists.
+
 No API key and no stylesheet. `@deck.gl/core`, `@deck.gl/layers` and
 `@deck.gl/geo-layers` come in as dependencies.
 
@@ -95,6 +105,52 @@ The unified zoom this SDK exposes is the Google Maps 256px one, so the driver
 adds **+1** on the way out and subtracts it on the way in
 (`ZoomAltitudeConverter`). Verified against Google Maps, MapLibre and
 OpenLayers on the `visible-region` sample: identical centre, zoom and bounds.
+
+## Tilt
+
+deck.gl's `pitch` only goes downward (0 and up). MapConductor also has **negative
+tilt — looking up** — and every provider that cannot express it natively fakes it
+the same way: keep the camera where it is, move the *ground target* forward along
+the camera heading, and render with `abs(tilt)`.
+
+```
+altitude * cos(t) * tan(t) * 1.83     forward shift, in metres
+zoom + (-0.9) * (t / 60)              so the visible extent matches positive tilt
+```
+
+The constants are shared with `react-for-maplibre`, `react-for-mapbox`,
+`react-for-leaflet` and the Android/iOS SDKs — changing them here alone would
+make the same `tilt` render differently per provider. Negative tilt is clamped to
+-60°, which is as far as the emulation is calibrated.
+
+Because deck.gl keeps no record that the pitch it was given came from a negative
+tilt, the driver remembers the last requested value (`logicalTiltHint`) and
+reverses the shift when reporting the camera back. Verified on the `tilt` sample
+against MapLibre: same streets in the same screen positions at -60, -30, 0, 30
+and 60.
+
+## Bearing
+
+MapConductor's `bearing` increases **clockwise for the map**. deck.gl uses the
+Mapbox/MapLibre convention, where `bearing` is the compass direction the camera
+is pointing — the opposite sign. The driver converts through the core's
+`toNativeHeading` / `bearingFromNativeHeading`, so a camera synced from another
+provider lands at the same orientation (checked on the `camera-sync` sample).
+
+Note that the base map is raster, so its labels rotate with the map instead of
+staying upright the way a vector style's would.
+
+## Not compatible with `react-for-longdo` on the same page
+
+deck.gl registers its version on `globalThis.deck` when the module is first
+evaluated and **throws if a different version is already there**. The Longdo web
+SDK ships its own deck.gl 8.x, so whichever loads second breaks.
+
+Nothing can be done about that from here; just do not put both on one page. Load
+this package lazily (`lazy(() => import('@mapconductor/react-for-deckgl'))`) so
+pages that do not show a deck.gl map never evaluate it, and take the view state
+and designs from the `@mapconductor/react-for-deckgl/state` subpath, which does
+not import deck.gl at all. `examples/basic` is wired this way.
 
 ## Camera events
 
