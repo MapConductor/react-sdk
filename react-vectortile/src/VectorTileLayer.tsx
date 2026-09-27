@@ -3,16 +3,26 @@ import {
     TileServerRegistry,
     createRasterLayerState,
     TileScheme,
+    RasterTilePreferenceKey,
     type AttributionRule,
     type RasterLayerState,
 } from '@mapconductor/js-sdk-core';
-import { RasterLayer } from '@mapconductor/js-sdk-react';
+import { RasterLayer, useMapServiceRegistry } from '@mapconductor/js-sdk-react';
 import { VectorTileProvider } from '@mapconductor/vectortile';
 
 export interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
     style: string | object;
-    /** Output tile size in pixels. Defaults to 512, matching the SDK cores. */
+    /**
+     * Output tile size in pixels. Left out, the backend decides: a provider
+     * that has registered a `RasterTilePreference` is answered, and anything
+     * else gets 512.
+     *
+     * Bigger tiles are cheaper for the same screen -- the per-tile costs scale
+     * with the count -- but ArcGIS's 3D SceneView picks the level as though
+     * every tile were 256 pixels, so handing it 512 makes it fetch one level
+     * deeper and four times as many tiles.
+     */
     tileSize?: number;
     opacity?: number;
     visible?: boolean;
@@ -68,7 +78,7 @@ const clamp = (value: number): number => Math.min(1, Math.max(0, value));
  */
 export function VectorTileLayer({
     style,
-    tileSize = 512,
+    tileSize: requestedTileSize,
     opacity = 1,
     visible = true,
     maxZoom = 22,
@@ -83,6 +93,15 @@ export function VectorTileLayer({
     // served, fetched and cached independently.
     const groundRoute = `${routeId}-ground`;
     const labelRoute = `${routeId}-labels`;
+
+    // タイルの一辺はアプリの好みで決めてよく、既定は 512（1 枚あたりの固定費が
+    // 枚数に比例するので、同じ画面なら大きいタイルのほうが安い）。ただし地図
+    // SDK 側に都合があることがある: ArcGIS の 3D SceneView は「タイルは 256px」
+    // という前提でレベルを選び、512 を渡すと 1 段深いレベルを 4 倍の枚数で引く。
+    // 宣言しているプロバイダにはそれに従い、明示された値は常に優先する。
+    const registry = useMapServiceRegistry();
+    const tileSize =
+        requestedTileSize ?? registry.get(RasterTilePreferenceKey)?.preferredTileSize ?? 512;
 
     const tileServer = useMemo(() => TileServerRegistry.get(), []);
     const providerRef = useRef<VectorTileProvider | null>(null);

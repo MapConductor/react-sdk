@@ -3,7 +3,16 @@ import React from 'react';
 interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
     style: string | object;
-    /** Output tile size in pixels. Defaults to 512, matching the SDK cores. */
+    /**
+     * Output tile size in pixels. Left out, the backend decides: a provider
+     * that has registered a `RasterTilePreference` is answered, and anything
+     * else gets 512.
+     *
+     * Bigger tiles are cheaper for the same screen -- the per-tile costs scale
+     * with the count -- but ArcGIS's 3D SceneView picks the level as though
+     * every tile were 256 pixels, so handing it 512 makes it fetch one level
+     * deeper and four times as many tiles.
+     */
     tileSize?: number;
     opacity?: number;
     visible?: boolean;
@@ -40,6 +49,6 @@ interface VectorTileLayerProps {
  * <VectorTileLayer style="https://example.com/style.json" opacity={0.9} />
  * ```
  */
-declare function VectorTileLayer({ style, tileSize, opacity, visible, maxZoom, headers, onDiagnostics, }: VectorTileLayerProps): React.ReactElement | null;
+declare function VectorTileLayer({ style, tileSize: requestedTileSize, opacity, visible, maxZoom, headers, onDiagnostics, }: VectorTileLayerProps): React.ReactElement | null;
 
 export { VectorTileLayer, type VectorTileLayerProps };
