@@ -10,6 +10,11 @@ interface TileRenderCoreOptions {
     /** Source tile cache budget in bytes. Defaults to 16 MB. */
     cacheBytes?: number;
     /**
+     * Keep fetched source MVT/PBF tiles in Cache Storage so reloads and
+     * remounts do not pay the network round trip again.
+     */
+    persistSourceTiles?: boolean;
+    /**
      * Keep rendered tiles in Cache Storage so a reload does not redraw them.
      * Off by default: a library helping itself to a user's disk quota behind
      * their back is not a favour.
@@ -25,7 +30,7 @@ interface TileRenderCoreOptions {
      * Full control over source tile fetching. Not cloneable, so supplying this
      * forces main-thread rendering; use `headers` if that is all you need.
      */
-    fetchTile?: (url: string) => Promise<Uint8Array | null>;
+    fetchTile?: (url: string, signal?: AbortSignal) => Promise<Uint8Array | null>;
     onWarning?: (message: string) => void;
 }
 /**
@@ -372,6 +377,7 @@ declare class TileCache {
     private readonly maxBytes;
     private readonly entries;
     private readonly inFlight;
+    private persistent;
     private bytes;
     /**
      * Budgeted in bytes, not entries. Counting entries is the easy mistake: a
@@ -385,10 +391,26 @@ declare class TileCache {
      * result (404, empty body) is cached too, so a known-missing tile is not
      * re-requested on every pan.
      */
-    get(url: string, fetcher: (url: string) => Promise<Uint8Array | null>): Promise<Uint8Array | null>;
+    get(url: string, fetcher: (url: string, signal?: AbortSignal) => Promise<Uint8Array | null>, signal?: AbortSignal, stats?: SourceFetchStats): Promise<Uint8Array | null>;
     private set;
     clear(): void;
     get size(): number;
+}
+declare class SourceTileCache {
+    private readonly store;
+    private constructor();
+    static open(name?: string): Promise<SourceTileCache | null>;
+    private static url;
+    get(key: string): Promise<Uint8Array | null>;
+    put(key: string, bytes: Uint8Array): Promise<void>;
+}
+interface SourceFetchStats {
+    memoryHits: number;
+    diskHits: number;
+    networkFetches: number;
+    sharedWaits: number;
+    cancelled: number;
+    queueWaitMs: number;
 }
 
 /**
@@ -497,6 +519,8 @@ interface WorkerInitRequest {
     readonly styleText: string;
     readonly tileSize: number;
     readonly cacheBytes: number;
+    readonly persistSourceTiles?: boolean;
+    readonly persistRenderedTiles?: boolean;
     readonly headers?: Record<string, string>;
     readonly wasmUrl?: string;
 }

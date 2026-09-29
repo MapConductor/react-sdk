@@ -172,6 +172,9 @@ export function VectorTileLayer({
             const provider = await VectorTileProvider.create({
                 style: styleRef.current,
                 tileSize,
+                cacheBytes: 48 * 1024 * 1024,
+                persistSourceTiles: true,
+                persistRenderedTiles: true,
                 headers,
                 onWarning: (message: string) => onDiagnostics?.([message]),
             });
