@@ -24,7 +24,8 @@ export type PaneProvider =
   | 'tomtom'
   | 'maptiler'
   | 'longdo'
-  | 'mappls';
+  | 'mappls'
+  | 'deckgl';
 
 export interface CameraLocationInfo {
   name: string;

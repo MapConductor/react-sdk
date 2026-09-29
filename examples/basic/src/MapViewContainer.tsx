@@ -121,6 +121,7 @@ export function MapViewContainer({
   const isMapTiler = location.pathname.startsWith('/maptiler');
   const isLongdo = location.pathname.startsWith('/longdo');
   const isMappls = location.pathname.startsWith('/mappls');
+  const isDeckGL = location.pathname.startsWith('/deckgl');
 
   const commonProps: ProviderViewProps = {
     children,
@@ -190,6 +191,10 @@ export function MapViewContainer({
 
     case isMappls: {
       return <SingletonProviderView id="mappls" {...commonProps} />;
+    }
+
+    case isDeckGL: {
+      return <SingletonProviderView id="deckgl" {...commonProps} />;
     }
 
     default: {

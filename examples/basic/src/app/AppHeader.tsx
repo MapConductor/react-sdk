@@ -18,6 +18,7 @@ const PROVIDERS: Array<{ value: MapProvider; label: string }> = [
   { value: 'maptiler', label: 'MapTiler' },
   { value: 'longdo', label: 'Longdo' },
   { value: 'mappls', label: 'Mappls' },
+  { value: 'deckgl', label: 'deck.gl' },
   { value: 'google', label: 'Google Maps' },
   { value: 'google-3d', label: 'Google Maps 3D' },
 ];

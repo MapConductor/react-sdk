@@ -39,7 +39,8 @@
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
     "three": "^0.185.1",
-    "@mapconductor/react-for-mappls": "*"
+    "@mapconductor/react-for-mappls": "*",
+    "@mapconductor/react-for-deckgl": "*"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",

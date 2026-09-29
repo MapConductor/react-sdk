@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import type { MapCameraPosition } from '@mapconductor/js-sdk-core';
 import {
   GoogleMapView,
@@ -61,6 +61,14 @@ import {
   MapplsMapView2D,
   type MapplsViewState,
 } from '@mapconductor/react-for-mappls';
+import type { DeckGLMapViewStateInterface } from '@mapconductor/react-for-deckgl/state';
+
+// deck.gl は読み込み時に `globalThis.deck` を取り合い、別バージョンが既に居ると例外を
+// 投げる。Longdo の web SDK が自前の deck.gl 8 系を積んでいるため、既定ペインの Longdo が
+// 居るだけで壊れてしまう。deck.gl のペインを選んだときだけ読み込む。
+const LazyDeckGLMapView = lazy(() =>
+  import('@mapconductor/react-for-deckgl').then(m => ({ default: m.DeckGLMapView })),
+);
 
 interface MapViewRenderProps {
   paneState: PaneState;
@@ -194,6 +202,16 @@ const adapters: CameraSyncProviderAdapter[] = [
     // Mappls renders through Mapbox GL; report the unified (Google-reference) altitude like MapLibre.
     id: 'mappls', label: 'Mappls', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
     render: props => renderMappls(props),
+  },
+  {
+    // deck.gl works in unified zoom once the driver has applied its +1 offset,
+    // so the Google-reference altitude applies unchanged (same as MapLibre).
+    id: 'deckgl', label: 'deck.gl', altitude: (_pane, position) => convertedAltitude(position, googleZoom),
+    render: ({ paneState: pane, children, ...events }) => (
+      <Suspense fallback={null}>
+        <LazyDeckGLMapView state={pane.mapState as DeckGLMapViewStateInterface} {...events}>{children}</LazyDeckGLMapView>
+      </Suspense>
+    ),
   },
 ];
 

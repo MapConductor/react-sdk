@@ -31,6 +31,7 @@ const DESIGN_OPTIONS_LOADERS: Record<string, () => Promise<MapDesignOption[]>> =
   tomtom: () => import('../../../providers/designOptions/tomtomDesignOptions').then(m => m.TOMTOM_DESIGNS),
   longdo: () => import('../../../providers/designOptions/longdoDesignOptions').then(m => m.LONGDO_DESIGNS),
   mappls: () => import('../../../providers/designOptions/mapplsDesignOptions').then(m => m.MAPPLS_DESIGNS),
+  deckgl: () => import('../../../providers/designOptions/deckglDesignOptions').then(m => m.DECKGL_DESIGNS),
 };
 
 export function MapDesignPage() {
