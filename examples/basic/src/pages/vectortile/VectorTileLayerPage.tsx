@@ -1,4 +1,18 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { MapDesignTypeInterface, MapViewStateInterface } from '@mapconductor/js-sdk-core';
+import { ArcGISDesign, ArcGISMapViewState } from '@mapconductor/react-for-arcgis';
+import { AzureMapsDesign, AzureMapsViewState } from '@mapconductor/react-for-azuremaps';
+import { CesiumDesign, CesiumMapViewState } from '@mapconductor/react-for-cesium';
+import { DeckGLDesign, DeckGLMapViewState } from '@mapconductor/react-for-deckgl';
+import { GoogleMapDesign, GoogleMapViewState } from '@mapconductor/react-for-googlemaps';
+import { HereMapDesign, HereViewState } from '@mapconductor/react-for-here';
+import { LeafletDesign, LeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import { LongdoDesign, LongdoViewState } from '@mapconductor/react-for-longdo';
+import { MapboxDesign, MapboxViewState } from '@mapconductor/react-for-mapbox';
+import { MapLibreDesign, MapLibreViewState } from '@mapconductor/react-for-maplibre';
+import { MapTilerDesign, MapTilerViewState } from '@mapconductor/react-for-maptiler';
+import { OpenLayersDesign, OpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import { TomTomDesign, TomTomViewState } from '@mapconductor/react-for-tomtom';
 import { VectorTileLayer } from '@mapconductor/react-vectortile';
 import { ControlPanel, SliderControl } from '../../components/ControlPanel';
 import { MapViewContainer } from '../../MapViewContainer';
@@ -24,6 +38,46 @@ const DEFAULT_PALETTE: Palette = {
 
 const CATEGORY_ORDER: ColourCategory[] = ['water', 'land', 'street', 'building'];
 
+/**
+ * Blanks the backend's own basemap, or restores it.
+ *
+ * Each provider says "draw nothing" with its own design value (`None`, or
+ * Azure's `Blank`). MapKit and Mappls have none; there the opaque tiles cover
+ * the basemap, which is still fetched for nobody.
+ */
+function showBasemap(state: MapViewStateInterface<MapDesignTypeInterface<unknown>>, visible: boolean) {
+    if (state instanceof MapLibreViewState) {
+        state.mapDesignType = visible ? MapLibreDesign.OsmBrightJa : MapLibreDesign.None;
+    } else if (state instanceof GoogleMapViewState) {
+        // The 3D map has no "none" mode, and the same state class serves both.
+        const map = state.getMapViewHolder()?.map as { tagName?: string } | undefined;
+        if (map?.tagName === 'GMP-MAP-3D') return;
+        state.mapDesignType = visible ? GoogleMapDesign.Normal : GoogleMapDesign.None;
+    } else if (state instanceof ArcGISMapViewState) {
+        state.mapDesignType = visible ? ArcGISDesign.OsmStandard : ArcGISDesign.None;
+    } else if (state instanceof MapboxViewState) {
+        state.mapDesignType = visible ? MapboxDesign.Streets : MapboxDesign.None;
+    } else if (state instanceof MapTilerViewState) {
+        state.mapDesignType = visible ? MapTilerDesign.Streets : MapTilerDesign.None;
+    } else if (state instanceof TomTomViewState) {
+        state.mapDesignType = visible ? TomTomDesign.Standard : TomTomDesign.None;
+    } else if (state instanceof LongdoViewState) {
+        state.mapDesignType = visible ? LongdoDesign.Normal : LongdoDesign.None;
+    } else if (state instanceof HereViewState) {
+        state.mapDesignType = visible ? HereMapDesign.NormalDay : HereMapDesign.None;
+    } else if (state instanceof LeafletMapViewState) {
+        state.mapDesignType = visible ? LeafletDesign.OpenStreetMap : LeafletDesign.None;
+    } else if (state instanceof OpenLayersMapViewState) {
+        state.mapDesignType = visible ? OpenLayersDesign.OpenStreetMap : OpenLayersDesign.None;
+    } else if (state instanceof DeckGLMapViewState) {
+        state.mapDesignType = visible ? DeckGLDesign.Standard : DeckGLDesign.None;
+    } else if (state instanceof CesiumMapViewState) {
+        state.mapDesignType = visible ? CesiumDesign.Default : CesiumDesign.None;
+    } else if (state instanceof AzureMapsViewState) {
+        state.mapDesignType = visible ? AzureMapsDesign.Road : AzureMapsDesign.Blank;
+    }
+}
+
 const CATEGORY_LABELS: Record<ColourCategory, Phrase> = {
     water: { en: 'Water', ja: '水域', 'es-419': 'Agua', de: 'Wasser', th: 'แหล่งน้ำ', hi: 'जल' },
     land: { en: 'Land', ja: '陸地', 'es-419': 'Terreno', de: 'Land', th: 'พื้นดิน', hi: 'भूमि' },
@@ -48,6 +102,20 @@ export function VectorTileLayerPage() {
     const [strength, setStrength] = useState(0.6);
     const [opacity, setOpacity] = useState(1);
     const [diagnostics, setDiagnostics] = useState<string[]>([]);
+    const [asBasemap, setAsBasemap] = useState(false);
+    const [mapViewState, setMapViewState] =
+        useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
+    const onStateReady = useCallback(
+        (state: MapViewStateInterface<MapDesignTypeInterface<unknown>>) => setMapViewState(state),
+        [],
+    );
+
+    useEffect(() => {
+        if (!mapViewState) return;
+        showBasemap(mapViewState, !asBasemap);
+        // The page's own choice must not follow the singleton map onto other pages.
+        return () => showBasemap(mapViewState, true);
+    }, [mapViewState, asBasemap]);
 
     useEffect(() => {
         let cancelled = false;
@@ -72,7 +140,7 @@ export function VectorTileLayerPage() {
     );
 
     return (
-        <MapViewContainer initialCamera={INIT_CAMERA}>
+        <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={onStateReady}>
             {style ? (
                 <VectorTileLayer
                     style={style}
@@ -90,6 +158,23 @@ export function VectorTileLayerPage() {
                     hi: 'वेक्टर टाइल लेयर',
                 })}
             >
+                <label className="checkbox-control">
+                    <input
+                        type="checkbox"
+                        checked={asBasemap}
+                        onChange={(event) => setAsBasemap(event.target.checked)}
+                    />
+                    <span>
+                        {t({
+                            en: 'As basemap (hide the provider\'s own)',
+                            ja: 'ベースマップとして使う（プロバイダの地図を隠す）',
+                            'es-419': 'Como mapa base (ocultar el del proveedor)',
+                            de: 'Als Basiskarte (die des Anbieters ausblenden)',
+                            th: 'ใช้เป็นแผนที่ฐาน (ซ่อนของผู้ให้บริการ)',
+                            hi: 'बेसमैप के रूप में (प्रदाता का छिपाएँ)',
+                        })}
+                    </span>
+                </label>
                 {CATEGORY_ORDER.map((category) => (
                     <label className="slider-control" key={category}>
                         <span className="slider-label">{t(CATEGORY_LABELS[category])}</span>
