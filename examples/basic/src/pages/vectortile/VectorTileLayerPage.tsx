@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { MapDesignTypeInterface, MapViewStateInterface } from '@mapconductor/js-sdk-core';
+import { VectorStyleSupportKey, type MapDesignTypeInterface, type MapViewStateInterface } from '@mapconductor/js-sdk-core';
 import { ArcGISDesign, ArcGISMapViewState } from '@mapconductor/react-for-arcgis';
 import { AzureMapsDesign, AzureMapsViewState } from '@mapconductor/react-for-azuremaps';
 import { CesiumDesign, CesiumMapViewState } from '@mapconductor/react-for-cesium';
@@ -46,6 +46,10 @@ const CATEGORY_ORDER: ColourCategory[] = ['water', 'land', 'street', 'building']
  * the basemap, which is still fetched for nobody.
  */
 function showBasemap(state: MapViewStateInterface<MapDesignTypeInterface<unknown>>, visible: boolean) {
+    // A map that takes the style directly gets it *as* its design from the
+    // layer; blanking first would only load one style to throw it away. Going
+    // back to the provider's own basemap is still done here.
+    if (!visible && state.serviceRegistry.has(VectorStyleSupportKey)) return;
     if (state instanceof MapLibreViewState) {
         state.mapDesignType = visible ? MapLibreDesign.OsmBrightJa : MapLibreDesign.None;
     } else if (state instanceof GoogleMapViewState) {
@@ -146,6 +150,7 @@ export function VectorTileLayerPage() {
                     style={style}
                     opacity={opacity}
                     onDiagnostics={setDiagnostics}
+                    asBasemap={asBasemap}
                 />
             ) : null}
             <ControlPanel

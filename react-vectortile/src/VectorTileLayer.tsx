@@ -4,6 +4,7 @@ import {
     createRasterLayerState,
     TileScheme,
     RasterTilePreferenceKey,
+    VectorStyleSupportKey,
     type AttributionRule,
     type RasterLayerState,
 } from '@mapconductor/js-sdk-core';
@@ -35,6 +36,34 @@ export interface VectorTileLayerProps {
      * failure mode that matters is a blank tile.
      */
     onDiagnostics?: (messages: string[]) => void;
+    /**
+     * The style is the basemap, not a layer over one.
+     *
+     * On a map that renders vector styles itself (MapLibre, Mapbox, MapTiler
+     * -- anything registering `VectorStyleSupportKey`) this hands the style
+     * over directly and mounts no raster layer at all: the fast path, and the
+     * one an offline package will take. The style then *replaces* the map's
+     * design and `opacity` does not apply. Elsewhere it changes nothing here;
+     * the app blanks the map's own basemap (a `None` design) and the opaque
+     * raster tiles are the map.
+     */
+    asBasemap?: boolean;
+}
+
+/**
+ * The `attribution` of every source in a style object, without duplicates.
+ * A URL string cannot be read here; the map credits those sources itself.
+ */
+function styleAttributions(style: string | object): AttributionRule[] {
+    if (typeof style === 'string') return [];
+    const sources = (style as { sources?: Record<string, { attribution?: unknown }> }).sources;
+    if (!sources) return [];
+    const seen = new Set<string>();
+    for (const source of Object.values(sources)) {
+        const attribution = source?.attribution;
+        if (typeof attribution === 'string' && attribution.trim() !== '') seen.add(attribution);
+    }
+    return [...seen].map((attribution) => ({ attribution }));
 }
 
 /**
@@ -84,6 +113,7 @@ export function VectorTileLayer({
     maxZoom = 22,
     headers,
     onDiagnostics,
+    asBasemap = false,
 }: VectorTileLayerProps): React.ReactElement | null {
     const routeId = useMemo(
         () => `vectortile-${Math.random().toString(36).slice(2, 10)}`,
@@ -102,6 +132,11 @@ export function VectorTileLayer({
     const registry = useMapServiceRegistry();
     const tileSize =
         requestedTileSize ?? registry.get(RasterTilePreferenceKey)?.preferredTileSize ?? 512;
+
+    // The direct path: the map draws the style itself and nothing below
+    // mounts. Read on every render because a provider registers as it
+    // initialises, and the ready re-render is when it first shows up.
+    const direct = asBasemap ? registry.get(VectorStyleSupportKey) : undefined;
 
     const tileServer = useMemo(() => TileServerRegistry.get(), []);
     const providerRef = useRef<VectorTileProvider | null>(null);
@@ -163,6 +198,7 @@ export function VectorTileLayer({
     // The service worker has to be controlling the page before any tile request
     // is made, otherwise the first requests 404 before the route exists.
     useEffect(() => {
+        if (direct) return;
         let cancelled = false;
 
         (async () => {
@@ -215,7 +251,18 @@ export function VectorTileLayer({
         // `headers` and `onDiagnostics` are deliberately not dependencies: a new
         // object identity each render would tear down and rebuild the renderer.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [routeId, tileServer, tileSize]);
+    }, [routeId, tileServer, tileSize, direct]);
+
+    // Handed over rather than rasterised. Keyed on the style's content, so a
+    // recolour is a new handoff; the support cancels the clear a remount
+    // would otherwise cause.
+    useEffect(() => {
+        if (!direct) return;
+        direct.showStyle(styleRef.current, styleAttributions(styleRef.current));
+        onDiagnostics?.(['direct: the map draws the style itself']);
+        return () => direct.clearStyle();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [direct, styleKey]);
 
     // Restyle in place. The vector tiles are unchanged — only the paint applied
     // to them — so this costs a re-rasterise and no network traffic.
@@ -325,7 +372,7 @@ export function VectorTileLayer({
         }
     }, [grounds, labels, opacity, visible]);
 
-    if (grounds.length === 0) return null;
+    if (direct || grounds.length === 0) return null;
     return (
         <>
             {/* Ground first: the providers that ignore zIndex stack in mount
