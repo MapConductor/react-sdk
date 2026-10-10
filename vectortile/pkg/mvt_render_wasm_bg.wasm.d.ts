@@ -17,6 +17,7 @@ export const vectortilerenderer_needsCpu: (a: number, b: number, c: number, d: n
 export const vectortilerenderer_needsSprite: (a: number) => number;
 export const vectortilerenderer_new: (a: number, b: number, c: number, d: number) => void;
 export const vectortilerenderer_plan: (a: number, b: number, c: number, d: number, e: number) => void;
+export const vectortilerenderer_queryFeatures: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number) => void;
 export const vectortilerenderer_render: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;
 export const vectortilerenderer_renderGeometry: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;
 export const vectortilerenderer_renderLabels: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;

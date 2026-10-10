@@ -11,6 +11,7 @@ import {
   type InfoBubbleEntry,
 } from '@mapconductor/js-sdk-react';
 import {
+  useMapViewStyle,
   useCameraRestriction,
   useMapUISettings,
   useMarkerRenderingSupport,
@@ -45,6 +46,8 @@ export interface DeckGLMapViewProps extends MapViewBaseProps<DeckGLMapViewStateI
 
 export function DeckGLMapView({
   state,
+  mapStyle,
+  onStyleDiagnostics,
   onMapLoaded,
   onMapClick,
   onMapLongClick,
@@ -66,6 +69,10 @@ export function DeckGLMapView({
   const [provider] = useState(() => new DeckGLProvider());
   const [scope] = useState(() => new MapViewScope());
   const [controller, setController] = useState<DeckGLMapViewController | null>(null);
+
+  // 地図の見た目。何が起きるかはこのバックエンドが宣言した能力で決まるので、
+  // ここにプロバイダ固有の分岐は無い。
+  useMapViewStyle(state, controller, mapStyle, onStyleDiagnostics);
   const [isReady, setIsReady] = useState(false);
   // `onMapLoaded` と同じ瞬間を「値」として持つ。イベントを取り逃した後から
   // マウントした子も読めるようにするため。

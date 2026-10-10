@@ -88,3 +88,6 @@
 [submodule "react-icons-weather"]
 	path = react-icons-weather
 	url = git@github.com:MapConductor/react-icons-weather.git
+[submodule "react-kml"]
+	path = react-kml
+	url = git@github.com:MapConductor/react-kml.git

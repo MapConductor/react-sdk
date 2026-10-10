@@ -154,7 +154,7 @@ interface DeckGLMapViewProps extends MapViewBaseProps<DeckGLMapViewStateInterfac
     children?: ReactNode;
     markerTilingOptions?: MarkerTilingOptions;
 }
-declare function DeckGLMapView({ state, onMapLoaded, onMapClick, onMapLongClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, maxZoom, minZoom, restrictBounds, cameraRestriction, className, containerStyle, options, onError, children, markerTilingOptions, }: DeckGLMapViewProps): react.JSX.Element;
+declare function DeckGLMapView({ state, mapStyle, onStyleDiagnostics, onMapLoaded, onMapClick, onMapLongClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, maxZoom, minZoom, restrictBounds, cameraRestriction, className, containerStyle, options, onError, children, markerTilingOptions, }: DeckGLMapViewProps): react.JSX.Element;
 
 /**
  * 投影の唯一の注入点。**投影をここ以外に書かないこと。**

@@ -5,7 +5,9 @@ import {
     MapViewState,
     type MapCameraPosition,
     type MapViewStateInterface,
+    type MapViewStyle,
 } from '@mapconductor/js-sdk-core';
+import { useMapViewStyle } from '@mapconductor/js-sdk-react/internal';
 import { TemplateDesign, TemplateMap, TemplateMapViewHolder, type TemplateMapDesignType } from './TemplateMap';
 import { TemplateMapViewController } from './TemplateMapViewController';
 
@@ -82,19 +84,38 @@ export function useTemplateViewState(params: {
  */
 export function TemplateMapView({
     state,
+    mapStyle,
+    onStyleDiagnostics,
     children,
 }: {
     state: MapViewStateInterface<TemplateMapDesignType>;
+    /**
+     * 実装点。**全プロバイダが同じ名前で受けること。** 何が起きるかはこの
+     * バックエンドが宣言した能力で決まる: `VectorStyleSupportKey` も
+     * `VectorStyleMutationSupportKey` も宣言していなければ、スタイルは
+     * ラスタータイルとして届く。
+     *
+     * android / iOS では `style`。JS だけ違う理由は `MapViewBaseProps` に。
+     */
+    mapStyle?: MapViewStyle | null;
+    onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
     children?: ReactNode;
 }) {
     const containerRef = useRef<HTMLDivElement>(null);
     const controllerRef = useRef<TemplateMapViewController | null>(null);
+    // コントローラができたら再レンダーさせる。スタイルの設置はコントローラが
+    // 要るので、ref に入れるだけでは設置の機会が来ない。
+    const [controller, setController] = useState<TemplateMapViewController | null>(null);
+
+    // 実装点。1 行で、プロバイダ固有の分岐は無い。
+    useMapViewStyle(state, controller, mapStyle, onStyleDiagnostics);
 
     useEffect(() => {
         // 実際のドライバーはここで `new maplibregl.Map({ container })` する。
         const map = new TemplateMap();
         const controller = new TemplateMapViewController(map);
         controllerRef.current = controller;
+        setController(controller);
 
         const internal = state as unknown as {
             attachController?: (c: TemplateMapViewController) => void;
@@ -108,6 +129,7 @@ export function TemplateMapView({
         return () => {
             controller.destroy();
             controllerRef.current = null;
+            setController(null);
         };
     }, [state]);
 

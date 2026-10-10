@@ -10,16 +10,20 @@ interface TileRenderCoreOptions {
     /** Source tile cache budget in bytes. Defaults to 16 MB. */
     cacheBytes?: number;
     /**
-     * Keep fetched source MVT/PBF tiles in Cache Storage so reloads and
-     * remounts do not pay the network round trip again.
-     */
-    persistSourceTiles?: boolean;
-    /**
      * Keep rendered tiles in Cache Storage so a reload does not redraw them.
      * Off by default: a library helping itself to a user's disk quota behind
      * their back is not a favour.
      */
     persistRenderedTiles?: boolean;
+    /**
+     * Keep fetched source tiles in Cache Storage so reloads and remounts do
+     * not pay the network round trip again. Off by default, for the same
+     * reason as {@link persistRenderedTiles}.
+     *
+     * Worth having on top of that one: a restyle discards every rendered tile
+     * and keeps every source tile, so a recolour costs no network at all.
+     */
+    persistSourceTiles?: boolean;
     wasmUrl?: string | URL;
     /**
      * Headers sent with every source tile request — auth tokens, API keys.
@@ -84,7 +88,7 @@ declare class TileRenderCore {
      * says*, not by *what the renderer did with it*. Kept in step with the
      * Android and iOS bindings: they cache the output of the same core.
      */
-    static readonly outputVersion = 13;
+    static readonly outputVersion = 20;
     /**
      * Told when glyphs arrive and the tiles already on screen are missing
      * labels because of it. The host must make the map refetch — nothing else
@@ -365,6 +369,52 @@ declare class VectorTileProvider implements TileProvider {
 }
 
 /**
+ * Fetched source tiles kept in Cache Storage, so a reload or a remount does
+ * not pay the network round trip again.
+ *
+ * The sibling of {@link RenderedTileCache}: that one keeps the PNGs this
+ * library draws, this one keeps the `.pbf` it drew them from. Keeping both is
+ * not redundant — a restyle throws away every rendered tile and keeps every
+ * source tile, which is what makes recolouring a map cost no network at all.
+ *
+ * Cache Storage rather than IndexedDB because the payload is already an HTTP
+ * response body: no serialisation, and the browser evicts it under the same
+ * quota rules as anything else it holds for the origin.
+ *
+ * Every method swallows its failures and answers "not cached". A disabled
+ * storage API, a private window or a full quota must slow the map down, never
+ * break it.
+ */
+declare class SourceTileCache {
+    private readonly store;
+    private constructor();
+    /**
+     * Opens the store, or returns null where Cache Storage is unavailable —
+     * a non-secure origin, a private window, or a worker in a browser that
+     * does not expose it.
+     */
+    static open(name?: string): Promise<SourceTileCache | null>;
+    /**
+     * Cache Storage keys on a URL, and a source tile's own URL would do —
+     * except that it can carry an API key, and keys do not belong in a store
+     * that outlives the session. The digest is stable for the same tile and
+     * says nothing about the token that fetched it.
+     */
+    private static url;
+    get(key: string): Promise<Uint8Array | null>;
+    put(key: string, bytes: Uint8Array): Promise<void>;
+}
+
+/** What one tile's worth of fetching had to do. For the debug log. */
+interface SourceFetchStats {
+    memoryHits: number;
+    diskHits: number;
+    networkFetches: number;
+    sharedWaits: number;
+    cancelled: number;
+    queueWaitMs: number;
+}
+/**
  * LRU cache for fetched source tiles, with single-flight de-duplication.
  *
  * This is not an optimisation detail — it is load-bearing. Neighbouring target
@@ -377,7 +427,6 @@ declare class TileCache {
     private readonly maxBytes;
     private readonly entries;
     private readonly inFlight;
-    private persistent;
     private bytes;
     /**
      * Budgeted in bytes, not entries. Counting entries is the easy mistake: a
@@ -387,6 +436,15 @@ declare class TileCache {
      */
     constructor(maxBytes?: number);
     /**
+     * Where tiles are kept between sessions, when the caller asked for that.
+     *
+     * Behind the single-flight gate rather than in front of it: a cold memory
+     * cache has the whole ring of neighbours asking for the same file at once,
+     * and nine Cache Storage reads of one tile is as wasteful as nine
+     * downloads of it.
+     */
+    persistent: SourceTileCache | null;
+    /**
      * Returns the bytes for `url`, fetching via `fetcher` on a miss. A `null`
      * result (404, empty body) is cached too, so a known-missing tile is not
      * re-requested on every pan.
@@ -395,22 +453,6 @@ declare class TileCache {
     private set;
     clear(): void;
     get size(): number;
-}
-declare class SourceTileCache {
-    private readonly store;
-    private constructor();
-    static open(name?: string): Promise<SourceTileCache | null>;
-    private static url;
-    get(key: string): Promise<Uint8Array | null>;
-    put(key: string, bytes: Uint8Array): Promise<void>;
-}
-interface SourceFetchStats {
-    memoryHits: number;
-    diskHits: number;
-    networkFetches: number;
-    sharedWaits: number;
-    cancelled: number;
-    queueWaitMs: number;
 }
 
 /**
@@ -479,6 +521,12 @@ interface WasmRenderer {
     drawLabels(z: number, x: number, y: number, tileSize: number, rgba: Uint8Array, data: Uint8Array, lengths: Uint32Array): number;
     glyphsUrlTemplate(): string | undefined;
     neededGlyphs(z: number, x: number, y: number, data: Uint8Array, lengths: Uint32Array): string;
+    /**
+     * Features in the tile as a JSON array of {sourceId, layer, id, geometry,
+     * lon, lat, bounds:[w,s,e,n], properties}. Empty strings mean "no
+     * restriction"; a filter that is not JSON throws.
+     */
+    queryFeatures(z: number, x: number, y: number, data: Uint8Array, lengths: Uint32Array, sourceLayer: string, filterJson: string, text: string, limit: number): string;
     addGlyphs(pbf: Uint8Array): number;
     hasGlyphs(): boolean;
     spriteUrls(pixelRatio: number): string;
@@ -519,10 +567,15 @@ interface WorkerInitRequest {
     readonly styleText: string;
     readonly tileSize: number;
     readonly cacheBytes: number;
-    readonly persistSourceTiles?: boolean;
-    readonly persistRenderedTiles?: boolean;
     readonly headers?: Record<string, string>;
     readonly wasmUrl?: string;
+    /**
+     * The caches live where the rendering does. Without these the worker --
+     * which is the default path -- would keep nothing on disk however the
+     * host asked, and the options would appear to do nothing.
+     */
+    readonly persistRenderedTiles?: boolean;
+    readonly persistSourceTiles?: boolean;
 }
 interface WorkerInitResponse {
     readonly type: 'init';
@@ -588,4 +641,4 @@ interface WorkerDisposeRequest {
 type WorkerRequest = WorkerAbortRequest | WorkerInitRequest | WorkerRenderRequest | WorkerSetStyleRequest | WorkerDisposeRequest;
 type WorkerResponse = WorkerGlyphsEvent | WorkerInitResponse | WorkerRenderResponse | WorkerSetStyleResponse;
 
-export { RenderedTileCache, TileCache, type TileContent, type TileProvider, TileRenderCore, type TileRenderCoreOptions, type TileRequest, type TileServerLike, VectorTileProvider, type VectorTileProviderOptions, type WasmRenderer, type WorkerAbortRequest, type WorkerDisposeRequest, type WorkerGlyphsEvent, type WorkerInitRequest, type WorkerInitResponse, type WorkerRenderRequest, type WorkerRenderResponse, type WorkerRequest, type WorkerResponse, type WorkerSetStyleRequest, type WorkerSetStyleResponse, loadWasm };
+export { RenderedTileCache, type SourceFetchStats, SourceTileCache, TileCache, type TileContent, type TileProvider, TileRenderCore, type TileRenderCoreOptions, type TileRequest, type TileServerLike, VectorTileProvider, type VectorTileProviderOptions, type WasmRenderer, type WorkerAbortRequest, type WorkerDisposeRequest, type WorkerGlyphsEvent, type WorkerInitRequest, type WorkerInitResponse, type WorkerRenderRequest, type WorkerRenderResponse, type WorkerRequest, type WorkerResponse, type WorkerSetStyleRequest, type WorkerSetStyleResponse, loadWasm };

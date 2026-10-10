@@ -111,6 +111,11 @@ export class VectorTileRenderer {
      */
     plan(z: number, x: number, y: number): string;
     /**
+     * Features in the tile as a JSON array; see `Renderer::query_features_json`.
+     * Empty strings mean "no restriction". A filter that is not JSON errors.
+     */
+    queryFeatures(z: number, x: number, y: number, data: Uint8Array, lengths: Uint32Array, source_layer: string, filter_json: string, text: string, limit: number): string;
+    /**
      * Rasterises `z/x/y` to PNG bytes.
      *
      * `data` is every fetched tile concatenated in plan order; `lengths` gives
@@ -200,6 +205,7 @@ export interface InitOutput {
     readonly vectortilerenderer_needsSprite: (a: number) => number;
     readonly vectortilerenderer_new: (a: number, b: number, c: number, d: number) => void;
     readonly vectortilerenderer_plan: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly vectortilerenderer_queryFeatures: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number) => void;
     readonly vectortilerenderer_render: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;
     readonly vectortilerenderer_renderGeometry: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;
     readonly vectortilerenderer_renderLabels: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number) => void;

@@ -25,6 +25,18 @@ interface VectorTileLayerProps {
      * failure mode that matters is a blank tile.
      */
     onDiagnostics?: (messages: string[]) => void;
+    /**
+     * The style is the basemap, not a layer over one.
+     *
+     * On a map that renders vector styles itself (MapLibre, Mapbox, MapTiler
+     * -- anything registering `VectorStyleSupportKey`) this hands the style
+     * over directly and mounts no raster layer at all: the fast path, and the
+     * one an offline package will take. The style then *replaces* the map's
+     * design and `opacity` does not apply. Elsewhere it changes nothing here;
+     * the app blanks the map's own basemap (a `None` design) and the opaque
+     * raster tiles are the map.
+     */
+    asBasemap?: boolean;
 }
 /**
  * Draws a MapLibre vector style on any map backend, by rendering it to raster
@@ -49,6 +61,6 @@ interface VectorTileLayerProps {
  * <VectorTileLayer style="https://example.com/style.json" opacity={0.9} />
  * ```
  */
-declare function VectorTileLayer({ style, tileSize: requestedTileSize, opacity, visible, maxZoom, headers, onDiagnostics, }: VectorTileLayerProps): React.ReactElement | null;
+declare function VectorTileLayer({ style, tileSize: requestedTileSize, opacity, visible, maxZoom, headers, onDiagnostics, asBasemap, }: VectorTileLayerProps): React.ReactElement | null;
 
 export { VectorTileLayer, type VectorTileLayerProps };

@@ -1,5 +1,7 @@
 PODS:
   - ArcGIS (300.1.0)
+  - CMapLibreStyleTry (1.3.1)
+  - CTilePng (1.3.1)
   - EXConstants (57.0.11):
     - ExpoModulesCore
   - Expo (57.0.13):
@@ -87,7 +89,8 @@ PODS:
     - MapboxCommon (= 24.28.2)
     - MapboxCoreMaps (= 11.28.2)
     - Turf (= 4.0.0)
-  - MapConductorCore (1.3.1)
+  - MapConductorCore (1.3.1):
+    - CTilePng
   - MapConductorForArcGIS (1.3.1):
     - ArcGIS (= 300.1.0)
     - MapConductorCore
@@ -101,6 +104,7 @@ PODS:
     - MapboxMaps (~> 11.26)
     - MapConductorCore
   - MapConductorForMapLibre (1.3.1):
+    - CMapLibreStyleTry
     - MapConductorCore
     - MapLibre (~> 6.20)
   - MapConductorForMapTiler (1.3.1):
@@ -117,12 +121,12 @@ PODS:
     - MapConductorCore
   - MapConductorMarkerClustering (1.3.1):
     - MapConductorCore
-  - MapConductorReactForArcGIS (0.2.0):
+  - MapConductorReactForArcGIS (0.2.1):
     - MapConductorForArcGIS (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForGoogleMaps (0.2.0):
+  - MapConductorReactForGoogleMaps (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - MapConductorForGoogleMaps (~> 1.3.0)
     - MapConductorReactMarkerClustering
@@ -134,21 +138,21 @@ PODS:
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForMapbox (0.2.0):
+  - MapConductorReactForMapbox (0.2.1):
     - MapboxMaps (~> 11.26)
     - MapConductorCore (~> 1.3.0)
     - MapConductorForMapbox (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForMapLibre (0.2.0):
-    - MapConductorCore (~> 1.3.0)
-    - MapConductorForMapLibre (~> 1.3.0)
+  - MapConductorReactForMapLibre (0.2.1):
+    - MapConductorCore
+    - MapConductorForMapLibre
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - MapLibre (~> 6.20)
     - React-Core
-  - MapConductorReactForMapTiler (0.2.0):
+  - MapConductorReactForMapTiler (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - MapConductorForMapTiler (~> 1.3.0)
     - MapConductorReactMarkerClustering
@@ -160,28 +164,28 @@ PODS:
     - MapConductorForTemplate (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactForTomTom (0.2.0):
+  - MapConductorReactForTomTom (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - MapConductorForTomTom (~> 1.3.0)
     - MapConductorReactMarkerClustering
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactGeoJSONLayer (0.2.0):
+  - MapConductorReactGeoJSONLayer (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - MapConductorGeoJSON (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactHeatmap (0.2.0):
+  - MapConductorReactHeatmap (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - MapConductorHeatmap (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactMarkerClustering (0.2.0):
+  - MapConductorReactMarkerClustering (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - MapConductorMarkerClustering (~> 1.3.0)
     - MapConductorReactNativeCore
     - React-Core
-  - MapConductorReactNativeCore (0.2.0):
+  - MapConductorReactNativeCore (0.2.1):
     - MapConductorCore (~> 1.3.0)
     - React-callinvoker
     - React-Core
@@ -2183,6 +2187,8 @@ PODS:
 
 DEPENDENCIES:
   - ArcGIS (from `../../../../ios-sdk/ios-for-arcgis/ArcGIS.podspec`)
+  - CMapLibreStyleTry (from `../../../../ios-sdk/ios-for-maplibre`)
+  - CTilePng (from `../../../../ios-sdk/ios-sdk-core`)
   - EXConstants (from `../../../node_modules/expo-constants/ios`)
   - Expo (from `../../../node_modules/expo`)
   - ExpoAsset (from `../../../node_modules/expo-asset/ios`)
@@ -2323,6 +2329,10 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   ArcGIS:
     :podspec: "../../../../ios-sdk/ios-for-arcgis/ArcGIS.podspec"
+  CMapLibreStyleTry:
+    :path: "../../../../ios-sdk/ios-for-maplibre"
+  CTilePng:
+    :path: "../../../../ios-sdk/ios-sdk-core"
   EXConstants:
     :path: "../../../node_modules/expo-constants/ios"
   Expo:
@@ -2575,6 +2585,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   ArcGIS: 7f9653b961b16c7658bc83d429e4cf943be495af
+  CMapLibreStyleTry: 814b15f1cdab0fb98603a80d9c099d11119cde70
+  CTilePng: 489523ec525ff5e6862929b9f4675caf58087408
   EXConstants: 13cc6ad9324d81223386074a523d4e16aed32cd2
   Expo: 092ab1f66de3246b5ffd87d85da9a78648013170
   ExpoAsset: e046c820a585f46969182c2aa03c3a822dd55b6b
@@ -2593,30 +2605,30 @@ SPEC CHECKSUMS:
   MapboxCommon: 69219036896e94b356757391629e586944ad2b97
   MapboxCoreMaps: 77311833fc3d61407777a6d9b1d49422b6962d9a
   MapboxMaps: 70192a3581956efae80a0ce4dedd09cc25b02d22
-  MapConductorCore: f4a8fe706da64fc05e72c0d387ec60a48dcf1eeb
+  MapConductorCore: 1103b5a507231aebe4ab08fb593b32aca6712bef
   MapConductorForArcGIS: 31dab782a4fbb6046f510dbe7d7ea19323092094
   MapConductorForGoogleMaps: 483f312109c462dc1fc309cfd693bfff4dee034b
   MapConductorForLongdo: 1d203bf49f1e99fd6695b33acc376c5ff239e0bc
   MapConductorForMapbox: e45bed934a7e307efc08d9aa51aa6c8a48f042d5
-  MapConductorForMapLibre: 9ac83b0358ba70f1b901e44e9d2f98ae4fbea9be
+  MapConductorForMapLibre: e2dd7d8a5f66d51b9d73af231a33d59b5920bfbd
   MapConductorForMapTiler: 882ab9b984a63fa8b244ac3d38917d1071163ad9
   MapConductorForTemplate: 722f6c4ad3df55aa9dc295301e549142f2bacded
   MapConductorForTomTom: 768935180c85c0cc420647730e8795ba17d79987
   MapConductorGeoJSON: 188c5fab5dc8d5db24e7fe77f9ee3eac707d1a55
   MapConductorHeatmap: cc0c6348088b76b4e1bc74eea8e19bd5ca491f86
   MapConductorMarkerClustering: 62baa375da0aafc1ff0a67f516ab3cddf10e4a39
-  MapConductorReactForArcGIS: 82a0eeb55de9ed386f0d6117441e1b25a06d4a99
-  MapConductorReactForGoogleMaps: bbf691aedad5c8f867ea691e8c9bb3beea70572e
+  MapConductorReactForArcGIS: 60976105f4b18c1443c41929f5f69635ccd33164
+  MapConductorReactForGoogleMaps: 197f61abc12cb55a27a9e88e07906c84aff6ad25
   MapConductorReactForLongdo: 8d91c04314a4c105db839071cfb930558e615223
-  MapConductorReactForMapbox: 1b423d99eb829c87b04e3edc57103e4e8b1d3659
-  MapConductorReactForMapLibre: 2f073b6a4c6918e5e225be9e1b2ce252452aeeda
-  MapConductorReactForMapTiler: dde283e47128af5a7a859b09badd867305aa5ce8
+  MapConductorReactForMapbox: 1c76065e17186f42ee25c16abfdeee7f2107ec4a
+  MapConductorReactForMapLibre: 03fe96bb4b75c00b39beed9a31993ba911d3bbaf
+  MapConductorReactForMapTiler: 915a2db2207a4244b1f57d58f0568e1f6ce30128
   MapConductorReactForTemplate: 58c9908fe31eb43653eab0604749fdcca7a3a3de
-  MapConductorReactForTomTom: e9ad7bbe3000c1e153338589db9cf14a0723e854
-  MapConductorReactGeoJSONLayer: b81b6c631b08d6c3497b8d74cec04c9f90a1a6b9
-  MapConductorReactHeatmap: baffc663d7492848f323739ea09acec8dbf5507a
-  MapConductorReactMarkerClustering: 45aa7843f5118c1ec3d32bba3eeb2ba354c06a1e
-  MapConductorReactNativeCore: fe69325883c4bcf93d6dce6382c15bcfb8c4998e
+  MapConductorReactForTomTom: 4116ab2dd76b583fb9caadb1e9c61bd25bc6bbdd
+  MapConductorReactGeoJSONLayer: 6d1b22cc5e42daf792fe9740d3c7be5d5bcb953b
+  MapConductorReactHeatmap: ddf19e30d12dc14083965c43fabdb1a6593c962a
+  MapConductorReactMarkerClustering: 9fd6c18d626b26098891b44d9821eef372752f5e
+  MapConductorReactNativeCore: af6a83a39feb5c8e093f97e7c42e0a012b106556
   MapLibre: 96726270455ffd183688cf0bd2a3881b0212a57e
   RCTDeprecation: 2a74a2c57675e64419bd89078efde81f7c1de90b
   RCTRequired: 30451112e6fef4e6f31b4e7eee0845156e35e4b0
@@ -2708,6 +2720,6 @@ SPEC CHECKSUMS:
   Turf: c9eb11a65d96af58cac523460fd40fec5061b081
   Yoga: fe50ab299e578f397fef753cf309c6703a4db29b
 
-PODFILE CHECKSUM: 1917e9c6b4085ff2a37b9ee48ae78f61895e2ad9
+PODFILE CHECKSUM: e34c1eec31b26fee25c162fd0991dcd413e25e19
 
 COCOAPODS: 1.17.0

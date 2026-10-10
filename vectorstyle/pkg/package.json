@@ -1,0 +1,17 @@
+{
+  "name": "mvt-style-wasm",
+  "type": "module",
+  "description": "wasm-bindgen bindings for mvt-style",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "files": [
+    "mvt_style_wasm_bg.wasm",
+    "mvt_style_wasm.js",
+    "mvt_style_wasm.d.ts"
+  ],
+  "main": "mvt_style_wasm.js",
+  "types": "mvt_style_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
