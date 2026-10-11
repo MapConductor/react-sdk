@@ -610,6 +610,11 @@ body,
   inset: 0;
   z-index: 0;
   visibility: hidden;
+  /* `visibility` alone is not enough: a descendant can set its own
+     `visibility: visible` and come back -- Longdo's built-in MapLibre
+     attribution does, and stayed on screen under every other provider.
+     Opacity is not inherited, so nothing inside can undo it. */
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -619,6 +624,7 @@ body,
 
 .singleton-map-layer.active {
   visibility: visible;
+  opacity: 1;
   pointer-events: auto;
 }
 

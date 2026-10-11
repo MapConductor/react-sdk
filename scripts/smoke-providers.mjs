@@ -70,7 +70,7 @@ async function visit(ctx, provider, page) {
     await p.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await p.waitForTimeout(9000); // Cesium / ArcGIS 3D settle slowly.
 
-    const sel = 'canvas, .leaflet-container, .gm-style, .H_Map';
+    const sel = 'canvas, .leaflet-container, .gm-style, .H_Map, gmp-map-3d';
     surface = await p.locator(sel).count();
     // Measure the LARGEST match, not the first. deck.gl leaves a second, unused
     // 300x150 canvas next to the one it renders into, and reporting that one
@@ -107,7 +107,7 @@ mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome' });
 const ctx = await browser.newContext({
   viewport: { width: 1400, height: 900 },
-  deviceScaleFactor: 1,
+  deviceScaleFactor: Number(process.env.DPR ?? 1),
   ignoreHTTPSErrors: true,
 });
 
