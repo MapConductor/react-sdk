@@ -130,8 +130,18 @@ export function VectorTileLayer({
     // という前提でレベルを選び、512 を渡すと 1 段深いレベルを 4 倍の枚数で引く。
     // 宣言しているプロバイダにはそれに従い、明示された値は常に優先する。
     const registry = useMapServiceRegistry();
-    const tileSize =
-        requestedTileSize ?? registry.get(RasterTilePreferenceKey)?.preferredTileSize ?? 512;
+    const preference = registry.get(RasterTilePreferenceKey);
+    /** CSS px one tile covers on screen; what the style is read at. */
+    const tileSize = requestedTileSize ?? preference?.preferredTileSize ?? 512;
+    /** Pixels drawn per tile. */
+    const pixelTileSize = Math.round(tileSize * devicePixelRatioClamped());
+    /**
+     * What the map is told. A map that lays tiles out in device px needs the
+     * pixel count or it asks for a zoom one level too deep; one that lays
+     * them out in CSS px needs the CSS size or everything doubles. Only the
+     * provider knows which it is, so it says, through the preference.
+     */
+    const declaredTileSize = preference?.layoutInDevicePixels ? pixelTileSize : tileSize;
 
     // The direct path: the map draws the style itself and nothing below
     // mounts. Read on every render because a provider registers as it
@@ -207,7 +217,8 @@ export function VectorTileLayer({
 
             const provider = await VectorTileProvider.create({
                 style: styleRef.current,
-                tileSize,
+                tileSize: pixelTileSize,
+                displayTileSize: tileSize,
                 cacheBytes: 48 * 1024 * 1024,
                 persistSourceTiles: true,
                 persistRenderedTiles: true,
@@ -251,7 +262,7 @@ export function VectorTileLayer({
         // `headers` and `onDiagnostics` are deliberately not dependencies: a new
         // object identity each render would tear down and rebuild the renderer.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [routeId, tileServer, tileSize, direct]);
+    }, [routeId, tileServer, tileSize, pixelTileSize, direct]);
 
     // Handed over rather than rasterised. Keyed on the style's content, so a
     // recolour is a new handoff; the support cancels the clear a remount
@@ -311,10 +322,10 @@ export function VectorTileLayer({
                 type: 'UrlTemplate',
                 template: tileServer.urlTemplate({
                     routeId: groundRoute,
-                    tileSize,
+                    tileSize: declaredTileSize,
                     cacheKey: `s${styleVersion}`,
                 }),
-                tileSize,
+                tileSize: declaredTileSize,
                 maxZoom,
                 attributionRules: credits,
                 scheme: TileScheme.XYZ,
@@ -327,7 +338,7 @@ export function VectorTileLayer({
         const timer = setTimeout(() => setGrounds((prev) => prev.slice(-1)), HANDOVER_MS);
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ready, styleVersion, credits, tileSize, maxZoom, groundRoute]);
+    }, [ready, styleVersion, credits, tileSize, pixelTileSize, declaredTileSize, maxZoom, groundRoute]);
 
     /**
      * The labels: replaced on a restyle and on every glyph arrival, always
@@ -342,10 +353,10 @@ export function VectorTileLayer({
                 type: 'UrlTemplate',
                 template: tileServer.urlTemplate({
                     routeId: labelRoute,
-                    tileSize,
+                    tileSize: declaredTileSize,
                     cacheKey: `s${styleVersion}-g${glyphGeneration}`,
                 }),
-                tileSize,
+                tileSize: declaredTileSize,
                 maxZoom,
                 // Both halves carry the credit: the attribution overlay
                 // deduplicates, so printing it twice costs nothing, and hiding
@@ -361,7 +372,7 @@ export function VectorTileLayer({
         const timer = setTimeout(() => setLabels((prev) => prev.slice(-1)), HANDOVER_MS);
         return () => clearTimeout(timer);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [ready, styleVersion, glyphGeneration, credits, tileSize, maxZoom, labelRoute]);
+    }, [ready, styleVersion, glyphGeneration, credits, tileSize, pixelTileSize, declaredTileSize, maxZoom, labelRoute]);
 
     // Pushed onto the existing states rather than rebuilding them: opacity and
     // visibility do not change what a tile contains, so nothing has to refetch.
@@ -385,4 +396,10 @@ export function VectorTileLayer({
             ))}
         </>
     );
+}
+
+/** Device pixels per CSS pixel, clamped to something sane. */
+function devicePixelRatioClamped(): number {
+    if (typeof window === 'undefined') return 1;
+    return Math.max(1, Math.min(3, Math.round(window.devicePixelRatio || 1)));
 }

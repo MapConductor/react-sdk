@@ -82,8 +82,16 @@ class Rasterisation implements VectorStyleRasterisation {
     private credits: AttributionRule[] = [];
     /** CSS px one tile covers on screen. */
     private tileSize: number;
-    /** Pixels per tile: what the map is told and what the renderer draws. */
+    /** Pixels per tile: what the renderer draws. */
     private pixelTileSize: number;
+    /**
+     * The size the map is told, in the layer state and in the tile URL
+     * (Leaflet derives its zoom offset from the URL's size segment; the
+     * server itself ignores it). The CSS size for a map that lays tiles out
+     * in CSS px, the pixel size for one that lays them out in device px --
+     * which is the provider's to say, through `RasterTilePreference`.
+     */
+    private declaredTileSize: number;
 
     constructor(
         private readonly host: MapStyleHost,
@@ -94,6 +102,7 @@ class Rasterisation implements VectorStyleRasterisation {
         this.labelRoute = `${this.groupId}-labels`;
         this.tileSize = options.tileSize ?? 512;
         this.pixelTileSize = this.tileSize;
+        this.declaredTileSize = this.tileSize;
         void this.start(styleJson);
     }
 
@@ -146,11 +155,10 @@ class Rasterisation implements VectorStyleRasterisation {
             this.tileServer.startServiceWorker(this.options.serviceWorkerPath ?? '/tile-sw.js');
             await this.tileServer.waitForController();
             if (this.disposed) return;
-            this.tileSize =
-                this.options.tileSize ??
-                this.host.serviceRegistry.get(RasterTilePreferenceKey)?.preferredTileSize ??
-                512;
+            const preference = this.host.serviceRegistry.get(RasterTilePreferenceKey);
+            this.tileSize = this.options.tileSize ?? preference?.preferredTileSize ?? 512;
             this.pixelTileSize = Math.round(this.tileSize * pixelRatio());
+            this.declaredTileSize = preference?.layoutInDevicePixels ? this.pixelTileSize : this.tileSize;
             await this.apply(styleJson, 'both', this.revision);
         } catch (error: unknown) {
             this.host.report([`the style could not be rasterised: ${describe(error)}`]);
@@ -215,10 +223,10 @@ class Rasterisation implements VectorStyleRasterisation {
                 type: 'UrlTemplate',
                 template: this.tileServer.urlTemplate({
                     routeId: this.groundRoute,
-                    tileSize: this.pixelTileSize,
+                    tileSize: this.declaredTileSize,
                     cacheKey: `g${this.groundGeneration}`,
                 }),
-                tileSize: this.tileSize,
+                tileSize: this.declaredTileSize,
                 maxZoom: MAX_ZOOM,
                 attributionRules: this.credits,
                 scheme: TileScheme.XYZ,
@@ -237,10 +245,10 @@ class Rasterisation implements VectorStyleRasterisation {
                 type: 'UrlTemplate',
                 template: this.tileServer.urlTemplate({
                     routeId: this.labelRoute,
-                    tileSize: this.pixelTileSize,
+                    tileSize: this.declaredTileSize,
                     cacheKey: `g${this.labelGeneration}`,
                 }),
-                tileSize: this.tileSize,
+                tileSize: this.declaredTileSize,
                 maxZoom: MAX_ZOOM,
                 // Both halves carry the credit, so hiding either one cannot
                 // silence it; the overlay ends in `distinct`.
