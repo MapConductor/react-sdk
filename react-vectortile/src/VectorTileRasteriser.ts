@@ -80,7 +80,10 @@ class Rasterisation implements VectorStyleRasterisation {
     private groundGeneration = 0;
     private labelGeneration = 0;
     private credits: AttributionRule[] = [];
+    /** CSS px one tile covers on screen. */
     private tileSize: number;
+    /** Pixels per tile: what the map is told and what the renderer draws. */
+    private pixelTileSize: number;
 
     constructor(
         private readonly host: MapStyleHost,
@@ -90,6 +93,7 @@ class Rasterisation implements VectorStyleRasterisation {
         this.groundRoute = `${this.groupId}-geom`;
         this.labelRoute = `${this.groupId}-labels`;
         this.tileSize = options.tileSize ?? 512;
+        this.pixelTileSize = this.tileSize;
         void this.start(styleJson);
     }
 
@@ -146,6 +150,7 @@ class Rasterisation implements VectorStyleRasterisation {
                 this.options.tileSize ??
                 this.host.serviceRegistry.get(RasterTilePreferenceKey)?.preferredTileSize ??
                 512;
+            this.pixelTileSize = Math.round(this.tileSize * pixelRatio());
             await this.apply(styleJson, 'both', this.revision);
         } catch (error: unknown) {
             this.host.report([`the style could not be rasterised: ${describe(error)}`]);
@@ -157,7 +162,10 @@ class Rasterisation implements VectorStyleRasterisation {
         try {
             created = await VectorTileProvider.create({
                 style: styleJson,
-                tileSize: this.tileSize,
+                // Two numbers, deliberately: the pixels to fill, and the
+                // CSS px they are shown at. See `pixelRatio`.
+                tileSize: this.pixelTileSize,
+                displayTileSize: this.tileSize,
                 cacheBytes: 48 * 1024 * 1024,
                 persistSourceTiles: true,
                 persistRenderedTiles: true,
@@ -207,7 +215,7 @@ class Rasterisation implements VectorStyleRasterisation {
                 type: 'UrlTemplate',
                 template: this.tileServer.urlTemplate({
                     routeId: this.groundRoute,
-                    tileSize: this.tileSize,
+                    tileSize: this.pixelTileSize,
                     cacheKey: `g${this.groundGeneration}`,
                 }),
                 tileSize: this.tileSize,
@@ -229,7 +237,7 @@ class Rasterisation implements VectorStyleRasterisation {
                 type: 'UrlTemplate',
                 template: this.tileServer.urlTemplate({
                     routeId: this.labelRoute,
-                    tileSize: this.tileSize,
+                    tileSize: this.pixelTileSize,
                     cacheKey: `g${this.labelGeneration}`,
                 }),
                 tileSize: this.tileSize,
@@ -249,6 +257,24 @@ function widen(current: StyleAffects, next: StyleAffects): StyleAffects {
     if (current === 'none') return next;
     if (current === next) return current;
     return 'both';
+}
+
+/**
+ * Device pixels per CSS pixel, clamped to something sane.
+ *
+ * A raster basemap is laid out by the map in device pixels, so on a 2x
+ * screen a tile declared as 512 covers half the ground it does on a 1x one:
+ * the map asks for a zoom one level deeper and the style is read there,
+ * which is how every label and road ends up half size. Declaring
+ * `size * ratio` keeps the zoom, rendering that many pixels keeps it sharp,
+ * and `displayTileSize` tells the rasteriser the ground has not changed.
+ *
+ * ios-vectortile's `VectorTileProvider(tileSize:renderScale:)` splits the
+ * same two numbers, for the same reason.
+ */
+function pixelRatio(): number {
+    if (typeof window === 'undefined') return 1;
+    return Math.max(1, Math.min(3, Math.round(window.devicePixelRatio || 1)));
 }
 
 function describe(error: unknown): string {

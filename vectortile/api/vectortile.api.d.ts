@@ -6,7 +6,28 @@ interface TileRequest {
 interface TileRenderCoreOptions {
     /** A `style.json` URL, its raw text, or the parsed object. */
     style: string | object;
+    /**
+     * How many pixels a rendered tile has on each edge. Defaults to 512.
+     *
+     * On a screen with more device pixels than CSS pixels this is the larger
+     * number: the map is handed a sharper image for the same ground. What
+     * that ground is stays {@link displayTileSize}'s job.
+     */
     tileSize?: number;
+    /**
+     * The CSS px one tile covers on screen, when that is not the same as
+     * {@link tileSize}.
+     *
+     * Style dimensions are screen units, so the rasteriser needs both: the
+     * pixel count to fill, and the width those pixels are shown at. They are
+     * the same number on a 1x screen and differ by the device pixel ratio on
+     * a Retina one -- and getting it wrong is not subtle. Declare 1024 pixels
+     * without saying they cover 512 CSS px and every label and road comes out
+     * half size, with the style read one zoom too deep.
+     *
+     * Defaults to {@link tileSize}, which is exactly today's behaviour.
+     */
+    displayTileSize?: number;
     /** Source tile cache budget in bytes. Defaults to 16 MB. */
     cacheBytes?: number;
     /**
@@ -88,7 +109,7 @@ declare class TileRenderCore {
      * says*, not by *what the renderer did with it*. Kept in step with the
      * Android and iOS bindings: they cache the output of the same core.
      */
-    static readonly outputVersion = 20;
+    static readonly outputVersion = 22;
     /**
      * Told when glyphs arrive and the tiles already on screen are missing
      * labels because of it. The host must make the map refetch — nothing else
@@ -566,6 +587,14 @@ interface WorkerInitRequest {
     /** Style JSON as text; the main thread never sends a URL it has resolved. */
     readonly styleText: string;
     readonly tileSize: number;
+    /**
+     * The CSS px one tile covers, when that differs from `tileSize`.
+     *
+     * Must cross the boundary with everything else: the worker *is* the
+     * default path, so a display size the main thread keeps to itself would
+     * silently do nothing.
+     */
+    readonly displayTileSize?: number;
     readonly cacheBytes: number;
     readonly headers?: Record<string, string>;
     readonly wasmUrl?: string;
