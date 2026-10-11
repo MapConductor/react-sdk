@@ -276,6 +276,8 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           onCameraMoveStart={content['google-2d']?.onCameraMoveStart}
           onCameraMove={content['google-2d']?.onCameraMove}
           onCameraMoveEnd={content['google-2d']?.onCameraMoveEnd}
+          mapStyle={content['google-2d']?.mapStyle}
+          onStyleDiagnostics={content['google-2d']?.onStyleDiagnostics}
         >
           {content['google-2d'] && <Fragment key={content['google-2d']!.owner}>{content['google-2d']!.children}</Fragment>}
         </GoogleMapView2D>
@@ -294,6 +296,8 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           onCameraMoveStart={content['google-3d']?.onCameraMoveStart}
           onCameraMove={content['google-3d']?.onCameraMove}
           onCameraMoveEnd={content['google-3d']?.onCameraMoveEnd}
+          mapStyle={content['google-3d']?.mapStyle}
+          onStyleDiagnostics={content['google-3d']?.onStyleDiagnostics}
         >
           {content['google-3d'] && <Fragment key={content['google-3d']!.owner}>{content['google-3d']!.children}</Fragment>}
         </GoogleMapView>
@@ -377,7 +381,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction }: SingletonMapSlotProps) {
+export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction, mapStyle, onStyleDiagnostics }: SingletonMapSlotProps) {
   const { register, unregister } = useSingletonMapsContext();
   const owner = useId();
 
@@ -390,6 +394,8 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
       onCameraMove,
       onCameraMoveEnd,
       cameraRestriction,
+      mapStyle,
+      onStyleDiagnostics,
     });
     return () => unregister(id, owner);
   }, [
@@ -401,6 +407,8 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
     onCameraMove,
     onCameraMoveEnd,
     cameraRestriction,
+    mapStyle,
+    onStyleDiagnostics,
     register,
     unregister,
   ]);

@@ -45,6 +45,7 @@ const PolygonHolePage = lazy(() => import('./pages/polygon/hole/PolygonHolePage'
 const PolylineClickPage = lazy(() => import('./pages/polyline/click/PolylineClickPage').then(m => ({ default: m.PolylineClickPage })));
 const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage').then(m => ({ default: m.RasterLayerPage })));
 const VectorTileLayerPage = lazy(() => import('./pages/vectortile/VectorTileLayerPage').then(m => ({ default: m.VectorTileLayerPage })));
+const StyleAdjustmentsPage = lazy(() => import('./pages/vectorstyle/StyleAdjustmentsPage').then(m => ({ default: m.StyleAdjustmentsPage })));
 const HeatmapLayerPage = lazy(() => import('./pages/heatmaplayer/HeatmapLayerPage').then(m => ({ default: m.HeatmapLayerPage })));
 const BasicGeoJSONPage = lazy(() => import('./pages/geojson/basic/BasicGeoJSONPage').then(m => ({ default: m.BasicGeoJSONPage })));
 const GeoJSONLayerPage = lazy(() => import('./pages/geojson/layer/GeoJSONLayerPage').then(m => ({ default: m.GeoJSONLayerPage })));
@@ -98,6 +99,7 @@ function pageContent(page: string | undefined) {
     case 'ground-image': return <GroundImagePage />;
     case 'raster-layer': return <RasterLayerPage />;
     case 'vector-tile': return <VectorTileLayerPage />;
+    case 'style-adjustments': return <StyleAdjustmentsPage />;
     case 'info-bubble-simple': return <SimpleInfoBubblePage />;
     case 'info-bubble-styled': return <StyledInfoBubblePage />;
     case 'info-bubble-multiple': return <MultipleBubblesPage />;

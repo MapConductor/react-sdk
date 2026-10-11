@@ -1021,3 +1021,17 @@ body,
 .hello-map-notes li {
   margin: 4px 0;
 }
+
+/* ベクタースタイルのページが出す診断行。ルールが当たらなかった、この地図が
+   受け取れなかった、スタイルが読めなかった — どれも「ほぼ動いた」に見えるので
+   目立たせる。 */
+.diagnostic {
+  margin: 2px 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #b45309;
+}
+
+.diagnostic.error {
+  color: #b91c1c;
+}

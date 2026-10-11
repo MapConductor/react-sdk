@@ -1,4 +1,7 @@
 import React from 'react';
+import { MapStyleHost } from '@mapconductor/js-sdk-core';
+import { StyleAffects } from '@mapconductor/vectorstyle';
+import { VectorStyleRasteriser, VectorStyleRasterisation } from '@mapconductor/react-vectorstyle';
 
 interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
@@ -63,4 +66,39 @@ interface VectorTileLayerProps {
  */
 declare function VectorTileLayer({ style, tileSize: requestedTileSize, opacity, visible, maxZoom, headers, onDiagnostics, asBasemap, }: VectorTileLayerProps): React.ReactElement | null;
 
-export { VectorTileLayer, type VectorTileLayerProps };
+interface VectorTileRasteriserOptions {
+    /** Edge of a rendered tile in CSS pixels. The map's own preference wins. */
+    readonly tileSize?: number;
+    /** Sent with every source-tile, sprite and glyph request. */
+    readonly headers?: Record<string, string>;
+    /** Where the renderer's `.wasm` is served from, if not the default. */
+    readonly wasmUrl?: string | URL;
+    /** Path the tile service worker is registered from. */
+    readonly serviceWorkerPath?: string;
+}
+/**
+ * Draws a vector style for a map that cannot read one.
+ *
+ * ```tsx
+ * <GoogleMapView
+ *     state={state}
+ *     mapStyle={createVectorStyle({ rules, rasteriser: new VectorTileRasteriser() })}
+ * />
+ * ```
+ *
+ * Google Maps, MapKit, HERE, ArcGIS, Leaflet, OpenLayers and the rest have
+ * no vector renderer. This renders the same compiled document to tiles in
+ * the browser and mounts them as the basemap, so the adjustments an app
+ * writes once produce the same map on every backend. MapLibre, Mapbox and
+ * MapTiler never call it — they are handed the document itself.
+ *
+ * ios-vectortile の `VectorTileRasteriser`、android-vectortile の同名クラスと
+ * 対応する。世代の付け方、地と文字の分け方、restyle のまとめ方まで揃えてある。
+ */
+declare class VectorTileRasteriser implements VectorStyleRasteriser {
+    private readonly options;
+    constructor(options?: VectorTileRasteriserOptions);
+    install(host: MapStyleHost, styleJson: string, _affects: StyleAffects): VectorStyleRasterisation;
+}
+
+export { VectorTileLayer, type VectorTileLayerProps, VectorTileRasteriser, type VectorTileRasteriserOptions };

@@ -21,6 +21,8 @@ type TileImage = ImageBitmap | HTMLImageElement | null;
 interface LocalTileTemplate {
   routeId: string;
   tileSize: number;
+  /** Cache generation embedded in SDK-owned tile URLs. */
+  cacheKey: string | null;
 }
 
 /**
@@ -33,11 +35,16 @@ interface LocalTileTemplate {
 function parseLocalTileTemplate(template: string): LocalTileTemplate | null {
   if (template.startsWith('mc-local-tile://')) {
     const url = new URL(template);
-    const tileSize = Number(url.pathname.split('/').filter(Boolean)[0]);
-    return Number.isFinite(tileSize) ? { routeId: url.hostname, tileSize } : null;
+    const parts = url.pathname.split('/').filter(Boolean);
+    const tileSize = Number(parts[0]);
+    return Number.isFinite(tileSize)
+      ? { routeId: url.hostname, tileSize, cacheKey: parts[1] ?? null }
+      : null;
   }
-  const match = template.match(/^\/?__tiles\/([^/]+)\/(\d+)\//);
-  return match ? { routeId: match[1], tileSize: Number(match[2]) } : null;
+  const match = template.match(/^\/?__tiles\/([^/]+)\/(\d+)(?:\/([^/]+))?\//);
+  return match
+    ? { routeId: match[1], tileSize: Number(match[2]), cacheKey: match[3] ?? null }
+    : null;
 }
 
 async function toImage(bytes: ArrayBuffer | Uint8Array | null): Promise<TileImage> {
@@ -47,7 +54,12 @@ async function toImage(bytes: ArrayBuffer | Uint8Array | null): Promise<TileImag
   // ArrayBuffer へ写してから渡す。
   const buffer = new ArrayBuffer(source.byteLength);
   new Uint8Array(buffer).set(source);
-  return createImageBitmap(new Blob([buffer], { type: 'image/png' }));
+  // BitmapLayer blends straight-alpha colors. The browser default can
+  // premultiply translucent glyph/halo pixels, darkening their edges again
+  // when WebGL blends them onto the ground tile.
+  return createImageBitmap(new Blob([buffer], { type: 'image/png' }), {
+    premultiplyAlpha: 'none',
+  });
 }
 
 async function fetchImage(
@@ -57,7 +69,7 @@ async function fetchImage(
 ): Promise<TileImage> {
   const response = await fetch(url, { headers: headers ?? undefined, signal });
   if (!response.ok) throw new Error(`Tile request failed: ${response.status}`);
-  return createImageBitmap(await response.blob());
+  return createImageBitmap(await response.blob(), { premultiplyAlpha: 'none' });
 }
 
 interface TileJsonDocument {
@@ -101,7 +113,11 @@ export class DeckGLRasterLayerRenderer {
     this.holder.map.registry.set(
       handle.layerId,
       new TileLayer<TileImage>({
-        id: handle.layerId,
+        // TileLayer keeps decoded images in its cache by layer id. The
+        // vector-style rasteriser changes only the cache key in the local URL
+        // when a preset changes, so include that generation in the deck layer
+        // id to force old Roads tiles out when switching to Night/Water/etc.
+        id: local?.cacheKey ? `${handle.layerId}-${local.cacheKey}` : handle.layerId,
         data: local ? [] : template,
         tileSize,
         minZoom: minZoom ?? undefined,
@@ -137,6 +153,10 @@ export class DeckGLRasterLayerRenderer {
             id: `${props.id}-bitmap`,
             image,
             bounds: [west, south, east, north],
+            // Labels are already rendered at 2x resolution. Trilinear
+            // filtering blends two downsampled mip levels and softens them
+            // again; sample the nearest mip level with linear pixel filtering.
+            textureParameters: { minFilter: 'linear', magFilter: 'linear', mipmapFilter: 'nearest' },
             pickable: false,
           });
         },

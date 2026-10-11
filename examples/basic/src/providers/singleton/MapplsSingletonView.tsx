@@ -18,6 +18,8 @@ export default function MapplsSingletonView({ state, content }: {
     <MapplsMapView2D
       state={state}
       cameraRestriction={content?.cameraRestriction}
+      mapStyle={content?.mapStyle}
+      onStyleDiagnostics={content?.onStyleDiagnostics}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

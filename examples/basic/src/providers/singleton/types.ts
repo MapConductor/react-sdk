@@ -1,4 +1,4 @@
-import type { CameraRestriction, GeoPoint, MapCameraPosition } from '@mapconductor/js-sdk-core';
+import type { CameraRestriction, GeoPoint, MapCameraPosition, MapViewStyle } from '@mapconductor/js-sdk-core';
 import type { ReactNode } from 'react';
 
 export interface SingletonMapContent {
@@ -17,4 +17,15 @@ export interface SingletonMapContent {
    * ままページごとに差し替えられる。
    */
   cameraRestriction?: CameraRestriction | null;
+  /**
+   * ページが指定する地図の見た目そのもの（ベクタースタイル）。
+   *
+   * 共有インスタンスなので、カメラ制限と同じ理由でここを通す。スタイルを
+   * 自分で読めるバックエンド（MapLibre / Mapbox / MapTiler）はドキュメントを
+   * 受け取り、読めないバックエンドは「ラスタライザが無い」と diagnostics で
+   * 返す。**全プロバイダに渡す**こと: 一部だけ配線すると「型は通るが何も
+   * 起きない prop」になる。
+   */
+  mapStyle?: MapViewStyle | null;
+  onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
 }

@@ -178,6 +178,9 @@ export class DeckGLMap {
       // カメラは MapConductor の state が持つので controlled にする。
       viewState: this.viewState as MapViewState,
       layers: [],
+      // Match the CSS layout to the current screen density, including browser
+      // zoom. ResizeObserver's physical pixel box can report a different ratio.
+      deviceProps: { createCanvasContext: { pixelSizeSource: 'css-dpr' } },
       style: { position: 'absolute', inset: '0' },
       onViewStateChange: ({ viewState, interactionState }) => {
         const next = viewState as DeckGLViewState;
