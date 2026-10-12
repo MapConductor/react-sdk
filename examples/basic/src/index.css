@@ -730,6 +730,17 @@ body,
   margin-bottom: 4px;
 }
 
+/* The category name doubles as its draw/skip switch, in the label row. */
+.category-visibility {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-visibility input {
+  width: auto;
+}
+
 .checkbox-control {
   display: flex;
   align-items: center;

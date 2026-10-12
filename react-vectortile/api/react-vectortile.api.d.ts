@@ -1,11 +1,31 @@
 import React from 'react';
+import { StyleRules, VectorStyleRasteriser, VectorStyleRasterisation } from '@mapconductor/react-vectorstyle';
 import { MapStyleHost } from '@mapconductor/js-sdk-core';
 import { StyleAffects } from '@mapconductor/vectorstyle';
-import { VectorStyleRasteriser, VectorStyleRasterisation } from '@mapconductor/react-vectorstyle';
 
 interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
     style: string | object;
+    /**
+     * Adjustments applied to the style before anything is drawn -- the same
+     * rules `VectorStyle` takes, so "roads are white" or "no buildings"
+     * reads the same wherever it is written.
+     *
+     * A rule that hides a role is the reason to reach for this rather than
+     * editing the document: the layers are switched off in the document the
+     * renderer is given, so nothing about them is drawn.
+     *
+     * ```tsx
+     * rules={buildStyleRules((r) => {
+     *     r.role(LayerRole.building, { visible: false });
+     *     r.role(LayerRole.road, { visible: false });
+     * })}
+     * ```
+     *
+     * Left out, the style is drawn as its author wrote it and the compiler's
+     * wasm is never fetched.
+     */
+    rules?: StyleRules;
     /**
      * Output tile size in pixels. Left out, the backend decides: a provider
      * that has registered a `RasterTilePreference` is answered, and anything
@@ -64,7 +84,7 @@ interface VectorTileLayerProps {
  * <VectorTileLayer style="https://example.com/style.json" opacity={0.9} />
  * ```
  */
-declare function VectorTileLayer({ style, tileSize: requestedTileSize, opacity, visible, maxZoom, headers, onDiagnostics, asBasemap, }: VectorTileLayerProps): React.ReactElement | null;
+declare function VectorTileLayer({ style, rules, tileSize: requestedTileSize, opacity, visible, maxZoom, headers, onDiagnostics, asBasemap, }: VectorTileLayerProps): React.ReactElement | null;
 
 interface VectorTileRasteriserOptions {
     /** Edge of a rendered tile in CSS pixels. The map's own preference wins. */

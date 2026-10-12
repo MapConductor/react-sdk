@@ -2,7 +2,7 @@ import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
   code: `<MapViewContainer state={mapViewState}>
-  <VectorTileLayer style={style} opacity={opacity} />
+  <VectorTileLayer style={style} rules={rules} opacity={opacity} />
 </MapViewContainer>`,
   state: `const [palette, setPalette] = useState({
   water: '#3a7ca5',
@@ -10,12 +10,14 @@ const doc: SamplePageDoc = {
   street: '#ffffff',
   building: '#d9d0c9',
 });
-// recolour() mixes each layer's own colour toward the picked one,
-// keyed on the Shortbread source layer it draws.
-const style = useMemo(
-  () => recolour(baseStyle, palette, strength),
-  [baseStyle, palette, strength],
-);`,
+// A rule reaches layers by role, so the same words work in someone
+// else's style. mix blends each layer's own colour toward the picked
+// one; visible: false leaves the layers out of the document, so they
+// are not drawn at all.
+const rules = buildStyleRules((r) => {
+  r.role(LayerRole.water, { colorFilter: { mix: { color: palette.water, amount: strength } } });
+  r.role(LayerRole.building, { visible: false });
+});`,
   explanation: {
     en: [
       'Draws a MapLibre vector style on any backend by rasterising it in the browser and serving the result as ordinary raster tiles.',

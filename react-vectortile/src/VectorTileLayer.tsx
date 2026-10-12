@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
     TileServerRegistry,
     createRasterLayerState,
@@ -10,10 +10,31 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { RasterLayer, useMapServiceRegistry } from '@mapconductor/js-sdk-react';
 import { VectorTileProvider } from '@mapconductor/vectortile';
+import { NO_STYLE_RULES, type StyleRules } from '@mapconductor/react-vectorstyle';
 
 export interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
     style: string | object;
+    /**
+     * Adjustments applied to the style before anything is drawn -- the same
+     * rules `VectorStyle` takes, so "roads are white" or "no buildings"
+     * reads the same wherever it is written.
+     *
+     * A rule that hides a role is the reason to reach for this rather than
+     * editing the document: the layers are switched off in the document the
+     * renderer is given, so nothing about them is drawn.
+     *
+     * ```tsx
+     * rules={buildStyleRules((r) => {
+     *     r.role(LayerRole.building, { visible: false });
+     *     r.role(LayerRole.road, { visible: false });
+     * })}
+     * ```
+     *
+     * Left out, the style is drawn as its author wrote it and the compiler's
+     * wasm is never fetched.
+     */
+    rules?: StyleRules;
     /**
      * Output tile size in pixels. Left out, the backend decides: a provider
      * that has registered a `RasterTilePreference` is answered, and anything
@@ -67,6 +88,21 @@ function styleAttributions(style: string | object): AttributionRule[] {
 }
 
 /**
+ * The style as text, fetched when it is a URL.
+ *
+ * Only `rules` needs this: without them the document is handed to the
+ * renderer untouched and it does its own fetching. The rule for telling a
+ * URL from a document is the renderer's, so both agree.
+ */
+async function styleText(style: string | object): Promise<string> {
+    if (typeof style === 'object') return JSON.stringify(style);
+    if (/^\s*\{/.test(style)) return style;
+    const response = await fetch(style);
+    if (!response.ok) throw new Error(`style fetch failed: ${response.status} ${style}`);
+    return response.text();
+}
+
+/**
  * How long a layer being replaced stays up.
  *
  * Replacing a raster layer's source URL is implemented as remove-then-add, so
@@ -107,6 +143,7 @@ const clamp = (value: number): number => Math.min(1, Math.max(0, value));
  */
 export function VectorTileLayer({
     style,
+    rules,
     tileSize: requestedTileSize,
     opacity = 1,
     visible = true,
@@ -177,9 +214,41 @@ export function VectorTileLayer({
         () => (typeof style === 'string' ? style : JSON.stringify(style)),
         [style],
     );
+    const rulesJson = rules?.json ?? NO_STYLE_RULES.json;
+    /**
+     * What identifies the document actually drawn. The rules belong in it:
+     * the same style with the buildings switched off is a different map, and
+     * everything below that reacts to a restyle keys off this.
+     */
+    const drawnKey = `${styleKey}\u0000${rulesJson}`;
     // Read inside effects that must not re-run when the style changes.
     const styleRef = useRef(style);
     styleRef.current = style;
+    const rulesRef = useRef(rulesJson);
+    rulesRef.current = rulesJson;
+
+    /**
+     * The document as it will be drawn: the author's style with `rules`
+     * applied to it.
+     *
+     * Applied to the document rather than sent as per-layer deltas, because
+     * both halves of this layer -- the rasteriser and the handover to a map
+     * that draws styles itself -- take a document. Without rules this
+     * returns the author's style untouched and the compiler's wasm is never
+     * loaded.
+     */
+    const drawnStyle = useCallback(
+        async (report?: (messages: string[]) => void): Promise<string | object> => {
+            const document = styleRef.current;
+            const json = rulesRef.current;
+            if (json === NO_STYLE_RULES.json) return document;
+            const { compileStyle } = await import('@mapconductor/vectorstyle');
+            const compiled = await compileStyle(await styleText(document), json);
+            if (compiled.diagnostics.length > 0) report?.([...compiled.diagnostics]);
+            return compiled.style as object;
+        },
+        [],
+    );
 
     // Bumped on every restyle and threaded into the tile URL. Without it the
     // new template is byte-identical to the old one, so the map serves the
@@ -216,7 +285,7 @@ export function VectorTileLayer({
             await tileServer.waitForController();
 
             const provider = await VectorTileProvider.create({
-                style: styleRef.current,
+                style: await drawnStyle(onDiagnostics),
                 tileSize: pixelTileSize,
                 displayTileSize: tileSize,
                 cacheBytes: 48 * 1024 * 1024,
@@ -269,11 +338,22 @@ export function VectorTileLayer({
     // would otherwise cause.
     useEffect(() => {
         if (!direct) return;
-        direct.showStyle(styleRef.current, styleAttributions(styleRef.current));
-        onDiagnostics?.(['direct: the map draws the style itself']);
-        return () => direct.clearStyle();
+        let cancelled = false;
+        void drawnStyle(onDiagnostics)
+            .then((document) => {
+                if (cancelled) return;
+                direct.showStyle(document, styleAttributions(document));
+                onDiagnostics?.(['direct: the map draws the style itself']);
+            })
+            .catch((error: unknown) => {
+                onDiagnostics?.([`style could not be applied: ${String(error)}`]);
+            });
+        return () => {
+            cancelled = true;
+            direct.clearStyle();
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [direct, styleKey]);
+    }, [direct, drawnKey]);
 
     // Restyle in place. The vector tiles are unchanged — only the paint applied
     // to them — so this costs a re-rasterise and no network traffic.
@@ -283,15 +363,15 @@ export function VectorTileLayer({
         if (!provider || !ready) return;
         // The boot effect already applied whatever style was current then.
         if (appliedStyleKey.current === null) {
-            appliedStyleKey.current = styleKey;
+            appliedStyleKey.current = drawnKey;
             return;
         }
-        if (appliedStyleKey.current === styleKey) return;
-        appliedStyleKey.current = styleKey;
+        if (appliedStyleKey.current === drawnKey) return;
+        appliedStyleKey.current = drawnKey;
 
         let cancelled = false;
-        provider
-            .setStyle(styleRef.current)
+        drawnStyle(onDiagnostics)
+            .then((document) => provider.setStyle(document))
             .then((diagnostics) => {
                 if (cancelled) return;
                 if (diagnostics.length > 0) onDiagnostics?.(diagnostics);
@@ -306,7 +386,7 @@ export function VectorTileLayer({
             cancelled = true;
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [styleKey, ready]);
+    }, [drawnKey, ready]);
 
     /**
      * The ground: geometry only, and nothing a font does can invalidate it.

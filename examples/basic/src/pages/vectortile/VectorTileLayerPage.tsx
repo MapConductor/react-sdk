@@ -6,32 +6,32 @@ import { MapViewContainer } from '../../MapViewContainer';
 import { showBasemap } from '../common/showBasemap';
 import { useSampleI18n } from '../../samples/i18n';
 import type { Phrase } from '../../samples/language';
-import { recolour, type ColourCategory, type Palette } from './recolour';
+import {
+    CATEGORY_ORDER,
+    DEFAULT_PALETTE,
+    TINTED,
+    styleRulesFor,
+    type Category,
+    type ColourCategory,
+    type Palette,
+} from './categories';
 
 const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 12 };
 
 /**
- * OpenStreetMap data in the Shortbread schema, which is what makes recolouring
- * by category possible: layers name a standard source layer, so `water_polygons`
- * can be found without knowing this particular style's layer ids.
+ * OpenStreetMap data in the Shortbread schema, which is what lets the SDK give
+ * every layer a role: a layer names a standard source layer, so the water can
+ * be found without knowing this particular style's layer ids.
  */
 const STYLE_URL = 'https://tiles.versatiles.org/assets/styles/colorful/style.json';
 
-const DEFAULT_PALETTE: Palette = {
-    water: '#3a7ca5',
-    land: '#f2efe6',
-    street: '#ffffff',
-    building: '#d9d0c9',
-};
 
-const CATEGORY_ORDER: ColourCategory[] = ['water', 'land', 'street', 'building'];
-
-
-const CATEGORY_LABELS: Record<ColourCategory, Phrase> = {
+const CATEGORY_LABELS: Record<Category, Phrase> = {
     water: { en: 'Water', ja: '水域', 'es-419': 'Agua', de: 'Wasser', th: 'แหล่งน้ำ', hi: 'जल' },
     land: { en: 'Land', ja: '陸地', 'es-419': 'Terreno', de: 'Land', th: 'พื้นดิน', hi: 'भूमि' },
     street: { en: 'Roads', ja: '道路', 'es-419': 'Carreteras', de: 'Straßen', th: 'ถนน', hi: 'सड़कें' },
     building: { en: 'Buildings', ja: '建物', 'es-419': 'Edificios', de: 'Gebäude', th: 'อาคาร', hi: 'इमारतें' },
+    label: { en: 'Labels', ja: 'ラベル', 'es-419': 'Etiquetas', de: 'Beschriftungen', th: 'ป้ายชื่อ', hi: 'लेबल' },
 };
 
 /**
@@ -48,6 +48,13 @@ export function VectorTileLayerPage() {
     const [baseStyle, setBaseStyle] = useState<object | null>(null);
     const [failure, setFailure] = useState<string | null>(null);
     const [palette, setPalette] = useState<Palette>(DEFAULT_PALETTE);
+    const [hidden, setHidden] = useState<Record<Category, boolean>>({
+        water: false,
+        land: false,
+        street: false,
+        building: false,
+        label: false,
+    });
     const [strength, setStrength] = useState(0.6);
     const [opacity, setOpacity] = useState(1);
     const [diagnostics, setDiagnostics] = useState<string[]>([]);
@@ -81,18 +88,26 @@ export function VectorTileLayerPage() {
         };
     }, []);
 
-    // Recolouring the whole 324-layer style on every slider tick would be
-    // wasteful, so it is memoised on the inputs that actually change it.
-    const style = useMemo(
-        () => (baseStyle ? recolour(baseStyle, palette, strength) : null),
-        [baseStyle, palette, strength],
+    /**
+     * The knobs, as the rules handed to the layer: what to leave out and what
+     * to blend towards. Memoised on the inputs that actually change them --
+     * a slider emits on every frame, and compiling a 257-layer style per
+     * frame for an unchanged palette would be waste.
+     *
+     * `undefined` rather than an empty rule set when nothing is adjusted: the
+     * layer then never loads the compiler at all.
+     */
+    const rules = useMemo(
+        () => styleRulesFor(hidden, palette, strength),
+        [hidden, palette, strength],
     );
 
     return (
         <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={onStateReady}>
-            {style ? (
+            {baseStyle ? (
                 <VectorTileLayer
-                    style={style}
+                    style={baseStyle}
+                    rules={rules}
                     opacity={opacity}
                     onDiagnostics={setDiagnostics}
                     asBasemap={asBasemap}
@@ -126,19 +141,37 @@ export function VectorTileLayerPage() {
                     </span>
                 </label>
                 {CATEGORY_ORDER.map((category) => (
-                    <label className="slider-control" key={category}>
-                        <span className="slider-label">{t(CATEGORY_LABELS[category])}</span>
-                        <input
-                            type="color"
-                            value={palette[category]}
-                            onChange={(event) =>
-                                setPalette((current) => ({
-                                    ...current,
-                                    [category]: event.target.value,
-                                }))
-                            }
-                        />
-                    </label>
+                    <div className="slider-control" key={category}>
+                        <span className="slider-label">
+                            <label className="category-visibility">
+                                <input
+                                    type="checkbox"
+                                    checked={!hidden[category]}
+                                    onChange={(event) =>
+                                        setHidden((current) => ({
+                                            ...current,
+                                            [category]: !event.target.checked,
+                                        }))
+                                    }
+                                />
+                                <span>{t(CATEGORY_LABELS[category])}</span>
+                            </label>
+                        </span>
+                        {TINTED.includes(category as ColourCategory) ? (
+                            <input
+                                type="color"
+                                aria-label={t(CATEGORY_LABELS[category])}
+                                value={palette[category as ColourCategory]}
+                                disabled={hidden[category]}
+                                onChange={(event) =>
+                                    setPalette((current) => ({
+                                        ...current,
+                                        [category]: event.target.value,
+                                    }))
+                                }
+                            />
+                        ) : null}
+                    </div>
                 ))}
                 <SliderControl
                     label={t({
@@ -179,8 +212,8 @@ export function VectorTileLayerPage() {
                               hi: `स्टाइल लोड नहीं हो सकी: ${failure}`,
                           })
                         : t({
-                              en: 'Recolouring reuses the vector tiles already fetched — only the rasterisation is redone. Labels ride on a second, transparent layer above the ground.',
-                              ja: '色の変更は取得済みのベクタータイルを再利用し、ラスタライズだけをやり直します。ラベルは地物の上に重なる透明なレイヤーに描かれます。',
+                              en: 'Recolouring reuses the vector tiles already fetched — only the rasterisation is redone. Unticking a category hides its layers, so they are never drawn. Labels ride on a second, transparent layer above the ground.',
+                              ja: '色の変更は取得済みのベクタータイルを再利用し、ラスタライズだけをやり直します。チェックを外した種別はレイヤーごと非表示になり、描画されません。ラベルは地物の上に重なる透明なレイヤーに描かれます。',
                               'es-419': 'Recolorear reutiliza las teselas vectoriales ya descargadas: solo se rehace la rasterización. Las etiquetas van en una segunda capa transparente sobre el terreno.',
                               de: 'Das Umfärben nutzt die bereits geladenen Vektorkacheln weiter — nur die Rasterung wird wiederholt. Beschriftungen liegen auf einer zweiten, transparenten Ebene darüber.',
                               th: 'การเปลี่ยนสีใช้เวกเตอร์ไทล์ที่ดาวน์โหลดไว้แล้ว โดยทำแรสเตอร์ใหม่เท่านั้น ป้ายชื่อวาดบนเลเยอร์โปร่งใสอีกชั้นที่ซ้อนอยู่ด้านบน',
