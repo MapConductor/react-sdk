@@ -58,6 +58,11 @@ jobs:
           distribution: temurin
           java-version: 17
 
+      # app/build.gradle は local.properties を存在確認なしで読む（ArcGIS のキー用）。キーはどれも
+      # 空が既定で、依存の解決には要らないので、ランナーの Android SDK を指すだけのものを置く。
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_HOME" > examples/reactnative-basic/android/local.properties
+
       - name: Generate and submit dependency graph
         uses: gradle/actions/dependency-submission@v6
         with:
