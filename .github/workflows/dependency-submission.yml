@@ -1,0 +1,65 @@
+name: Dependency Submission (Gradle)
+
+# examples/reactnative-basic/android の Gradle 依存を依存関係グラフへ送る。
+#
+# GitHub の「Automatic dependency submission」は依存を何も入れずに Gradle を動かすため、
+# このプロジェクトでは必ず落ちる。settings.gradle が `node` で node_modules の中から
+# @react-native/gradle-plugin を探すので、npm install より前には評価すらできない。
+# ここでは npm install を済ませてから同じ送信を行う。
+#
+# このワークフローを入れたら、リポジトリ設定の Code security → Dependency graph →
+# Automatic dependency submission は Disabled にすること（二重に走り、自動の方は落ち続ける）。
+#
+# pull_request では送信せず、依存グラフを作れるか（= 依存を解決できるか）だけを確かめる。
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+  pull_request:
+    paths:
+      - .github/workflows/dependency-submission.yml
+      - examples/reactnative-basic/android/**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  submit-gradle:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          submodules: recursive
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 22
+
+      # @mapconductor/* はまだ npm に無い。deploy-basic-example.yml と同じく、内部の依存指定を
+      # "*" に揃えてローカルの workspace をリンクさせる（揃えないと registry を見に行って 404）。
+      - name: Link local workspace packages
+        run: node scripts/link-local-workspaces.mjs
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Generate and submit dependency graph
+        uses: gradle/actions/dependency-submission@v6
+        with:
+          build-root-directory: examples/reactnative-basic/android
+          dependency-graph: ${{ github.event_name == 'pull_request' && 'generate-and-upload' || 'generate-and-submit' }}
