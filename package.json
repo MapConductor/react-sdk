@@ -92,6 +92,6 @@
   "author": "MapConductor",
   "license": "Apache2",
   "dependencies": {
-    "ol": "^10.9.0"
+    "ol": "^10.11.0"
   }
 }
