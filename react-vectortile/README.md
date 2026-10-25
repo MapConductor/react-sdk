@@ -4,10 +4,10 @@ Renders a MapLibre vector style as raster tiles, so any MapConductor backend can
 display one — including the several that cannot read a vector style at all
 (Google Maps, MapKit, HERE, ArcGIS, Cesium).
 
-This package is a thin React component. The renderer itself is
-[`@mapconductor/vectortile`](../vectortile), which has **no framework
-dependency and no runtime dependencies**; use that directly from Vue, Svelte, or
-plain JavaScript.
+This package is a thin React component. The renderer itself is a Rust/wasm
+build from [MapConductor/vectortile](https://github.com/MapConductor/vectortile),
+shipped inside this package under `vendor/` (fetched from a pinned release by
+`scripts/fetch-vector-assets.mjs` when the package is built).
 
 ```tsx
 import { VectorTileLayer } from '@mapconductor/react-vectortile';

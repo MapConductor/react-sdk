@@ -1,0 +1,8 @@
+{
+  "repository": "MapConductor/vectortile",
+  "tag": "v0.1.0",
+  "assets": {
+    "vectorstyle-web.tgz": "7d5a3bd2826937b2b2d745bdb02ba06de05238435ae70803b5aa571c8da14e14",
+    "vectortile-web.tgz": "f87e498e36d892595ba240dbf4cdcb94914bd0088b98d66feff842a0fdc4f490"
+  }
+}

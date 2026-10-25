@@ -82,9 +82,8 @@ newkey.xcresult
 ios-rest.xcresult
 ios-final.xcresult
 
-# The vendored Rust renderer (wasm + its JS bindings) is a build artifact of the
-# mapconductor-vectortile repo, copied in by its scripts/sync-sdk.sh. It is
-# tracked on purpose: the package cannot be built or published without it, the
-# same way android-vectortile tracks its .so and ios-vectortile its XCFramework.
-!react-vectortile/vendor/
-!react-vectortile/vendor/**
+# The Rust style compiler and renderer (wasm + their JS bindings), fetched from a
+# MapConductor/vectortile release by scripts/fetch-vector-assets.mjs. The tag and
+# checksums are pinned in scripts/vector-assets.json; the bytes are not tracked.
+react-vectorstyle/vendor/
+react-vectortile/vendor/

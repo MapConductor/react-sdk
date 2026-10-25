@@ -10,15 +10,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
-    "./worker": "./vendor/dist/worker.js"
+    "./worker": "./vendor/vectortile/dist/worker.js"
   },
   "files": [
     "dist",
+    "vendor",
     "README.md"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --external @mapconductor/vectortile",
-    "dev": "tsup src/index.ts --format esm --watch --external @mapconductor/vectortile",
+    "prebuild": "node ../scripts/fetch-vector-assets.mjs",
+    "build": "tsup",
+    "predev": "node ../scripts/fetch-vector-assets.mjs",
+    "dev": "tsup --watch",
     "clean": "rm -rf dist",
     "test": "echo 'covered by the harness in mapconductor-vectortile'"
   },
@@ -34,9 +37,7 @@
   "dependencies": {
     "@mapconductor/js-sdk-core": "^0.2.0",
     "@mapconductor/js-sdk-react": "^0.2.1",
-    "@mapconductor/vectortile": "^0.1.0",
-    "@mapconductor/react-vectorstyle": "^0.1.0",
-    "@mapconductor/vectorstyle": "^0.1.0"
+    "@mapconductor/react-vectorstyle": "^0.1.0"
   },
   "peerDependencies": {
     "react": "^18.0.0 || ^19.0.0"
