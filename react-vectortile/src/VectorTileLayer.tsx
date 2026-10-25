@@ -1,0 +1,485 @@
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+    TileServerRegistry,
+    createRasterLayerState,
+    TileScheme,
+    RasterTilePreferenceKey,
+    VectorStyleSupportKey,
+    type AttributionRule,
+    type RasterLayerState,
+} from '@mapconductor/js-sdk-core';
+import { RasterLayer, useMapServiceRegistry } from '@mapconductor/js-sdk-react';
+import { VectorTileProvider } from '@mapconductor/vectortile';
+import { NO_STYLE_RULES, type StyleRules } from '@mapconductor/react-vectorstyle';
+
+export interface VectorTileLayerProps {
+    /** A `style.json` URL, its raw text, or the parsed object. */
+    style: string | object;
+    /**
+     * Adjustments applied to the style before anything is drawn -- the same
+     * rules `VectorStyle` takes, so "roads are white" or "no buildings"
+     * reads the same wherever it is written.
+     *
+     * A rule that hides a role is the reason to reach for this rather than
+     * editing the document: the layers are switched off in the document the
+     * renderer is given, so nothing about them is drawn.
+     *
+     * ```tsx
+     * rules={buildStyleRules((r) => {
+     *     r.role(LayerRole.building, { visible: false });
+     *     r.role(LayerRole.road, { visible: false });
+     * })}
+     * ```
+     *
+     * Left out, the style is drawn as its author wrote it and the compiler's
+     * wasm is never fetched.
+     */
+    rules?: StyleRules;
+    /**
+     * Output tile size in pixels. Left out, the backend decides: a provider
+     * that has registered a `RasterTilePreference` is answered, and anything
+     * else gets 512.
+     *
+     * Bigger tiles are cheaper for the same screen -- the per-tile costs scale
+     * with the count -- but ArcGIS's 3D SceneView picks the level as though
+     * every tile were 256 pixels, so handing it 512 makes it fetch one level
+     * deeper and four times as many tiles.
+     */
+    tileSize?: number;
+    opacity?: number;
+    visible?: boolean;
+    maxZoom?: number;
+    /** Headers sent with every source tile request — auth tokens, API keys. */
+    headers?: Record<string, string>;
+    /**
+     * Reasons the style may not render as intended: undrawn layer types,
+     * sources that cannot be fetched, Mapbox `imports`. Worth surfacing — the
+     * failure mode that matters is a blank tile.
+     */
+    onDiagnostics?: (messages: string[]) => void;
+    /**
+     * The style is the basemap, not a layer over one.
+     *
+     * On a map that renders vector styles itself (MapLibre, Mapbox, MapTiler
+     * -- anything registering `VectorStyleSupportKey`) this hands the style
+     * over directly and mounts no raster layer at all: the fast path, and the
+     * one an offline package will take. The style then *replaces* the map's
+     * design and `opacity` does not apply. Elsewhere it changes nothing here;
+     * the app blanks the map's own basemap (a `None` design) and the opaque
+     * raster tiles are the map.
+     */
+    asBasemap?: boolean;
+}
+
+/**
+ * The `attribution` of every source in a style object, without duplicates.
+ * A URL string cannot be read here; the map credits those sources itself.
+ */
+function styleAttributions(style: string | object): AttributionRule[] {
+    if (typeof style === 'string') return [];
+    const sources = (style as { sources?: Record<string, { attribution?: unknown }> }).sources;
+    if (!sources) return [];
+    const seen = new Set<string>();
+    for (const source of Object.values(sources)) {
+        const attribution = source?.attribution;
+        if (typeof attribution === 'string' && attribution.trim() !== '') seen.add(attribution);
+    }
+    return [...seen].map((attribution) => ({ attribution }));
+}
+
+/**
+ * The style as text, fetched when it is a URL.
+ *
+ * Only `rules` needs this: without them the document is handed to the
+ * renderer untouched and it does its own fetching. The rule for telling a
+ * URL from a document is the renderer's, so both agree.
+ */
+async function styleText(style: string | object): Promise<string> {
+    if (typeof style === 'object') return JSON.stringify(style);
+    if (/^\s*\{/.test(style)) return style;
+    const response = await fetch(style);
+    if (!response.ok) throw new Error(`style fetch failed: ${response.status} ${style}`);
+    return response.text();
+}
+
+/**
+ * How long a layer being replaced stays up.
+ *
+ * Replacing a raster layer's source URL is implemented as remove-then-add, so
+ * the layer vanishes for as long as the new source takes to fetch its first
+ * tiles. Mounting the replacement alongside and dropping the old one a moment
+ * later hands over instead. No signal says a raster source has drawn, so this
+ * is a window rather than a wait: too short brings the flash back, too long
+ * leaves two layers stacked, which costs a moment of overdraw and nothing else.
+ *
+ * Matches `HANDOVER_MS` in android-vectortile.
+ */
+const HANDOVER_MS = 900;
+
+const clamp = (value: number): number => Math.min(1, Math.max(0, value));
+
+/**
+ * Draws a MapLibre vector style on any map backend, by rendering it to raster
+ * tiles in the browser and serving them through the SDK's local tile server.
+ *
+ * The backend only ever sees ordinary raster layers, which is what makes this
+ * work on Google Maps, MapKit, Cesium, OpenLayers and the rest — none of which
+ * can render a vector style themselves.
+ *
+ * Rendering runs in a Web Worker, so a viewport's worth of tiles does not stall
+ * the map.
+ *
+ * Two layers are mounted, not one: the ground (fills, lines, circles) and a
+ * transparent label overlay above it. To the map and the user they read as one
+ * map. The halves render in parallel, and a glyph range landing redraws only
+ * the transparent one, so a label appearing never blanks the map beneath it.
+ *
+ * Changing `style` recolours in place rather than rebuilding: the vector tiles
+ * already fetched are reused, so only the rasterisation is redone.
+ *
+ * ```tsx
+ * <VectorTileLayer style="https://example.com/style.json" opacity={0.9} />
+ * ```
+ */
+export function VectorTileLayer({
+    style,
+    rules,
+    tileSize: requestedTileSize,
+    opacity = 1,
+    visible = true,
+    maxZoom = 22,
+    headers,
+    onDiagnostics,
+    asBasemap = false,
+}: VectorTileLayerProps): React.ReactElement | null {
+    const routeId = useMemo(
+        () => `vectortile-${Math.random().toString(36).slice(2, 10)}`,
+        [],
+    );
+    // Two routes from one provider. The user sees one map; the halves are
+    // served, fetched and cached independently.
+    const groundRoute = `${routeId}-ground`;
+    const labelRoute = `${routeId}-labels`;
+
+    // タイルの一辺はアプリの好みで決めてよく、既定は 512（1 枚あたりの固定費が
+    // 枚数に比例するので、同じ画面なら大きいタイルのほうが安い）。ただし地図
+    // SDK 側に都合があることがある: ArcGIS の 3D SceneView は「タイルは 256px」
+    // という前提でレベルを選び、512 を渡すと 1 段深いレベルを 4 倍の枚数で引く。
+    // 宣言しているプロバイダにはそれに従い、明示された値は常に優先する。
+    const registry = useMapServiceRegistry();
+    const preference = registry.get(RasterTilePreferenceKey);
+    /** CSS px one tile covers on screen; what the style is read at. */
+    const tileSize = requestedTileSize ?? preference?.preferredTileSize ?? 512;
+    /** Pixels drawn per tile. */
+    const pixelTileSize = Math.round(tileSize * devicePixelRatioClamped());
+    /**
+     * What the map is told. A map that lays tiles out in device px needs the
+     * pixel count or it asks for a zoom one level too deep; one that lays
+     * them out in CSS px needs the CSS size or everything doubles. Only the
+     * provider knows which it is, so it says, through the preference.
+     */
+    const declaredTileSize = preference?.layoutInDevicePixels ? pixelTileSize : tileSize;
+
+    // The direct path: the map draws the style itself and nothing below
+    // mounts. Read on every render because a provider registers as it
+    // initialises, and the ready re-render is when it first shows up.
+    const direct = asBasemap ? registry.get(VectorStyleSupportKey) : undefined;
+
+    const tileServer = useMemo(() => TileServerRegistry.get(), []);
+    const providerRef = useRef<VectorTileProvider | null>(null);
+    const [ready, setReady] = useState(false);
+
+    /**
+     * The credits the style's sources ask for, carried by the layers themselves.
+     *
+     * The map's attribution overlay is fed from the rules of every visible
+     * raster layer, so a credit attached here appears without the host writing
+     * any UI and disappears when the layer unmounts. Nothing else about this
+     * layer can be wrong while still looking right: the tiles draw perfectly
+     * whether or not anyone is credited for them.
+     *
+     * No zoom or bounds narrowing on the rules. A source's `maxzoom` is where
+     * its tiles stop, not where its data stops being on screen — past it the
+     * renderer magnifies the deepest tile it has, so the data is still shown
+     * and still has to be credited. Crediting a little too often costs a line
+     * of text; crediting too rarely breaks a licence.
+     */
+    const [credits, setCredits] = useState<AttributionRule[]>([]);
+
+    // Restyling keys off content, not object identity. A caller that builds its
+    // style inline — which is exactly what a colour picker does — produces a new
+    // object every render, and keying off identity would rerender the whole map
+    // on every unrelated state change.
+    const styleKey = useMemo(
+        () => (typeof style === 'string' ? style : JSON.stringify(style)),
+        [style],
+    );
+    const rulesJson = rules?.json ?? NO_STYLE_RULES.json;
+    /**
+     * What identifies the document actually drawn. The rules belong in it:
+     * the same style with the buildings switched off is a different map, and
+     * everything below that reacts to a restyle keys off this.
+     */
+    const drawnKey = `${styleKey}\u0000${rulesJson}`;
+    // Read inside effects that must not re-run when the style changes.
+    const styleRef = useRef(style);
+    styleRef.current = style;
+    const rulesRef = useRef(rulesJson);
+    rulesRef.current = rulesJson;
+
+    /**
+     * The document as it will be drawn: the author's style with `rules`
+     * applied to it.
+     *
+     * Applied to the document rather than sent as per-layer deltas, because
+     * both halves of this layer -- the rasteriser and the handover to a map
+     * that draws styles itself -- take a document. Without rules this
+     * returns the author's style untouched and the compiler's wasm is never
+     * loaded.
+     */
+    const drawnStyle = useCallback(
+        async (report?: (messages: string[]) => void): Promise<string | object> => {
+            const document = styleRef.current;
+            const json = rulesRef.current;
+            if (json === NO_STYLE_RULES.json) return document;
+            const { compileStyle } = await import('@mapconductor/vectorstyle');
+            const compiled = await compileStyle(await styleText(document), json);
+            if (compiled.diagnostics.length > 0) report?.([...compiled.diagnostics]);
+            return compiled.style as object;
+        },
+        [],
+    );
+
+    // Bumped on every restyle and threaded into the tile URL. Without it the
+    // new template is byte-identical to the old one, so the map serves the
+    // raster tiles it already holds and nothing appears to change.
+    const [styleVersion, setStyleVersion] = useState(0);
+
+    // Bumped when glyphs land. The map only refetches a raster source whose URL
+    // changed, so the generation has to reach the template.
+    const [glyphGeneration, setGlyphGeneration] = useState(0);
+
+    // Normally one each, briefly two while a replacement takes over.
+    const [grounds, setGrounds] = useState<RasterLayerState[]>([]);
+    const [labels, setLabels] = useState<RasterLayerState[]>([]);
+
+    // Applied at creation so a layer never mounts at the wrong opacity, then
+    // pushed onto the live states by the effect at the bottom.
+    const opacityRef = useRef(opacity);
+    opacityRef.current = opacity;
+    const visibleRef = useRef(visible);
+    visibleRef.current = visible;
+
+    // Strictly increasing, so a replacement always stacks above what it
+    // replaces. Restyles and glyph arrivals both draw from it.
+    const labelDepth = useRef(0);
+
+    // The service worker has to be controlling the page before any tile request
+    // is made, otherwise the first requests 404 before the route exists.
+    useEffect(() => {
+        if (direct) return;
+        let cancelled = false;
+
+        (async () => {
+            tileServer.startServiceWorker('/tile-sw.js');
+            await tileServer.waitForController();
+
+            const provider = await VectorTileProvider.create({
+                style: await drawnStyle(onDiagnostics),
+                tileSize: pixelTileSize,
+                displayTileSize: tileSize,
+                cacheBytes: 48 * 1024 * 1024,
+                persistSourceTiles: true,
+                persistRenderedTiles: true,
+                headers,
+                onWarning: (message: string) => onDiagnostics?.([message]),
+            });
+            if (cancelled) {
+                provider.dispose();
+                return;
+            }
+            providerRef.current = provider;
+
+            // Glyphs arrive after the tiles that need them: a range is a round
+            // trip and a tile at low zoom wants dozens, so tiles are drawn with
+            // whatever is loaded and the overlay is replaced once more arrives.
+            provider.onGlyphsLoaded = (generation: number) => {
+                setGlyphGeneration(generation);
+            };
+
+            tileServer.register(groundRoute, provider.groundTiles);
+            tileServer.register(labelRoute, provider.labelTiles);
+
+            if (provider.diagnostics.length > 0) onDiagnostics?.(provider.diagnostics);
+            setCredits(provider.attributions.map((attribution) => ({ attribution })));
+            setReady(true);
+        })().catch((error: unknown) => {
+            onDiagnostics?.([`style could not be loaded: ${String(error)}`]);
+        });
+
+        return () => {
+            cancelled = true;
+            setReady(false);
+            setGrounds([]);
+            setLabels([]);
+            tileServer.unregister(groundRoute);
+            tileServer.unregister(labelRoute);
+            providerRef.current?.dispose();
+            providerRef.current = null;
+        };
+        // `style` is handled by the restyle effect below, not by rebuilding.
+        // `headers` and `onDiagnostics` are deliberately not dependencies: a new
+        // object identity each render would tear down and rebuild the renderer.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [routeId, tileServer, tileSize, pixelTileSize, direct]);
+
+    // Handed over rather than rasterised. Keyed on the style's content, so a
+    // recolour is a new handoff; the support cancels the clear a remount
+    // would otherwise cause.
+    useEffect(() => {
+        if (!direct) return;
+        let cancelled = false;
+        void drawnStyle(onDiagnostics)
+            .then((document) => {
+                if (cancelled) return;
+                direct.showStyle(document, styleAttributions(document));
+                onDiagnostics?.(['direct: the map draws the style itself']);
+            })
+            .catch((error: unknown) => {
+                onDiagnostics?.([`style could not be applied: ${String(error)}`]);
+            });
+        return () => {
+            cancelled = true;
+            direct.clearStyle();
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [direct, drawnKey]);
+
+    // Restyle in place. The vector tiles are unchanged — only the paint applied
+    // to them — so this costs a re-rasterise and no network traffic.
+    const appliedStyleKey = useRef<string | null>(null);
+    useEffect(() => {
+        const provider = providerRef.current;
+        if (!provider || !ready) return;
+        // The boot effect already applied whatever style was current then.
+        if (appliedStyleKey.current === null) {
+            appliedStyleKey.current = drawnKey;
+            return;
+        }
+        if (appliedStyleKey.current === drawnKey) return;
+        appliedStyleKey.current = drawnKey;
+
+        let cancelled = false;
+        drawnStyle(onDiagnostics)
+            .then((document) => provider.setStyle(document))
+            .then((diagnostics) => {
+                if (cancelled) return;
+                if (diagnostics.length > 0) onDiagnostics?.(diagnostics);
+                setCredits(provider.attributions.map((attribution) => ({ attribution })));
+                setStyleVersion((version) => version + 1);
+            })
+            .catch((error: unknown) => {
+                onDiagnostics?.([`style could not be applied: ${String(error)}`]);
+            });
+
+        return () => {
+            cancelled = true;
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [drawnKey, ready]);
+
+    /**
+     * The ground: geometry only, and nothing a font does can invalidate it.
+     *
+     * Keyed by the style alone. A glyph range landing must not reach this
+     * layer — that is the whole reason the halves are separate.
+     */
+    useEffect(() => {
+        if (!ready) return;
+        const next = createRasterLayerState({
+            id: `${groundRoute}-s${styleVersion}`,
+            source: {
+                type: 'UrlTemplate',
+                template: tileServer.urlTemplate({
+                    routeId: groundRoute,
+                    tileSize: declaredTileSize,
+                    cacheKey: `s${styleVersion}`,
+                }),
+                tileSize: declaredTileSize,
+                maxZoom,
+                attributionRules: credits,
+                scheme: TileScheme.XYZ,
+            },
+            opacity: clamp(opacityRef.current),
+            visible: visibleRef.current,
+            zIndex: 0,
+        });
+        setGrounds((prev) => [...prev, next]);
+        const timer = setTimeout(() => setGrounds((prev) => prev.slice(-1)), HANDOVER_MS);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ready, styleVersion, credits, tileSize, pixelTileSize, declaredTileSize, maxZoom, groundRoute]);
+
+    /**
+     * The labels: replaced on a restyle and on every glyph arrival, always
+     * above the ground and above the generation it takes over from.
+     */
+    useEffect(() => {
+        if (!ready) return;
+        labelDepth.current += 1;
+        const next = createRasterLayerState({
+            id: `${labelRoute}-s${styleVersion}-g${glyphGeneration}`,
+            source: {
+                type: 'UrlTemplate',
+                template: tileServer.urlTemplate({
+                    routeId: labelRoute,
+                    tileSize: declaredTileSize,
+                    cacheKey: `s${styleVersion}-g${glyphGeneration}`,
+                }),
+                tileSize: declaredTileSize,
+                maxZoom,
+                // Both halves carry the credit: the attribution overlay
+                // deduplicates, so printing it twice costs nothing, and hiding
+                // either half cannot silence it.
+                attributionRules: credits,
+                scheme: TileScheme.XYZ,
+            },
+            opacity: clamp(opacityRef.current),
+            visible: visibleRef.current,
+            zIndex: 1000 + labelDepth.current,
+        });
+        setLabels((prev) => [...prev, next]);
+        const timer = setTimeout(() => setLabels((prev) => prev.slice(-1)), HANDOVER_MS);
+        return () => clearTimeout(timer);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [ready, styleVersion, glyphGeneration, credits, tileSize, pixelTileSize, declaredTileSize, maxZoom, labelRoute]);
+
+    // Pushed onto the existing states rather than rebuilding them: opacity and
+    // visibility do not change what a tile contains, so nothing has to refetch.
+    useEffect(() => {
+        for (const state of [...grounds, ...labels]) {
+            state.opacity = clamp(opacity);
+            state.visible = visible;
+        }
+    }, [grounds, labels, opacity, visible]);
+
+    if (direct || grounds.length === 0) return null;
+    return (
+        <>
+            {/* Ground first: the providers that ignore zIndex stack in mount
+                order, so the labels have to be added after the ground. */}
+            {grounds.map((state) => (
+                <RasterLayer key={state.id} state={state} />
+            ))}
+            {labels.map((state) => (
+                <RasterLayer key={state.id} state={state} />
+            ))}
+        </>
+    );
+}
+
+/** Device pixels per CSS pixel, clamped to something sane. */
+function devicePixelRatioClamped(): number {
+    if (typeof window === 'undefined') return 1;
+    return Math.max(1, Math.min(3, Math.round(window.devicePixelRatio || 1)));
+}

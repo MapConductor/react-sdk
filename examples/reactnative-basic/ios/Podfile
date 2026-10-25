@@ -49,6 +49,12 @@ target 'MapConductorBasic' do
   # consumed as CocoaPods source pods (not vendored prebuilt xcframeworks), so the real GoogleMaps
   # pod gets installed fresh by CocoaPods instead of being statically embedded by us - autolinking
   # only covers npm packages, so these path pods must be declared explicitly.
+  # CTilePng は MapConductorCore の依存だが、`:path` のローカル pod は
+  # 依存も `:path` で名指ししないと解決できない（CocoaPods は trunk を見る）。
+  # `:modular_headers` が要る: Swift から `import CTilePng` するには C の pod が
+  # モジュールマップを持っていないといけない。CocoaPods は static library の
+  # ときだけこれを強制する（まさに RN の構成）。
+  pod 'CTilePng', :path => '../../../../ios-sdk/ios-sdk-core', :modular_headers => true
   pod 'MapConductorCore', :path => '../../../../ios-sdk/ios-sdk-core'
   pod 'MapConductorForGoogleMaps', :path => '../../../../ios-sdk/ios-for-googlemaps'
   # MapConductorForArcGIS is also a path pod for the same reason. Esri publishes no podspec of
@@ -61,6 +67,9 @@ target 'MapConductorBasic' do
   pod 'ArcGIS', :podspec => '../../../../ios-sdk/ios-for-arcgis/ArcGIS.podspec'
   pod 'MapConductorForArcGIS', :path => '../../../../ios-sdk/ios-for-arcgis'
   pod 'MapConductorMarkerClustering', :path => '../../../../ios-sdk/ios-marker-clustering'
+  # CTilePng と同じ理由（Swift から import する ObjC は別 pod ＋
+  # modular_headers が要る）。
+  pod 'CMapLibreStyleTry', :path => '../../../../ios-sdk/ios-for-maplibre', :modular_headers => true
   pod 'MapConductorForMapLibre', :path => '../../../../ios-sdk/ios-for-maplibre'
   # 雛形。実 SDK を持たないので**プロバイダの選択肢には出さない**が、pod は残す。
   # `@mapconductor/reactnative-for-template` の autolinking と合わせて、雛形の

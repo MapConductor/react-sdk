@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { lazy, Suspense, useMemo, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import {
   type MapCameraPosition,
@@ -22,6 +22,13 @@ import { MapTilerDesign, MapTilerMapView2D, useMapTilerViewState } from '@mapcon
 import '@mapconductor/react-for-maptiler/style.css';
 import { LongdoDesign, LongdoMapView2D, useLongdoViewState } from '@mapconductor/react-for-longdo';
 import { MapplsDesign, MapplsMapView2D, useMapplsViewState } from '@mapconductor/react-for-mappls';
+// deck.gl は読み込み時に `globalThis.deck` を取り合う（別バージョンが居ると例外）。
+// このモジュールは全プロバイダのページから評価されるので、Longdo など自前の deck.gl を
+// 積んだ SDK のページを壊さないよう、描画コンポーネントだけ遅延読み込みにする。
+import { DeckGLDesign, useDeckGLMapViewState } from '@mapconductor/react-for-deckgl/state';
+const LazyDeckGLMapView = lazy(() =>
+  import('@mapconductor/react-for-deckgl').then(m => ({ default: m.DeckGLMapView })),
+);
 import { SingletonMapSlot, useSingletonMapState } from '../../../SingletonMaps';
 
 export type PostOfficeMapState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
@@ -261,12 +268,25 @@ function MapplsProvider({ cameraPosition, markerTilingOptions, children }: PostO
   });
 }
 
+function DeckGLProviderView({ cameraPosition, markerTilingOptions, children }: PostOfficeMapProviderProps) {
+  const state = useDeckGLMapViewState({ mapDesignType: DeckGLDesign.Standard, cameraPosition });
+  return children({
+    mapViewState: state,
+    renderMapView: (content, onMapClick) => (
+      <Suspense fallback={null}>
+        <LazyDeckGLMapView state={state} markerTilingOptions={markerTilingOptions} onMapClick={onMapClick}>{content}</LazyDeckGLMapView>
+      </Suspense>
+    ),
+  });
+}
+
 export function PostOfficeMapProvider(props: PostOfficeMapProviderProps) {
   const pathname = useLocation().pathname;
   if (pathname.startsWith('/google-maps')) return <GoogleProvider {...props} />;
   if (pathname.startsWith('/maptiler')) return <MapTilerProvider {...props} />;
   if (pathname.startsWith('/longdo')) return <LongdoProvider {...props} />;
   if (pathname.startsWith('/mappls')) return <MapplsProvider {...props} />;
+  if (pathname.startsWith('/deckgl')) return <DeckGLProviderView {...props} />;
   if (pathname.startsWith('/tomtom')) return <TomTomProvider {...props} />;
   if (pathname.startsWith('/mapbox')) return <MapboxProvider {...props} />;
   if (pathname.startsWith('/leaflet')) return <LeafletProvider {...props} />;

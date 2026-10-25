@@ -610,6 +610,11 @@ body,
   inset: 0;
   z-index: 0;
   visibility: hidden;
+  /* `visibility` alone is not enough: a descendant can set its own
+     `visibility: visible` and come back -- Longdo's built-in MapLibre
+     attribution does, and stayed on screen under every other provider.
+     Opacity is not inherited, so nothing inside can undo it. */
+  opacity: 0;
   pointer-events: none;
 }
 
@@ -619,6 +624,7 @@ body,
 
 .singleton-map-layer.active {
   visibility: visible;
+  opacity: 1;
   pointer-events: auto;
 }
 
@@ -722,6 +728,17 @@ body,
   font-size: 13px;
   color: #555;
   margin-bottom: 4px;
+}
+
+/* The category name doubles as its draw/skip switch, in the label row. */
+.category-visibility {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.category-visibility input {
+  width: auto;
 }
 
 .checkbox-control {
@@ -1020,4 +1037,18 @@ body,
 
 .hello-map-notes li {
   margin: 4px 0;
+}
+
+/* ベクタースタイルのページが出す診断行。ルールが当たらなかった、この地図が
+   受け取れなかった、スタイルが読めなかった — どれも「ほぼ動いた」に見えるので
+   目立たせる。 */
+.diagnostic {
+  margin: 2px 0;
+  font-size: 11px;
+  line-height: 1.35;
+  color: #b45309;
+}
+
+.diagnostic.error {
+  color: #b91c1c;
 }

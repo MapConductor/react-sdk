@@ -31,6 +31,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'marker-animation', label: { en: 'Marker Animation', ja: 'マーカーアニメーション', 'es-419': 'Animación de marcadores', de: 'Marker-Animation', th: 'แอนิเมชันมาร์กเกอร์', hi: 'मार्कर एनिमेशन' }, group: 'Marker' },
   { id: 'post-office', label: { en: 'Post Office', ja: '郵便局', 'es-419': 'Oficinas postales', de: 'Postfilialen', th: 'ที่ทำการไปรษณีย์', hi: 'डाकघर' }, group: 'Marker', unavailableProviders: ['google-maps-3d'] },
   { id: 'post-office-cluster', label: { en: 'Post Office Cluster', ja: '郵便局クラスタリング', 'es-419': 'Agrupación de oficinas postales', de: 'Postfilialen-Clustering', th: 'การจัดกลุ่มที่ทำการไปรษณีย์', hi: 'डाकघरों की क्लस्टरिंग' }, group: 'Marker' },
+  { id: 'street-tree', label: { en: 'Street Trees', ja: '街路樹', 'es-419': 'Árboles urbanos', de: 'Straßenbäume', th: 'ต้นไม้ริมถนน', hi: 'सड़क के पेड़' }, group: 'Marker', unavailableProviders: ['google-maps-3d'] },
   { id: 'circle', label: { en: 'Circle', ja: '円', 'es-419': 'Círculo', de: 'Kreis', th: 'วงกลม', hi: 'वृत्त' }, group: 'Shape' },
   { id: 'polyline', label: { en: 'Polyline', ja: 'ポリライン', 'es-419': 'Polilínea', de: 'Polylinie', th: 'โพลีไลน์', hi: 'पॉलीलाइन' }, group: 'Shape' },
   { id: 'polyline-click', label: { en: 'Polyline Click', ja: 'ポリラインのクリック', 'es-419': 'Clic en polilínea', de: 'Polylinien-Klick', th: 'การคลิกโพลีไลน์', hi: 'पॉलीलाइन क्लिक' }, group: 'Shape' },
@@ -40,6 +41,8 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'polygon-hole', label: { en: 'Polygon Hole', ja: '穴付きポリゴン', 'es-419': 'Polígono con huecos', de: 'Polygon mit Loch', th: 'โพลีกอนแบบมีรู', hi: 'छेद वाला पॉलीगॉन' }, group: 'Shape', unavailableProviders: ['google-maps-3d'] },
   { id: 'ground-image', label: { en: 'Ground Image', ja: '地表画像', 'es-419': 'Imagen sobre el terreno', de: 'Bodenbild', th: 'ภาพบนพื้นผิว', hi: 'ग्राउंड इमेज' }, group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
   { id: 'raster-layer', label: { en: 'Raster Layer', ja: 'ラスターレイヤー', 'es-419': 'Capa ráster', de: 'Rasterebene', th: 'เลเยอร์ราสเตอร์', hi: 'रास्टर लेयर' }, group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
+  { id: 'vector-tile', label: { en: 'Vector Tile Layer', ja: 'ベクタータイルレイヤー', 'es-419': 'Capa de teselas vectoriales', de: 'Vektorkachel-Ebene', th: 'เลเยอร์เวกเตอร์ไทล์', hi: 'वेक्टर टाइल लेयर' }, group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
+  { id: 'style-adjustments', label: { en: 'Style Adjustments', ja: 'スタイル調整', 'es-419': 'Ajustes de estilo', de: 'Stil-Anpassungen', th: 'การปรับแต่งสไตล์', hi: 'स्टाइल समायोजन' }, group: 'Overlay', unavailableProviders: ['google-maps-3d'] },
   { id: 'info-bubble-simple', label: { en: 'Simple Bubble', ja: 'シンプル吹き出し', 'es-419': 'Globo simple', de: 'Einfache Sprechblase', th: 'บับเบิลอย่างง่าย', hi: 'साधारण बबल' }, group: 'Info Bubble' },
   { id: 'info-bubble-styled', label: { en: 'Styled Bubble', ja: 'スタイル付き吹き出し', 'es-419': 'Globo con estilo', de: 'Gestaltete Sprechblase', th: 'บับเบิลแบบมีสไตล์', hi: 'स्टाइल वाला बबल' }, group: 'Info Bubble' },
   { id: 'info-bubble-multiple', label: { en: 'Multiple Bubbles', ja: '複数の吹き出し', 'es-419': 'Varios globos', de: 'Mehrere Sprechblasen', th: 'บับเบิลหลายอัน', hi: 'कई बबल' }, group: 'Info Bubble' },
@@ -90,6 +93,7 @@ export function getProviderLabel(provider: string | undefined): string {
     case 'maptiler': return 'MapTiler';
     case 'longdo': return 'Longdo';
     case 'mappls': return 'Mappls';
+    case 'deckgl': return 'deck.gl';
     default: return 'MapLibre';
   }
 }

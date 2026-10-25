@@ -7,6 +7,7 @@ import type {
   MapDesignTypeInterface,
   MapViewStateInterface,
   MarkerTilingOptions,
+  MapViewStyle,
 } from '@mapconductor/js-sdk-core';
 import type { InitialCamera } from '../common';
 
@@ -28,4 +29,7 @@ export interface ProviderViewProps {
   restrictBounds?: GeoRectBounds;
   /** 矩形 + minZoom/maxZoom を丸ごと指定したいページ向け。restrictBounds より優先。 */
   cameraRestriction?: CameraRestriction | null;
+  /** 地図の見た目そのもの。`createVectorStyle()` が作る。 */
+  mapStyle?: MapViewStyle | null;
+  onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
 }

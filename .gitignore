@@ -81,3 +81,10 @@ examples/reactnative-basic/android/.kotlin/
 newkey.xcresult
 ios-rest.xcresult
 ios-final.xcresult
+
+# The vendored Rust renderer (wasm + its JS bindings) is a build artifact of the
+# mapconductor-vectortile repo, copied in by its scripts/sync-sdk.sh. It is
+# tracked on purpose: the package cannot be built or published without it, the
+# same way android-vectortile tracks its .so and ios-vectortile its XCFramework.
+!react-vectortile/vendor/
+!react-vectortile/vendor/**

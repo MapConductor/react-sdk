@@ -88,6 +88,10 @@ export default defineConfig({
   define: {
     CESIUM_BASE_URL: JSON.stringify(cesiumStaticPath),
   },
+  // @mapconductor/vectortile renders in a module Worker, and Vite's default
+  // worker format (iife) cannot code-split. Only the production build trips
+  // on this — dev serves module workers natively.
+  worker: { format: 'es' },
   plugins: [react(), cesiumStaticAssets(), mapconductorTileServiceWorker(), ...(useHttps ? [mkcert()] : [])],
   resolve: {
     dedupe: ['react', 'react-dom', '@mapconductor/js-sdk-core'],

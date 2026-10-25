@@ -12,6 +12,8 @@ export default function ArcGISSingletonView({ state, content, useSceneView }: {
     <View
       state={state}
       cameraRestriction={content?.cameraRestriction}
+      mapStyle={content?.mapStyle}
+      onStyleDiagnostics={content?.onStyleDiagnostics}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

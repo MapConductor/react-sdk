@@ -19,7 +19,7 @@ const OUT = process.env.OUT ?? './smoke-shots';
 const PROVIDERS = process.env.PROVIDERS ? process.env.PROVIDERS.split(',') : [
   'maplibre', 'mapbox', 'leaflet', 'openlayers', 'arcgis', 'arcgis-3d',
   'mapkit', 'azuremaps', 'cesium', 'here', 'tomtom', 'maptiler',
-  'longdo', 'mappls', 'google-maps', 'google-maps-3d',
+  'longdo', 'mappls', 'deckgl', 'google-maps', 'google-maps-3d',
 ];
 
 // Mirrors unavailableProviders in examples/basic/src/samples/sampleRegistry.ts.
@@ -70,9 +70,15 @@ async function visit(ctx, provider, page) {
     await p.goto(url, { waitUntil: 'domcontentloaded', timeout: 45000 });
     await p.waitForTimeout(9000); // Cesium / ArcGIS 3D settle slowly.
 
-    const sel = 'canvas, .leaflet-container, .gm-style, .H_Map';
+    const sel = 'canvas, .leaflet-container, .gm-style, .H_Map, gmp-map-3d';
     surface = await p.locator(sel).count();
-    if (surface) box = await p.locator(sel).first().boundingBox();
+    // Measure the LARGEST match, not the first. deck.gl leaves a second, unused
+    // 300x150 canvas next to the one it renders into, and reporting that one
+    // makes a correctly mounted map look like it has a collapsed surface.
+    for (let i = 0; i < surface; i++) {
+      const b = await p.locator(sel).nth(i).boundingBox();
+      if (b && (!box || b.width * b.height > box.width * box.height)) box = b;
+    }
 
     // Screenshot only the map region, so unrelated chrome (nav, prose) cannot
     // make two different providers look identical or two identical ones differ.
@@ -101,7 +107,7 @@ mkdirSync(OUT, { recursive: true });
 const browser = await chromium.launch({ channel: 'chrome' });
 const ctx = await browser.newContext({
   viewport: { width: 1400, height: 900 },
-  deviceScaleFactor: 1,
+  deviceScaleFactor: Number(process.env.DPR ?? 1),
   ignoreHTTPSErrors: true,
 });
 

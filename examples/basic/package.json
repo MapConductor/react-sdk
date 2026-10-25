@@ -31,6 +31,8 @@
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-icons": "*",
     "@mapconductor/react-marker-clustering": "*",
+    "@mapconductor/react-vectorstyle": "*",
+    "@mapconductor/react-vectortile": "*",
     "@zip.js/zip.js": "^2.8.26",
     "maplibre-gl": "^6.0.0",
     "prism-react-renderer": "^2.4.1",
@@ -38,7 +40,8 @@
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
     "three": "^0.185.1",
-    "@mapconductor/react-for-mappls": "*"
+    "@mapconductor/react-for-mappls": "*",
+    "@mapconductor/react-for-deckgl": "*"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
