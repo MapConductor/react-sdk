@@ -15,6 +15,7 @@ import tilt from './pages/tilt';
 import visibleRegion from './pages/visible-region';
 import cameraSync from './pages/camera-sync';
 import marker from './pages/marker';
+import markerLabelPosition from './pages/marker-label-position';
 import markerAnimation from './pages/marker-animation';
 import postOffice from './pages/post-office';
 import postOfficeCluster from './pages/post-office-cluster';
@@ -50,6 +51,7 @@ const DOCUMENTATION: Record<string, SamplePageDoc> = {
   'visible-region': visibleRegion,
   'camera-sync': cameraSync,
   marker,
+  'marker-label-position': markerLabelPosition,
   'marker-animation': markerAnimation,
   'post-office': postOffice,
   'post-office-cluster': postOfficeCluster,
@@ -168,6 +170,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
       'MapCameraPosition',
       'MapDesignTypeInterface',
       'MapViewStateInterface',
+      'MarkerLabelPosition',
       'MarkerState',
       'VisibleRegion',
     ],

@@ -27,6 +27,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'visible-region', label: { en: 'Visible Region', ja: '表示領域', 'es-419': 'Región visible', de: 'Sichtbarer Bereich', th: 'พื้นที่ที่มองเห็น', hi: 'दृश्य क्षेत्र' }, group: 'Map' },
   { id: 'camera-sync', label: { en: 'Camera Sync', ja: 'カメラ同期', 'es-419': 'Sincronización de cámara', de: 'Kamerasynchronisation', th: 'การซิงก์กล้อง', hi: 'कैमरा सिंक' }, group: 'Map', showProviderSelector: false },
   { id: 'marker', label: { en: 'Marker Icons', ja: 'マーカーアイコン', 'es-419': 'Iconos de marcadores', de: 'Marker-Icons', th: 'ไอคอนมาร์กเกอร์', hi: 'मार्कर आइकन' }, group: 'Marker' },
+  { id: 'marker-label-position', label: { en: 'Marker Label Position', ja: 'マーカーラベルの位置' }, group: 'Marker' },
   { id: 'marker-animation', label: { en: 'Marker Animation', ja: 'マーカーアニメーション', 'es-419': 'Animación de marcadores', de: 'Marker-Animation', th: 'แอนิเมชันมาร์กเกอร์', hi: 'मार्कर एनिमेशन' }, group: 'Marker' },
   { id: 'post-office', label: { en: 'Post Office', ja: '郵便局', 'es-419': 'Oficinas postales', de: 'Postfilialen', th: 'ที่ทำการไปรษณีย์', hi: 'डाकघर' }, group: 'Marker', unavailableProviders: ['google-maps-3d'] },
   { id: 'post-office-cluster', label: { en: 'Post Office Cluster', ja: '郵便局クラスタリング', 'es-419': 'Agrupación de oficinas postales', de: 'Postfilialen-Clustering', th: 'การจัดกลุ่มที่ทำการไปรษณีย์', hi: 'डाकघरों की क्लस्टरिंग' }, group: 'Marker' },

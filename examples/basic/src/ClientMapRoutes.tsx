@@ -35,6 +35,7 @@ const TiltPage = lazy(() => import('./pages/map/tilt/TiltPage').then(m => ({ def
 const UISettingsPage = lazy(() => import('./pages/map/uisettings/UISettingsPage').then(m => ({ default: m.UISettingsPage })));
 const VisibleRegionPage = lazy(() => import('./pages/map/visibleregion/VisibleRegionPage').then(m => ({ default: m.VisibleRegionPage })));
 const CameraSyncPage = lazy(() => import('./pages/map/camerasync/CameraSyncPage').then(m => ({ default: m.CameraSyncPage })));
+const MarkerLabelPositionPage = lazy(() => import('./pages/marker/labelposition/MarkerLabelPositionPage').then(m => ({ default: m.MarkerLabelPositionPage })));
 const MarkerAnimationPage = lazy(() => import('./pages/marker/animation/MarkerAnimationPage').then(m => ({ default: m.MarkerAnimationPage })));
 const PostOfficePage = lazy(() => import('./pages/marker/postoffice/PostOfficePage').then(m => ({ default: m.PostOfficePage })));
 const PostOfficeClusterPage = lazy(() => import('./pages/marker/postofficecluster/PostOfficeClusterPage').then(m => ({ default: m.PostOfficeClusterPage })));
@@ -87,6 +88,7 @@ function pageContent(page: string | undefined) {
     case 'visible-region': return <VisibleRegionPage />;
     case 'camera-sync': return <CameraSyncPage />;
     case 'marker': return <MarkerIconsPage />;
+    case 'marker-label-position': return <MarkerLabelPositionPage />;
     case 'marker-animation': return <MarkerAnimationPage />;
     case 'post-office': return <PostOfficePage />;
     case 'circle': return <CirclePage />;
