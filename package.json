@@ -34,8 +34,6 @@
     "react-geojson/",
     "react-kml/",
     "react-heatmap/",
-    "vectorstyle/",
-    "vectortile/",
     "react-vectorstyle/",
     "react-vectortile/",
     "react-marker-clustering/",

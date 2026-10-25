@@ -1,7 +1,6 @@
 import React from 'react';
-import { StyleRules, VectorStyleRasteriser, VectorStyleRasterisation } from '@mapconductor/react-vectorstyle';
+import { StyleRules, VectorStyleRasteriser, StyleAffects, VectorStyleRasterisation } from '@mapconductor/react-vectorstyle';
 import { MapStyleHost } from '@mapconductor/js-sdk-core';
-import { StyleAffects } from '@mapconductor/vectorstyle';
 
 interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */

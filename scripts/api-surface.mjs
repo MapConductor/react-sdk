@@ -62,8 +62,6 @@ const PACKAGES = [
   "react-kml",
   "react-heatmap",
   "react-marker-clustering",
-  "vectorstyle",
-  "vectortile",
   "react-vectorstyle",
   "react-vectortile",
   "react-icons-jp",
