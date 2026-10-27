@@ -91,3 +91,6 @@
 [submodule "react-kml"]
 	path = react-kml
 	url = git@github.com:MapConductor/react-kml.git
+[submodule "react-for-deckgl"]
+	path = react-for-deckgl
+	url = git@github.com:MapConductor/react-for-deckgl.git
