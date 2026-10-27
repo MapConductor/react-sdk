@@ -39,6 +39,10 @@ import { TomTomDesign, useTomTomViewState } from '@mapconductor/react-for-tomtom
 import { MapTilerDesign, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
 import { LongdoDesign, useLongdoViewState } from '@mapconductor/react-for-longdo';
 import { MapplsDesign, useMapplsViewState } from '@mapconductor/react-for-mappls';
+// deck.gl は読み込み時に `globalThis.deck` を取り合う（別バージョンが居ると例外）。
+// Longdo の web SDK が自前の deck.gl 8 系を積んでいるので、deck.gl の地図を出さない
+// ページでは評価しないこと。状態とデザインは deck.gl を引かない `/state` から取る。
+import { DeckGLDesign, useDeckGLMapViewState } from '@mapconductor/react-for-deckgl/state';
 import type { SingletonMapContent } from './providers/singleton/types';
 
 export type { SingletonMapContent };
@@ -60,7 +64,8 @@ export type SingletonMapId =
   | 'tomtom'
   | 'maptiler'
   | 'longdo'
-  | 'mappls';
+  | 'mappls'
+  | 'deckgl';
 
 type AnyMapViewState = MapViewStateInterface<MapDesignTypeInterface<unknown>>;
 type AnyMapDesignType = MapDesignTypeInterface<unknown>;
@@ -127,6 +132,7 @@ const LazyHereSingletonView = lazy(() => import('./providers/singleton/HereSingl
 const LazyTomTomSingletonView = lazy(() => import('./providers/singleton/TomTomSingletonView'));
 const LazyMapTilerSingletonView = lazy(() => import('./providers/singleton/MapTilerSingletonView'));
 const LazyMapplsSingletonView = lazy(() => import('./providers/singleton/MapplsSingletonView'));
+const LazyDeckGLSingletonView = lazy(() => import('./providers/singleton/DeckGLSingletonView'));
 const LazyLongdoSingletonView = lazy(() => import('./providers/singleton/LongdoSingletonView'));
 
 export function SingletonMapsProvider({ children }: { children: ReactNode }) {
@@ -162,6 +168,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   const mapTilerState = useMapTilerViewState({ apiKey: mapTilerApiKey, mapDesignType: MapTilerDesign.Streets, cameraPosition: DEFAULT_CAMERA });
   const longdoState = useLongdoViewState({ apiKey: longdoApiKey, mapDesignType: LongdoDesign.Normal, cameraPosition: DEFAULT_CAMERA });
   const mapplsState = useMapplsViewState({ apiKey: mapplsApiKey, mapDesignType: MapplsDesign.Default, cameraPosition: DEFAULT_CAMERA });
+  const deckglState = useDeckGLMapViewState({ mapDesignType: DeckGLDesign.Standard, cameraPosition: DEFAULT_CAMERA });
 
   const statesById = useMemo<Record<SingletonMapId, AnyMapViewState>>(() => ({
     'google-2d': google2DState,
@@ -181,9 +188,10 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
     maptiler: mapTilerState,
     longdo: longdoState,
     mappls: mapplsState,
+    deckgl: deckglState,
   }), [
     google2DState, google3DState, maplibre2DState, maplibre3DState, mapboxState,
-    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState, tomtomState, mapTilerState, longdoState, mapplsState,
+    leafletState, openLayersState, arcgis2DState, arcgis3DState, mapkitState, azuremapsState, cesiumState, hereState, tomtomState, mapTilerState, longdoState, mapplsState, deckglState,
   ]);
 
   // Capture each provider's default map design once, up front, before any page
@@ -268,6 +276,8 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           onCameraMoveStart={content['google-2d']?.onCameraMoveStart}
           onCameraMove={content['google-2d']?.onCameraMove}
           onCameraMoveEnd={content['google-2d']?.onCameraMoveEnd}
+          mapStyle={content['google-2d']?.mapStyle}
+          onStyleDiagnostics={content['google-2d']?.onStyleDiagnostics}
         >
           {content['google-2d'] && <Fragment key={content['google-2d']!.owner}>{content['google-2d']!.children}</Fragment>}
         </GoogleMapView2D>
@@ -286,6 +296,8 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           onCameraMoveStart={content['google-3d']?.onCameraMoveStart}
           onCameraMove={content['google-3d']?.onCameraMove}
           onCameraMoveEnd={content['google-3d']?.onCameraMoveEnd}
+          mapStyle={content['google-3d']?.mapStyle}
+          onStyleDiagnostics={content['google-3d']?.onStyleDiagnostics}
         >
           {content['google-3d'] && <Fragment key={content['google-3d']!.owner}>{content['google-3d']!.children}</Fragment>}
         </GoogleMapView>
@@ -351,6 +363,10 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
       id: 'mappls',
       node: <Suspense fallback={null}><LazyMapplsSingletonView state={mapplsState} content={content['mappls'] ?? null} /></Suspense>,
     },
+    {
+      id: 'deckgl',
+      node: <Suspense fallback={null}><LazyDeckGLSingletonView state={deckglState} content={content['deckgl'] ?? null} /></Suspense>,
+    },
   ];
 
   return (
@@ -365,7 +381,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction }: SingletonMapSlotProps) {
+export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction, mapStyle, onStyleDiagnostics }: SingletonMapSlotProps) {
   const { register, unregister } = useSingletonMapsContext();
   const owner = useId();
 
@@ -378,6 +394,8 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
       onCameraMove,
       onCameraMoveEnd,
       cameraRestriction,
+      mapStyle,
+      onStyleDiagnostics,
     });
     return () => unregister(id, owner);
   }, [
@@ -389,6 +407,8 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
     onCameraMove,
     onCameraMoveEnd,
     cameraRestriction,
+    mapStyle,
+    onStyleDiagnostics,
     register,
     unregister,
   ]);

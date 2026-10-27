@@ -45,6 +45,7 @@ import { TomTomDesign, useTomTomViewState } from '@mapconductor/react-for-tomtom
 import { MapTilerDesign, useMapTilerViewState } from '@mapconductor/react-for-maptiler';
 import { LongdoDesign, useLongdoViewState } from '@mapconductor/react-for-longdo';
 import { MapplsDesign, useMapplsViewState } from '@mapconductor/react-for-mappls';
+import { DeckGLDesign, useDeckGLMapViewState } from '@mapconductor/react-for-deckgl/state';
 
 type ProviderStateMap = Record<PaneProvider, PaneState>;
 
@@ -79,6 +80,7 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
   const mapTilerState = useMapTilerViewState({ id: `camera-sync-${prefix}-maptiler`, apiKey: mapTilerApiKey, mapDesignType: prefix === 'left' ? MapTilerDesign.Streets : MapTilerDesign.StreetsLight, cameraPosition: INITIAL_CAMERA });
   const longdoState = useLongdoViewState({ id: `camera-sync-${prefix}-longdo`, apiKey: longdoApiKey, mapDesignType: LongdoDesign.Normal, cameraPosition: INITIAL_CAMERA });
   const mapplsState = useMapplsViewState({ id: `camera-sync-${prefix}-mappls`, apiKey: mapplsApiKey, mapDesignType: MapplsDesign.Default, cameraPosition: INITIAL_CAMERA });
+  const deckglState = useDeckGLMapViewState({ id: `camera-sync-${prefix}-deckgl`, mapDesignType: DeckGLDesign.Standard, cameraPosition: INITIAL_CAMERA });
 
   return {
     maplibre: paneState('maplibre', mapLibreState),
@@ -98,5 +100,6 @@ export function useCameraSyncProviderStates(prefix: 'left' | 'right'): ProviderS
     maptiler: paneState('maptiler', mapTilerState),
     longdo: paneState('longdo', longdoState),
     mappls: paneState('mappls', mapplsState),
+    deckgl: paneState('deckgl', deckglState),
   };
 }

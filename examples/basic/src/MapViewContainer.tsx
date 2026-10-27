@@ -8,6 +8,7 @@ import type {
   MapDesignTypeInterface,
   MapViewStateInterface,
   MarkerTilingOptions,
+  MapViewStyle,
 } from '@mapconductor/js-sdk-core';
 import { type InitialCamera, DEFAULT_CAMERA } from './common';
 import { SingletonMapSlot, useSingletonMapState, type SingletonMapId } from './SingletonMaps';
@@ -50,6 +51,9 @@ interface MapViewContainerProps {
    * 指定された場合は restrictBounds より優先される。
    */
   cameraRestriction?: CameraRestriction | null;
+  /** 地図の見た目そのもの。`createVectorStyle()` が作る。 */
+  mapStyle?: MapViewStyle | null;
+  onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
 }
 
 function SingletonProviderView({
@@ -63,6 +67,8 @@ function SingletonProviderView({
   onStateReady,
   restrictBounds,
   cameraRestriction: cameraRestrictionProp,
+  mapStyle,
+  onStyleDiagnostics,
 }: ProviderViewProps & { id: SingletonMapId }) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useSingletonMapState(id, cameraPosition);
@@ -85,6 +91,8 @@ function SingletonProviderView({
       onCameraMove={onCameraMove}
       onCameraMoveEnd={onCameraMoveEnd}
       cameraRestriction={cameraRestriction}
+      mapStyle={mapStyle}
+      onStyleDiagnostics={onStyleDiagnostics}
     >
       {children}
     </SingletonMapSlot>
@@ -102,6 +110,8 @@ export function MapViewContainer({
   markerTilingOptions,
   onStateReady,
   restrictBounds,
+  mapStyle,
+  onStyleDiagnostics,
 }: MapViewContainerProps) {
   const location = useLocation();
   const isGoogle3D = location.pathname.startsWith('/google-maps-3d');
@@ -121,6 +131,7 @@ export function MapViewContainer({
   const isMapTiler = location.pathname.startsWith('/maptiler');
   const isLongdo = location.pathname.startsWith('/longdo');
   const isMappls = location.pathname.startsWith('/mappls');
+  const isDeckGL = location.pathname.startsWith('/deckgl');
 
   const commonProps: ProviderViewProps = {
     children,
@@ -133,6 +144,8 @@ export function MapViewContainer({
     onStateReady,
     restrictBounds,
     cameraRestriction,
+    mapStyle,
+    onStyleDiagnostics,
   };
 
   switch (true) {
@@ -190,6 +203,10 @@ export function MapViewContainer({
 
     case isMappls: {
       return <SingletonProviderView id="mappls" {...commonProps} />;
+    }
+
+    case isDeckGL: {
+      return <SingletonProviderView id="deckgl" {...commonProps} />;
     }
 
     default: {

@@ -31,6 +31,8 @@
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-icons": "*",
     "@mapconductor/react-marker-clustering": "*",
+    "@mapconductor/react-vectorstyle": "*",
+    "@mapconductor/react-vectortile": "*",
     "@zip.js/zip.js": "^2.8.26",
     "maplibre-gl": "^6.15.0",
     "prism-react-renderer": "^2.4.1",
@@ -38,7 +40,8 @@
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.18.0",
     "three": "^0.185.1",
-    "@mapconductor/react-for-mappls": "*"
+    "@mapconductor/react-for-mappls": "*",
+    "@mapconductor/react-for-deckgl": "*"
   },
   "devDependencies": {
     "@types/react": "^19.2.17",
@@ -46,7 +49,7 @@
     "@vitejs/plugin-react": "^5.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3",
-    "vite": "^7.3.5",
+    "vite": "^7.3.7",
     "vite-plugin-mkcert": "^2.1.0"
   }
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react';
 import { useLocation } from 'react-router-dom';
 import { createGeoPoint, createMapCameraPosition } from '@mapconductor/js-sdk-core';
 import { MapLibreDesign, MapLibreMapView2D, useMapLibreViewState, type MapLibreViewState } from '@mapconductor/react-for-maplibre';
@@ -9,6 +9,12 @@ import { ArcGISDesign, ArcGISMapView2D, useArcGISViewState, type ArcGISViewState
 import { TomTomDesign, TomTomMapView2D, useTomTomViewState, type TomTomViewState } from '@mapconductor/react-for-tomtom';
 import { MapTilerDesign, MapTilerMapView2D, useMapTilerViewState, type MapTilerViewState } from '@mapconductor/react-for-maptiler';
 import { MapplsDesign, MapplsMapView2D, useMapplsViewState, type MapplsViewState } from '@mapconductor/react-for-mappls';
+// deck.gl は読み込み時に `globalThis.deck` を取り合う（別バージョンが居ると例外）。
+// このモジュールは全プロバイダのページから評価されるので、描画コンポーネントだけ遅延読み込みにする。
+import { DeckGLDesign, useDeckGLMapViewState, type DeckGLMapViewStateInterface } from '@mapconductor/react-for-deckgl/state';
+const LazyDeckGLMapView = lazy(() =>
+  import('@mapconductor/react-for-deckgl').then(m => ({ default: m.DeckGLMapView })),
+);
 import { HeatmapOverlay, HeatmapPoints, HeatmapPointState } from '@mapconductor/react-heatmap';
 import { ControlPanel } from '../../components/ControlPanel';
 import { SingletonMapSlot, useSingletonMapState } from '../../SingletonMaps';
@@ -215,12 +221,29 @@ function MapTilerHeatmapLayerPage() {
   );
 }
 
+function DeckGLHeatmapLayerPage() {
+  const mapViewState = useDeckGLMapViewState({
+    mapDesignType: DeckGLDesign.Light,
+    cameraPosition: INIT_CAMERA_POSITION,
+  });
+  return (
+    <HeatmapLayerPageContent
+      renderMapView={children => (
+        <Suspense fallback={null}>
+          <LazyDeckGLMapView state={mapViewState as DeckGLMapViewStateInterface}>{children}</LazyDeckGLMapView>
+        </Suspense>
+      )}
+    />
+  );
+}
+
 export function HeatmapLayerPage() {
   const location = useLocation();
   if (location.pathname.startsWith('/google-maps')) return <GoogleHeatmapLayerPage />;
   if (location.pathname.startsWith('/maptiler')) return <MapTilerHeatmapLayerPage />;
   if (location.pathname.startsWith('/tomtom')) return <TomTomHeatmapLayerPage />;
   if (location.pathname.startsWith('/mappls')) return <MapplsHeatmapLayerPage />;
+  if (location.pathname.startsWith('/deckgl')) return <DeckGLHeatmapLayerPage />;
   if (location.pathname.startsWith('/mapbox')) return <MapboxHeatmapLayerPage />;
   if (location.pathname.startsWith('/leaflet')) return <LeafletHeatmapLayerPage />;
   if (location.pathname.startsWith('/openlayers')) return <OpenLayersHeatmapLayerPage />;

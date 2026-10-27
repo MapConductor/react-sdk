@@ -81,3 +81,9 @@ examples/reactnative-basic/android/.kotlin/
 newkey.xcresult
 ios-rest.xcresult
 ios-final.xcresult
+
+# The Rust style compiler and renderer (wasm + their JS bindings), fetched from a
+# MapConductor/vectortile release by scripts/fetch-vector-assets.mjs. The tag and
+# checksums are pinned in scripts/vector-assets.json; the bytes are not tracked.
+react-vectorstyle/vendor/
+react-vectortile/vendor/
