@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * Puts the Rust style compiler and renderer (wasm + their JS bindings) where
- * react-vectorstyle and react-vectortile import them from.
+ * Puts the Rust renderer (wasm + its JS bindings) where react-vectortile
+ * imports it from. The style compiler is fetched by js-vectorstyle itself, the
+ * same way, from its own copy of this script; keep the two tags in step.
  *
  *   node scripts/fetch-vector-assets.mjs            fetch what is missing or stale
  *   node scripts/fetch-vector-assets.mjs --force    fetch again regardless
@@ -13,7 +14,7 @@
  *
  * To try a local build of mapconductor-vectortile instead, point
  * MAPCONDUCTOR_VECTORTILE_DIR at that checkout (after `npm run build` in its
- * bindings/js and bindings/js-style). Nothing is verified then, and the stamp
+ * bindings/js). Nothing is verified then, and the stamp
  * says so, so the next plain run fetches the pinned release again.
  */
 import { createHash } from "node:crypto";
@@ -28,7 +29,6 @@ const PIN = JSON.parse(readFileSync(join(ROOT, "scripts", "vector-assets.json"),
 
 /** Release asset -> where it is unpacked, and where a local build keeps it. */
 const TARGETS = [
-  { asset: "vectorstyle-web.tgz", dest: "react-vectorstyle/vendor/vectorstyle", local: "bindings/js-style" },
   { asset: "vectortile-web.tgz", dest: "react-vectortile/vendor/vectortile", local: "bindings/js" },
 ];
 

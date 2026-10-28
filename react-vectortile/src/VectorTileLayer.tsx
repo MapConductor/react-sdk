@@ -10,7 +10,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { RasterLayer, useMapServiceRegistry } from '@mapconductor/js-sdk-react';
 import { VectorTileProvider } from '../vendor/vectortile/dist/index.js';
-import { NO_STYLE_RULES, type StyleRules } from '@mapconductor/react-vectorstyle';
+import { NO_STYLE_RULES, type StyleRules } from '@mapconductor/js-vectorstyle';
 
 export interface VectorTileLayerProps {
     /** A `style.json` URL, its raw text, or the parsed object. */
@@ -242,7 +242,7 @@ export function VectorTileLayer({
             const document = styleRef.current;
             const json = rulesRef.current;
             if (json === NO_STYLE_RULES.json) return document;
-            const { compileStyle } = await import('@mapconductor/react-vectorstyle');
+            const { compileStyle } = await import('@mapconductor/js-vectorstyle');
             const compiled = await compileStyle(await styleText(document), json);
             if (compiled.diagnostics.length > 0) report?.([...compiled.diagnostics]);
             return compiled.style as object;
