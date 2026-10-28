@@ -8,8 +8,8 @@ import {
     type RasterLayerState,
 } from '@mapconductor/js-sdk-core';
 import { VectorTileProvider } from '../vendor/vectortile/dist/index.js';
-import type { StyleAffects } from '@mapconductor/react-vectorstyle';
-import type { VectorStyleRasterisation, VectorStyleRasteriser } from '@mapconductor/react-vectorstyle';
+import type { StyleAffects } from '@mapconductor/js-vectorstyle';
+import type { VectorStyleRasterisation, VectorStyleRasteriser } from '@mapconductor/js-vectorstyle';
 
 /** How long a burst of restyles is gathered into one redraw. */
 const COALESCE_MS = 150;

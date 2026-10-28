@@ -94,3 +94,6 @@
 [submodule "react-for-deckgl"]
 	path = react-for-deckgl
 	url = git@github.com:MapConductor/react-for-deckgl.git
+[submodule "js-vectorstyle"]
+	path = js-vectorstyle
+	url = git@github.com:mapconductor/js-vectorstyle.git

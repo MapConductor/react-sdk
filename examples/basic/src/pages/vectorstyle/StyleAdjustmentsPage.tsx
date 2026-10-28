@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { MapDesignTypeInterface, MapViewStateInterface } from '@mapconductor/js-sdk-core';
-import { buildStyleRules, createVectorStyle, LayerRole, NO_STYLE_RULES } from '@mapconductor/react-vectorstyle';
+import { buildStyleRules, createVectorStyle, LayerRole, NO_STYLE_RULES } from '@mapconductor/js-vectorstyle';
 import { VectorTileRasteriser } from '@mapconductor/react-vectortile';
 import { ControlPanel, SliderControl } from '../../components/ControlPanel';
 import { MapViewContainer } from '../../MapViewContainer';

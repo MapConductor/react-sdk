@@ -31,7 +31,7 @@
     "@mapconductor/react-heatmap": "*",
     "@mapconductor/react-icons": "*",
     "@mapconductor/react-marker-clustering": "*",
-    "@mapconductor/react-vectorstyle": "*",
+    "@mapconductor/js-vectorstyle": "*",
     "@mapconductor/react-vectortile": "*",
     "@zip.js/zip.js": "^2.8.26",
     "maplibre-gl": "^6.15.0",

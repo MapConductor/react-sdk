@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleRules, VectorStyleRasteriser, StyleAffects, VectorStyleRasterisation } from '@mapconductor/react-vectorstyle';
+import { StyleRules, VectorStyleRasteriser, StyleAffects, VectorStyleRasterisation } from '@mapconductor/js-vectorstyle';
 import { MapStyleHost } from '@mapconductor/js-sdk-core';
 
 interface VectorTileLayerProps {

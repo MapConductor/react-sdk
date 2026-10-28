@@ -1,4 +1,4 @@
-import { LayerRole, buildStyleRules, NO_STYLE_RULES, type StyleRules } from '@mapconductor/react-vectorstyle';
+import { LayerRole, buildStyleRules, NO_STYLE_RULES, type StyleRules } from '@mapconductor/js-vectorstyle';
 
 /** A category that can be painted as well as switched off. */
 export type ColourCategory = 'water' | 'land' | 'street' | 'building';
