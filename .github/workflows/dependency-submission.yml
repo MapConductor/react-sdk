@@ -44,7 +44,7 @@ jobs:
         with:
           node-version: 22
 
-      # @mapconductor/* はまだ npm に無い。deploy-basic-example.yml と同じく、内部の依存指定を
+      # @mapconductor/* はまだ npm に無い。内部の依存指定を
       # "*" に揃えてローカルの workspace をリンクさせる（揃えないと registry を見に行って 404）。
       - name: Link local workspace packages
         run: node scripts/link-local-workspaces.mjs
