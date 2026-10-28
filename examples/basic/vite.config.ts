@@ -106,6 +106,8 @@ export default defineConfig({
     port: 4003,
   },
   build: {
-    sourcemap: true,
+    // Source maps for this many providers run the build out of heap (6 GB is
+    // not enough), so they are made only when asked for: SOURCEMAP=true.
+    sourcemap: process.env.SOURCEMAP === 'true',
   },
 });
