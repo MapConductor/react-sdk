@@ -20,6 +20,7 @@
   "scripts": {
     "build": "tsup src/index.tsx --format cjs,esm --dts",
     "clean": "rm -rf dist",
+    "pretest": "npm run build",
     "test": "node --test \"test/**/*.test.mjs\""
   },
   "author": "MapConductor",

@@ -48,8 +48,12 @@ jobs:
       - name: Install
         run: npm ci
 
-      # ワークスペース横断。各パッケージの `pretest` が自分の dist を作るので、
-      # ここで先に build する必要はない。
+      # 各パッケージの `pretest` は自分の dist しか作らない。プロバイダの build は
+      # js-sdk-react の dist（型と `/internal`）を読むので、それと js-sdk-core だけ先に作る。
+      - name: Build shared packages
+        run: npm run build -w @mapconductor/js-sdk-core -w @mapconductor/js-sdk-react
+
+      # ワークスペース横断。各パッケージの `pretest` が自分の dist を作る。
       - name: Test
         run: npm test
 
