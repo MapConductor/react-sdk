@@ -97,3 +97,6 @@
 [submodule "js-vectorstyle"]
 	path = js-vectorstyle
 	url = git@github.com:mapconductor/js-vectorstyle.git
+[submodule "react-vectortile"]
+	path = react-vectortile
+	url = git@github.com:MapConductor/react-vectortile.git
