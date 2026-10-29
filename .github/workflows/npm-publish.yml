@@ -16,6 +16,10 @@ on:
 
 permissions:
   contents: read
+  # Trusted publishing: npm exchanges the workflow's OIDC token for a
+  # short-lived publish token. Every package already on npm has a trusted
+  # publisher for this repository and this workflow file.
+  id-token: write
 
 concurrency:
   group: npm-publish
@@ -43,6 +47,10 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
           # cache: npm
+
+      # Trusted publishing needs npm 11.5.1 or later; Node 22 ships npm 10.
+      - name: Update npm
+        run: npm install -g npm@^11.5.1
 
       # Internal packages may not exist in the npm registry yet. Normalize
       # their dependency specs temporarily so npm links every dependency from
@@ -172,11 +180,17 @@ jobs:
               continue
             fi
 
-            npm publish --workspace "${package}" --access public
+            # Provenance is off: npm generates it automatically under trusted
+            # publishing, and the registry rejects it unless the package's
+            # repository.url names this repository, which none of them do (most
+            # have no repository field; the submodules name their own repos).
+            npm publish --workspace "${package}" --access public --provenance=false
             echo "::endgroup::"
           done
         env:
-          # npm checks authentication even for a publish.
+          # npm tries the OIDC exchange first and falls back to this token.
+          # The token is still needed for a package's first publish: a trusted
+          # publisher can only be added to a package that already exists.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       # `npm publish` printed "+ @mapconductor/react-geojson@0.2.0" and exited 0
