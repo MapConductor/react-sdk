@@ -1,6 +1,6 @@
 {
   "name": "@mapconductor/react-sdk",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": true,
   "description": "Unified mapping library for React - common API for Google Maps, MapLibre, and other map providers",
   "workspaces": [

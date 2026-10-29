@@ -40,7 +40,9 @@ const inBuildScript = new Set(
 );
 
 const workspaces = JSON.parse(sh('npm query .workspace --json'));
-const publishable = workspaces.filter((w) => !w.private);
+// The publish workflow's `exclude` input: packages left out of this release.
+const excluded = new Set((process.env.PUBLISH_EXCLUDE ?? '').split(/\s+/).filter(Boolean));
+const publishable = workspaces.filter((w) => !w.private && !excluded.has(w.name));
 
 const problems = [];
 const add = (pkg, msg) => problems.push(`${pkg}: ${msg}`);
@@ -54,7 +56,7 @@ const versionOf = new Map(
   ]),
 );
 
-console.log(`preflight: ${publishable.length} publishable package(s)\n`);
+console.log(`preflight: ${publishable.length} publishable package(s)${excluded.size ? `, excluding ${[...excluded].join(' ')}` : ''}\n`);
 
 for (const w of publishable) {
   const pkg = JSON.parse(readFileSync(resolve(w.location, 'package.json'), 'utf8'));
