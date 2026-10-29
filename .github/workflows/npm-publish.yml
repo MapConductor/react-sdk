@@ -8,6 +8,11 @@ name: npm publish
 # still linked to "*", and nothing may be published until they are restored.
 on:
   workflow_dispatch:
+    inputs:
+      exclude:
+        description: Package names to leave out of this release, separated by spaces
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -23,6 +28,9 @@ jobs:
     # visibility gate, which waits up to 15 min per newly-created package name
     # (already-published ones answer on the first try and cost nothing).
     timeout-minutes: 60
+    env:
+      # Read by preflight-publish.mjs and by each package list below.
+      PUBLISH_EXCLUDE: ${{ inputs.exclude }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -91,8 +99,9 @@ jobs:
               let input = "";
               process.stdin.on("data", chunk => input += chunk);
               process.stdin.on("end", () => {
+                const exclude = new Set((process.env.PUBLISH_EXCLUDE ?? "").split(/\s+/).filter(Boolean));
                 for (const workspace of JSON.parse(input)) {
-                  if (!workspace.private) console.log(workspace.name);
+                  if (!workspace.private && !exclude.has(workspace.name)) console.log(workspace.name);
                 }
               });
             '
@@ -135,8 +144,9 @@ jobs:
               let input = "";
               process.stdin.on("data", chunk => input += chunk);
               process.stdin.on("end", () => {
+                const exclude = new Set((process.env.PUBLISH_EXCLUDE ?? "").split(/\s+/).filter(Boolean));
                 for (const workspace of JSON.parse(input)) {
-                  if (!workspace.private) console.log(workspace.name);
+                  if (!workspace.private && !exclude.has(workspace.name)) console.log(workspace.name);
                 }
               });
             '
@@ -189,8 +199,9 @@ jobs:
               let input = "";
               process.stdin.on("data", chunk => input += chunk);
               process.stdin.on("end", () => {
+                const exclude = new Set((process.env.PUBLISH_EXCLUDE ?? "").split(/\s+/).filter(Boolean));
                 for (const workspace of JSON.parse(input)) {
-                  if (!workspace.private) console.log(workspace.name);
+                  if (!workspace.private && !exclude.has(workspace.name)) console.log(workspace.name);
                 }
               });
             '
