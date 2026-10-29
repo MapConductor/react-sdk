@@ -120,4 +120,5 @@ declare class VectorTileRasteriser implements VectorStyleRasteriser {
     install(host: MapStyleHost, styleJson: string, _affects: StyleAffects): VectorStyleRasterisation;
 }
 
-export { VectorTileLayer, type VectorTileLayerProps, VectorTileRasteriser, type VectorTileRasteriserOptions };
+export { VectorTileLayer, VectorTileRasteriser };
+export type { VectorTileLayerProps, VectorTileRasteriserOptions };
