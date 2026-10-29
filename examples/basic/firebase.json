@@ -1,0 +1,45 @@
+{
+  "hosting": {
+    "site": "mapconductor-react",
+    "public": "dist",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "cleanUrls": true,
+    "rewrites": [
+      {
+        "regex": "^/(?:camera-sync|hello-map)(?:/(?:en|ja|es-419|de|th|hi))?/?$",
+        "destination": "/index.html"
+      },
+      {
+        "regex": "^/[a-z0-9-]+/[a-z0-9-]+(?:/(?:en|ja|es-419|de|th|hi))?/?$",
+        "destination": "/index.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/assets/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+        ]
+      },
+      {
+        "source": "/cesiumStatic/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=86400" }
+        ]
+      },
+      {
+        "source": "**/index.html",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" }
+        ]
+      },
+      {
+        "source": "/tile-sw.js",
+        "headers": [
+          { "key": "Cache-Control", "value": "no-cache" },
+          { "key": "Service-Worker-Allowed", "value": "/" }
+        ]
+      }
+    ]
+  }
+}
