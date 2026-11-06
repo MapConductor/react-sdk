@@ -34,7 +34,7 @@ export function usePostOfficeMarkers(
     dataSource.load(includeClusterImage).then(assets => {
       if (!active) return;
       setRecords(assets.records);
-      setIcon(new ImageIcon(assets.markerImage, { scale: iconScale }));
+      setIcon(new ImageIcon(assets.markerImageUrl, { scale: iconScale }));
       setClusterImage(assets.clusterImage ?? null);
     }).catch(reason => {
       if (active) setError(String(reason));

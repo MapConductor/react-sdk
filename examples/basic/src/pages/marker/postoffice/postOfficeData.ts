@@ -2,7 +2,8 @@ export type PostOfficeRecord = readonly [number, number, string, string];
 
 export interface PostOfficeAssets {
   records: PostOfficeRecord[];
-  markerImage: HTMLImageElement;
+  /** マーカーの画像。ImageIcon に URL のまま渡す（読み込みは SDK がする）。 */
+  markerImageUrl: string;
   clusterImage?: HTMLImageElement;
 }
 
@@ -26,16 +27,11 @@ export function createPostOfficeDataSource(baseUrl: string): PostOfficeDataSourc
         if (!response.ok) throw new Error(`HTTP ${response.status}`);
         return response.json() as Promise<PostOfficeRecord[]>;
       });
-      const markerImagePromise = loadImage(`${baseUrl}postoffice/postoffice.webp`);
       const clusterImagePromise = includeClusterImage
         ? loadImage(`${baseUrl}postoffice/cluster_red.png`)
         : Promise.resolve(undefined);
-      const [records, markerImage, clusterImage] = await Promise.all([
-        recordsPromise,
-        markerImagePromise,
-        clusterImagePromise,
-      ]);
-      return { records, markerImage, clusterImage };
+      const [records, clusterImage] = await Promise.all([recordsPromise, clusterImagePromise]);
+      return { records, markerImageUrl: `${baseUrl}postoffice/postoffice.webp`, clusterImage };
     },
   };
 }
