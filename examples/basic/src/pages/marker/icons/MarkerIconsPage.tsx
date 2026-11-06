@@ -68,7 +68,6 @@ interface MarkerDefinition {
 }
 
 export function MarkerIconsPage() {
-  const weatherImage = useLoadedImage(WEATHER_ICON_URL);
   const humanImage = useLoadedImage(HUMAN_ICON_URL);
   const launcherImage = useLoadedImage(LAUNCHER_ICON_URL);
   const weatherPngUrl = useRasterizedDataUrl(WEATHER_ICON_URL);
@@ -282,19 +281,18 @@ export function MarkerIconsPage() {
       });
     }
 
-    if (weatherImage) {
-      definitions.splice(9, 0, {
-        id: 'image-weather',
-        lat: 0.01,
-        lng: 0.009,
-        icon: new ImageIcon(weatherImage, { debug: true, anchor: { x: 0.5, y: 1 } }),
-        extra: `ImageIcon(
+    // ImageIcon には画像の URL をそのまま渡せる。読み終えたら SDK が描き直す。
+    definitions.splice(9, 0, {
+      id: 'image-weather',
+      lat: 0.01,
+      lng: 0.009,
+      icon: new ImageIcon(WEATHER_ICON_URL, { debug: true, anchor: { x: 0.5, y: 1 } }),
+      extra: `ImageIcon(
   drawable = icon,
   debug = true,
   anchor = PointF(0.5, 1.0),
 )`,
-      });
-    }
+    });
 
     if (labelImage) {
       definitions.splice(10, 0, {
@@ -310,7 +308,7 @@ export function MarkerIconsPage() {
     }
 
     return definitions;
-  }, [defaultMarkerPngUrl, humanImage, labelImage, launcherImage, thumbnailPngUrl, weatherImage, weatherPngUrl]);
+  }, [defaultMarkerPngUrl, humanImage, labelImage, launcherImage, thumbnailPngUrl, weatherPngUrl]);
 
   const markers = useMemo(
     () =>
