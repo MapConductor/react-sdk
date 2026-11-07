@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createGeoPoint, createPolygonState, type GeoPoint, type PolygonState } from '@mapconductor/js-sdk-core';
 import { Polygons } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
@@ -6,36 +6,59 @@ import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 
 /**
- * Building footprints of central Boston (about 0.8 x 1.1 km) from the Overture
- * Maps buildings theme, drawn with one <Polygons>.
+ * Building footprints of central Boston from the Overture Maps buildings theme,
+ * drawn with one <Polygons> on top of the real map.
  *
- * The copies control lays the same block out 2 x 2 or 4 x 4 times side by side,
- * so the page doubles as a load test for many polygons.
+ * Three nested areas around Downtown Crossing — 0.8 x 1.1 km, 1.6 x 2.2 km and
+ * 3.2 x 4.4 km — each building tagged with the smallest one that holds it, so
+ * the page doubles as a load test. Tapping a building highlights it and names
+ * it; tapping elsewhere says nothing was hit, which is what makes the page
+ * usable for checking hit testing.
  */
+interface Building {
+  id: string;
+  /** The smallest area (0, 1 or 2) the building fits in. */
+  l: number;
+  h: number | null;
+  n?: string;
+  rings: number[][];
+}
+
 interface BuildingsDoc {
   attribution: string;
   license: string;
-  bbox: [number, number, number, number];
-  buildings: { h: number | null; rings: number[][] }[];
+  buildings: Building[];
 }
 
 const DEFAULT_CAMERA = { lat: 42.35545, lng: -71.0605, zoom: 16 };
-const GRID_SIZES = [1, 2, 4] as const;
-type GridSize = (typeof GRID_SIZES)[number];
+const AREAS = [
+  { level: 0, label: '0.8 × 1.1 km' },
+  { level: 1, label: '1.6 × 2.2 km' },
+  { level: 2, label: '3.2 × 4.4 km' },
+] as const;
+const TAPPED = 'rgba(37, 99, 235, 0.85)';
+
+/** What the last tap hit: a building, or nothing (`building` null). */
+interface Tap {
+  seq: number;
+  building: Building | null;
+  /** Where the map said it was tapped, when the tap missed every building. */
+  point: GeoPoint | null;
+}
 
 /**
- * `?camera=lat,lng,zoom` and `?grid=1|2|4` set where the page opens and how many
- * copies it starts with, so a measurement sees the same view on every provider.
+ * `?camera=lat,lng,zoom` and `?area=0|1|2` set where the page opens and how much
+ * of the data it starts with, so a measurement sees the same view on every
+ * provider.
  */
-function initialParams(): { camera: typeof DEFAULT_CAMERA; grid: GridSize } {
-  if (typeof window === 'undefined') return { camera: DEFAULT_CAMERA, grid: 1 };
+function initialParams(): { camera: typeof DEFAULT_CAMERA; area: number } {
+  if (typeof window === 'undefined') return { camera: DEFAULT_CAMERA, area: 0 };
   const params = new URLSearchParams(window.location.search);
   const [lat, lng, zoom] = (params.get('camera') ?? '').split(',').map(Number);
   const camera = [lat, lng, zoom].some(n => !Number.isFinite(n)) ? DEFAULT_CAMERA : { lat, lng, zoom };
-  const grid = GRID_SIZES.find(size => String(size) === params.get('grid')) ?? 1;
-  return { camera, grid };
+  const area = AREAS.find(a => String(a.level) === params.get('area'))?.level ?? 0;
+  return { camera, area };
 }
-const TAPPED = 'rgba(37, 99, 235, 0.85)';
 
 // Darker for taller buildings; grey when the height is unknown.
 function fillForHeight(height: number | null): string {
@@ -47,51 +70,22 @@ function fillForHeight(height: number | null): string {
   return 'rgba(127, 29, 29, 0.75)';
 }
 
-function toPoints(ring: number[], dLng: number, dLat: number): GeoPoint[] {
+function toPoints(ring: number[]): GeoPoint[] {
   const points: GeoPoint[] = [];
   for (let i = 0; i < ring.length; i += 2) {
-    points.push(createGeoPoint({ longitude: ring[i] + dLng, latitude: ring[i + 1] + dLat }));
+    points.push(createGeoPoint({ longitude: ring[i], latitude: ring[i + 1] }));
   }
   return points;
-}
-
-function buildStates(doc: BuildingsDoc, grid: number, onTap: (height: number | null) => void): PolygonState[] {
-  const [west, south, east, north] = doc.bbox;
-  const states: PolygonState[] = [];
-  for (let row = 0; row < grid; row++) {
-    for (let column = 0; column < grid; column++) {
-      // Copies go east and south of the original block.
-      const dLng = column * (east - west);
-      const dLat = -row * (north - south);
-      doc.buildings.forEach((building, index) => {
-        const [outer, ...holes] = building.rings;
-        states.push(
-          createPolygonState({
-            id: `boston-${row}-${column}-${index}`,
-            points: toPoints(outer, dLng, dLat),
-            holes: holes.map(hole => toPoints(hole, dLng, dLat)),
-            strokeColor: 'rgba(68, 64, 60, 0.8)',
-            strokeWidth: 1,
-            fillColor: fillForHeight(building.h),
-            onClick: event => {
-              event.state.fillColor = TAPPED;
-              onTap(building.h);
-            },
-          })
-        );
-      });
-    }
-  }
-  return states;
 }
 
 export function BostonBuildingsPage() {
   const { t } = useSampleI18n();
   const [doc, setDoc] = useState<BuildingsDoc | null>(null);
   const [initial] = useState(initialParams);
-  const [grid, setGrid] = useState<GridSize>(initial.grid);
-  const [tapped, setTapped] = useState<number | null | undefined>(undefined);
+  const [area, setArea] = useState(initial.area);
+  const [tap, setTap] = useState<Tap | null>(null);
   const [timing, setTiming] = useState<{ build: number; frame: number } | null>(null);
+  const highlightedRef = useRef<{ state: PolygonState; fill: string } | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -101,29 +95,60 @@ export function BostonBuildingsPage() {
     return () => { cancelled = true; };
   }, []);
 
-  const buildStartRef = useRef(0);
-  const built = useMemo(() => {
+  // Moves the highlight to `state` (or clears it) and records the tap.
+  const onTap = (state: PolygonState | null, building: Building | null, point: GeoPoint | null = null) => {
+    const previous = highlightedRef.current;
+    if (previous) previous.state.fillColor = previous.fill;
+    highlightedRef.current = state ? { state, fill: state.fillColor } : null;
+    if (state) state.fillColor = TAPPED;
+    setTap(prev => ({ seq: (prev?.seq ?? 0) + 1, building, point }));
+  };
+  const onTapRef = useRef(onTap);
+  onTapRef.current = onTap;
+  const onMapClick = useCallback((point: GeoPoint) => onTapRef.current(null, null, point), []);
+
+  // Every building's state, built once; the area only filters them.
+  const allStates = useMemo(() => {
     if (!doc) return null;
     const start = performance.now();
-    const states = buildStates(doc, grid, setTapped);
+    const states = doc.buildings.map(building => {
+      const [outer, ...holes] = building.rings;
+      return createPolygonState({
+        id: building.id,
+        points: toPoints(outer),
+        holes: holes.map(toPoints),
+        strokeColor: 'rgba(68, 64, 60, 0.8)',
+        strokeWidth: 1,
+        fillColor: fillForHeight(building.h),
+        extra: building.id,
+        onClick: event => onTapRef.current(event.state, building),
+      });
+    });
+    return { states, build: performance.now() - start };
+  }, [doc]);
+
+  const shown = useMemo(() => {
+    if (!doc || !allStates) return null;
+    const states = allStates.states.filter((_, i) => doc.buildings[i].l <= area);
     const vertices = states.reduce((n, s) => n + s.points.length + s.holes.reduce((m, h) => m + h.length, 0), 0);
-    return { states, vertices, build: performance.now() - start };
-  }, [doc, grid]);
+    return { states, vertices };
+  }, [doc, allStates, area]);
 
   // Time from handing the list to <Polygons> until the frame after it: the
   // child's effect has registered the polygons by the time this one runs.
-  useLayoutEffect(() => { buildStartRef.current = performance.now(); }, [built]);
+  const commitRef = useRef(0);
+  useLayoutEffect(() => { commitRef.current = performance.now(); }, [shown]);
   useEffect(() => {
-    if (!built) return;
+    if (!shown || !allStates) return;
     let raf = requestAnimationFrame(() => {
-      raf = requestAnimationFrame(() => setTiming({ build: built.build, frame: performance.now() - buildStartRef.current }));
+      raf = requestAnimationFrame(() => setTiming({ build: allStates.build, frame: performance.now() - commitRef.current }));
     });
     return () => cancelAnimationFrame(raf);
-  }, [built]);
+  }, [shown, allStates]);
 
   return (
-    <MapViewContainer initialCamera={initial.camera}>
-      {built && <Polygons states={built.states} />}
+    <MapViewContainer initialCamera={initial.camera} onMapClick={onMapClick}>
+      {shown && <Polygons states={shown.states} />}
       <ControlPanel
         title={t({
           en: 'Boston buildings',
@@ -135,27 +160,27 @@ export function BostonBuildingsPage() {
         })}
       >
         <div className="button-grid" style={{ marginBottom: 8 }}>
-          {GRID_SIZES.map(size => (
+          {AREAS.map(a => (
             <button
-              key={size}
+              key={a.level}
               type="button"
-              data-testid={`grid-${size}`}
-              className={size === grid ? 'active' : undefined}
-              onClick={() => setGrid(size)}
+              data-testid={`area-${a.level}`}
+              className={a.level === area ? 'active' : undefined}
+              onClick={() => setArea(a.level)}
             >
-              {size === 1 ? '×1' : `${size}×${size}`}
+              {a.label}
             </button>
           ))}
         </div>
-        {built ? (
+        {shown ? (
           <p className="control-panel-note" data-testid="stats">
             {t({
-              en: `${built.states.length.toLocaleString()} polygons, ${built.vertices.toLocaleString()} vertices`,
-              ja: `ポリゴン ${built.states.length.toLocaleString()} 個・頂点 ${built.vertices.toLocaleString()} 個`,
-              'es-419': `${built.states.length.toLocaleString()} polígonos, ${built.vertices.toLocaleString()} vértices`,
-              de: `${built.states.length.toLocaleString()} Polygone, ${built.vertices.toLocaleString()} Eckpunkte`,
-              th: `โพลีกอน ${built.states.length.toLocaleString()} รูป จุดยอด ${built.vertices.toLocaleString()} จุด`,
-              hi: `${built.states.length.toLocaleString()} पॉलीगॉन, ${built.vertices.toLocaleString()} शीर्ष`,
+              en: `${shown.states.length.toLocaleString()} polygons, ${shown.vertices.toLocaleString()} vertices`,
+              ja: `ポリゴン ${shown.states.length.toLocaleString()} 個・頂点 ${shown.vertices.toLocaleString()} 個`,
+              'es-419': `${shown.states.length.toLocaleString()} polígonos, ${shown.vertices.toLocaleString()} vértices`,
+              de: `${shown.states.length.toLocaleString()} Polygone, ${shown.vertices.toLocaleString()} Eckpunkte`,
+              th: `โพลีกอน ${shown.states.length.toLocaleString()} รูป จุดยอด ${shown.vertices.toLocaleString()} จุด`,
+              hi: `${shown.states.length.toLocaleString()} पॉलीगॉन, ${shown.vertices.toLocaleString()} शीर्ष`,
             })}
             {timing && (
               <>
@@ -176,18 +201,22 @@ export function BostonBuildingsPage() {
         ) : (
           <p className="control-panel-note">…</p>
         )}
-        {tapped !== undefined && (
-          <p className="control-panel-note">
-            {tapped == null
-              ? t({ en: 'Height unknown', ja: '高さ不明', 'es-419': 'Altura desconocida', de: 'Höhe unbekannt', th: 'ไม่ทราบความสูง', hi: 'ऊँचाई अज्ञात' })
-              : t({
-                  en: `Height ${tapped} m`,
-                  ja: `高さ ${tapped} m`,
-                  'es-419': `Altura ${tapped} m`,
-                  de: `Höhe ${tapped} m`,
-                  th: `ความสูง ${tapped} ม.`,
-                  hi: `ऊँचाई ${tapped} मी`,
-                })}
+        {tap && (
+          <p
+            className="control-panel-note"
+            data-testid="tap"
+            data-seq={tap.seq}
+            data-id={tap.building?.id ?? ''}
+            data-lat={tap.point?.latitude ?? ''}
+            data-lng={tap.point?.longitude ?? ''}
+          >
+            {tap.building
+              ? `${tap.building.n ?? t({ en: 'Building', ja: '建物', 'es-419': 'Edificio', de: 'Gebäude', th: 'อาคาร', hi: 'इमारत' })} · ${
+                  tap.building.h == null
+                    ? t({ en: 'height unknown', ja: '高さ不明', 'es-419': 'altura desconocida', de: 'Höhe unbekannt', th: 'ไม่ทราบความสูง', hi: 'ऊँचाई अज्ञात' })
+                    : `${tap.building.h} m`
+                } · ${tap.building.id.slice(0, 8)}`
+              : t({ en: 'No building here', ja: 'ここに建物はありません', 'es-419': 'Aquí no hay edificio', de: 'Hier ist kein Gebäude', th: 'ไม่มีอาคารตรงนี้', hi: 'यहाँ कोई इमारत नहीं' })}
           </p>
         )}
         <p className="control-panel-note" style={{ fontSize: 11 }}>
