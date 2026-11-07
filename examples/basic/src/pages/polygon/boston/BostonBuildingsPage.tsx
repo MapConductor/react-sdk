@@ -131,11 +131,24 @@ export function BostonBuildingsPage() {
   onTapRef.current = onTap;
   const onMapClick = useCallback((point: GeoPoint) => onTapRef.current(null, null, point), []);
 
-  // The loading overlay stays up until the map has every polygon of the shown
-  // dataset: each state's onAdded counts one. `doc` tells this load's calls
-  // from those of a dataset switched away from.
+  // The loading overlay stays up until the map has every polygon of the list
+  // now handed to it: each state's onAdded records its id, and `count` is how
+  // many ids of that list are recorded. `doc` tells this load's calls from
+  // those of a dataset switched away from.
+  //
+  // An id stays recorded when the area shrinks and drops it. The SDK only
+  // calls onAdded again for a polygon it saw leave, and a list replaced before
+  // the SDK got to it is never seen; a list's polygons that never came would
+  // leave the overlay up for good. So the count is redone against each new
+  // list, and an id already on the map counts for it.
   const commitRef = useRef(0);
-  const addedRef = useRef<{ doc: BuildingsDoc | null; count: number; target: number }>({ doc: null, count: 0, target: 0 });
+  const addedRef = useRef<{
+    doc: BuildingsDoc | null;
+    ids: Set<string>;
+    list: Set<string>;
+    count: number;
+    waiting: boolean;
+  }>({ doc: null, ids: new Set(), list: new Set(), count: 0, waiting: false });
   const onAllAddedRef = useRef(() => {});
   onAllAddedRef.current = () => {
     setAddedMs(performance.now() - commitRef.current);
@@ -146,10 +159,15 @@ export function BostonBuildingsPage() {
   const allStates = useMemo(() => {
     if (!doc) return null;
     const start = performance.now();
-    const onAdded = () => {
+    const onAdded = (state: PolygonState) => {
       const added = addedRef.current;
-      if (added.doc !== doc) return;
-      if (++added.count === added.target) onAllAddedRef.current();
+      if (added.doc !== doc || added.ids.has(state.id)) return;
+      added.ids.add(state.id);
+      if (!added.list.has(state.id)) return; // from a list since replaced
+      if (++added.count === added.list.size && added.waiting) {
+        added.waiting = false;
+        onAllAddedRef.current();
+      }
     };
     const states = doc.buildings.map(building => {
       const [outer, ...holes] = building.rings;
@@ -183,14 +201,23 @@ export function BostonBuildingsPage() {
   useLayoutEffect(() => {
     commitRef.current = performance.now();
     if (!shown || !doc) return;
-    if (addedRef.current.doc === doc) return; // the area changed; nothing is loading
-    // Runs before <Polygons> registers them, so no onAdded has come yet.
+    const added = addedRef.current;
+    if (added.doc !== doc) {
+      // A new dataset. Runs before <Polygons> registers it, so no onAdded has come yet.
+      added.doc = doc;
+      added.ids = new Set();
+      added.waiting = true;
+      setProgress(p => (p ? { phase: 'draw' } : p));
+    }
     // One per id: the map keeps one polygon per id, and the downtown data
     // has a building listed twice.
-    const target = new Set(shown.states.map(s => s.id)).size;
-    addedRef.current = { doc, count: 0, target };
-    if (target === 0) onAllAddedRef.current();
-    else setProgress(p => (p ? { phase: 'draw' } : p));
+    added.list = new Set(shown.states.map(s => s.id));
+    added.count = 0;
+    for (const id of added.list) if (added.ids.has(id)) added.count++;
+    if (added.waiting && added.count === added.list.size) {
+      added.waiting = false;
+      onAllAddedRef.current();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown]);
   useEffect(() => {
