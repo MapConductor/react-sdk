@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createGeoPoint, createPolygonState, type GeoPoint, type PolygonState } from '@mapconductor/js-sdk-core';
-import { Polygons } from '@mapconductor/js-sdk-react';
+import { InfoBubble, Polygons } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 import { loadDataset, nextPaint, type Building, type BuildingsDoc, type Dataset } from './bostonData';
-import { LAND_USE_STYLES, LandUseLegend, LoadingOverlay, type OverlayPhase } from './BostonOverlays';
+import { LAND_USE_STYLES, LandUseLegend, LoadingOverlay, PolygonInfo, type OverlayPhase } from './BostonOverlays';
 
 /**
  * Polygons of Boston drawn with one <Polygons> on top of the real map.
@@ -37,7 +37,7 @@ const TAPPED = 'rgba(37, 99, 235, 0.85)';
 interface Tap {
   seq: number;
   building: Building | null;
-  /** Where the map said it was tapped, when the tap missed every building. */
+  /** Where the tap landed: the polygon event's point, or the map click's. */
   point: GeoPoint | null;
 }
 
@@ -142,7 +142,7 @@ export function BostonBuildingsPage() {
         strokeWidth: 1,
         fillColor: fillFor(dataset, building),
         extra: building.id,
-        onClick: event => onTapRef.current(event.state, building),
+        onClick: event => onTapRef.current(event.state, building, event.clicked),
       });
     });
     return { states, build: performance.now() - start };
@@ -179,6 +179,11 @@ export function BostonBuildingsPage() {
     <MapViewContainer initialCamera={initial.camera} onMapClick={onMapClick}>
       {shown && <Polygons states={shown.states} />}
       {progress && <LoadingOverlay progress={progress} />}
+      {tap?.building && tap.point && (
+        <InfoBubble position={tap.point} contentPadding={8}>
+          <PolygonInfo building={tap.building} />
+        </InfoBubble>
+      )}
       <ControlPanel
         title={t({
           en: 'Boston buildings',

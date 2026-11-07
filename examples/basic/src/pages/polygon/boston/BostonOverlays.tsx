@@ -1,5 +1,5 @@
 import { useSampleI18n } from '../../../samples/i18n';
-import type { LandUse, LoadProgress } from './bostonData';
+import type { Building, LandUse, LoadProgress } from './bostonData';
 
 type Label = { en: string; ja: string; 'es-419': string; de: string; th: string; hi: string };
 
@@ -114,5 +114,39 @@ export function LoadingOverlay({ progress }: { progress: OverlayPhase }) {
         `}</style>
       </div>
     </div>
+  );
+}
+
+/** What a tapped polygon carries, shown in an InfoBubble at the tap. */
+export function PolygonInfo({ building }: { building: Building }) {
+  const { t } = useSampleI18n();
+  const rows: [string, string][] = [];
+  if (building.use) {
+    rows.push([t({ en: 'Parcel', ja: '区画', 'es-419': 'Parcela', de: 'Flurstück', th: 'แปลงที่ดิน', hi: 'भूखंड' }), building.n?.replace(/^Parcel /, '') ?? '—']);
+    rows.push([t({ en: 'Land use', ja: '土地利用', 'es-419': 'Uso del suelo', de: 'Nutzung', th: 'การใช้ที่ดิน', hi: 'भूमि उपयोग' }), t(LAND_USE_STYLES[building.use].label)]);
+  } else {
+    if (building.n) rows.push([t({ en: 'Name', ja: '名前', 'es-419': 'Nombre', de: 'Name', th: 'ชื่อ', hi: 'नाम' }), building.n]);
+    rows.push([
+      t({ en: 'Height', ja: '高さ', 'es-419': 'Altura', de: 'Höhe', th: 'ความสูง', hi: 'ऊँचाई' }),
+      building.h == null ? t({ en: 'unknown', ja: '不明', 'es-419': 'desconocida', de: 'unbekannt', th: 'ไม่ทราบ', hi: 'अज्ञात' }) : `${building.h} m`,
+    ]);
+    rows.push(['Overture ID', building.id.length > 13 ? `${building.id.slice(0, 13)}…` : building.id]);
+  }
+  rows.push([
+    t({ en: 'Vertices', ja: '頂点', 'es-419': 'Vértices', de: 'Eckpunkte', th: 'จุดยอด', hi: 'शीर्ष' }),
+    String(building.rings.reduce((n, r) => n + r.length / 2, 0)) +
+      (building.rings.length > 1 ? ` (${t({ en: 'holes', ja: '穴', 'es-419': 'huecos', de: 'Löcher', th: 'รู', hi: 'छेद' })} ${building.rings.length - 1})` : ''),
+  ]);
+  return (
+    <table data-testid="polygon-info" style={{ borderCollapse: 'collapse', fontSize: 12, lineHeight: 1.5 }}>
+      <tbody>
+        {rows.map(([key, value]) => (
+          <tr key={key}>
+            <th style={{ textAlign: 'left', fontWeight: 600, paddingRight: 10, whiteSpace: 'nowrap', color: '#475569' }}>{key}</th>
+            <td style={{ whiteSpace: 'nowrap' }}>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
   );
 }
