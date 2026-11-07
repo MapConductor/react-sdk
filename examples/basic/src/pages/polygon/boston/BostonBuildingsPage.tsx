@@ -4,7 +4,8 @@ import { Polygons } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
-import { loadDataset, type Building, type BuildingsDoc, type Dataset } from './bostonData';
+import { loadDataset, nextPaint, type Building, type BuildingsDoc, type Dataset } from './bostonData';
+import { LAND_USE_STYLES, LandUseLegend, LoadingOverlay, type OverlayPhase } from './BostonOverlays';
 
 /**
  * Polygons of Boston drawn with one <Polygons> on top of the real map.
@@ -55,28 +56,10 @@ function initialParams(): { camera: typeof DEFAULT_CAMERA; area: number; dataset
   return { camera, area, dataset };
 }
 
-// Parcels carry no height or land use, so each gets one of a few colours picked
-// from its id, like a cadastral map: neighbours mostly differ.
-const PARCEL_COLORS = [
-  'rgba(244, 114, 182, 0.45)',
-  'rgba(96, 165, 250, 0.45)',
-  'rgba(52, 211, 153, 0.45)',
-  'rgba(251, 191, 36, 0.45)',
-  'rgba(167, 139, 250, 0.45)',
-  'rgba(248, 113, 113, 0.45)',
-  'rgba(45, 212, 191, 0.45)',
-  'rgba(163, 230, 53, 0.45)',
-];
-
-function parcelColor(id: string): string {
-  let hash = 2166136261;
-  for (let i = 0; i < id.length; i++) hash = Math.imul(hash ^ id.charCodeAt(i), 16777619);
-  return PARCEL_COLORS[(hash >>> 0) % PARCEL_COLORS.length];
-}
-
-// Buildings: darker for taller, grey when the height is unknown.
+// Parcels: by land use (Property Assessment). Buildings: darker for taller,
+// grey when the height is unknown.
 function fillFor(dataset: Dataset, building: Building): string {
-  if (dataset === 'parcels') return parcelColor(building.id);
+  if (dataset === 'parcels') return LAND_USE_STYLES[building.use ?? 'unknown'].fill;
   const height = building.h;
   if (height == null) return 'rgba(148, 163, 184, 0.6)';
   if (height < 15) return 'rgba(254, 240, 138, 0.7)';
@@ -106,20 +89,30 @@ export function BostonBuildingsPage() {
   const highlightedRef = useRef<{ state: PolygonState; fill: string } | null>(null);
 
   const [loadMs, setLoadMs] = useState(0);
+  // Non-null while a dataset is on its way; drives the loading overlay.
+  const [progress, setProgress] = useState<OverlayPhase | null>(null);
   useEffect(() => {
     let cancelled = false;
     const start = performance.now();
     setDoc(null);
     setTiming(null);
     setLoadError(null);
+    setProgress({ phase: 'download', loaded: 0, total: null });
     highlightedRef.current = null;
-    loadDataset(dataset)
-      .then(loaded => {
+    loadDataset(dataset, p => { if (!cancelled) setProgress(p); })
+      .then(async loaded => {
         if (cancelled) return;
         setLoadMs(performance.now() - start);
-        setDoc(loaded);
+        // Building the states blocks the main thread; show that phase first.
+        setProgress({ phase: 'build' });
+        await nextPaint();
+        if (!cancelled) setDoc(loaded);
       })
-      .catch(error => { if (!cancelled) setLoadError(String(error)); });
+      .catch(error => {
+        if (cancelled) return;
+        setProgress(null);
+        setLoadError(String(error));
+      });
     return () => { cancelled = true; };
   }, [dataset]);
 
@@ -167,11 +160,17 @@ export function BostonBuildingsPage() {
   // Time from handing the list to <Polygons> until the frame after it: the
   // child's effect has registered the polygons by the time this one runs.
   const commitRef = useRef(0);
-  useLayoutEffect(() => { commitRef.current = performance.now(); }, [shown]);
+  useLayoutEffect(() => {
+    commitRef.current = performance.now();
+    if (shown) setProgress(p => (p ? { phase: 'draw' } : p));
+  }, [shown]);
   useEffect(() => {
     if (!shown || !allStates) return;
     let raf = requestAnimationFrame(() => {
-      raf = requestAnimationFrame(() => setTiming({ build: allStates.build, frame: performance.now() - commitRef.current }));
+      raf = requestAnimationFrame(() => {
+        setTiming({ build: allStates.build, frame: performance.now() - commitRef.current });
+        setProgress(null);
+      });
     });
     return () => cancelAnimationFrame(raf);
   }, [shown, allStates]);
@@ -179,6 +178,7 @@ export function BostonBuildingsPage() {
   return (
     <MapViewContainer initialCamera={initial.camera} onMapClick={onMapClick}>
       {shown && <Polygons states={shown.states} />}
+      {progress && <LoadingOverlay progress={progress} />}
       <ControlPanel
         title={t({
           en: 'Boston buildings',
@@ -218,6 +218,7 @@ export function BostonBuildingsPage() {
         </div>
         )}
         {loadError && <p className="control-panel-note" data-testid="load-error">{loadError}</p>}
+        {dataset === 'parcels' && <LandUseLegend />}
         {shown ? (
           <p className="control-panel-note" data-testid="stats">
             {t({
@@ -256,7 +257,9 @@ export function BostonBuildingsPage() {
             data-lat={tap.point?.latitude ?? ''}
             data-lng={tap.point?.longitude ?? ''}
           >
-            {tap.building
+            {tap.building?.use
+              ? `${tap.building.n} · ${t(LAND_USE_STYLES[tap.building.use].label)}`
+              : tap.building
               ? `${tap.building.n ?? t({ en: 'Building', ja: '建物', 'es-419': 'Edificio', de: 'Gebäude', th: 'อาคาร', hi: 'इमारत' })} · ${
                   tap.building.h == null
                     ? t({ en: 'height unknown', ja: '高さ不明', 'es-419': 'altura desconocida', de: 'Höhe unbekannt', th: 'ไม่ทราบความสูง', hi: 'ऊँचाई अज्ञात' })

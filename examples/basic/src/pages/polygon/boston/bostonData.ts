@@ -4,8 +4,9 @@
  * - `downtown`: the bundled Overture extract (JSON), three nested areas.
  * - `buildings` / `parcels`: the whole city, from `public/boston/full/*.bin`.
  *   Those files are too large for the repository; they are built from the
- *   official sources (Overture buildings, Analyze Boston Parcels 2025) and are
- *   not committed.
+ *   official sources (Overture buildings, Analyze Boston Parcels 2025 joined
+ *   with the FY2026 Property Assessment land use) and are not committed.
+ *   A parcel's label is "<GIS_ID>|<land use>".
  *
  * Binary layout (little-endian):
  *   'MCPG' u32 version=1 u32 count
@@ -22,9 +23,27 @@ export interface Building {
   l: number;
   h: number | null;
   n?: string;
+  /** A parcel's land use, from the City of Boston's Property Assessment. */
+  use?: LandUse;
   /** Rings as flat [lng, lat, lng, lat, ...]; the first is the outline, the rest holes. */
   rings: number[][];
 }
+
+export type LandUse =
+  | 'family'
+  | 'apartment'
+  | 'condo'
+  | 'mixed'
+  | 'commercial'
+  | 'industrial'
+  | 'exempt'
+  | 'vacant'
+  | 'unknown';
+
+/** Where loading has got to, for the overlay. */
+export type LoadProgress =
+  | { phase: 'download'; loaded: number; total: number | null }
+  | { phase: 'decode' };
 
 export interface BuildingsDoc {
   attribution: string;
@@ -40,20 +59,60 @@ const CITY_SOURCES: Record<Exclude<Dataset, 'downtown'>, { file: string; attribu
   },
   parcels: {
     file: 'boston/full/boston-parcels.bin',
-    attribution: 'City of Boston, Parcels 2025 (Analyze Boston)',
+    attribution: 'City of Boston, Parcels 2025 and FY2026 Property Assessment (Analyze Boston)',
     license: 'ODC PDDL',
   },
 };
 
-export async function loadDataset(dataset: Dataset): Promise<BuildingsDoc> {
+export async function loadDataset(
+  dataset: Dataset,
+  onProgress: (progress: LoadProgress) => void = () => {},
+): Promise<BuildingsDoc> {
   if (dataset === 'downtown') {
     const response = await fetch(`${import.meta.env.BASE_URL}boston/boston-buildings.json`);
-    return (await response.json()) as BuildingsDoc;
+    const bytes = await readWithProgress(response, onProgress);
+    onProgress({ phase: 'decode' });
+    await nextPaint();
+    return JSON.parse(new TextDecoder().decode(bytes)) as BuildingsDoc;
   }
   const source = CITY_SOURCES[dataset];
   const response = await fetch(`${import.meta.env.BASE_URL}${source.file}`);
   if (!response.ok) throw new Error(`${source.file}: ${response.status}`);
-  return { attribution: source.attribution, license: source.license, buildings: decode(await response.arrayBuffer(), dataset) };
+  const bytes = await readWithProgress(response, onProgress);
+  onProgress({ phase: 'decode' });
+  // Decoding blocks the main thread; let the overlay show the new phase first.
+  await nextPaint();
+  return { attribution: source.attribution, license: source.license, buildings: decode(bytes.buffer as ArrayBuffer, dataset) };
+}
+
+/** Resolves after the browser has painted, so a state change shows before blocking work. */
+export function nextPaint(): Promise<void> {
+  return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
+}
+
+async function readWithProgress(response: Response, onProgress: (progress: LoadProgress) => void): Promise<Uint8Array> {
+  const header = response.headers.get('Content-Length');
+  // A compressed response's Content-Length counts compressed bytes; fall back to a byte count.
+  const total = header && !response.headers.get('Content-Encoding') ? Number(header) : null;
+  if (!response.body) return new Uint8Array(await response.arrayBuffer());
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let loaded = 0;
+  onProgress({ phase: 'download', loaded, total });
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.byteLength;
+    onProgress({ phase: 'download', loaded, total });
+  }
+  const bytes = new Uint8Array(loaded);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return bytes;
 }
 
 function decode(buffer: ArrayBuffer, dataset: string): Building[] {
@@ -88,16 +147,18 @@ function decode(buffer: ArrayBuffer, dataset: string): Building[] {
       }
       rings.push(ring);
     }
-    // A building's label is its Overture id; a parcel's is its parcel id, shown as the name.
+    // A building's label is its Overture id; a parcel's is "<parcel id>|<land use>".
     // Parts of a multipolygon share the label, so a repeat gets the index appended.
-    let id = label || `${dataset}-${i}`;
+    const [key, use] = dataset === 'parcels' ? label.split('|') : [label, undefined];
+    let id = key || `${dataset}-${i}`;
     if (seen.has(id)) id = `${id}#${i}`;
     seen.add(id);
     buildings[i] = {
       id,
       l: 0,
       h: height === 0xffff ? null : height / 10,
-      n: dataset === 'parcels' && label ? `Parcel ${label}` : undefined,
+      n: dataset === 'parcels' && key ? `Parcel ${key}` : undefined,
+      use: dataset === 'parcels' ? ((use as LandUse | undefined) ?? 'unknown') : undefined,
       rings,
     };
   }
