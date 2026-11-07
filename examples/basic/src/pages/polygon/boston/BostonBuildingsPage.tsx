@@ -4,31 +4,25 @@ import { Polygons } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { loadDataset, type Building, type BuildingsDoc, type Dataset } from './bostonData';
 
 /**
- * Building footprints of central Boston from the Overture Maps buildings theme,
- * drawn with one <Polygons> on top of the real map.
+ * Polygons of Boston drawn with one <Polygons> on top of the real map.
  *
- * Three nested areas around Downtown Crossing — 0.8 x 1.1 km, 1.6 x 2.2 km and
- * 3.2 x 4.4 km — each building tagged with the smallest one that holds it, so
- * the page doubles as a load test. Tapping a building highlights it and names
- * it; tapping elsewhere says nothing was hit, which is what makes the page
- * usable for checking hit testing.
+ * - Downtown: Overture building footprints in three nested areas around
+ *   Downtown Crossing — 0.8 x 1.1 km, 1.6 x 2.2 km and 3.2 x 4.4 km — each
+ *   building tagged with the smallest one that holds it.
+ * - City buildings / city parcels: the whole city (about 100,000 polygons
+ *   each), a load test. See bostonData.ts for where those files come from.
+ *
+ * Tapping a polygon highlights it and names it; tapping elsewhere says nothing
+ * was hit, which is what makes the page usable for checking hit testing.
  */
-interface Building {
-  id: string;
-  /** The smallest area (0, 1 or 2) the building fits in. */
-  l: number;
-  h: number | null;
-  n?: string;
-  rings: number[][];
-}
-
-interface BuildingsDoc {
-  attribution: string;
-  license: string;
-  buildings: Building[];
-}
+const DATASETS: { key: Dataset; label: string }[] = [
+  { key: 'downtown', label: 'Downtown' },
+  { key: 'buildings', label: 'City buildings' },
+  { key: 'parcels', label: 'City parcels' },
+];
 
 const DEFAULT_CAMERA = { lat: 42.35545, lng: -71.0605, zoom: 16 };
 const AREAS = [
@@ -47,21 +41,23 @@ interface Tap {
 }
 
 /**
- * `?camera=lat,lng,zoom` and `?area=0|1|2` set where the page opens and how much
- * of the data it starts with, so a measurement sees the same view on every
- * provider.
+ * `?camera=lat,lng,zoom`, `?data=downtown|buildings|parcels` and `?area=0|1|2`
+ * set where the page opens and what it starts with, so a measurement sees the
+ * same view on every provider.
  */
-function initialParams(): { camera: typeof DEFAULT_CAMERA; area: number } {
-  if (typeof window === 'undefined') return { camera: DEFAULT_CAMERA, area: 0 };
+function initialParams(): { camera: typeof DEFAULT_CAMERA; area: number; dataset: Dataset } {
+  if (typeof window === 'undefined') return { camera: DEFAULT_CAMERA, area: 0, dataset: 'downtown' };
   const params = new URLSearchParams(window.location.search);
   const [lat, lng, zoom] = (params.get('camera') ?? '').split(',').map(Number);
   const camera = [lat, lng, zoom].some(n => !Number.isFinite(n)) ? DEFAULT_CAMERA : { lat, lng, zoom };
   const area = AREAS.find(a => String(a.level) === params.get('area'))?.level ?? 0;
-  return { camera, area };
+  const dataset = DATASETS.find(d => d.key === params.get('data'))?.key ?? 'downtown';
+  return { camera, area, dataset };
 }
 
-// Darker for taller buildings; grey when the height is unknown.
-function fillForHeight(height: number | null): string {
+// Darker for taller buildings; grey when the height is unknown. Parcels are all one colour.
+function fillFor(dataset: Dataset, height: number | null): string {
+  if (dataset === 'parcels') return 'rgba(34, 197, 94, 0.25)';
   if (height == null) return 'rgba(148, 163, 184, 0.6)';
   if (height < 15) return 'rgba(254, 240, 138, 0.7)';
   if (height < 30) return 'rgba(253, 186, 116, 0.7)';
@@ -83,17 +79,29 @@ export function BostonBuildingsPage() {
   const [doc, setDoc] = useState<BuildingsDoc | null>(null);
   const [initial] = useState(initialParams);
   const [area, setArea] = useState(initial.area);
+  const [dataset, setDataset] = useState<Dataset>(initial.dataset);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [tap, setTap] = useState<Tap | null>(null);
   const [timing, setTiming] = useState<{ build: number; frame: number } | null>(null);
   const highlightedRef = useRef<{ state: PolygonState; fill: string } | null>(null);
 
+  const [loadMs, setLoadMs] = useState(0);
   useEffect(() => {
     let cancelled = false;
-    fetch(`${import.meta.env.BASE_URL}boston/boston-buildings.json`)
-      .then(response => response.json() as Promise<BuildingsDoc>)
-      .then(loaded => { if (!cancelled) setDoc(loaded); });
+    const start = performance.now();
+    setDoc(null);
+    setTiming(null);
+    setLoadError(null);
+    highlightedRef.current = null;
+    loadDataset(dataset)
+      .then(loaded => {
+        if (cancelled) return;
+        setLoadMs(performance.now() - start);
+        setDoc(loaded);
+      })
+      .catch(error => { if (!cancelled) setLoadError(String(error)); });
     return () => { cancelled = true; };
-  }, []);
+  }, [dataset]);
 
   // Moves the highlight to `state` (or clears it) and records the tap.
   const onTap = (state: PolygonState | null, building: Building | null, point: GeoPoint | null = null) => {
@@ -117,14 +125,16 @@ export function BostonBuildingsPage() {
         id: building.id,
         points: toPoints(outer),
         holes: holes.map(toPoints),
-        strokeColor: 'rgba(68, 64, 60, 0.8)',
+        strokeColor: dataset === 'parcels' ? 'rgba(21, 128, 61, 0.8)' : 'rgba(68, 64, 60, 0.8)',
         strokeWidth: 1,
-        fillColor: fillForHeight(building.h),
+        fillColor: fillFor(dataset, building.h),
         extra: building.id,
         onClick: event => onTapRef.current(event.state, building),
       });
     });
     return { states, build: performance.now() - start };
+    // `dataset` changes only together with `doc`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc]);
 
   const shown = useMemo(() => {
@@ -160,6 +170,20 @@ export function BostonBuildingsPage() {
         })}
       >
         <div className="button-grid" style={{ marginBottom: 8 }}>
+          {DATASETS.map(d => (
+            <button
+              key={d.key}
+              type="button"
+              data-testid={`data-${d.key}`}
+              className={d.key === dataset ? 'active' : undefined}
+              onClick={() => setDataset(d.key)}
+            >
+              {d.label}
+            </button>
+          ))}
+        </div>
+        {dataset === 'downtown' && (
+        <div className="button-grid" style={{ marginBottom: 8 }}>
           {AREAS.map(a => (
             <button
               key={a.level}
@@ -172,6 +196,8 @@ export function BostonBuildingsPage() {
             </button>
           ))}
         </div>
+        )}
+        {loadError && <p className="control-panel-note" data-testid="load-error">{loadError}</p>}
         {shown ? (
           <p className="control-panel-note" data-testid="stats">
             {t({
@@ -187,12 +213,12 @@ export function BostonBuildingsPage() {
                 <br />
                 <span data-testid="timing">
                   {t({
-                    en: `states ${timing.build.toFixed(0)} ms, next frame ${timing.frame.toFixed(0)} ms`,
-                    ja: `state 作成 ${timing.build.toFixed(0)} ms・次のフレームまで ${timing.frame.toFixed(0)} ms`,
-                    'es-419': `estados ${timing.build.toFixed(0)} ms, siguiente cuadro ${timing.frame.toFixed(0)} ms`,
-                    de: `States ${timing.build.toFixed(0)} ms, nächster Frame ${timing.frame.toFixed(0)} ms`,
-                    th: `สร้าง state ${timing.build.toFixed(0)} ms เฟรมถัดไป ${timing.frame.toFixed(0)} ms`,
-                    hi: `state ${timing.build.toFixed(0)} ms, अगला फ़्रेम ${timing.frame.toFixed(0)} ms`,
+                    en: `load ${loadMs.toFixed(0)} ms, states ${timing.build.toFixed(0)} ms, next frame ${timing.frame.toFixed(0)} ms`,
+                    ja: `読み込み ${loadMs.toFixed(0)} ms・state 作成 ${timing.build.toFixed(0)} ms・次のフレームまで ${timing.frame.toFixed(0)} ms`,
+                    'es-419': `carga ${loadMs.toFixed(0)} ms, estados ${timing.build.toFixed(0)} ms, siguiente cuadro ${timing.frame.toFixed(0)} ms`,
+                    de: `Laden ${loadMs.toFixed(0)} ms, States ${timing.build.toFixed(0)} ms, nächster Frame ${timing.frame.toFixed(0)} ms`,
+                    th: `โหลด ${loadMs.toFixed(0)} ms สร้าง state ${timing.build.toFixed(0)} ms เฟรมถัดไป ${timing.frame.toFixed(0)} ms`,
+                    hi: `लोड ${loadMs.toFixed(0)} ms, state ${timing.build.toFixed(0)} ms, अगला फ़्रेम ${timing.frame.toFixed(0)} ms`,
                   })}
                 </span>
               </>
