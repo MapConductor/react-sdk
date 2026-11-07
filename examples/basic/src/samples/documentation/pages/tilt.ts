@@ -1,11 +1,15 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `mapViewState.moveCameraTo(
-  mapViewState.cameraPosition.copy({ tilt }),
-  400,
-);
-
+  code: `<label>
+  Tilt: {tilt}°
+  <input type="range" min="0" max="60" value={tilt}
+    onChange={event => {
+      const next = Number(event.target.value);
+      setTilt(next);
+      mapViewState.moveCameraTo(mapViewState.cameraPosition.copy({ tilt: next }), 400);
+    }} />
+</label>
 <MapViewContainer state={mapViewState} />`,
   state: `const [tilt, setTilt] = useState(0);`,
   explanation: {

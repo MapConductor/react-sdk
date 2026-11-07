@@ -1,19 +1,21 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `const layer = createRasterLayerState({
-  source: tileSource,
-  opacity,
-});
-
+  code: `<input aria-label="Opacity" type="range" min="0" max="1" step="0.05"
+  value={opacity} onChange={event => setOpacity(Number(event.target.value))} />
 <MapViewContainer state={mapViewState}>
   <RasterLayer state={layer} />
 </MapViewContainer>`,
   state: `const [opacity, setOpacity] = useState(0.75);
-const tileSource = RasterLayerSource.UrlTemplate({
-  template: 'https://example.com/tiles/{z}/{x}/{y}.png',
+const tileSource = useMemo(() => RasterLayerSource.UrlTemplate({
+  template: 'https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png',
   tileSize: 256,
-});`,
+}), []);
+const layer = useMemo(() => createRasterLayerState({
+  source: tileSource,
+  opacity: 0.75,
+}), [tileSource]);
+useEffect(() => { layer.opacity = opacity; }, [layer, opacity]);`,
   explanation: {
     en: [
       'Add a tiled raster source through the shared layer state and update its opacity without replacing the map.',

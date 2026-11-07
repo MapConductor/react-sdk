@@ -1,10 +1,14 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `<MapViewContainer state={mapViewState}>
-  <VectorTileLayer style={style} rules={rules} opacity={opacity} />
+  code: `<label>Water <input type="color" value={palette.water}
+  onChange={event => setPalette(current => ({ ...current, water: event.target.value }))} /></label>
+<MapViewContainer state={mapViewState}>
+  <VectorTileLayer style={style} rules={rules} opacity={0.8} />
 </MapViewContainer>`,
-  state: `const [palette, setPalette] = useState({
+  state: `const style = 'https://tiles.versatiles.org/assets/styles/colorful/style.json';
+const strength = 0.6;
+const [palette, setPalette] = useState({
   water: '#3a7ca5',
   land: '#f2efe6',
   street: '#ffffff',
@@ -14,10 +18,10 @@ const doc: SamplePageDoc = {
 // else's style. mix blends each layer's own colour toward the picked
 // one; visible: false leaves the layers out of the document, so they
 // are not drawn at all.
-const rules = buildStyleRules((r) => {
+const rules = useMemo(() => buildStyleRules((r) => {
   r.role(LayerRole.water, { colorFilter: { mix: { color: palette.water, amount: strength } } });
   r.role(LayerRole.building, { visible: false });
-});`,
+}), [palette]);`,
   explanation: {
     en: [
       'Draws a MapLibre vector style on any backend by rasterising it in the browser and serving the result as ordinary raster tiles.',

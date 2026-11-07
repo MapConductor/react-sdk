@@ -5,16 +5,22 @@ const doc: SamplePageDoc = {
   <Polygon state={polygonState} />
   <Markers states={vertexMarkers} />
 </MapViewContainer>`,
-  state: `const [vertices, setVertices] = useState<GeoPoint[]>(initialVertices);
+  state: `const initialVertices = [
+  createGeoPoint({ latitude: 35.69, longitude: 139.75 }),
+  createGeoPoint({ latitude: 35.67, longitude: 139.75 }),
+  createGeoPoint({ latitude: 35.67, longitude: 139.79 }),
+];
+const [vertices, setVertices] = useState<GeoPoint[]>(initialVertices);
 const polygonState = useMemo(() => createPolygonState({
   id: 'area',
   points: vertices,
   fillColor: 'rgba(37, 99, 235, 0.3)',
   strokeColor: '#2563eb',
 }), [vertices]);
-const vertexMarkers = vertices.map((position, index) => createMarkerState({
+const vertexMarkers = useMemo(() => initialVertices.map((position, index) => createMarkerState({
   id: \`vertex-\${index}\`, position, draggable: true,
-}));`,
+  onDrag: marker => setVertices(current => current.map((point, i) => i === index ? marker.position : point)),
+})), []);`,
   explanation: {
     en: [
       'Render a filled polygon and use markers to make each vertex visible and interactive.',
