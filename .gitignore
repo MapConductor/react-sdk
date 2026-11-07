@@ -56,6 +56,8 @@ dist/*
 !examples/basic/scripts/generate-static.mjs
 !examples/basic/scripts/check-snippets.mjs
 !examples/basic/scripts/snippet-interactions.mjs
+!examples/basic/scripts/vite-maplibre-registry.mjs
+!examples/basic/scripts/vite-maplibre-registry.test.mjs
 # scripts/ はソースしか置かないので丸ごと追跡する。1 本ずつ negation を足す運用だと
 # 足し忘れたスクリプトが `git add -A` で無言のまま無視され、CI のチェックアウトにだけ
 # 存在しない状態になる（unlink-local-workspaces.mjs で実際に踏んだ）。

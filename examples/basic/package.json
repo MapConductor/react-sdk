@@ -4,6 +4,7 @@
   "private": true,
   "description": "Basic example app for MapConductor React SDK",
   "scripts": {
+    "test:maplibre-registry": "node --test scripts/vite-maplibre-registry.test.mjs",
     "check:snippets": "node scripts/check-snippets.mjs",
     "dev": "vite",
     "dev:https": "HTTPS=true vite",
@@ -35,7 +36,7 @@
     "@mapconductor/js-vectorstyle": "*",
     "@mapconductor/react-vectortile": "*",
     "@zip.js/zip.js": "^2.8.26",
-    "maplibre-gl": "^6.15.0",
+    "maplibre-gl": "^6.17.0",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
