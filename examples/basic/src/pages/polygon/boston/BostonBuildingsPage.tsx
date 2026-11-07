@@ -55,9 +55,29 @@ function initialParams(): { camera: typeof DEFAULT_CAMERA; area: number; dataset
   return { camera, area, dataset };
 }
 
-// Darker for taller buildings; grey when the height is unknown. Parcels are all one colour.
-function fillFor(dataset: Dataset, height: number | null): string {
-  if (dataset === 'parcels') return 'rgba(34, 197, 94, 0.25)';
+// Parcels carry no height or land use, so each gets one of a few colours picked
+// from its id, like a cadastral map: neighbours mostly differ.
+const PARCEL_COLORS = [
+  'rgba(244, 114, 182, 0.45)',
+  'rgba(96, 165, 250, 0.45)',
+  'rgba(52, 211, 153, 0.45)',
+  'rgba(251, 191, 36, 0.45)',
+  'rgba(167, 139, 250, 0.45)',
+  'rgba(248, 113, 113, 0.45)',
+  'rgba(45, 212, 191, 0.45)',
+  'rgba(163, 230, 53, 0.45)',
+];
+
+function parcelColor(id: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < id.length; i++) hash = Math.imul(hash ^ id.charCodeAt(i), 16777619);
+  return PARCEL_COLORS[(hash >>> 0) % PARCEL_COLORS.length];
+}
+
+// Buildings: darker for taller, grey when the height is unknown.
+function fillFor(dataset: Dataset, building: Building): string {
+  if (dataset === 'parcels') return parcelColor(building.id);
+  const height = building.h;
   if (height == null) return 'rgba(148, 163, 184, 0.6)';
   if (height < 15) return 'rgba(254, 240, 138, 0.7)';
   if (height < 30) return 'rgba(253, 186, 116, 0.7)';
@@ -125,9 +145,9 @@ export function BostonBuildingsPage() {
         id: building.id,
         points: toPoints(outer),
         holes: holes.map(toPoints),
-        strokeColor: dataset === 'parcels' ? 'rgba(21, 128, 61, 0.8)' : 'rgba(68, 64, 60, 0.8)',
+        strokeColor: dataset === 'parcels' ? 'rgba(71, 85, 105, 0.7)' : 'rgba(68, 64, 60, 0.8)',
         strokeWidth: 1,
-        fillColor: fillFor(dataset, building.h),
+        fillColor: fillFor(dataset, building),
         extra: building.id,
         onClick: event => onTapRef.current(event.state, building),
       });
