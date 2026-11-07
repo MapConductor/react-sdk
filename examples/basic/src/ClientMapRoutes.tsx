@@ -43,6 +43,7 @@ const StreetTreePage = lazy(() => import('./pages/marker/streettree/StreetTreePa
 const PolygonClickPage = lazy(() => import('./pages/polygon/click/PolygonClickPage').then(m => ({ default: m.PolygonClickPage })));
 const PolygonGeodesicPage = lazy(() => import('./pages/polygon/geodesic/PolygonGeodesicPage').then(m => ({ default: m.PolygonGeodesicPage })));
 const PolygonHolePage = lazy(() => import('./pages/polygon/hole/PolygonHolePage').then(m => ({ default: m.PolygonHolePage })));
+const PolygonsPage = lazy(() => import('./pages/polygon/collection/PolygonsPage').then(m => ({ default: m.PolygonsPage })));
 const PolylineClickPage = lazy(() => import('./pages/polyline/click/PolylineClickPage').then(m => ({ default: m.PolylineClickPage })));
 const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage').then(m => ({ default: m.RasterLayerPage })));
 const VectorTileLayerPage = lazy(() => import('./pages/vectortile/VectorTileLayerPage').then(m => ({ default: m.VectorTileLayerPage })));
@@ -98,6 +99,7 @@ function pageContent(page: string | undefined) {
     case 'polygon-click': return <PolygonClickPage />;
     case 'polygon-geodesic': return <PolygonGeodesicPage />;
     case 'polygon-hole': return <PolygonHolePage />;
+    case 'polygons': return <PolygonsPage />;
     case 'ground-image': return <GroundImagePage />;
     case 'raster-layer': return <RasterLayerPage />;
     case 'vector-tile': return <VectorTileLayerPage />;
