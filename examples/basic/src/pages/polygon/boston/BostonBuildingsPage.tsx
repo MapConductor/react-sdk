@@ -87,6 +87,8 @@ export function BostonBuildingsPage() {
   const [tap, setTap] = useState<Tap | null>(null);
   const [timing, setTiming] = useState<{ build: number; frame: number } | null>(null);
   const highlightedRef = useRef<{ state: PolygonState; fill: string } | null>(null);
+  // Time from handing the list to <Polygons> until every polygon's onAdded ran.
+  const [addedMs, setAddedMs] = useState<number | null>(null);
 
   const [loadMs, setLoadMs] = useState(0);
   // Non-null while a dataset is on its way; drives the loading overlay.
@@ -96,6 +98,7 @@ export function BostonBuildingsPage() {
     const start = performance.now();
     setDoc(null);
     setTiming(null);
+    setAddedMs(null);
     setLoadError(null);
     setProgress({ phase: 'download', loaded: 0, total: null });
     highlightedRef.current = null;
@@ -128,10 +131,26 @@ export function BostonBuildingsPage() {
   onTapRef.current = onTap;
   const onMapClick = useCallback((point: GeoPoint) => onTapRef.current(null, null, point), []);
 
+  // The loading overlay stays up until the map has every polygon of the shown
+  // dataset: each state's onAdded counts one. `doc` tells this load's calls
+  // from those of a dataset switched away from.
+  const commitRef = useRef(0);
+  const addedRef = useRef<{ doc: BuildingsDoc | null; count: number; target: number }>({ doc: null, count: 0, target: 0 });
+  const onAllAddedRef = useRef(() => {});
+  onAllAddedRef.current = () => {
+    setAddedMs(performance.now() - commitRef.current);
+    setProgress(null);
+  };
+
   // Every building's state, built once; the area only filters them.
   const allStates = useMemo(() => {
     if (!doc) return null;
     const start = performance.now();
+    const onAdded = () => {
+      const added = addedRef.current;
+      if (added.doc !== doc) return;
+      if (++added.count === added.target) onAllAddedRef.current();
+    };
     const states = doc.buildings.map(building => {
       const [outer, ...holes] = building.rings;
       return createPolygonState({
@@ -143,6 +162,7 @@ export function BostonBuildingsPage() {
         fillColor: fillFor(dataset, building),
         extra: building.id,
         onClick: event => onTapRef.current(event.state, building, event.clicked),
+        onAdded,
       });
     });
     return { states, build: performance.now() - start };
@@ -159,17 +179,25 @@ export function BostonBuildingsPage() {
 
   // Time from handing the list to <Polygons> until the frame after it: the
   // child's effect has registered the polygons by the time this one runs.
-  const commitRef = useRef(0);
+  // That is not when they are on the map; the overlay waits for onAdded.
   useLayoutEffect(() => {
     commitRef.current = performance.now();
-    if (shown) setProgress(p => (p ? { phase: 'draw' } : p));
+    if (!shown || !doc) return;
+    if (addedRef.current.doc === doc) return; // the area changed; nothing is loading
+    // Runs before <Polygons> registers them, so no onAdded has come yet.
+    // One per id: the map keeps one polygon per id, and the downtown data
+    // has a building listed twice.
+    const target = new Set(shown.states.map(s => s.id)).size;
+    addedRef.current = { doc, count: 0, target };
+    if (target === 0) onAllAddedRef.current();
+    else setProgress(p => (p ? { phase: 'draw' } : p));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown]);
   useEffect(() => {
     if (!shown || !allStates) return;
     let raf = requestAnimationFrame(() => {
       raf = requestAnimationFrame(() => {
         setTiming({ build: allStates.build, frame: performance.now() - commitRef.current });
-        setProgress(null);
       });
     });
     return () => cancelAnimationFrame(raf);
@@ -225,7 +253,7 @@ export function BostonBuildingsPage() {
         {loadError && <p className="control-panel-note" data-testid="load-error">{loadError}</p>}
         {dataset === 'parcels' && <LandUseLegend />}
         {shown ? (
-          <p className="control-panel-note" data-testid="stats">
+          <p className="control-panel-note" data-testid="stats" data-added-ms={addedMs?.toFixed(0) ?? ''}>
             {t({
               en: `${shown.states.length.toLocaleString()} polygons, ${shown.vertices.toLocaleString()} vertices`,
               ja: `ポリゴン ${shown.states.length.toLocaleString()} 個・頂点 ${shown.vertices.toLocaleString()} 個`,
