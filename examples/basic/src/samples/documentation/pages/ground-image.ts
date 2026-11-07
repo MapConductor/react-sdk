@@ -1,11 +1,32 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  camera: { latitude: -26.479235, longitude: 31.306239, zoom: 15 },
   code: `<MapViewContainer state={mapViewState}>
   <GroundImage state={groundImageState} />
   <Markers states={cornerMarkers} />
 </MapViewContainer>`,
-  state: `const [groundImageState] = useState(() => createGroundImageState({
+  state: `// Generate a PNG: MapLibre's image decoder cannot read SVG sources.
+// In your app this can instead be a URL to a PNG or JPEG image.
+const imageUrl = useMemo(() => {
+  const canvas = document.createElement('canvas');
+  canvas.width = 400;
+  canvas.height = 300;
+  const context = canvas.getContext('2d')!;
+  context.fillStyle = '#bfdbfe';
+  context.fillRect(0, 0, 400, 300);
+  context.fillStyle = '#2563eb';
+  context.fillRect(196, 0, 8, 300);
+  context.fillRect(0, 146, 400, 8);
+  context.font = '24px sans-serif';
+  context.fillText('Ground image', 20, 40);
+  return canvas.toDataURL('image/png');
+}, []);
+const initialBounds = createGeoRectBounds({
+  southWest: createGeoPoint({ latitude: -26.4849, longitude: 31.2996 }),
+  northEast: createGeoPoint({ latitude: -26.4736, longitude: 31.3129 }),
+});
+const [groundImageState] = useState(() => createGroundImageState({
   id: 'historic-map', imageUrl, bounds: initialBounds, opacity: 0.7,
 }));
 
@@ -16,11 +37,19 @@ const moveSouthWest = (markerState: MarkerState) => {
   });
 };
 
-const southWestMarker = createMarkerState({
+const moveNorthEast = (markerState: MarkerState) => {
+  groundImageState.bounds = createGeoRectBounds({
+    southWest: groundImageState.bounds.southWest,
+    northEast: markerState.position,
+  });
+};
+const cornerMarkers = useMemo(() => [createMarkerState({
   id: 'south-west', position: groundImageState.bounds.southWest!,
   draggable: true, onDrag: moveSouthWest, onDragEnd: moveSouthWest,
-});
-const cornerMarkers = [southWestMarker, northEastMarker];`,
+}), createMarkerState({
+  id: 'north-east', position: groundImageState.bounds.northEast!,
+  draggable: true, onDrag: moveNorthEast, onDragEnd: moveNorthEast,
+})], [groundImageState]);`,
   explanation: {
     en: [
       'Keep one GroundImageState instance and update its bounds from the draggable corner markers.',

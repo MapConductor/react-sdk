@@ -1,13 +1,18 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  camera: { latitude: 30, longitude: -160, zoom: 2 },
   code: `<MapViewContainer state={mapViewState}>
   <Polyline state={polyline} />
   <Polyline state={straightPolyline} />
   <Markers states={clickMarkers} />
 </MapViewContainer>`,
   state: `const [clickMarkers, setClickMarkers] = useState<MarkerState[]>([]);
-const points = useMemo(() => [haneda, sanFrancisco, honolulu], []);
+const points = useMemo(() => [
+  createGeoPoint({ latitude: 35.5494, longitude: 139.7798 }),
+  createGeoPoint({ latitude: 37.6213, longitude: -122.3790 }),
+  createGeoPoint({ latitude: 21.3187, longitude: -157.9225 }),
+], []);
 const polyline = useMemo(() => createPolylineState({
   id: 'route', points, geodesic: true, strokeColor: '#ff0000', strokeWidth: 4,
   onClick: event => setClickMarkers(current => [

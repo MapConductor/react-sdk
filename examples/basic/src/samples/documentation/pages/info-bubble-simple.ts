@@ -7,7 +7,7 @@ const doc: SamplePageDoc = {
     <InfoBubble marker={marker}>Simple text content</InfoBubble>
   )}
 </MapViewContainer>`,
-  state: `const position = createGeoPoint({ latitude: 35.6812, longitude: 139.7671 });
+  state: `const position = useMemo(() => createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }), []);
 const [selected, setSelected] = useState(false);
 const marker = useMemo(() => createMarkerState({
   id: 'place', position, onClick: () => setSelected(true),

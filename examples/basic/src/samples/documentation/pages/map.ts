@@ -1,15 +1,22 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  helpers: `function StoreInfoView({ store }: { store: { name: string; address: string } }) {
+  return <article><h3>{store.name}</h3><p>{store.address}</p></article>;
+}`,
   code: `<MapViewContainer state={mapViewState} onMapClick={clearSelection}>
   <Markers states={storeMarkers} />
   {selectedMarker && (
     <InfoBubble marker={selectedMarker}>
-      <StoreInfoView store={selectedMarker.extra} />
+      <StoreInfoView store={selectedMarker.extra as (typeof stores)[number]} />
     </InfoBubble>
   )}
 </MapViewContainer>`,
-  state: `const [selectedMarker, setSelectedMarker] = useState<MarkerState | null>(null);
+  state: `const stores = useMemo(() => [
+  { id: 'tokyo', name: 'Tokyo Store', address: 'Tokyo Station', lat: 35.6812, lng: 139.7671 },
+  { id: 'ginza', name: 'Ginza Store', address: 'Ginza, Tokyo', lat: 35.6717, lng: 139.7650 },
+], []);
+const [selectedMarker, setSelectedMarker] = useState<MarkerState | null>(null);
 const storeMarkers = useMemo(() => stores.map(store => createMarkerState({
   id: store.id,
   position: createGeoPoint({ latitude: store.lat, longitude: store.lng }),

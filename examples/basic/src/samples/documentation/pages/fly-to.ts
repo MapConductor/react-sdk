@@ -1,6 +1,7 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  camera: { latitude: 35.65, longitude: 139.70, zoom: 10 },
   code: `<button onClick={() => mapViewState.moveCameraTo(destination, 1000)}>
   Fly to destination
 </button>
@@ -8,11 +9,11 @@ const doc: SamplePageDoc = {
 <MapViewContainer state={mapViewState}>
   <Markers states={destinations} />
 </MapViewContainer>`,
-  state: `const destination = createMapCameraPosition({
+  state: `const destination = useMemo(() => createMapCameraPosition({
   position: createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }),
   zoom: 13,
-});
-const destinations = [createMarkerState({ id: 'tokyo', position: destination.position })];`,
+}), []);
+const destinations = useMemo(() => [createMarkerState({ id: 'tokyo', position: destination.position })], [destination]);`,
   explanation: {
     en: [
       'Move the camera to a destination with a one-second animation while using the same API for every provider.',

@@ -1,27 +1,40 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `function ThreeMapObject({ mapViewState, position }) {
+  helpers: `function ThreeMapObject({ mapViewState, position }: {
+  mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>>;
+  position: GeoPoint;
+}) {
   const isMapLoaded = useMapLoaded();
 
   useEffect(() => {
     if (!isMapLoaded) return;
     const holder = mapViewState.getMapViewHolder();
     if (!holder) return;
+    const mapElement = holder.mapView;
+    if (!(mapElement instanceof HTMLElement)) return;
+    const host = mapElement.parentElement ?? mapElement;
 
     const scene = new THREE.Scene();
     const camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 1000);
     camera.position.z = 200;
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    const width = holder.mapView.clientWidth;
-    const height = holder.mapView.clientHeight;
-    renderer.setSize(width, height);
-    camera.right = width;
-    camera.top = height;
-    camera.updateProjectionMatrix();
+    let height = 1;
+    const resize = () => {
+      const width = Math.max(host.clientWidth, 1);
+      height = Math.max(host.clientHeight, 1);
+      renderer.setSize(width, height);
+      camera.right = width;
+      camera.top = height;
+      camera.updateProjectionMatrix();
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(host);
+    resize();
     renderer.domElement.style.position = 'absolute';
     renderer.domElement.style.inset = '0';
-    holder.mapView.appendChild(renderer.domElement);
+    renderer.domElement.style.pointerEvents = 'none';
+    host.appendChild(renderer.domElement);
 
     const object = new THREE.Mesh(
       new THREE.TorusKnotGeometry(13, 4),
@@ -30,9 +43,16 @@ const doc: SamplePageDoc = {
     scene.add(object);
 
     let frame = 0;
-    const draw = () => {
-      const offset = holder.toScreenOffset(position);
-      if (offset && !(offset instanceof Promise)) {
+    let disposed = false;
+    // Leaflet exposes outer-viewport projection separately.
+    const projector = holder as typeof holder & {
+      toOuterScreenOffset?: typeof holder.toScreenOffset;
+    };
+    const draw = async () => {
+      const offset = await (projector.toOuterScreenOffset?.(position) ?? holder.toScreenOffset(position));
+      if (disposed) return;
+      object.visible = offset !== null;
+      if (offset) {
         object.position.set(offset.x, height - offset.y, 0);
       }
       object.rotation.y += 0.02;
@@ -42,16 +62,19 @@ const doc: SamplePageDoc = {
     draw();
 
     return () => {
+      disposed = true;
       cancelAnimationFrame(frame);
+      observer.disconnect();
       renderer.domElement.remove();
+      object.geometry.dispose();
+      object.material.dispose();
       renderer.dispose();
     };
   }, [isMapLoaded, mapViewState, position]);
 
   return null;
-}
-
-<MapViewContainer state={mapViewState}>
+}`,
+  code: `<MapViewContainer state={mapViewState}>
   <ThreeMapObject mapViewState={mapViewState} position={position} />
 </MapViewContainer>`,
   state: `const position = useMemo(() => createGeoPoint({

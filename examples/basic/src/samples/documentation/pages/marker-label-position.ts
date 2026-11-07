@@ -9,6 +9,10 @@ const doc: SamplePageDoc = {
   'left center', 'center center', 'right center',
   'left bottom', 'center bottom', 'right bottom',
 ];
+const positions = useMemo(() => POSITIONS.map((_, index) => createGeoPoint({
+  latitude: 35.69 - Math.floor(index / 3) * 0.01,
+  longitude: 139.75 + (index % 3) * 0.02,
+})), []);
 const markers = useMemo(() => POSITIONS.map((labelPosition, index) => createMarkerState({
   id: labelPosition,
   position: positions[index],

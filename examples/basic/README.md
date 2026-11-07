@@ -57,6 +57,17 @@ This project uses Vite's environment variable system. All environment variables 
 - Never put sensitive secrets that should remain server-side in `VITE_` variables
 - For production deployment, set environment variables in your hosting platform
 
+## Validate the displayed code examples
+
+From the workspace root, run `npm run check:snippets --workspace @mapconductor/example-basic`.
+This checks the generated TSX for every supported page/provider pair, including imports,
+and exercises data preparation and interaction handlers with real SDK state objects.
+Provider rendering still requires a browser and any provider-specific credentials.
+
+The snippets are standalone `App.tsx` examples. They include small inline datasets;
+the interactive pages may use larger datasets and additional controls. Replace `YOUR_…`
+credential placeholders when using a provider that requires authentication.
+
 ## Features
 
 - Switch between MapLibre and Google Maps providers
