@@ -12,29 +12,32 @@ const maplibre = await readFile(maplibrePath, 'utf8');
 const mapbox = await readFile(require.resolve('mapbox-gl/dist/mapbox-gl-dev.js'), 'utf8');
 const plugin = isolateMapLibreRegistry();
 
-function serializeWithBothRenderers(maplibreCode, order) {
+function serializeWithBothRenderers(maplibreCode, order, mapboxCode = mapbox) {
   // Exercise the installed libraries' actual registration/serialization code.
   // Separate registries, shared built-in constructors, just like a browser page.
   const registerStart = maplibreCode.indexOf('function register(name, klass, options = {})');
   assert.ok(registerStart >= 0, 'MapLibre registration code changed; review the workaround');
   const registerEnd = maplibreCode.indexOf('register("Object", Object);', registerStart);
   assert.ok(registerEnd > registerStart);
-  const serializeStart = mapbox.indexOf('function serialize(input, transferables)');
-  const serializeEnd = mapbox.indexOf('function deserialize(input)', serializeStart);
+  const serializeStart = mapboxCode.indexOf('function serialize(input, transferables)');
+  const serializeEnd = mapboxCode.indexOf('function deserialize(input)', serializeStart);
   assert.ok(serializeStart >= 0 && serializeEnd > serializeStart);
   const registerMaplibre = `(() => {
     const registry = {};
     ${maplibreCode.slice(registerStart, registerEnd)}
     register('Object', Object); register('Set', Set); register('Error', Error);
   })();`;
-  const registerMapbox = `Object.defineProperty(Object, '_classRegistryKey', {value: 'Object'});`;
+  const registerStartBox = mapboxCode.indexOf('function register(klass, name, options = {})');
+  const registerEndBox = mapboxCode.indexOf('register(Object, "Object");', registerStartBox);
+  assert.ok(registerStartBox >= 0 && registerEndBox > registerStartBox);
+  const registerMapbox = `${mapboxCode.slice(registerStartBox, registerEndBox)} register(Object, 'Object');`;
   return runInNewContext(`
     class ImageBitmap {} class ImageData {} class Headers {}
     const assert = () => {}; // Mapbox's production assertions are compiled out.
     const registry = {Object: {omit: []}};
     const isArrayBuffer = value => value instanceof ArrayBuffer;
     ${order === 'mapbox-first' ? registerMapbox + registerMaplibre : registerMaplibre + registerMapbox}
-    ${mapbox.slice(serializeStart, serializeEnd)}
+    ${mapboxCode.slice(serializeStart, serializeEnd)}
     JSON.stringify(serialize({tiles: new Set([1, 2])}));
   `);
 }
@@ -50,7 +53,16 @@ test('production transform permits both load orders without changing the wire fo
       tiles: {$name: 'Set', 1: 1, 2: 2},
     });
   }
-  assert.equal(plugin.transform(mapbox, require.resolve('mapbox-gl')), undefined);
+  assert.equal(plugin.transform('const x = 1;', '/unrelated/library.js'), undefined);
+});
+
+test('Mapbox coexists with unmodified external MapLibre as loaded by Longdo', () => {
+  const transformed = plugin.transform(mapbox, require.resolve('mapbox-gl')).code;
+  for (const order of ['maplibre-first', 'mapbox-first']) {
+    assert.deepEqual(JSON.parse(serializeWithBothRenderers(maplibre, order, transformed)), {
+      tiles: {$name: 'Set', 1: 1, 2: 2},
+    });
+  }
 });
 
 test('Vite dependency optimization applies the same isolation to MapLibre', async () => {
