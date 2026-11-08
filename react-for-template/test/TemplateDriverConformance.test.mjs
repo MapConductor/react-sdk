@@ -33,6 +33,16 @@ test('every overlay kind is reachable from the Capable facade and the cascade', 
     MapDriverConformance.checkOverlaySlots(controller.overlayControllers);
 });
 
+/**
+ * `clearOverlays()` は自分の 6 つだけでなく、拡張が登録したマーカーのコントローラ
+ * （クラスタリングの `StrategyMarkerController` など）も clear すること。
+ * `clearOverlayControllers()` を通さないと、ここで落ちる。
+ */
+test('clearOverlays() reaches the marker controllers extensions register', async () => {
+    const controller = new TemplateMapViewController(new TemplateMap());
+    await MapDriverConformance.checkClearOverlaysReachesExtensions(controller);
+});
+
 test('zoom converter round-trips, is monotonic and clamps', () => {
     const controller = new TemplateMapViewController(new TemplateMap());
     MapDriverConformance.checkZoomConverter(controller.zoomConverter);

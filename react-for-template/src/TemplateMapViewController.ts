@@ -193,12 +193,14 @@ export class TemplateMapViewController extends BaseMapViewController implements 
     }
 
     async clearOverlays(): Promise<void> {
-        await this.markerController.clear();
-        await this.circleController.clear();
-        await this.polylineController.clear();
-        await this.polygonController.clear();
-        await this.groundImageController.clear();
-        await this.rasterLayerController.clear();
+        await this.clearOverlayControllers([
+          this.markerController,
+          this.circleController,
+          this.polylineController,
+          this.polygonController,
+          this.groundImageController,
+          this.rasterLayerController,
+        ]);
     }
 
     /** 地図の破棄。登録済みコントローラの後始末はコアがやる。 */
