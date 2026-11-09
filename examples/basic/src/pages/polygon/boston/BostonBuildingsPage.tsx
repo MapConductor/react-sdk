@@ -5,7 +5,7 @@ import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 import { loadDataset, nextPaint, type Building, type BuildingsDoc, type Dataset } from './bostonData';
-import { LAND_USE_STYLES, LandUseLegend, LoadingOverlay, PolygonInfo, type OverlayPhase } from './BostonOverlays';
+import { areaSquareMetres, formatArea, LAND_USE_STYLES, LandUseLegend, LoadingOverlay, PolygonInfo, type OverlayPhase } from './BostonOverlays';
 
 /**
  * Polygons of Boston drawn with one <Polygons> on top of the real map.
@@ -209,8 +209,7 @@ export function BostonBuildingsPage() {
       added.waiting = true;
       setProgress(p => (p ? { phase: 'draw' } : p));
     }
-    // One per id: the map keeps one polygon per id, and the downtown data
-    // has a building listed twice.
+    // One per id: the map keeps one polygon per id.
     added.list = new Set(shown.states.map(s => s.id));
     added.count = 0;
     for (const id of added.list) if (added.ids.has(id)) added.count++;
@@ -318,13 +317,13 @@ export function BostonBuildingsPage() {
             data-lng={tap.point?.longitude ?? ''}
           >
             {tap.building?.use
-              ? `${tap.building.n} · ${t(LAND_USE_STYLES[tap.building.use].label)}`
+              ? `${t({ en: 'Parcel', ja: '区画', 'es-419': 'Parcela', de: 'Flurstück', th: 'แปลงที่ดิน', hi: 'भूखंड' })} · ${t(LAND_USE_STYLES[tap.building.use].label)} · ${formatArea(areaSquareMetres(tap.building))}`
               : tap.building
               ? `${tap.building.n ?? t({ en: 'Building', ja: '建物', 'es-419': 'Edificio', de: 'Gebäude', th: 'อาคาร', hi: 'इमारत' })} · ${
                   tap.building.h == null
                     ? t({ en: 'height unknown', ja: '高さ不明', 'es-419': 'altura desconocida', de: 'Höhe unbekannt', th: 'ไม่ทราบความสูง', hi: 'ऊँचाई अज्ञात' })
                     : `${tap.building.h} m`
-                } · ${tap.building.id.slice(0, 8)}`
+                } · ${formatArea(areaSquareMetres(tap.building))}`
               : t({ en: 'No building here', ja: 'ここに建物はありません', 'es-419': 'Aquí no hay edificio', de: 'Hier ist kein Gebäude', th: 'ไม่มีอาคารตรงนี้', hi: 'यहाँ कोई इमारत नहीं' })}
           </p>
         )}
