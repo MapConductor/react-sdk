@@ -2,18 +2,21 @@
  * Loads the polygons the Boston page draws.
  *
  * - `downtown`: Overture building footprints of downtown in three nested
- *   areas, bundled (`public/boston/boston-downtown.bin`).
- * - `buildings` / `parcels`: the whole city, from `public/boston/full/*.bin`.
- *   Those files are too large for the repository; they are built from the
- *   official sources (Overture buildings, Analyze Boston Parcels 2025 joined
- *   with the FY2026 Property Assessment land use) and are not committed.
+ *   areas (`public/boston/boston-downtown.bin`).
+ * - `buildings` / `parcels`: the whole city (`public/boston/boston-city-*.bin`):
+ *   Overture buildings, and Analyze Boston Parcels 2025 joined with the FY2026
+ *   Property Assessment land use.
+ *
+ * All three are bundled. `tools/boston/` builds them from the official sources
+ * (see its README).
  *
  * The files carry no ids: this is a polygon demo, and a polygon's id on the
  * map is its index in the file.
  *
  * Binary layout, MCPG v2:
- *   'MCPG' u32 version=2 u32 count u8 fields   (little-endian)
+ *   'MCPG' u32 version=2 u32 count u8 fields u8 digits   (little-endian)
  *     fields: 1 = height, 2 = land use, 4 = area, 8 = name (what the file carries)
+ *     digits: coordinates are integers of 10^-digits degree (buildings 6, parcels 5)
  *   per polygon, only the fields present, in this order:
  *     height    varint, 0 = unknown, else the height in 0.1 m plus 1
  *     land use  u8, the index in LAND_USES (family … unknown)
@@ -21,8 +24,8 @@
  *     name      varint byte length (0 = none), UTF-8
  *     varint ringCount, per ring: varint n, n x (svarint dLat, svarint dLng)
  *   varint is LEB128 (7 bits at a time, low first); svarint is a zigzag varint.
- *   Coordinates are 1e-6 degree integers, each the difference from the
- *   previous vertex across the whole file. A ring's closing vertex (the same
+ *   Coordinates are integers of 10^-digits degree, each the difference from
+ *   the previous vertex across the whole file. A ring's closing vertex (the same
  *   as its first) is not stored: n counts the others, and the reader closes
  *   the ring again.
  */
@@ -73,9 +76,9 @@ const OVERTURE = {
 
 const SOURCES: Record<Dataset, { file: string; attribution: string; license: string }> = {
   downtown: { file: 'boston/boston-downtown.bin', ...OVERTURE },
-  buildings: { file: 'boston/full/boston-city-buildings.bin', ...OVERTURE },
+  buildings: { file: 'boston/boston-city-buildings.bin', ...OVERTURE },
   parcels: {
-    file: 'boston/full/boston-city-parcels.bin',
+    file: 'boston/boston-city-parcels.bin',
     attribution: 'City of Boston, Parcels 2025 and FY2026 Property Assessment (Analyze Boston)',
     license: 'ODC PDDL',
   },
@@ -137,7 +140,8 @@ export function decodeMcpg(bytes: Uint8Array, idPrefix: string): Building[] {
   if (magic !== 'MCPG' || view.getUint32(4, true) !== 2) throw new Error('not an MCPG v2 file');
   const count = view.getUint32(8, true);
   const fields = bytes[12];
-  let offset = 13;
+  const scale = 10 ** bytes[13];
+  let offset = 14;
   // Values stay below 2^31 here, so the shifts and the zigzag work on 32-bit ints.
   const varint = (): number => {
     let value = 0;
@@ -182,8 +186,8 @@ export function decodeMcpg(bytes: Uint8Array, idPrefix: string): Building[] {
       for (let v = 0; v < vertices; v++) {
         lat += svarint();
         lng += svarint();
-        ring[v * 2] = lng / 1e6;
-        ring[v * 2 + 1] = lat / 1e6;
+        ring[v * 2] = lng / scale;
+        ring[v * 2 + 1] = lat / scale;
       }
       ring[vertices * 2] = ring[0];
       ring[vertices * 2 + 1] = ring[1];
