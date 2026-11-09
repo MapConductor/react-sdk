@@ -21,13 +21,15 @@ and iOS (`samples/MapConductorSampleApp/Resources/`) samples.
     --bbox=-71.19125,42.22792,-70.86865,42.39699 -o boston-city-bbox.geojson
   ```
 
-- **City boundary** (water included; buildings are kept when their centroid is
-  inside): *City of Boston Boundary* from Analyze Boston, as GeoJSON.
+- **City boundary** (water included): *City of Boston Boundary* from Analyze
+  Boston, as GeoJSON. Only the buildings use it: a building is kept when its
+  centroid is inside. None of its geometry is in the files, and the parcels
+  command takes it but does not use it.
 - **Parcels**: *Parcels 2025* from Analyze Boston (https://data.boston.gov/), as
   GeoJSON (`Parcels_2025.geojson` in the zip).
-- **Land use**: *Property Assessment FY2026* from Analyze Boston, as CSV. Only
-  the `LU` code is read, joined to the parcels on `GIS_ID`; nothing else (owner
-  names, values) is carried over.
+- **Land use**: *City of Boston FY2026 Property Assessment* from Analyze Boston,
+  as CSV. Only the `LU` code is read, joined to the parcels on `GIS_ID`;
+  nothing else (owner names, values) is carried over.
 - **Downtown**: the Overture extract the sample used to hold as JSON
   (`public/boston/boston-buildings.json` up to commit `daeb4e5`):
 
@@ -95,7 +97,11 @@ the file.
 - Buildings (city and downtown): © OpenStreetMap contributors, Esri Community
   Maps contributors, USGS, Microsoft — via Overture Maps Foundation.
   [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/).
-- Parcels, land use and boundary: City of Boston, Analyze Boston.
+- Parcels: City of Boston *Parcels 2025* (Analyze Boston),
   [ODC PDDL](https://opendatacommons.org/licenses/pddl/1-0/).
+- Land use: City of Boston FY2026 Property Assessment (Analyze Boston),
+  licensed PDDL like the parcels.
+- City boundary: *City of Boston Boundary* (Analyze Boston). It only decides
+  which buildings are kept; nothing of it is redistributed.
 
 The samples show these attributions on the map.
