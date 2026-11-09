@@ -8,10 +8,12 @@ import {
   type PolylineState,
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Polylines } from '@mapconductor/js-sdk-react';
+import { useLocation } from 'react-router-dom';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 import { LoadingOverlay, type OverlayPhase } from '../../polygon/boston/BostonOverlays';
+import { StackCheck } from './StackCheck';
 import { loadRoads, nextPaint, ROAD_CLASSES, type Road, type RoadClass, type RoadsDoc } from './bostonRoadsData';
 
 /**
@@ -53,13 +55,14 @@ interface Tap {
 /**
  * `?camera=lat,lng,zoom` and `?tiling=native` set where the page opens and how
  * it starts drawing, so a measurement sees the same view on every provider.
+ * `?stack=1` adds tiled polygons, a circle and a marker over the roads (StackCheck).
  */
-function initialParams(): { camera: typeof DEFAULT_CAMERA; tiled: boolean } {
-  if (typeof window === 'undefined') return { camera: DEFAULT_CAMERA, tiled: true };
+function initialParams(): { camera: typeof DEFAULT_CAMERA; tiled: boolean; stack: boolean } {
+  if (typeof window === 'undefined') return { camera: DEFAULT_CAMERA, tiled: true, stack: false };
   const params = new URLSearchParams(window.location.search);
   const [lat, lng, zoom] = (params.get('camera') ?? '').split(',').map(Number);
   const camera = [lat, lng, zoom].some(n => !Number.isFinite(n)) ? DEFAULT_CAMERA : { lat, lng, zoom };
-  return { camera, tiled: params.get('tiling') !== 'native' };
+  return { camera, tiled: params.get('tiling') !== 'native', stack: params.get('stack') === '1' };
 }
 
 function toPoints(path: number[]): GeoPoint[] {
@@ -82,6 +85,8 @@ function formatLength(metres: number): string {
 export function BostonRoadsPage() {
   const { t } = useSampleI18n();
   const [initial] = useState(initialParams);
+  // The page stays mounted when the provider changes; the roads then go onto the other map.
+  const provider = useLocation().pathname.split('/').filter(Boolean)[0] ?? '';
   const [doc, setDoc] = useState<RoadsDoc | null>(null);
   const [tiled, setTiled] = useState(initial.tiled);
   // False while a switch of tiling takes the roads off the map before handing them back.
@@ -168,7 +173,7 @@ export function BostonRoadsPage() {
   const states = built?.list ?? null;
   const buildMs = built?.buildMs ?? 0;
 
-  // A new round each time the list goes onto the map.
+  // A new round each time the list goes onto a map (also another provider's).
   useLayoutEffect(() => {
     if (!states || !mounted) return;
     commitRef.current = performance.now();
@@ -177,7 +182,7 @@ export function BostonRoadsPage() {
     setAddedMs(null);
     setFrameMs(null);
     setProgress({ phase: 'draw' });
-  }, [states, mounted]);
+  }, [states, mounted, provider]);
 
   // Switching: take the roads off the map, let that reach it, then hand them back
   // with the new tiling, so every road is added again and calls onAdded again.
@@ -209,6 +214,7 @@ export function BostonRoadsPage() {
       polylineTilingOptions={tiled ? TILED : NATIVE}
     >
       {states && mounted && <Polylines states={states} />}
+      {initial.stack && <StackCheck center={createGeoPoint({ latitude: initial.camera.lat, longitude: initial.camera.lng })} />}
       {progress && <LoadingOverlay progress={progress} shapes="roads" />}
       {tap?.road && tap.point && tapLength != null && (
         <InfoBubble position={tap.point} contentPadding={8}>
