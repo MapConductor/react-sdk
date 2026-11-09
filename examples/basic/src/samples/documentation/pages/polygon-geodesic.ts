@@ -1,16 +1,22 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  camera: { latitude: 40, longitude: -160, zoom: 2 },
   code: `<MapViewContainer state={mapViewState}>
   {polygons.map(polygon => (
     <Polygon key={polygon.id} state={polygon} />
   ))}
 </MapViewContainer>`,
-  state: `const geodesicPolygon = useMemo(() => createPolygonState({
+  state: `const longDistancePoints = useMemo(() => [
+  createGeoPoint({ latitude: 35.68, longitude: 139.77 }),
+  createGeoPoint({ latitude: 37.77, longitude: -122.42 }),
+  createGeoPoint({ latitude: 21.31, longitude: -157.86 }),
+], []);
+const geodesicPolygon = useMemo(() => createPolygonState({
   id: 'geodesic', points: longDistancePoints, geodesic: true,
 }), [longDistancePoints]);
 const straightPolygon = useMemo(() => geodesicPolygon.copy({
-  id: 'straight', geodesic: false,
+  id: 'straight', geodesic: false, strokeColor: '#2563eb', fillColor: 'rgba(37, 99, 235, 0.15)',
 }), [geodesicPolygon]);
 const polygons = [geodesicPolygon, straightPolygon];`,
   explanation: {

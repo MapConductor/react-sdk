@@ -1,16 +1,15 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `const marker = createMarkerState({
+  code: `<MapViewContainer state={mapViewState}>
+  <Marker state={marker} />
+</MapViewContainer>`,
+  state: `const position = createGeoPoint({ latitude: 35.6812, longitude: 139.7671 });
+const marker = useMemo(() => createMarkerState({
   position,
   animation: MarkerAnimation.Drop,
   onClick: state => state.animate(MarkerAnimation.Bounce),
-});
-
-<MapViewContainer state={mapViewState}>
-  <Marker state={marker} />
-</MapViewContainer>`,
-  state: `const position = createGeoPoint({ latitude: 35.6812, longitude: 139.7671 });`,
+}), []);`,
   explanation: {
     en: [
       'Set an initial marker animation and trigger another one through the shared marker state API.',

@@ -5,13 +5,19 @@ const doc: SamplePageDoc = {
   <Polyline state={polylineState} />
   <Markers states={waypointMarkers} />
 </MapViewContainer>`,
-  state: `const [points, setPoints] = useState<GeoPoint[]>(initialPoints);
+  state: `const initialPoints = [
+  createGeoPoint({ latitude: 35.69, longitude: 139.75 }),
+  createGeoPoint({ latitude: 35.67, longitude: 139.77 }),
+  createGeoPoint({ latitude: 35.69, longitude: 139.79 }),
+];
+const [points, setPoints] = useState<GeoPoint[]>(initialPoints);
 const polylineState = useMemo(() => createPolylineState({
   id: 'route', points, strokeColor: '#ef4444', strokeWidth: 4,
 }), [points]);
-const waypointMarkers = points.map((position, index) => createMarkerState({
+const waypointMarkers = useMemo(() => initialPoints.map((position, index) => createMarkerState({
   id: \`waypoint-\${index}\`, position, draggable: true,
-}));`,
+  onDrag: marker => setPoints(current => current.map((point, i) => i === index ? marker.position : point)),
+})), []);`,
   explanation: {
     en: [
       'Draw a route from geographic points and expose its vertices as draggable waypoint markers.',

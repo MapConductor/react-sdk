@@ -4,42 +4,46 @@ const doc: SamplePageDoc = {
   code: `<MapViewContainer state={mapViewState}>
   <GeoJSONLayer state={layer} features={features} />
 </MapViewContainer>`,
-  state: `const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
+  state: `// GeoJSON coordinates use [longitude, latitude]. Rings must be closed.
+const features = useMemo(() => GeoJSONParser.parseFeatures(JSON.stringify({
+  type: 'FeatureCollection',
+  features: [{
+    type: 'Feature', properties: { name: 'Area with a hole' },
+    geometry: { type: 'Polygon', coordinates: [
+      [[139.74, 35.70], [139.74, 35.66], [139.80, 35.66], [139.80, 35.70], [139.74, 35.70]],
+      [[139.76, 35.69], [139.78, 35.68], [139.76, 35.67], [139.76, 35.69]],
+    ] },
+  }],
+})), []);
 const layer = useMemo(() => new GeoJSONLayerState({
   fillColor: colorArgb(127, 0x3b, 0xb2, 0xd0),
   strokeColor: colorArgb(255, 0x1d, 0x70, 0x82),
   strokeWidth: 2,
 }), []);`,
   explanation: {
-    en: [
-      'Load GeoJSON features and render them with one provider-independent layer style.',
-      'The features live in React state and layer is a GeoJSONLayerState created once with useMemo.',
-      'Passing both to <GeoJSONLayer> draws every feature with a single shared style that looks the same on any provider.',
+    'en': [
+      'GeoJSONParser.parseFeatures converts inline GeoJSON into layer features. Coordinates use longitude before latitude, and polygon rings must be closed.',
+      'GeoJSONLayerState supplies the shared fill and stroke. GeoJSONLayer renders the polygon and its hole from the memoized features.',
     ],
-    ja: [
-      'GeoJSON の Feature を読み込み、プロバイダーに依存しない1つのレイヤースタイルで描画します。',
-      'features は React の state に保持し、layer は useMemo で一度だけ生成した GeoJSONLayerState です。',
-      '両方を <GeoJSONLayer> へ渡すと、すべての Feature が共有の1スタイルで描画され、どのプロバイダーでも同じ見た目になります。',
+    'ja': [
+      'GeoJSONParser.parseFeatures でコード内の GeoJSON を Feature 配列に変換します。座標は経度・緯度の順で、ポリゴンの各リングは始点と終点を一致させます。',
+      'GeoJSONLayerState に塗りと線を設定し、useMemo で保持した features とともに GeoJSONLayer へ渡すと、穴付きポリゴンを描画できます。',
     ],
     'es-419': [
-      'Carga elementos GeoJSON y los dibuja con un estilo de capa independiente del proveedor.',
-      'Los features viven en el estado de React y layer es un GeoJSONLayerState creado una sola vez con useMemo.',
-      'Pasar ambos a <GeoJSONLayer> dibuja cada elemento con un único estilo compartido que se ve igual en cualquier proveedor.',
+      'GeoJSONParser.parseFeatures convierte el GeoJSON incluido en elementos de capa. Las coordenadas usan longitud antes de latitud y los anillos deben estar cerrados.',
+      'GeoJSONLayerState define el relleno y el trazo. GeoJSONLayer dibuja el polígono con su hueco.',
     ],
-    de: [
-      'GeoJSON-Features laden und mit einem einzigen anbieterunabhängigen Ebenenstil zeichnen.',
-      'Die Features liegen im React-State, und layer ist ein einmalig mit useMemo erzeugter GeoJSONLayerState.',
-      'Beides an <GeoJSONLayer> übergeben zeichnet jedes Feature mit einem gemeinsamen Stil, der bei jedem Anbieter gleich aussieht.',
+    'de': [
+      'GeoJSONParser.parseFeatures wandelt eingebettetes GeoJSON in Features um. Koordinaten stehen als Länge vor Breite; Polygonringe müssen geschlossen sein.',
+      'GeoJSONLayerState definiert Füllung und Kontur. GeoJSONLayer zeichnet das Polygon mit seinem Loch.',
     ],
-    th: [
-      'โหลดฟีเจอร์ GeoJSON แล้ววาดด้วยสไตล์เลเยอร์ชุดเดียวที่ไม่ผูกกับผู้ให้บริการ',
-      'ฟีเจอร์เก็บอยู่ในสถานะของ React ส่วน layer คือ GeoJSONLayerState ที่สร้างครั้งเดียวด้วย useMemo',
-      'การส่งทั้งสองเข้า <GeoJSONLayer> จะวาดทุกฟีเจอร์ด้วยสไตล์ร่วมชุดเดียว ซึ่งหน้าตาเหมือนกันบนผู้ให้บริการทุกเจ้า',
+    'th': [
+      'GeoJSONParser.parseFeatures แปลง GeoJSON ในโค้ดเป็นฟีเจอร์ พิกัดเรียงลองจิจูดก่อนละติจูด และวงแหวนของโพลีกอนต้องปิด',
+      'GeoJSONLayerState กำหนดสีเติมและเส้นขอบ ส่วน GeoJSONLayer วาดโพลีกอนพร้อมรูจากฟีเจอร์ที่เก็บด้วย useMemo',
     ],
-    hi: [
-      'GeoJSON फ़ीचर लोड करें और उन्हें एक ही प्रोवाइडर-निरपेक्ष लेयर स्टाइल से रेंडर करें।',
-      'फ़ीचर React स्टेट में रहते हैं, और layer एक GeoJSONLayerState है जो useMemo से एक बार बनता है।',
-      'दोनों को <GeoJSONLayer> को देने पर हर फ़ीचर एक ही साझा स्टाइल से खिंचता है, जो किसी भी प्रोवाइडर पर एक जैसा दिखता है।',
+    'hi': [
+      'GeoJSONParser.parseFeatures कोड के GeoJSON को फ़ीचर में बदलता है। निर्देशांक में देशांतर पहले आता है और पॉलीगॉन के रिंग बंद होने चाहिए।',
+      'GeoJSONLayerState भराव और रेखा तय करता है। GeoJSONLayer छेद वाला पॉलीगॉन बनाता है।',
     ],
   },
 };

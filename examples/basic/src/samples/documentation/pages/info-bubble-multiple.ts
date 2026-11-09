@@ -9,12 +9,18 @@ const doc: SamplePageDoc = {
     </InfoBubble>
   ))}
 </MapViewContainer>`,
-  state: `const [selectedMarkers, setSelectedMarkers] = useState<MarkerState[]>([]);
+  state: `const positions = useMemo(() => [
+  createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }),
+  createGeoPoint({ latitude: 35.6862, longitude: 139.7771 }),
+], []);
+const [selectedMarkers, setSelectedMarkers] = useState<MarkerState[]>([]);
 const markers = useMemo(() => positions.map((position, index) => createMarkerState({
   id: \`marker-\${index}\`, position,
-  onClick: markerState => setSelectedMarkers(current => [...current, markerState]),
+  extra: \`Place \${index + 1}\`,
+  onClick: markerState => setSelectedMarkers(current =>
+    current.some(item => item.id === markerState.id) ? current : [...current, markerState]),
 })), [positions]);
-const activeMarker = selectedMarkers.at(-1) ?? null;`,
+`,
   explanation: {
     en: [
       'Keep multiple markers selected and render one independently positioned bubble for each.',

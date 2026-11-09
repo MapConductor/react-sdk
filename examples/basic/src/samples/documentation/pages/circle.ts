@@ -1,13 +1,14 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  camera: { latitude: 21.382314, longitude: -157.933097, zoom: 13 },
   code: `<MapViewContainer state={mapViewState}>
   <Circle state={circleState} />
   <Polyline points={[center, edge]} zIndex={1} />
   <Marker position={center} />
   <Marker position={edge} draggable onDrag={resizeCircle} />
 </MapViewContainer>`,
-  state: `const center = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
+  state: `const center = useMemo(() => createGeoPoint({ latitude: 21.382314, longitude: -157.933097 }), []);
 const [edge, setEdge] = useState(() => Spherical.computeOffset({
   origin: center, distance: 1000, heading: 90,
 }));

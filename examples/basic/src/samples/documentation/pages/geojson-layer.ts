@@ -5,46 +5,51 @@ const doc: SamplePageDoc = {
   <GeoJSONLayer state={layerState} features={features} />
   {selected && (
     <InfoBubble position={selected.position}>
-      <PropertyTable properties={selected.properties} />
+      <pre>{JSON.stringify(selected.properties, null, 2)}</pre>
     </InfoBubble>
   )}
 </MapViewContainer>`,
-  state: `const [features, setFeatures] = useState<GeoJSONFeatureData[]>([]);
-const [selected, setSelected] = useState<SelectedFeature | null>(null);
+  state: `const features = useMemo(() => GeoJSONParser.parseFeatures(JSON.stringify({
+  type: 'FeatureCollection',
+  features: [{ type: 'Feature', properties: { name: 'Sample railway' },
+    geometry: { type: 'LineString', coordinates: [[139.75, 35.68], [139.77, 35.69], [139.79, 35.68]] },
+  }],
+})), []);
+const [selected, setSelected] = useState<{
+  position: GeoPoint; properties: Record<string, unknown>;
+} | null>(null);
 const layerState = useMemo(() => new GeoJSONLayerState({
   strokeColor: colorArgb(200, 250, 36, 29),
   strokeWidth: 6,
-}), []);`,
+  onClick: (feature, position) => setSelected({ position: createGeoPoint(position), properties: feature.properties ?? {} }),
+}), []);
+const handleMapClick = (point: GeoPoint) => {
+  if (!layerState.processClick(point, 10, mapViewState.cameraPosition.zoom)) setSelected(null);
+};`,
   explanation: {
-    en: [
-      "Process clicks against GeoJSON features and show the selected feature's properties at the geographic click position.",
-      'Both the features and the selected feature live in React state, and layerState is a GeoJSONLayerState holding the railway data.',
-      'handleMapClick resolves which feature was hit and stores it, then InfoBubble anchors a PropertyTable of its properties at the clicked coordinate.',
+    'en': [
+      'The inline GeoJSON contains a sample railway line, so the snippet needs no data server.',
+      'handleMapClick calls processClick with the current zoom. A hit invokes layerState.onClick, which stores the feature properties and click position for the InfoBubble; a miss clears the selection.',
     ],
-    ja: [
-      'GeoJSON Feature へのクリックを判定し、選択した Feature の属性をクリック地点に表示します。',
-      'features と選択中の Feature はどちらも React の state に保持し、layerState は鉄道データ用の GeoJSONLayerState です。',
-      'handleMapClick がどの Feature に当たったかを判定して保存し、InfoBubble がその属性の PropertyTable をクリック座標に固定します。',
+    'ja': [
+      '外部データサーバーなしで試せるよう、説明用の鉄道路線を GeoJSON としてコード内に用意しています。',
+      'handleMapClick は現在のズームを渡して processClick を呼びます。ヒット時に layerState.onClick が属性とクリック地点を保存して InfoBubble へ表示し、何もない場所をクリックすると選択を解除します。',
     ],
     'es-419': [
-      'Procesa clics sobre elementos GeoJSON y muestra las propiedades del elemento seleccionado en la posición geográfica del clic.',
-      'Tanto los features como el elemento seleccionado viven en el estado de React, y layerState es un GeoJSONLayerState con los datos ferroviarios.',
-      'handleMapClick determina qué elemento se tocó y lo almacena, luego InfoBubble ancla un PropertyTable de sus propiedades en la coordenada tocada.',
+      'El GeoJSON incluido contiene una línea de ferrocarril de ejemplo y no necesita servidor de datos.',
+      'handleMapClick llama a processClick con el zoom actual. onClick guarda las propiedades para el InfoBubble cuando hay un acierto; de lo contrario borra la selección.',
     ],
-    de: [
-      'Klicks gegen GeoJSON-Features auswerten und die Eigenschaften des getroffenen Features an der geografischen Klickposition zeigen.',
-      'Sowohl die Features als auch das ausgewählte Feature liegen im React-State, und layerState ist ein GeoJSONLayerState mit den Bahndaten.',
-      'handleMapClick ermittelt das getroffene Feature und merkt es sich, dann verankert InfoBubble eine PropertyTable seiner Eigenschaften an der angeklickten Koordinate.',
+    'de': [
+      'Das eingebettete GeoJSON enthält eine Beispielbahnlinie und benötigt keinen Datenserver.',
+      'handleMapClick ruft processClick mit dem aktuellen Zoom auf. Bei einem Treffer speichert onClick die Attribute für die InfoBubble; andernfalls wird die Auswahl aufgehoben.',
     ],
-    th: [
-      'ประมวลผลการคลิกกับฟีเจอร์ GeoJSON แล้วแสดงคุณสมบัติของฟีเจอร์ที่เลือกไว้ ณ ตำแหน่งภูมิศาสตร์ที่คลิก',
-      'ทั้งฟีเจอร์และฟีเจอร์ที่เลือกอยู่ในสถานะของ React ส่วน layerState คือ GeoJSONLayerState ที่ถือข้อมูลเส้นทางรถไฟ',
-      'handleMapClick หาว่าโดนฟีเจอร์ใดแล้วเก็บไว้ จากนั้น InfoBubble จะตรึง PropertyTable ของคุณสมบัตินั้นไว้ที่พิกัดที่คลิก',
+    'th': [
+      'GeoJSON ในโค้ดมีเส้นทางรถไฟตัวอย่าง จึงไม่ต้องใช้เซิร์ฟเวอร์ข้อมูล',
+      'handleMapClick เรียก processClick ด้วยระดับซูมปัจจุบัน เมื่อพบฟีเจอร์ onClick จะเก็บคุณสมบัติให้ InfoBubble หากไม่พบจะล้างการเลือก',
     ],
-    hi: [
-      'क्लिक को GeoJSON फ़ीचर के विरुद्ध जाँचें और चुने गए फ़ीचर की प्रॉपर्टी उसी भौगोलिक जगह पर दिखाएँ।',
-      'फ़ीचर और चुना गया फ़ीचर दोनों React स्टेट में रहते हैं, और layerState एक GeoJSONLayerState है जिसमें रेलवे का डेटा है।',
-      'handleMapClick तय करता है कि कौन-सा फ़ीचर लगा और उसे रख लेता है; फिर InfoBubble उसकी प्रॉपर्टी की PropertyTable क्लिक किए गए निर्देशांक पर टिका देता है।',
+    'hi': [
+      'कोड के GeoJSON में उदाहरण रेल लाइन है, इसलिए डेटा सर्वर की ज़रूरत नहीं।',
+      'handleMapClick वर्तमान ज़ूम से processClick बुलाता है। फ़ीचर मिलने पर onClick गुणों को InfoBubble के लिए रखता है; न मिलने पर चयन हटता है।',
     ],
   },
 };
