@@ -68,7 +68,7 @@ const MB = 1024 * 1024;
  * which the compositor keeps animating while decoding or building the states
  * holds the main thread.
  */
-export function LoadingOverlay({ progress }: { progress: OverlayPhase }) {
+export function LoadingOverlay({ progress, shapes = 'polygons' }: { progress: OverlayPhase; shapes?: 'polygons' | 'roads' }) {
   const { t } = useSampleI18n();
   let text: string;
   let percent: number | null = null;
@@ -85,10 +85,14 @@ export function LoadingOverlay({ progress }: { progress: OverlayPhase }) {
       break;
     }
     case 'decode':
-      text = t({ en: 'Reading the polygons…', ja: 'ポリゴンを読み取り中…', 'es-419': 'Leyendo los polígonos…', de: 'Polygone werden gelesen…', th: 'กำลังอ่านโพลีกอน…', hi: 'पॉलीगॉन पढ़े जा रहे हैं…' });
+      text = shapes === 'roads'
+        ? t({ en: 'Reading the roads…', ja: '道路を読み取り中…', 'es-419': 'Leyendo las calles…', de: 'Straßen werden gelesen…', th: 'กำลังอ่านถนน…', hi: 'सड़कें पढ़ी जा रही हैं…' })
+        : t({ en: 'Reading the polygons…', ja: 'ポリゴンを読み取り中…', 'es-419': 'Leyendo los polígonos…', de: 'Polygone werden gelesen…', th: 'กำลังอ่านโพลีกอน…', hi: 'पॉलीगॉन पढ़े जा रहे हैं…' });
       break;
     case 'build':
-      text = t({ en: 'Preparing the polygons…', ja: 'ポリゴンを準備中…', 'es-419': 'Preparando los polígonos…', de: 'Polygone werden vorbereitet…', th: 'กำลังเตรียมโพลีกอน…', hi: 'पॉलीगॉन तैयार हो रहे हैं…' });
+      text = shapes === 'roads'
+        ? t({ en: 'Preparing the roads…', ja: '道路を準備中…', 'es-419': 'Preparando las calles…', de: 'Straßen werden vorbereitet…', th: 'กำลังเตรียมถนน…', hi: 'सड़कें तैयार हो रही हैं…' })
+        : t({ en: 'Preparing the polygons…', ja: 'ポリゴンを準備中…', 'es-419': 'Preparando los polígonos…', de: 'Polygone werden vorbereitet…', th: 'กำลังเตรียมโพลีกอน…', hi: 'पॉलीगॉन तैयार हो रहे हैं…' });
       break;
     case 'draw':
       text = t({ en: 'Drawing the map…', ja: '地図に描画中…', 'es-419': 'Dibujando el mapa…', de: 'Karte wird gezeichnet…', th: 'กำลังวาดแผนที่…', hi: 'मैप बनाया जा रहा है…' });

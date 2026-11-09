@@ -103,7 +103,7 @@ export function nextPaint(): Promise<void> {
   return new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 0)));
 }
 
-async function readWithProgress(response: Response, onProgress: (progress: LoadProgress) => void): Promise<Uint8Array> {
+export async function readWithProgress(response: Response, onProgress: (progress: LoadProgress) => void): Promise<Uint8Array> {
   const header = response.headers.get('Content-Length');
   // A compressed response's Content-Length counts compressed bytes; fall back to a byte count.
   const total = header && !response.headers.get('Content-Encoding') ? Number(header) : null;

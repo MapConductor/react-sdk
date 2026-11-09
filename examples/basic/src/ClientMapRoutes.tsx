@@ -45,6 +45,7 @@ const PolygonGeodesicPage = lazy(() => import('./pages/polygon/geodesic/PolygonG
 const PolygonHolePage = lazy(() => import('./pages/polygon/hole/PolygonHolePage').then(m => ({ default: m.PolygonHolePage })));
 const PolygonsPage = lazy(() => import('./pages/polygon/collection/PolygonsPage').then(m => ({ default: m.PolygonsPage })));
 const BostonBuildingsPage = lazy(() => import('./pages/polygon/boston/BostonBuildingsPage').then(m => ({ default: m.BostonBuildingsPage })));
+const BostonRoadsPage = lazy(() => import('./pages/polyline/boston/BostonRoadsPage').then(m => ({ default: m.BostonRoadsPage })));
 const PolylineClickPage = lazy(() => import('./pages/polyline/click/PolylineClickPage').then(m => ({ default: m.PolylineClickPage })));
 const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage').then(m => ({ default: m.RasterLayerPage })));
 const VectorTileLayerPage = lazy(() => import('./pages/vectortile/VectorTileLayerPage').then(m => ({ default: m.VectorTileLayerPage })));
@@ -102,6 +103,7 @@ function pageContent(page: string | undefined) {
     case 'polygon-hole': return <PolygonHolePage />;
     case 'polygons': return <PolygonsPage />;
     case 'boston-buildings': return <BostonBuildingsPage />;
+    case 'boston-roads': return <BostonRoadsPage />;
     case 'ground-image': return <GroundImagePage />;
     case 'raster-layer': return <RasterLayerPage />;
     case 'vector-tile': return <VectorTileLayerPage />;

@@ -1,3 +1,4 @@
+import { PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { LongdoMapView2D, type LongdoViewStateInterface } from '@mapconductor/react-for-longdo';
 import type { SingletonMapContent } from './types';
@@ -20,6 +21,7 @@ export default function LongdoSingletonView({ state, content }: {
       cameraRestriction={content?.cameraRestriction}
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
+      polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

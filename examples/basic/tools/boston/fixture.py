@@ -25,3 +25,17 @@ assert all(lat % 10 == 0 and lng % 10 == 0 for p in polys for r in p.rings for l
 buf5 = bytes(write_v2(coarse, 15, 5))
 assert [p.rings for p in decode(buf5)[3]] == [p.rings for p in coarse]
 print('1e-5:', buf5.hex())
+
+# Two road polylines (fields name | road class | lines, 1e-5 degree): a multi-byte
+# name, an open path (no closing vertex added by the reader), and a nameless
+# two-point line that steps back west and south of the first.
+from pack import FIELD_NAME, FIELD_CLASS, FIELD_LINES
+roads = [
+    Poly([[(4235545, -7106050), (4235555, -7106040), (4235560, -7106020)]], name='Café Street ☕', road='primary'),
+    Poly([[(4230000, -7110000), (4229990, -7110010)]], name=None, road='path'),
+]
+bufr = bytes(write_v2(roads, FIELD_NAME | FIELD_CLASS | FIELD_LINES, 5))
+back = decode(bufr)[3]
+assert [p.rings for p in back] == [p.rings for p in roads]
+assert [(p.name, p.road) for p in back] == [(p.name, p.road) for p in roads]
+print('roads 1e-5:', bufr.hex())

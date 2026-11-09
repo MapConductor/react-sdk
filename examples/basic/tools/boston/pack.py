@@ -3,6 +3,7 @@
 #   python pack.py [--format v1|v2] parcels   <Parcels_2025.geojson> <boundary.geojson> <out.bin> [<assessment.csv>]
 #   python pack.py [--format v1|v2] buildings <overture.geojson>     <boundary.geojson> <out.bin>
 #   python pack.py [--format v2]    downtown  <boston-buildings.json> <out.bin>
+#   python pack.py                  roads     <overture-segments.geojson> <boundary.geojson> <out.bin>
 #   python pack.py decode <in.bin>            (reads v1 or v2 and prints counts and sizes)
 #
 # v2 is the default and the only format the samples read.
@@ -17,7 +18,8 @@
 #
 # v2 (no ids):
 #   'MCPG' u32 version=2 u32 count u8 fields u8 digits   (little-endian)
-#     fields: 1 = height, 2 = land use, 4 = area, 8 = name (what the file carries)
+#     fields: 1 = height, 2 = land use, 4 = area, 8 = name, 16 = road class (what the file carries),
+#             32 = lines: the shapes are polylines, not polygons (see below)
 #     digits: coordinates are integers of 10^-digits degree (6 = 1e-6, 5 = 1e-5)
 #   per polygon, only the fields present, in this order:
 #     height    varint  0 = unknown, else the height in 0.1 m plus 1
@@ -25,14 +27,26 @@
 #                       5 industrial, 6 exempt, 7 vacant, 8 unknown
 #     area      u8      the smallest downtown area (0, 1 or 2) the building fits in
 #     name      varint  byte length (0 = none), UTF-8
+#     road class u8     0 highway (motorway, trunk), 1 primary, 2 secondary, 3 tertiary,
+#                       4 local (residential, unclassified, living street, unknown),
+#                       5 service, 6 path (footway, path, steps, cycleway, pedestrian, track)
 #     varint ringCount, per ring: varint n, n x (svarint dLat, svarint dLng)
 #   varint is LEB128 (7 bits at a time, low first); svarint is a zigzag varint
 #   ((v << 1) ^ (v >> 63)). Coordinates are one difference series across the
 #   file, as in v1. A ring's closing vertex (the same as its first) is not
 #   stored: n counts the others and the reader closes the ring again.
+#   With the lines bit (32) a "ring" is an open polyline instead: every vertex
+#   is stored (n >= 2) and the reader does not close it. The roads file has one
+#   polyline per record (ringCount 1); each is one polyline on the map.
 #
-# Buildings keep 1e-6 and every vertex. Parcels are written at 1e-5 (about 1 m)
-# and lose the vertices that lie almost on a straight line (see simplify_ring).
+# Buildings keep 1e-6 and every vertex. Parcels and roads are written at 1e-5
+# (about 1 m) and lose the vertices that lie almost on a straight line (see
+# simplify_ring, simplify_path).
+#
+# Roads are Overture transportation segments of the road subtype, cut at the
+# city boundary (a segment crossing it keeps the part inside, a segment leaving
+# and coming back becomes several polylines). They keep their class (grouped as
+# above) and primary name, and nothing else (no ids, connectors or rules).
 #
 # Buildings are kept when their centroid is inside the city boundary (water
 # included). Every parcel is in the city. Parcels get a land use from the
@@ -42,7 +56,17 @@
 # the nested area (l), the height (h) and the name (n).
 import csv, gzip, json, math, struct, sys
 
-FIELD_HEIGHT, FIELD_USE, FIELD_AREA, FIELD_NAME = 1, 2, 4, 8
+FIELD_HEIGHT, FIELD_USE, FIELD_AREA, FIELD_NAME, FIELD_CLASS, FIELD_LINES = 1, 2, 4, 8, 16, 32
+ROAD_CLASSES = ['highway', 'primary', 'secondary', 'tertiary', 'local', 'service', 'path']
+# Overture segment class -> the sample's road class
+ROAD_CLASS = {
+    'motorway': 'highway', 'trunk': 'highway',
+    'primary': 'primary', 'secondary': 'secondary', 'tertiary': 'tertiary',
+    'residential': 'local', 'unclassified': 'local', 'living_street': 'local', 'unknown': 'local',
+    'service': 'service',
+    'footway': 'path', 'path': 'path', 'steps': 'path', 'cycleway': 'path', 'pedestrian': 'path',
+    'track': 'path', 'bridleway': 'path',
+}
 USES = ['family', 'apartment', 'condo', 'mixed', 'commercial', 'industrial', 'exempt', 'vacant', 'unknown']
 
 # Parcels: 1e-5 degree, and drop a vertex when every vertex dropped since the
@@ -50,6 +74,9 @@ USES = ['family', 'apartment', 'condo', 'mixed', 'commercial', 'industrial', 'ex
 # next one (metres on the ground).
 PARCEL_DIGITS = 5
 PARCEL_TOLERANCE_M = 0.5
+# Roads: the same unit and tolerance as the parcels.
+ROAD_DIGITS = 5
+ROAD_TOLERANCE_M = 0.5
 
 # Land use code (LU) -> the sample's colour groups
 LAND_USE = {
@@ -69,8 +96,9 @@ PRIORITY = ['condo', 'mixed', 'apartment', 'family', 'commercial', 'industrial',
 class Poly:
     """One polygon. rings are [(ilat, ilng), ...] (integers of the file's unit, closed)."""
 
-    def __init__(self, rings, label='', height=None, use=None, area=None, name=None):
+    def __init__(self, rings, label='', height=None, use=None, area=None, name=None, road=None):
         self.rings, self.label, self.height, self.use, self.area, self.name = rings, label, height, use, area, name
+        self.road = road
 
 
 def to_int_ring(ring, digits=6):
@@ -128,6 +156,74 @@ def read_downtown(src):
         rings = [[(round(r[i + 1] * 1e6), round(r[i] * 1e6)) for i in range(0, len(r), 2)] for r in b['rings']]
         polys.append(Poly(rings, b['id'], height10(b['h']), None, b['l'], b.get('n')))
     return polys
+
+
+def read_roads(src, boundary_path, digits):
+    """Road segments cut at the city boundary: one Poly per polyline, its one "ring" open."""
+    from shapely.geometry import shape
+    from shapely.prepared import prep
+    from shapely.ops import unary_union
+    boundary = unary_union([shape(f['geometry']) for f in json.load(open(boundary_path))['features']])
+    inside = prep(boundary)
+    lines = []
+    for f in json.load(open(src))['features']:
+        p = f['properties']
+        if p.get('subtype') != 'road' or not f['geometry']:
+            continue
+        cls = ROAD_CLASS.get(p.get('class') or 'unknown')
+        if cls is None:
+            raise ValueError(f"road class {p.get('class')!r} has no group")
+        g = shape(f['geometry'])
+        if not inside.intersects(g):
+            continue
+        if not inside.contains(g):
+            g = g.intersection(boundary)
+        parts = [g] if g.geom_type == 'LineString' else [x for x in getattr(g, 'geoms', []) if x.geom_type == 'LineString']
+        name = ((p.get('names') or {}).get('primary') or None)
+        for part in parts:
+            if part.length == 0:
+                continue
+            lines.append(Poly([to_int_ring(part.coords, digits)], name=name, road=cls))
+    return lines
+
+
+def simplify_path(path, digits, tolerance_m):
+    """simplify_ring for an open polyline: both ends are kept. None if one point is left."""
+    scale = 10 ** digits
+    pts = []
+    for q in path:
+        if not pts or q != pts[-1]:
+            pts.append(q)
+    if len(pts) < 2:
+        return None
+    kept = [pts[0]]
+    dropped = []
+    for i in range(1, len(pts) - 1):
+        candidate = dropped + [pts[i]]
+        if all(_segment_distance_m(q, kept[-1], pts[i + 1], scale) < tolerance_m for q in candidate):
+            dropped = candidate
+        else:
+            kept.append(pts[i])
+            dropped = []
+    kept.append(pts[-1])
+    return kept
+
+
+def simplify_roads(lines, digits, tolerance_m):
+    stats = {'lines_in': len(lines), 'dropped_lines': 0, 'vertices_in': 0, 'vertices_out': 0}
+    out = []
+    for p in lines:
+        stats['vertices_in'] += len(p.rings[0])
+        path = simplify_path(p.rings[0], digits, tolerance_m)
+        if path is None:
+            stats['dropped_lines'] += 1
+            continue
+        p.rings = [path]
+        stats['vertices_out'] += len(path)
+        out.append(p)
+    lines[:] = out
+    stats['lines_out'] = len(out)
+    return stats
 
 
 def _segment_distance_m(p, a, b, scale):
@@ -343,12 +439,20 @@ def write_v2(polys, fields, digits=6):
             name = (p.name or '').encode('utf-8')
             varint(len(name), buf)
             buf += name
+        if fields & FIELD_CLASS:
+            buf.append(ROAD_CLASSES.index(p.road))
         varint(len(p.rings), buf)
         for ring in p.rings:
-            if len(ring) < 2 or ring[0] != ring[-1]:
-                raise ValueError(f'ring not closed ({len(ring)} points)')
-            varint(len(ring) - 1, buf)
-            for lat, lng in ring[:-1]:
+            if fields & FIELD_LINES:
+                if len(ring) < 2:
+                    raise ValueError(f'polyline of {len(ring)} points')
+                stored = ring
+            else:
+                if len(ring) < 2 or ring[0] != ring[-1]:
+                    raise ValueError(f'ring not closed ({len(ring)} points)')
+                stored = ring[:-1]
+            varint(len(stored), buf)
+            for lat, lng in stored:
                 svarint(lat - plat, buf)
                 svarint(lng - plng, buf)
                 plat, plng = lat, lng
@@ -420,13 +524,17 @@ def decode(data):
             n = rv()
             p.name = data[off:off + n].decode('utf-8') or None
             off += n
+        if fields & FIELD_CLASS:
+            p.road = ROAD_CLASSES[data[off]]
+            off += 1
         for _ in range(rv()):
             ring = []
             for _ in range(rv()):
                 lat += rs()
                 lng += rs()
                 ring.append((lat, lng))
-            ring.append(ring[0])
+            if not fields & FIELD_LINES:
+                ring.append(ring[0])
             p.rings.append(ring)
         polys.append(p)
     if off != len(data):
@@ -444,11 +552,19 @@ def main(argv):
         version, fields, digits, polys = decode(data)
         vertices = sum(len(r) for p in polys for r in p.rings)
         rings = sum(len(p.rings) for p in polys)
-        print(f'v{version} fields={fields} digits={digits} {len(polys)} polygons, {rings} rings, {vertices} vertices, '
+        what = 'polylines' if fields and fields & FIELD_LINES else 'polygons'
+        print(f'v{version} fields={fields} digits={digits} {len(polys)} {what}, {rings} rings, {vertices} vertices, '
               f'raw {len(data)} B, gzip -9 {len(gzip.compress(data, 9))} B')
         return
     digits = 6
-    if kind == 'downtown':
+    if kind == 'roads':
+        src, boundary_path, out = argv[1:4]
+        digits = ROAD_DIGITS
+        polys = read_roads(src, boundary_path, digits)
+        stats = simplify_roads(polys, digits, ROAD_TOLERANCE_M)
+        print('roads simplified: ' + ', '.join(f'{k} {v}' for k, v in stats.items()))
+        fields = FIELD_NAME | FIELD_CLASS | FIELD_LINES
+    elif kind == 'downtown':
         if fmt != 'v2':
             raise SystemExit('downtown is written as v2 only (its v1 form was JSON)')
         src, out = argv[1:3]
@@ -470,10 +586,11 @@ def main(argv):
     for a, b in zip(polys, back):
         assert a.rings == b.rings and a.height == b.height and (a.use or None) == (b.use or None)
         if fmt == 'v2':
-            assert a.area == b.area and (a.name or None) == b.name
+            assert a.area == b.area and (a.name or None) == b.name and a.road == b.road
     open(out, 'wb').write(buf)
     vertices = sum(len(r) for p in polys for r in p.rings)
-    print(f'{kind} {fmt}: {len(polys)} polygons, {vertices} vertices, digits {digits}, {len(buf) / 1e6:.2f} MB')
+    what = 'polylines' if fields & FIELD_LINES else 'polygons'
+    print(f'{kind} {fmt}: {len(polys)} {what}, {vertices} vertices, digits {digits}, {len(buf) / 1e6:.2f} MB')
 
 
 if __name__ == '__main__':

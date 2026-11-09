@@ -1,3 +1,4 @@
+import { PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { MapTilerMapView2D, type MapTilerViewStateInterface } from '@mapconductor/react-for-maptiler';
 import '@mapconductor/react-for-maptiler/style.css';
@@ -21,6 +22,7 @@ export default function MapTilerSingletonView({ state, content }: {
       cameraRestriction={content?.cameraRestriction}
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
+      polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}
