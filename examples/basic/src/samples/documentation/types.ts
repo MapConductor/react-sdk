@@ -6,13 +6,17 @@ import type { SupportedLanguage } from '../sampleRegistry';
  * Each page keeps its render snippet, its `(2) state` setup and every language's
  * prose in a single file under `./pages`, so adding or editing a page is a local
  * change. The code generator in `./index.ts` assembles these into the full,
- * provider-specific snippet shown by the docs component.
+ * provider-specific App component shown by the docs component.
  */
 export interface SamplePageDoc {
   /** The render JSX snippet, using `<MapViewContainer>` as the provider placeholder. */
   code: string;
   /** The `(2)` React state and data setup for the page (omitted when there is none). */
   state?: string;
+  /** Module-level helpers, kept outside App so their component identity is stable. */
+  helpers?: string;
+  /** Initial viewport for this example's data. */
+  camera?: { latitude: number; longitude: number; zoom: number };
   /**
    * Prose explanation of the snippet, one entry per supported language.
    *

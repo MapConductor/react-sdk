@@ -1,7 +1,13 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `<MapViewContainer state={mapViewState}>
+  code: `<label>Bubble <input type="color" value={fillColor} onChange={e => setFillColor(e.target.value)} /></label>
+<label>Border <input type="color" value={strokeColor} onChange={e => setStrokeColor(e.target.value)} /></label>
+<label>Text <input type="color" value={fontColor} onChange={e => setFontColor(e.target.value)} /></label>
+<label>Marker <input type="color" value={markerColor} onChange={e => setMarkerColor(e.target.value)} /></label>
+<input aria-label="Border width" type="range" min="0" max="8" value={strokeWidth} onChange={e => setStrokeWidth(Number(e.target.value))} />
+<input aria-label="Marker scale" type="range" min="0.5" max="2" step="0.1" value={markerScale} onChange={e => setMarkerScale(Number(e.target.value))} />
+<MapViewContainer state={mapViewState}>
   <Marker state={marker} />
   <InfoBubble
     marker={marker}

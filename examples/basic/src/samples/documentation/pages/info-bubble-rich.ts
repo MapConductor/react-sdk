@@ -3,18 +3,19 @@ import type { SamplePageDoc } from '../types';
 const doc: SamplePageDoc = {
   code: `<MapViewContainer state={mapViewState}>
   <Marker state={marker} />
-  <InfoBubble marker={marker} bubbleColor="#ffffff">
+  {selected && <InfoBubble marker={marker} bubbleColor="#ffffff">
     <article>
       <h3>Place details</h3>
       <button onClick={openDetails}>Open details</button>
     </article>
-  </InfoBubble>
+  </InfoBubble>}
 </MapViewContainer>`,
-  state: `const position = createGeoPoint({ latitude: 35.6812, longitude: 139.7671 });
+  state: `const position = useMemo(() => createGeoPoint({ latitude: 35.6812, longitude: 139.7671 }), []);
 const [selected, setSelected] = useState(false);
 const marker = useMemo(() => createMarkerState({
   id: 'place', position, onClick: () => setSelected(true),
-}), [position]);`,
+}), [position]);
+const openDetails = () => window.alert('Tokyo Station, Tokyo, Japan');`,
   explanation: {
     en: [
       'Render interactive React elements inside a marker-anchored bubble, including headings and buttons.',

@@ -1,7 +1,9 @@
 import type { SamplePageDoc } from '../types';
+import { postOfficeState } from '../postOfficeData';
 
 const doc: SamplePageDoc = {
-  code: `<MapViewContainer state={mapViewState}>
+  camera: { latitude: 43.05, longitude: 141.31, zoom: 11 },
+  code: `<MapViewContainer state={mapViewState} onMapClick={() => setSelected(null)}>
   <MarkerClusterGroup
     markers={postOfficeMarkers}
     clusterIconProvider={clusterIconProvider}
@@ -9,18 +11,17 @@ const doc: SamplePageDoc = {
     minClusterSize={3}
     clusterRadiusPx={80}
   />
+  {selected && <InfoBubble marker={selected}>{selected.extra as string}</InfoBubble>}
 </MapViewContainer>`,
-  state: `const [selected, setSelected] = useState<MarkerState | null>(null);
-const postOfficeMarkers = useMemo(() => postOffices.map(office => createMarkerState({
-  id: office.id,
-  position: createGeoPoint({ latitude: office.lat, longitude: office.lng }),
-  extra: office,
-  onClick: markerState => setSelected(markerState),
-})), [postOffices]);
-const markerTilingOptions = {
-  ...MarkerTilingOptions.Default,
-  iconScaleCallback: (_state: MarkerState, zoom: number) =>
-    zoom > 10 ? 0.8 : zoom > 5 ? 0.5 : 0.2,
+  state: `${postOfficeState}
+const clusterIconProvider = (count: number) => new ColorDefaultIcon({
+  fillColor: '#dc2626', label: String(count), labelTextColor: '#ffffff',
+});
+const zoomToCluster = (cluster: MarkerCluster) => {
+  const bounds = createGeoRectBounds();
+  postOfficeMarkers.filter(marker => cluster.markerIds.includes(marker.id))
+    .forEach(marker => bounds.extend(marker.position));
+  mapViewState.fitBounds(bounds, 60);
 };`,
   explanation: {
     en: [

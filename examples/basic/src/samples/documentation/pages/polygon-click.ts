@@ -17,9 +17,16 @@ const doc: SamplePageDoc = {
     </>
   )}
 </MapViewContainer>`,
-  state: `const polygons = useMemo(() => california.map((points, index) =>
+  state: `// A small polygon keeps this example self-contained.
+const california = useMemo(() => [[
+  createGeoPoint({ latitude: 35.70, longitude: 139.74 }),
+  createGeoPoint({ latitude: 35.66, longitude: 139.74 }),
+  createGeoPoint({ latitude: 35.66, longitude: 139.80 }),
+  createGeoPoint({ latitude: 35.70, longitude: 139.80 }),
+]], []);
+const polygons = useMemo(() => california.map((points, index) =>
   createPolygonState({ id: \`california-\${index}\`, points }),
-), []);
+), [california]);
 const polygonManager = useMemo(() => {
   const manager = new PolygonManager<null>();
   polygons.forEach(polygon => manager.registerEntity(

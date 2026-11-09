@@ -1,6 +1,11 @@
 import type { SamplePageDoc } from '../types';
+import { postOfficeState } from '../postOfficeData';
 
 const doc: SamplePageDoc = {
+  helpers: `function PostOfficeInfoBubble({ marker }: { marker: MarkerState }) {
+  return <InfoBubble marker={marker}>{marker.extra as string}</InfoBubble>;
+}`,
+  camera: { latitude: 43.05, longitude: 141.31, zoom: 12 },
   code: `<MapViewContainer
   state={mapViewState}
   markerTilingOptions={markerTilingOptions}
@@ -9,15 +14,11 @@ const doc: SamplePageDoc = {
   <Markers states={postOfficeMarkers} />
   {selected && <PostOfficeInfoBubble marker={selected} />}
 </MapViewContainer>`,
-  state: `const [selected, setSelected] = useState<MarkerState | null>(null);
-const postOfficeMarkers = useMemo(() => postOffices.map(office => createMarkerState({
-  id: office.id,
-  position: createGeoPoint({ latitude: office.lat, longitude: office.lng }),
-  extra: office,
-  onClick: markerState => setSelected(markerState),
-})), [postOffices]);
+  state: `${postOfficeState}
 const markerTilingOptions = {
   ...MarkerTilingOptions.Default,
+  // Use five inline records here; load the full dataset for a large-marker map.
+  minMarkerCount: 2,
   iconScaleCallback: (_state: MarkerState, zoom: number) =>
     zoom > 10 ? 0.8 : zoom > 5 ? 0.5 : 0.2,
 };`,

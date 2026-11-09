@@ -5,12 +5,23 @@ const doc: SamplePageDoc = {
   <Polygon state={polygon} />
   <Markers states={vertexMarkers} />
 </MapViewContainer>`,
-  state: `const [holes, setHoles] = useState<GeoPoint[][]>(initialHoles);
+  state: `const outerRing = useMemo(() => [
+  createGeoPoint({ latitude: 35.70, longitude: 139.74 }),
+  createGeoPoint({ latitude: 35.66, longitude: 139.74 }),
+  createGeoPoint({ latitude: 35.66, longitude: 139.80 }),
+  createGeoPoint({ latitude: 35.70, longitude: 139.80 }),
+], []);
+const initialHoles = useMemo(() => [[
+  createGeoPoint({ latitude: 35.69, longitude: 139.76 }),
+  createGeoPoint({ latitude: 35.68, longitude: 139.78 }),
+  createGeoPoint({ latitude: 35.67, longitude: 139.76 }),
+]], []);
+const [holes, setHoles] = useState<GeoPoint[][]>(initialHoles);
 const polygon = useMemo(() => createPolygonState({
   id: 'area-with-holes', points: outerRing, holes,
   fillColor: 'rgba(37, 99, 235, 0.45)',
-}), [holes]);
-const vertexMarkers = useMemo(() => holes.flatMap((hole, holeIndex) =>
+}), [outerRing, holes]);
+const vertexMarkers = useMemo(() => initialHoles.flatMap((hole, holeIndex) =>
   hole.map((position, vertexIndex) => createMarkerState({
     id: \`hole-\${holeIndex}-\${vertexIndex}\`, position, draggable: true,
     onDrag: markerState => setHoles(current => current.map(
@@ -19,7 +30,7 @@ const vertexMarkers = useMemo(() => holes.flatMap((hole, holeIndex) =>
       ),
     )),
   })),
-), [holes]);`,
+), [initialHoles]);`,
   explanation: {
     en: [
       'Define an outer ring and one or more inner rings to render transparent holes inside a polygon.',
