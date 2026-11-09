@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ColorDefaultIcon,
   Planar,
@@ -20,7 +20,6 @@ import { useSampleI18n } from '../samples/i18n';
 const CIRCLE_CENTER = createGeoPoint({ latitude: 21.382314, longitude: -157.933097 });
 const INIT_CAMERA = { lat: CIRCLE_CENTER.latitude, lng: CIRCLE_CENTER.longitude, zoom: 3 };
 const INITIAL_RADIUS_METERS = 5000000.0;
-const SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS = 300;
 const CIRCLE_COLORS = ['#0000ff', '#ff0000', '#008000', '#00ffff', '#d3d3d3', '#ff00ff'];
 
 function rgba(hex: string, alpha: number): string {
@@ -57,7 +56,6 @@ export function CirclePage() {
   const [strokeWidth, setStrokeWidth] = useState(3);
   const [labelOffset, setLabelOffset] = useState<Offset | null>(null);
   const [cameraTick, setCameraTick] = useState(0);
-  const suppressCircleClickUntilRef = useRef(0);
   const { messages, showToast, dismissToast } = useToast();
   const radius = useMemo(
     () => Spherical.computeDistanceBetween(CIRCLE_CENTER, edgePosition),
@@ -87,12 +85,6 @@ export function CirclePage() {
     setEdgePosition(dragged.position);
   }, []);
 
-  const handleMarkerDragEnd = useCallback((dragged: MarkerState) => {
-    suppressCircleClickUntilRef.current =
-      Date.now() + SUPPRESS_CIRCLE_CLICK_AFTER_MARKER_DRAG_MS;
-    setEdgePosition(dragged.position);
-  }, []);
-
   const circleState = useMemo(
     () =>
       createCircleState({
@@ -106,7 +98,6 @@ export function CirclePage() {
         geodesic: true,
         clickable: true,
         onClick: () => {
-          if (Date.now() < suppressCircleClickUntilRef.current) return;
           setColorIndex((index) => (index + 1) % CIRCLE_COLORS.length);
           showToast(`Circle clicked - Radius: ${radius.toFixed(0)}m`);
         },
@@ -152,7 +143,7 @@ export function CirclePage() {
         draggable
         onDragStart={handleMarkerMove}
         onDrag={handleMarkerMove}
-        onDragEnd={handleMarkerDragEnd}
+        onDragEnd={handleMarkerMove}
       />
       {labelOffset && (
         <div
