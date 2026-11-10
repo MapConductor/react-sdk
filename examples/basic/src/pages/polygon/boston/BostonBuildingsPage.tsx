@@ -5,7 +5,7 @@ import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
 import { loadDataset, nextPaint, type Building, type BuildingsDoc, type Dataset } from './bostonData';
-import { LAND_USE_STYLES, LandUseLegend, LoadingOverlay, PolygonInfo, type OverlayPhase } from './BostonOverlays';
+import { areaSquareMetres, formatArea, LAND_USE_STYLES, LandUseLegend, LoadingOverlay, PolygonInfo, type OverlayPhase } from './BostonOverlays';
 
 /**
  * Polygons of Boston drawn with one <Polygons> on top of the real map.
@@ -87,6 +87,8 @@ export function BostonBuildingsPage() {
   const [tap, setTap] = useState<Tap | null>(null);
   const [timing, setTiming] = useState<{ build: number; frame: number } | null>(null);
   const highlightedRef = useRef<{ state: PolygonState; fill: string } | null>(null);
+  // Time from handing the list to <Polygons> until every polygon's onAdded ran.
+  const [addedMs, setAddedMs] = useState<number | null>(null);
 
   const [loadMs, setLoadMs] = useState(0);
   // Non-null while a dataset is on its way; drives the loading overlay.
@@ -96,6 +98,7 @@ export function BostonBuildingsPage() {
     const start = performance.now();
     setDoc(null);
     setTiming(null);
+    setAddedMs(null);
     setLoadError(null);
     setProgress({ phase: 'download', loaded: 0, total: null });
     highlightedRef.current = null;
@@ -128,10 +131,44 @@ export function BostonBuildingsPage() {
   onTapRef.current = onTap;
   const onMapClick = useCallback((point: GeoPoint) => onTapRef.current(null, null, point), []);
 
+  // The loading overlay stays up until the map has every polygon of the list
+  // now handed to it: each state's onAdded records its id, and `count` is how
+  // many ids of that list are recorded. `doc` tells this load's calls from
+  // those of a dataset switched away from.
+  //
+  // An id stays recorded when the area shrinks and drops it. The SDK only
+  // calls onAdded again for a polygon it saw leave, and a list replaced before
+  // the SDK got to it is never seen; a list's polygons that never came would
+  // leave the overlay up for good. So the count is redone against each new
+  // list, and an id already on the map counts for it.
+  const commitRef = useRef(0);
+  const addedRef = useRef<{
+    doc: BuildingsDoc | null;
+    ids: Set<string>;
+    list: Set<string>;
+    count: number;
+    waiting: boolean;
+  }>({ doc: null, ids: new Set(), list: new Set(), count: 0, waiting: false });
+  const onAllAddedRef = useRef(() => {});
+  onAllAddedRef.current = () => {
+    setAddedMs(performance.now() - commitRef.current);
+    setProgress(null);
+  };
+
   // Every building's state, built once; the area only filters them.
   const allStates = useMemo(() => {
     if (!doc) return null;
     const start = performance.now();
+    const onAdded = (state: PolygonState) => {
+      const added = addedRef.current;
+      if (added.doc !== doc || added.ids.has(state.id)) return;
+      added.ids.add(state.id);
+      if (!added.list.has(state.id)) return; // from a list since replaced
+      if (++added.count === added.list.size && added.waiting) {
+        added.waiting = false;
+        onAllAddedRef.current();
+      }
+    };
     const states = doc.buildings.map(building => {
       const [outer, ...holes] = building.rings;
       return createPolygonState({
@@ -143,6 +180,7 @@ export function BostonBuildingsPage() {
         fillColor: fillFor(dataset, building),
         extra: building.id,
         onClick: event => onTapRef.current(event.state, building, event.clicked),
+        onAdded,
       });
     });
     return { states, build: performance.now() - start };
@@ -159,17 +197,33 @@ export function BostonBuildingsPage() {
 
   // Time from handing the list to <Polygons> until the frame after it: the
   // child's effect has registered the polygons by the time this one runs.
-  const commitRef = useRef(0);
+  // That is not when they are on the map; the overlay waits for onAdded.
   useLayoutEffect(() => {
     commitRef.current = performance.now();
-    if (shown) setProgress(p => (p ? { phase: 'draw' } : p));
+    if (!shown || !doc) return;
+    const added = addedRef.current;
+    if (added.doc !== doc) {
+      // A new dataset. Runs before <Polygons> registers it, so no onAdded has come yet.
+      added.doc = doc;
+      added.ids = new Set();
+      added.waiting = true;
+      setProgress(p => (p ? { phase: 'draw' } : p));
+    }
+    // One per id: the map keeps one polygon per id.
+    added.list = new Set(shown.states.map(s => s.id));
+    added.count = 0;
+    for (const id of added.list) if (added.ids.has(id)) added.count++;
+    if (added.waiting && added.count === added.list.size) {
+      added.waiting = false;
+      onAllAddedRef.current();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shown]);
   useEffect(() => {
     if (!shown || !allStates) return;
     let raf = requestAnimationFrame(() => {
       raf = requestAnimationFrame(() => {
         setTiming({ build: allStates.build, frame: performance.now() - commitRef.current });
-        setProgress(null);
       });
     });
     return () => cancelAnimationFrame(raf);
@@ -225,7 +279,7 @@ export function BostonBuildingsPage() {
         {loadError && <p className="control-panel-note" data-testid="load-error">{loadError}</p>}
         {dataset === 'parcels' && <LandUseLegend />}
         {shown ? (
-          <p className="control-panel-note" data-testid="stats">
+          <p className="control-panel-note" data-testid="stats" data-added-ms={addedMs?.toFixed(0) ?? ''}>
             {t({
               en: `${shown.states.length.toLocaleString()} polygons, ${shown.vertices.toLocaleString()} vertices`,
               ja: `ポリゴン ${shown.states.length.toLocaleString()} 個・頂点 ${shown.vertices.toLocaleString()} 個`,
@@ -263,13 +317,13 @@ export function BostonBuildingsPage() {
             data-lng={tap.point?.longitude ?? ''}
           >
             {tap.building?.use
-              ? `${tap.building.n} · ${t(LAND_USE_STYLES[tap.building.use].label)}`
+              ? `${t({ en: 'Parcel', ja: '区画', 'es-419': 'Parcela', de: 'Flurstück', th: 'แปลงที่ดิน', hi: 'भूखंड' })} · ${t(LAND_USE_STYLES[tap.building.use].label)} · ${formatArea(areaSquareMetres(tap.building))}`
               : tap.building
               ? `${tap.building.n ?? t({ en: 'Building', ja: '建物', 'es-419': 'Edificio', de: 'Gebäude', th: 'อาคาร', hi: 'इमारत' })} · ${
                   tap.building.h == null
                     ? t({ en: 'height unknown', ja: '高さ不明', 'es-419': 'altura desconocida', de: 'Höhe unbekannt', th: 'ไม่ทราบความสูง', hi: 'ऊँचाई अज्ञात' })
                     : `${tap.building.h} m`
-                } · ${tap.building.id.slice(0, 8)}`
+                } · ${formatArea(areaSquareMetres(tap.building))}`
               : t({ en: 'No building here', ja: 'ここに建物はありません', 'es-419': 'Aquí no hay edificio', de: 'Hier ist kein Gebäude', th: 'ไม่มีอาคารตรงนี้', hi: 'यहाँ कोई इमारत नहीं' })}
           </p>
         )}

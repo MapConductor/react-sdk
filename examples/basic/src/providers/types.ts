@@ -8,6 +8,7 @@ import type {
   MapViewStateInterface,
   MarkerTilingOptions,
   MapViewStyle,
+  PolylineTilingOptions,
 } from '@mapconductor/js-sdk-core';
 import type { InitialCamera } from '../common';
 
@@ -32,4 +33,6 @@ export interface ProviderViewProps {
   /** 地図の見た目そのもの。`createVectorStyle()` が作る。 */
   mapStyle?: MapViewStyle | null;
   onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
+  /** When the shared map draws this page's polylines as tiles (the default when omitted). */
+  polylineTilingOptions?: PolylineTilingOptions;
 }

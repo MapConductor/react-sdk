@@ -9,6 +9,7 @@ import type {
   MapViewStateInterface,
   MarkerTilingOptions,
   MapViewStyle,
+  PolylineTilingOptions,
 } from '@mapconductor/js-sdk-core';
 import { type InitialCamera, DEFAULT_CAMERA } from './common';
 import { SingletonMapSlot, useSingletonMapState, type SingletonMapId } from './SingletonMaps';
@@ -54,6 +55,11 @@ interface MapViewContainerProps {
   /** 地図の見た目そのもの。`createVectorStyle()` が作る。 */
   mapStyle?: MapViewStyle | null;
   onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
+  /**
+   * When the shared map draws this page's polylines as tiles. Applies from the next time the
+   * polylines are handed over; back to the default when the page leaves.
+   */
+  polylineTilingOptions?: PolylineTilingOptions;
 }
 
 function SingletonProviderView({
@@ -69,6 +75,7 @@ function SingletonProviderView({
   cameraRestriction: cameraRestrictionProp,
   mapStyle,
   onStyleDiagnostics,
+  polylineTilingOptions,
 }: ProviderViewProps & { id: SingletonMapId }) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useSingletonMapState(id, cameraPosition);
@@ -93,6 +100,7 @@ function SingletonProviderView({
       cameraRestriction={cameraRestriction}
       mapStyle={mapStyle}
       onStyleDiagnostics={onStyleDiagnostics}
+      polylineTilingOptions={polylineTilingOptions}
     >
       {children}
     </SingletonMapSlot>
@@ -112,6 +120,7 @@ export function MapViewContainer({
   restrictBounds,
   mapStyle,
   onStyleDiagnostics,
+  polylineTilingOptions,
 }: MapViewContainerProps) {
   const location = useLocation();
   const isGoogle3D = location.pathname.startsWith('/google-maps-3d');
@@ -146,6 +155,7 @@ export function MapViewContainer({
     cameraRestriction,
     mapStyle,
     onStyleDiagnostics,
+    polylineTilingOptions,
   };
 
   switch (true) {

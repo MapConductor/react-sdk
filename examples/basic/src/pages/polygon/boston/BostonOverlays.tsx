@@ -1,3 +1,4 @@
+import { computeArea, createGeoPoint } from '@mapconductor/js-sdk-core';
 import { useSampleI18n } from '../../../samples/i18n';
 import type { Building, LandUse, LoadProgress } from './bostonData';
 
@@ -67,7 +68,7 @@ const MB = 1024 * 1024;
  * which the compositor keeps animating while decoding or building the states
  * holds the main thread.
  */
-export function LoadingOverlay({ progress }: { progress: OverlayPhase }) {
+export function LoadingOverlay({ progress, shapes = 'polygons' }: { progress: OverlayPhase; shapes?: 'polygons' | 'roads' }) {
   const { t } = useSampleI18n();
   let text: string;
   let percent: number | null = null;
@@ -84,10 +85,14 @@ export function LoadingOverlay({ progress }: { progress: OverlayPhase }) {
       break;
     }
     case 'decode':
-      text = t({ en: 'Reading the polygons…', ja: 'ポリゴンを読み取り中…', 'es-419': 'Leyendo los polígonos…', de: 'Polygone werden gelesen…', th: 'กำลังอ่านโพลีกอน…', hi: 'पॉलीगॉन पढ़े जा रहे हैं…' });
+      text = shapes === 'roads'
+        ? t({ en: 'Reading the roads…', ja: '道路を読み取り中…', 'es-419': 'Leyendo las calles…', de: 'Straßen werden gelesen…', th: 'กำลังอ่านถนน…', hi: 'सड़कें पढ़ी जा रही हैं…' })
+        : t({ en: 'Reading the polygons…', ja: 'ポリゴンを読み取り中…', 'es-419': 'Leyendo los polígonos…', de: 'Polygone werden gelesen…', th: 'กำลังอ่านโพลีกอน…', hi: 'पॉलीगॉन पढ़े जा रहे हैं…' });
       break;
     case 'build':
-      text = t({ en: 'Preparing the polygons…', ja: 'ポリゴンを準備中…', 'es-419': 'Preparando los polígonos…', de: 'Polygone werden vorbereitet…', th: 'กำลังเตรียมโพลีกอน…', hi: 'पॉलीगॉन तैयार हो रहे हैं…' });
+      text = shapes === 'roads'
+        ? t({ en: 'Preparing the roads…', ja: '道路を準備中…', 'es-419': 'Preparando las calles…', de: 'Straßen werden vorbereitet…', th: 'กำลังเตรียมถนน…', hi: 'सड़कें तैयार हो रही हैं…' })
+        : t({ en: 'Preparing the polygons…', ja: 'ポリゴンを準備中…', 'es-419': 'Preparando los polígonos…', de: 'Polygone werden vorbereitet…', th: 'กำลังเตรียมโพลีกอน…', hi: 'पॉलीगॉन तैयार हो रहे हैं…' });
       break;
     case 'draw':
       text = t({ en: 'Drawing the map…', ja: '地図に描画中…', 'es-419': 'Dibujando el mapa…', de: 'Karte wird gezeichnet…', th: 'กำลังวาดแผนที่…', hi: 'मैप बनाया जा रहा है…' });
@@ -122,7 +127,6 @@ export function PolygonInfo({ building }: { building: Building }) {
   const { t } = useSampleI18n();
   const rows: [string, string][] = [];
   if (building.use) {
-    rows.push([t({ en: 'Parcel', ja: '区画', 'es-419': 'Parcela', de: 'Flurstück', th: 'แปลงที่ดิน', hi: 'भूखंड' }), building.n?.replace(/^Parcel /, '') ?? '—']);
     rows.push([t({ en: 'Land use', ja: '土地利用', 'es-419': 'Uso del suelo', de: 'Nutzung', th: 'การใช้ที่ดิน', hi: 'भूमि उपयोग' }), t(LAND_USE_STYLES[building.use].label)]);
   } else {
     if (building.n) rows.push([t({ en: 'Name', ja: '名前', 'es-419': 'Nombre', de: 'Name', th: 'ชื่อ', hi: 'नाम' }), building.n]);
@@ -130,8 +134,8 @@ export function PolygonInfo({ building }: { building: Building }) {
       t({ en: 'Height', ja: '高さ', 'es-419': 'Altura', de: 'Höhe', th: 'ความสูง', hi: 'ऊँचाई' }),
       building.h == null ? t({ en: 'unknown', ja: '不明', 'es-419': 'desconocida', de: 'unbekannt', th: 'ไม่ทราบ', hi: 'अज्ञात' }) : `${building.h} m`,
     ]);
-    rows.push(['Overture ID', building.id.length > 13 ? `${building.id.slice(0, 13)}…` : building.id]);
   }
+  rows.push([t({ en: 'Area', ja: '面積', 'es-419': 'Superficie', de: 'Fläche', th: 'พื้นที่', hi: 'क्षेत्रफल' }), formatArea(areaSquareMetres(building))]);
   rows.push([
     t({ en: 'Vertices', ja: '頂点', 'es-419': 'Vértices', de: 'Eckpunkte', th: 'จุดยอด', hi: 'शीर्ष' }),
     String(building.rings.reduce((n, r) => n + r.length / 2, 0)) +
@@ -149,4 +153,21 @@ export function PolygonInfo({ building }: { building: Building }) {
       </tbody>
     </table>
   );
+}
+
+/** The area of a polygon in square metres: its outline less its holes. */
+export function areaSquareMetres(building: Building): number {
+  const areas = building.rings.map(ring => {
+    const points = [];
+    for (let i = 0; i < ring.length; i += 2) points.push(createGeoPoint({ longitude: ring[i], latitude: ring[i + 1] }));
+    return computeArea(points);
+  });
+  return areas.slice(1).reduce((rest, hole) => rest - hole, areas[0] ?? 0);
+}
+
+/** "1,234 m²", or hectares from 10,000 m² up. */
+export function formatArea(squareMetres: number): string {
+  return squareMetres >= 10_000
+    ? `${(squareMetres / 10_000).toFixed(2)} ha`
+    : `${Math.round(squareMetres).toLocaleString('en-US')} m²`;
 }

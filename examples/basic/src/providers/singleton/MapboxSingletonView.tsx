@@ -1,3 +1,4 @@
+import { PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { MapBoxMapView2D, type MapboxViewStateInterface } from '@mapconductor/react-for-mapbox';
 import '@mapconductor/react-for-mapbox/style.css';
@@ -23,6 +24,7 @@ export default function MapboxSingletonView({ state, content }: {
       cameraRestriction={content?.cameraRestriction}
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
+      polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}
