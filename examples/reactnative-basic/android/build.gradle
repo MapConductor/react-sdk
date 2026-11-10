@@ -7,6 +7,9 @@ buildscript {
     // メタデータ前方互換があるため 2.3 で 2.4.0 メタデータを読める。RN 既定 (2.1.x) のままだと
     // "Module was compiled with an incompatible version of Kotlin" で落ちる。
     kotlinVersion = '2.3.20'
+    // NDK は GitHub の ubuntu ランナーに入っている版に合わせる。RN 既定の 27.0.12077973 は
+    // ランナーに無く、CI が毎回ダウンロードしていた（途中で通信が切れて落ちたことがある）。
+    ndkVersion = '27.1.12297006'
   }
   repositories {
     google()
