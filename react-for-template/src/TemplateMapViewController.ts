@@ -158,8 +158,8 @@ export class TemplateMapViewController extends BaseMapViewController implements 
     }
 
     private apply(position: MapCameraPosition): void {
-        this.map.center = createGeoPoint(position.center);
-        this.map.zoom = this.zoomConverter.toNativeZoom(position.zoom ?? 0, position.center.latitude);
+        this.map.center = createGeoPoint(position.position);
+        this.map.zoom = this.zoomConverter.toNativeZoom(position.zoom ?? 0, position.position.latitude);
         this.map.bearingDegrees = position.bearing ?? 0;
         this.map.tiltDegrees = position.tilt ?? 0;
     }
