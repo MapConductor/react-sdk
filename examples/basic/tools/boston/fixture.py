@@ -39,3 +39,15 @@ back = decode(bufr)[3]
 assert [p.rings for p in back] == [p.rings for p in roads]
 assert [(p.name, p.road) for p in back] == [(p.name, p.road) for p in roads]
 print('roads 1e-5:', bufr.hex())
+
+# Two circles (fields tree group | circles, 1e-5 degree): a 150.0 m radius (a
+# two-byte varint) and a 0.1 m one, the second centre west and south of the first.
+from pack import FIELD_TREE, FIELD_CIRCLES
+circles = [
+    Poly([[(4235545, -7106050)]], tree='oak', radius=1500),
+    Poly([[(4230000, -7110000)]], tree='other', radius=1),
+]
+bufc = bytes(write_v2(circles, FIELD_TREE | FIELD_CIRCLES, 5))
+back = decode(bufc)[3]
+assert [(p.rings, p.tree, p.radius) for p in back] == [(p.rings, p.tree, p.radius) for p in circles]
+print('trees 1e-5:', bufc.hex())

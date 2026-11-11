@@ -1,3 +1,4 @@
+import antennaHorizons from './pages/antenna-horizons';
 import type { SupportedLanguage } from '../sampleRegistry';
 import {
   PROVIDER_IMPORTS,
@@ -48,6 +49,7 @@ export type { SamplePageDoc } from './types';
 
 /** Every sample page's documentation, keyed by its route id. */
 const DOCUMENTATION: Record<string, SamplePageDoc> = {
+  'antenna-horizons': antennaHorizons,
   'hello-map': helloMap,
   map,
   'map-design': mapDesign,
@@ -163,6 +165,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
       'ImageIcon',
       'MapUISettings',
       'MarkerAnimation',
+      'CircleTilingOptions',
       'MarkerTilingOptions',
       'PolygonManager',
       'RasterLayerSource',
@@ -191,6 +194,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   {
     source: '@mapconductor/js-sdk-react',
     values: [
+      'Circles',
       'Circle',
       'GroundImage',
       'InfoBubble',

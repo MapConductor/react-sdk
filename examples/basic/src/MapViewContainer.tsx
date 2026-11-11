@@ -10,6 +10,7 @@ import type {
   MarkerTilingOptions,
   MapViewStyle,
   PolylineTilingOptions,
+  CircleTilingOptions,
 } from '@mapconductor/js-sdk-core';
 import { type InitialCamera, DEFAULT_CAMERA } from './common';
 import { SingletonMapSlot, useSingletonMapState, type SingletonMapId } from './SingletonMaps';
@@ -60,6 +61,11 @@ interface MapViewContainerProps {
    * polylines are handed over; back to the default when the page leaves.
    */
   polylineTilingOptions?: PolylineTilingOptions;
+  /**
+   * When the shared map draws this page's circles as tiles. Applies from the next time the
+   * circles are handed over; back to the default when the page leaves.
+   */
+  circleTilingOptions?: CircleTilingOptions;
 }
 
 function SingletonProviderView({
@@ -76,6 +82,7 @@ function SingletonProviderView({
   mapStyle,
   onStyleDiagnostics,
   polylineTilingOptions,
+  circleTilingOptions,
 }: ProviderViewProps & { id: SingletonMapId }) {
   const cameraPosition = useInitialCameraPosition(initialCamera);
   const state = useSingletonMapState(id, cameraPosition);
@@ -101,6 +108,7 @@ function SingletonProviderView({
       mapStyle={mapStyle}
       onStyleDiagnostics={onStyleDiagnostics}
       polylineTilingOptions={polylineTilingOptions}
+      circleTilingOptions={circleTilingOptions}
     >
       {children}
     </SingletonMapSlot>
@@ -121,6 +129,7 @@ export function MapViewContainer({
   mapStyle,
   onStyleDiagnostics,
   polylineTilingOptions,
+  circleTilingOptions,
 }: MapViewContainerProps) {
   const location = useLocation();
   const isGoogle3D = location.pathname.startsWith('/google-maps-3d');
@@ -156,6 +165,7 @@ export function MapViewContainer({
     mapStyle,
     onStyleDiagnostics,
     polylineTilingOptions,
+    circleTilingOptions,
   };
 
   switch (true) {
