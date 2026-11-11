@@ -4,6 +4,7 @@
 #   python pack.py [--format v1|v2] buildings <overture.geojson>     <boundary.geojson> <out.bin>
 #   python pack.py [--format v2]    downtown  <boston-buildings.json> <out.bin>
 #   python pack.py                  roads     <overture-segments.geojson> <boundary.geojson> <out.bin>
+#   python pack.py                  trees     <bprd_trees.csv> <out.bin>
 #   python pack.py decode <in.bin>            (reads v1 or v2 and prints counts and sizes)
 #
 # v2 is the default and the only format the samples read.
@@ -18,8 +19,10 @@
 #
 # v2 (no ids):
 #   'MCPG' u32 version=2 u32 count u8 fields u8 digits   (little-endian)
-#     fields: 1 = height, 2 = land use, 4 = area, 8 = name, 16 = road class (what the file carries),
-#             32 = lines: the shapes are polylines, not polygons (see below)
+#     fields: 1 = height, 2 = land use, 4 = area, 8 = name, 16 = road class, 128 = tree group
+#             (what the file carries),
+#             32 = lines: the shapes are polylines, not polygons (see below),
+#             64 = circles: each record is one circle, a radius and a centre (see below)
 #     digits: coordinates are integers of 10^-digits degree (6 = 1e-6, 5 = 1e-5)
 #   per polygon, only the fields present, in this order:
 #     height    varint  0 = unknown, else the height in 0.1 m plus 1
@@ -30,7 +33,11 @@
 #     road class u8     0 highway (motorway, trunk), 1 primary, 2 secondary, 3 tertiary,
 #                       4 local (residential, unclassified, living street, unknown),
 #                       5 service, 6 path (footway, path, steps, cycleway, pedestrian, track)
+#     tree group u8     0 maple, 1 oak, 2 honeylocust, 3 linden, 4 elm, 5 flowering,
+#                       6 conifer, 7 other (see TREE_GROUP)
 #     varint ringCount, per ring: varint n, n x (svarint dLat, svarint dLng)
+#     -- or, with the circles bit (64), instead of the rings:
+#     varint radius (0.1 m, at least 1), svarint dLat, svarint dLng (the centre)
 #   varint is LEB128 (7 bits at a time, low first); svarint is a zigzag varint
 #   ((v << 1) ^ (v >> 63)). Coordinates are one difference series across the
 #   file, as in v1. A ring's closing vertex (the same as its first) is not
@@ -38,6 +45,17 @@
 #   With the lines bit (32) a "ring" is an open polyline instead: every vertex
 #   is stored (n >= 2) and the reader does not close it. The roads file has one
 #   polyline per record (ringCount 1); each is one polyline on the map.
+#   With the circles bit (64) a record is one circle: its radius on the ground and
+#   its centre, the centre being one more point of the file's difference series.
+#   The trees file is written in Hilbert-curve order of the centres, so the
+#   differences stay small (mostly one or two bytes each).
+#
+# Trees are the City of Boston's street and park trees (BPRD Trees, Analyze
+# Boston). A record is a tree's estimated crown: its radius is the trunk
+# diameter (DBH) times CROWN_TO_DBH / 2 -- crowns of open-grown broadleaf trees
+# are commonly some 20-25 times as wide as the trunk -- between TREE_MIN_RADIUS_M
+# and TREE_MAX_RADIUS_M. An estimate, not a measurement: the inventory holds no
+# crown widths. Planting sites, empty pits, stumps and retired sites are left out.
 #
 # Buildings keep 1e-6 and every vertex. Parcels and roads are written at 1e-5
 # (about 1 m) and lose the vertices that lie almost on a straight line (see
@@ -57,6 +75,30 @@
 import csv, gzip, json, math, struct, sys
 
 FIELD_HEIGHT, FIELD_USE, FIELD_AREA, FIELD_NAME, FIELD_CLASS, FIELD_LINES = 1, 2, 4, 8, 16, 32
+FIELD_CIRCLES, FIELD_TREE = 64, 128
+TREE_GROUPS = ['maple', 'oak', 'honeylocust', 'linden', 'elm', 'flowering', 'conifer', 'other']
+# Genus (first word of spp_bot) -> the sample's tree group; any other genus is 'other'
+TREE_GROUP = {
+    'Acer': 'maple', 'Quercus': 'oak', 'Gleditsia': 'honeylocust', 'Tilia': 'linden', 'Ulmus': 'elm',
+    'Prunus': 'flowering', 'Pyrus': 'flowering', 'Malus': 'flowering', 'Syringa': 'flowering',
+    'Amelanchier': 'flowering', 'Cercis': 'flowering', 'Crataegus': 'flowering', 'Cornus': 'flowering',
+    'Magnolia': 'flowering', 'Chionanthus': 'flowering', 'Halesia': 'flowering', 'Styrax': 'flowering',
+    'Hamamelis': 'flowering', 'Hydrangea': 'flowering', 'Hibiscus': 'flowering', 'Viburnum': 'flowering',
+    'Laburnum': 'flowering', 'Stewartia': 'flowering', 'Oxydendrum': 'flowering', 'Albizia': 'flowering',
+    'Pinus': 'conifer', 'Picea': 'conifer', 'Abies': 'conifer', 'Tsuga': 'conifer', 'Thuja': 'conifer',
+    'Taxus': 'conifer', 'Juniperus': 'conifer', 'Larix': 'conifer', 'Metasequoia': 'conifer',
+    'Taxodium': 'conifer', 'Platycladus': 'conifer', 'Chamaecyparis': 'conifer', 'Cryptomeria': 'conifer',
+    'Pseudotsuga': 'conifer', 'Cedrus': 'conifer', 'Sequoiadendron': 'conifer', 'Ginkgo': 'other',
+}
+# Not trees: sites in the inventory with nothing standing
+TREE_SKIP = {'Empty', 'Scheduled', 'Vacant', 'Stump', '--', ''}
+# Crown diameter / trunk diameter, and the radius bounds (metres on the ground)
+CROWN_TO_DBH = 22
+TREE_MIN_RADIUS_M = 1.0
+TREE_MAX_RADIUS_M = 15.0
+# DBH (inches) for a tree with none recorded, from its dbh_range when there is one
+DBH_RANGE_MID = {'0-3in': 2, '3-6in': 4.5, '6-12in': 9, '12-18in': 15, '18-24in': 21, '24-30in': 27, '>30in': 33}
+TREE_DIGITS = 5
 ROAD_CLASSES = ['highway', 'primary', 'secondary', 'tertiary', 'local', 'service', 'path']
 # Overture segment class -> the sample's road class
 ROAD_CLASS = {
@@ -96,9 +138,12 @@ PRIORITY = ['condo', 'mixed', 'apartment', 'family', 'commercial', 'industrial',
 class Poly:
     """One polygon. rings are [(ilat, ilng), ...] (integers of the file's unit, closed)."""
 
-    def __init__(self, rings, label='', height=None, use=None, area=None, name=None, road=None):
+    def __init__(self, rings, label='', height=None, use=None, area=None, name=None, road=None, tree=None,
+                 radius=None):
         self.rings, self.label, self.height, self.use, self.area, self.name = rings, label, height, use, area, name
         self.road = road
+        # Circles: tree group, and radius in 0.1 m; rings is then [[(lat, lng)]], the centre.
+        self.tree, self.radius = tree, radius
 
 
 def to_int_ring(ring, digits=6):
@@ -185,6 +230,56 @@ def read_roads(src, boundary_path, digits):
                 continue
             lines.append(Poly([to_int_ring(part.coords, digits)], name=name, road=cls))
     return lines
+
+
+def hilbert_d(n, x, y):
+    """Distance along a Hilbert curve over an n x n grid (n a power of two)."""
+    d = 0
+    s = n // 2
+    while s > 0:
+        rx = 1 if x & s else 0
+        ry = 1 if y & s else 0
+        d += s * s * ((3 * rx) ^ ry)
+        if ry == 0:
+            if rx == 1:
+                x, y = n - 1 - x, n - 1 - y
+            x, y = y, x
+        s //= 2
+    return d
+
+
+def read_trees(src, digits):
+    """BPRD trees as circles (crown estimates), in Hilbert order of their centres. Returns (polys, stats)."""
+    scale = 10 ** digits
+    stats = {'rows': 0, 'skipped_sites': 0, 'no_dbh': 0, 'clamped_min': 0, 'clamped_max': 0}
+    trees = []
+    for row in csv.DictReader(open(src, encoding='utf-8-sig')):
+        stats['rows'] += 1
+        genus = (row['spp_bot'] or '').split(' ')[0]
+        if genus in TREE_SKIP or not row['y_latitude'] or not row['x_longitude']:
+            stats['skipped_sites'] += 1
+            continue
+        dbh = float(row['dbh'] or 0)
+        if dbh <= 0:
+            stats['no_dbh'] += 1
+            dbh = DBH_RANGE_MID.get(row['dbh_range'], 0)
+        radius_m = dbh * 0.0254 * CROWN_TO_DBH / 2
+        if radius_m < TREE_MIN_RADIUS_M:
+            stats['clamped_min'] += 1
+            radius_m = TREE_MIN_RADIUS_M
+        elif radius_m > TREE_MAX_RADIUS_M:
+            stats['clamped_max'] += 1
+            radius_m = TREE_MAX_RADIUS_M
+        lat, lng = round(float(row['y_latitude']) * scale), round(float(row['x_longitude']) * scale)
+        trees.append(Poly([[(lat, lng)]], tree=TREE_GROUP.get(genus, 'other'), radius=int(round(radius_m * 10))))
+    min_lat = min(p.rings[0][0][0] for p in trees)
+    min_lng = min(p.rings[0][0][1] for p in trees)
+    n = 1 << 16
+    span = max(max(p.rings[0][0][0] for p in trees) - min_lat, max(p.rings[0][0][1] for p in trees) - min_lng) + 1
+    trees.sort(key=lambda p: hilbert_d(n, (p.rings[0][0][1] - min_lng) * (n - 1) // span,
+                                       (p.rings[0][0][0] - min_lat) * (n - 1) // span))
+    stats['trees'] = len(trees)
+    return trees, stats
 
 
 def simplify_path(path, digits, tolerance_m):
@@ -441,6 +536,17 @@ def write_v2(polys, fields, digits=6):
             buf += name
         if fields & FIELD_CLASS:
             buf.append(ROAD_CLASSES.index(p.road))
+        if fields & FIELD_TREE:
+            buf.append(TREE_GROUPS.index(p.tree))
+        if fields & FIELD_CIRCLES:
+            if not p.radius or p.radius < 1:
+                raise ValueError(f'circle radius {p.radius}')
+            varint(p.radius, buf)
+            lat, lng = p.rings[0][0]
+            svarint(lat - plat, buf)
+            svarint(lng - plng, buf)
+            plat, plng = lat, lng
+            continue
         varint(len(p.rings), buf)
         for ring in p.rings:
             if fields & FIELD_LINES:
@@ -527,6 +633,16 @@ def decode(data):
         if fields & FIELD_CLASS:
             p.road = ROAD_CLASSES[data[off]]
             off += 1
+        if fields & FIELD_TREE:
+            p.tree = TREE_GROUPS[data[off]]
+            off += 1
+        if fields & FIELD_CIRCLES:
+            p.radius = rv()
+            lat += rs()
+            lng += rs()
+            p.rings = [[(lat, lng)]]
+            polys.append(p)
+            continue
         for _ in range(rv()):
             ring = []
             for _ in range(rv()):
@@ -552,12 +668,18 @@ def main(argv):
         version, fields, digits, polys = decode(data)
         vertices = sum(len(r) for p in polys for r in p.rings)
         rings = sum(len(p.rings) for p in polys)
-        what = 'polylines' if fields and fields & FIELD_LINES else 'polygons'
+        what = 'circles' if fields and fields & FIELD_CIRCLES else 'polylines' if fields and fields & FIELD_LINES else 'polygons'
         print(f'v{version} fields={fields} digits={digits} {len(polys)} {what}, {rings} rings, {vertices} vertices, '
               f'raw {len(data)} B, gzip -9 {len(gzip.compress(data, 9))} B')
         return
     digits = 6
-    if kind == 'roads':
+    if kind == 'trees':
+        src, out = argv[1:3]
+        digits = TREE_DIGITS
+        polys, stats = read_trees(src, digits)
+        print('trees: ' + ', '.join(f'{k} {v}' for k, v in stats.items()))
+        fields = FIELD_TREE | FIELD_CIRCLES
+    elif kind == 'roads':
         src, boundary_path, out = argv[1:4]
         digits = ROAD_DIGITS
         polys = read_roads(src, boundary_path, digits)
@@ -587,9 +709,10 @@ def main(argv):
         assert a.rings == b.rings and a.height == b.height and (a.use or None) == (b.use or None)
         if fmt == 'v2':
             assert a.area == b.area and (a.name or None) == b.name and a.road == b.road
+            assert a.tree == b.tree and a.radius == b.radius
     open(out, 'wb').write(buf)
     vertices = sum(len(r) for p in polys for r in p.rings)
-    what = 'polylines' if fields & FIELD_LINES else 'polygons'
+    what = 'circles' if fields & FIELD_CIRCLES else 'polylines' if fields & FIELD_LINES else 'polygons'
     print(f'{kind} {fmt}: {len(polys)} {what}, {vertices} vertices, digits {digits}, {len(buf) / 1e6:.2f} MB')
 
 

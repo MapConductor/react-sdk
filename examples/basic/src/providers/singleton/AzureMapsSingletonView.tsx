@@ -1,4 +1,4 @@
-import { PolylineTilingOptions } from '@mapconductor/js-sdk-core';
+import { CircleTilingOptions, PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { AzureMapsMapView, type AzureMapsViewStateInterface } from '@mapconductor/react-for-azuremaps';
 import '@mapconductor/react-for-azuremaps/style.css';
@@ -15,6 +15,7 @@ export default function AzureMapsSingletonView({ state, content }: {
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
       polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
+      circleTilingOptions={content?.circleTilingOptions ?? CircleTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

@@ -9,6 +9,7 @@ import type {
   MarkerTilingOptions,
   MapViewStyle,
   PolylineTilingOptions,
+  CircleTilingOptions,
 } from '@mapconductor/js-sdk-core';
 import type { InitialCamera } from '../common';
 
@@ -35,4 +36,6 @@ export interface ProviderViewProps {
   onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
   /** When the shared map draws this page's polylines as tiles (the default when omitted). */
   polylineTilingOptions?: PolylineTilingOptions;
+  /** When the shared map draws this page's circles as tiles (the default when omitted). */
+  circleTilingOptions?: CircleTilingOptions;
 }

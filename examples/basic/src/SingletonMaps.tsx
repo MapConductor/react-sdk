@@ -17,6 +17,7 @@ import {
   createMapCameraPosition,
   MarkerTilingOptions,
   PolylineTilingOptions,
+  CircleTilingOptions,
   type MapCameraPosition,
   type MapDesignTypeInterface,
   type MapViewStateInterface,
@@ -280,6 +281,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
           mapStyle={content['google-2d']?.mapStyle}
           onStyleDiagnostics={content['google-2d']?.onStyleDiagnostics}
           polylineTilingOptions={content['google-2d']?.polylineTilingOptions ?? PolylineTilingOptions.Default}
+          circleTilingOptions={content['google-2d']?.circleTilingOptions ?? CircleTilingOptions.Default}
         >
           {content['google-2d'] && <Fragment key={content['google-2d']!.owner}>{content['google-2d']!.children}</Fragment>}
         </GoogleMapView2D>
@@ -383,7 +385,7 @@ export function SingletonMapsProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction, mapStyle, onStyleDiagnostics, polylineTilingOptions }: SingletonMapSlotProps) {
+export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, onCameraMove, onCameraMoveEnd, cameraRestriction, mapStyle, onStyleDiagnostics, polylineTilingOptions, circleTilingOptions }: SingletonMapSlotProps) {
   const { register, unregister } = useSingletonMapsContext();
   const owner = useId();
 
@@ -399,6 +401,7 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
       mapStyle,
       onStyleDiagnostics,
       polylineTilingOptions,
+      circleTilingOptions,
     });
     return () => unregister(id, owner);
   }, [
@@ -413,6 +416,7 @@ export function SingletonMapSlot({ id, children, onMapClick, onCameraMoveStart, 
     mapStyle,
     onStyleDiagnostics,
     polylineTilingOptions,
+    circleTilingOptions,
     register,
     unregister,
   ]);

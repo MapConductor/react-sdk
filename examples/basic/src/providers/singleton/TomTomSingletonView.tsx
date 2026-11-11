@@ -1,4 +1,4 @@
-import { PolylineTilingOptions } from '@mapconductor/js-sdk-core';
+import { CircleTilingOptions, PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { TomTomMapView2D, type TomTomViewStateInterface } from '@mapconductor/react-for-tomtom';
 import type { SingletonMapContent } from './types';
@@ -22,6 +22,7 @@ export default function TomTomSingletonView({ state, content }: {
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
       polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
+      circleTilingOptions={content?.circleTilingOptions ?? CircleTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}
