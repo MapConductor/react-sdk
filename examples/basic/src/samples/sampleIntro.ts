@@ -74,6 +74,17 @@ const INTROS: Record<string, SampleIntro> = Object.fromEntries([
     },
   ),
   intro(
+    'projected-coordinates',
+    {
+      en: 'Tap the map to see the tapped point in the map engine\'s coordinate system.',
+      ja: '地図をタップすると、その地点を地図エンジンの座標系で表示します。',
+      'es-419': 'Toca el mapa para ver el punto en el sistema de coordenadas del motor de mapas.',
+      de: 'Tippen Sie auf die Karte, um den Punkt im Koordinatensystem der Karten-Engine zu sehen.',
+      th: 'แตะแผนที่เพื่อดูจุดที่แตะในระบบพิกัดของเอนจินแผนที่',
+      hi: 'मैप पर टैप करें, टैप किया गया बिंदु मैप इंजन की निर्देशांक प्रणाली में दिखेगा।',
+    },
+  ),
+  intro(
     'camera-sync',
     {
       en: 'Move one map and watch the other follow in sync.',

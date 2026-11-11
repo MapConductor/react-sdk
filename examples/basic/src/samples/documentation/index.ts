@@ -14,6 +14,7 @@ import mapDesign from './pages/map-design';
 import flyTo from './pages/fly-to';
 import tilt from './pages/tilt';
 import visibleRegion from './pages/visible-region';
+import projectedCoordinates from './pages/projected-coordinates';
 import cameraSync from './pages/camera-sync';
 import marker from './pages/marker';
 import markerLabelPosition from './pages/marker-label-position';
@@ -56,6 +57,7 @@ const DOCUMENTATION: Record<string, SamplePageDoc> = {
   'fly-to': flyTo,
   tilt,
   'visible-region': visibleRegion,
+  'projected-coordinates': projectedCoordinates,
   'camera-sync': cameraSync,
   marker,
   'marker-label-position': markerLabelPosition,
