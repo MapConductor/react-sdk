@@ -28,8 +28,8 @@ let dropCount = 0;
  * タップした地点（赤）と、その投影座標を緯度経度へ戻した地点（青・小）に落とすマーカー。
  *
  * 投影と逆投影が合っていれば、青は赤のピン先に重なる。タップのたびに新しい id に
- * するので、Drop がそのつど再生される。同じ地点なら後から足した青が手前に描かれる。
- * 青を小さくするのは `scale` ではなく `iconSize` で行う（android / ios の同ページと同じ）。
+ * するので、Drop がそのつど再生される。青は zIndex 1 にして、赤より手前に描く。
+ * 青は `iconSize` で小さくしている（android / ios の同ページと同じ）。
  */
 function dropMarkers(tapped: GeoPoint, holder: Holder | null): MarkerState[] {
   dropCount += 1;
@@ -49,6 +49,7 @@ function dropMarkers(tapped: GeoPoint, holder: Holder | null): MarkerState[] {
       position: back,
       icon: new ColorDefaultIcon({ fillColor: '#1e88e5', label: 'P', iconSize: 28 }),
       animation: MarkerAnimation.Drop,
+      zIndex: 1,
     }));
   }
   return markers;
