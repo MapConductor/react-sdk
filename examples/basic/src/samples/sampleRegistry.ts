@@ -25,6 +25,7 @@ export const SAMPLE_PAGES: SamplePageDefinition[] = [
   { id: 'tilt', label: { en: 'Tilt', ja: '傾き', 'es-419': 'Inclinación', de: 'Neigung', th: 'การเอียง', hi: 'झुकाव' }, group: 'Map', unavailableProviders: ['google-maps', 'mapkit'] },
   { id: 'ui-settings', label: { en: 'UI Settings', ja: 'UI設定', 'es-419': 'Ajustes de interfaz', de: 'UI-Einstellungen', th: 'การตั้งค่า UI', hi: 'UI सेटिंग' }, group: 'Map' },
   { id: 'visible-region', label: { en: 'Visible Region', ja: '表示領域', 'es-419': 'Región visible', de: 'Sichtbarer Bereich', th: 'พื้นที่ที่มองเห็น', hi: 'दृश्य क्षेत्र' }, group: 'Map' },
+  { id: 'projected-coordinates', label: { en: 'Projected Coordinates', ja: '投影座標', 'es-419': 'Coordenadas proyectadas', de: 'Projizierte Koordinaten', th: 'พิกัดที่ฉายแล้ว', hi: 'प्रक्षेपित निर्देशांक' }, group: 'Map' },
   { id: 'camera-sync', label: { en: 'Camera Sync', ja: 'カメラ同期', 'es-419': 'Sincronización de cámara', de: 'Kamerasynchronisation', th: 'การซิงก์กล้อง', hi: 'कैमरा सिंक' }, group: 'Map', showProviderSelector: false },
   { id: 'marker', label: { en: 'Marker Icons', ja: 'マーカーアイコン', 'es-419': 'Iconos de marcadores', de: 'Marker-Icons', th: 'ไอคอนมาร์กเกอร์', hi: 'मार्कर आइकन' }, group: 'Marker' },
   { id: 'marker-label-position', label: { en: 'Marker Label Position', ja: 'マーカーラベルの位置' }, group: 'Marker' },
