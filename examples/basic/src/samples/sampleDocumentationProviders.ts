@@ -134,12 +134,11 @@ const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
     design: 'HereMapDesign.NormalDay',
     extraSetup: HERE_PLATFORM_SETUP,
     prerequisites: `// Before mounting App, add these tags to index.html:
-// <script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"></script>
-// <script src="https://js.api.here.com/v3/3.1/mapsjs-core-legacy.js"></script>
-// <script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"></script>
-// <script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js"></script>
-// <script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js"></script>
-// <link rel="stylesheet" href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />`,
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-core.js"></script>
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-service.js"></script>
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-ui.js"></script>
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-mapevents.js"></script>
+// <link rel="stylesheet" href="https://js.api.here.com/v3/3.2/mapsjs-ui.css" />`,
     import: { source: '@mapconductor/react-for-here', values: ['HereMapDesign', 'HereMapView2D', 'useHereViewState'] },
   },
   mapkit: {
