@@ -50,7 +50,7 @@ jobs:
 
       # Trusted publishing needs npm 11.5.1 or later; Node 22 ships npm 10.
       - name: Update npm
-        run: npm install -g npm@^11.5.1
+        run: npm install -g npm@^12.2.2
 
       # Internal packages may not exist in the npm registry yet. Normalize
       # their dependency specs temporarily so npm links every dependency from
