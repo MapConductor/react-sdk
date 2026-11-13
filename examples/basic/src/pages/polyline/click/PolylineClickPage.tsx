@@ -12,10 +12,12 @@ import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 35.548852, lng: 139.784086, zoom: 4 };
 
 export function PolylineClickPage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [clickMarkers, setClickMarkers] = useState<MarkerState[]>([]);
   // The Android polyline-click sample draws no waypoint markers, so neither do
@@ -52,7 +54,8 @@ export function PolylineClickPage() {
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polyline state={polyline} />
       <Polyline state={straightPolyline} />
-      <Markers states={clickMarkers} />
+      <Markers states={clickMarkers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel title={t({ en: 'Description', ja: '説明', 'es-419': 'Descripción', de: 'Beschreibung', th: 'คำอธิบาย', hi: 'विवरण' })}>
         <p className="control-panel-note">
           {t(

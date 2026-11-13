@@ -1,3 +1,4 @@
+import { CircleTilingOptions, PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { LeafletMapView, type LeafletMapViewStateInterface } from '@mapconductor/react-for-leaflet';
 import '@mapconductor/react-for-leaflet/style.css';
@@ -13,6 +14,8 @@ export default function LeafletSingletonView({ state, content }: {
       cameraRestriction={content?.cameraRestriction}
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
+      polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
+      circleTilingOptions={content?.circleTilingOptions ?? CircleTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

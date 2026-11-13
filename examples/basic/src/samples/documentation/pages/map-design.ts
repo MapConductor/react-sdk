@@ -1,29 +1,30 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
-  code: `const handleDesignChange = (designId: string) => {
-  const option = mapDesignOptions.find(item => item.design.id === designId);
+  code: `<select
+  value={selectedDesignId}
+  onChange={event => handleDesignChange(event.target.value)}
+>
+  {mapDesignOptions.map(option => (
+    <option key={String(option.design.id)} value={String(option.design.id)}>
+      {option.label}
+    </option>
+  ))}
+</select>
+<MapViewContainer state={mapViewState} />`,
+  state: `const mapDesignOptions = Object.entries(ProviderDesign)
+  .filter((entry): entry is [string, typeof mapViewState.mapDesignType] =>
+    typeof entry[1] === 'object' && entry[1] !== null && 'id' in entry[1])
+  .map(([label, design]) => ({ label, design }));
+const [selectedDesignId, setSelectedDesignId] = useState(
+  String(mapViewState.mapDesignType.id),
+);
+const handleDesignChange = (designId: string) => {
+  const option = mapDesignOptions.find(item => String(item.design.id) === designId);
   if (!option) return;
   mapViewState.mapDesignType = option.design;
   setSelectedDesignId(String(option.design.id));
-};
-
-<MapViewContainer state={mapViewState}>
-  <select
-    value={selectedDesignId}
-    onChange={event => handleDesignChange(event.target.value)}
-  >
-    {mapDesignOptions.map(option => (
-      <option key={String(option.design.id)} value={String(option.design.id)}>
-        {option.label}
-      </option>
-    ))}
-  </select>
-</MapViewContainer>`,
-  state: `const mapDesignOptions = providerDesignOptions;
-const [selectedDesignId, setSelectedDesignId] = useState(
-  String(mapViewState.mapDesignType.id),
-);`,
+};`,
   explanation: {
     en: [
       'Change the abstract map design on the view state, and let each provider resolve it to its corresponding native style.',

@@ -1,4 +1,4 @@
-import type { CameraRestriction, GeoPoint, MapCameraPosition, MapViewStyle } from '@mapconductor/js-sdk-core';
+import type { CameraRestriction, GeoPoint, MapCameraPosition, MapViewStyle, PolylineTilingOptions, CircleTilingOptions } from '@mapconductor/js-sdk-core';
 import type { ReactNode } from 'react';
 
 export interface SingletonMapContent {
@@ -28,4 +28,15 @@ export interface SingletonMapContent {
    */
   mapStyle?: MapViewStyle | null;
   onStyleDiagnostics?: (diagnostics: readonly string[]) => void;
+  /**
+   * ページが指定するポリラインのタイル化の条件。共有インスタンスなので、ページを離れたら
+   * 既定（`PolylineTilingOptions.Default`）に戻す（各ビューが `?? Default` で渡す）。
+   * 次にポリラインを渡したときから効く。
+   */
+  polylineTilingOptions?: PolylineTilingOptions;
+  /**
+   * ページが指定する円のタイル化の条件。ポリラインと同じく、ページを離れたら既定
+   * （`CircleTilingOptions.Default`）に戻り、次に円を渡したときから効く。
+   */
+  circleTilingOptions?: CircleTilingOptions;
 }

@@ -1,3 +1,4 @@
+import antennaHorizons from './pages/antenna-horizons';
 import type { SupportedLanguage } from '../sampleRegistry';
 import {
   PROVIDER_IMPORTS,
@@ -13,6 +14,7 @@ import mapDesign from './pages/map-design';
 import flyTo from './pages/fly-to';
 import tilt from './pages/tilt';
 import visibleRegion from './pages/visible-region';
+import projectedCoordinates from './pages/projected-coordinates';
 import cameraSync from './pages/camera-sync';
 import marker from './pages/marker';
 import markerLabelPosition from './pages/marker-label-position';
@@ -38,17 +40,24 @@ import geojsonLayer from './pages/geojson-layer';
 import kmlLayer from './pages/kml-layer';
 import heatmapLayer from './pages/heatmap-layer';
 import threejsObject from './pages/threejs-object';
+import fitBounds from './pages/fit-bounds';
+import cameraRestriction from './pages/camera-restriction';
+import uiSettings from './pages/ui-settings';
+import streetTree from './pages/street-tree';
+import styleAdjustments from './pages/style-adjustments';
 
 export type { SamplePageDoc } from './types';
 
 /** Every sample page's documentation, keyed by its route id. */
 const DOCUMENTATION: Record<string, SamplePageDoc> = {
+  'antenna-horizons': antennaHorizons,
   'hello-map': helloMap,
   map,
   'map-design': mapDesign,
   'fly-to': flyTo,
   tilt,
   'visible-region': visibleRegion,
+  'projected-coordinates': projectedCoordinates,
   'camera-sync': cameraSync,
   marker,
   'marker-label-position': markerLabelPosition,
@@ -74,6 +83,11 @@ const DOCUMENTATION: Record<string, SamplePageDoc> = {
   'kml-layer': kmlLayer,
   'heatmap-layer': heatmapLayer,
   'threejs-object': threejsObject,
+  'fit-bounds': fitBounds,
+  'camera-restriction': cameraRestriction,
+  'ui-settings': uiSettings,
+  'street-tree': streetTree,
+  'style-adjustments': styleAdjustments,
 };
 
 const FALLBACK: SamplePageDoc = {
@@ -129,6 +143,7 @@ const SECTION_COMMENTS: Record<SupportedLanguage, {
 
 function adaptProviderView(code: string, provider: ProviderCode): string {
   return code
+    .split('ProviderDesign').join(provider.designClass)
     .split('<MapViewContainer').join(`<${provider.component}${provider.openingProps}`)
     .split('</MapViewContainer>').join(`</${provider.component}>`);
 }
@@ -149,7 +164,10 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
     values: [
       'ColorDefaultIcon',
       'DefaultMarkerIcon',
+      'ImageIcon',
+      'MapUISettings',
       'MarkerAnimation',
+      'CircleTilingOptions',
       'MarkerTilingOptions',
       'PolygonManager',
       'RasterLayerSource',
@@ -178,6 +196,7 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   {
     source: '@mapconductor/js-sdk-react',
     values: [
+      'Circles',
       'Circle',
       'GroundImage',
       'InfoBubble',
@@ -195,8 +214,16 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   ...PROVIDER_IMPORTS,
   {
     source: '@mapconductor/react-geojson',
-    values: ['GeoJSONLayer', 'GeoJSONLayerState', 'colorArgb'],
+    values: ['GeoJSONLayer', 'GeoJSONLayerState', 'GeoJSONParser', 'colorArgb'],
     types: ['GeoJSONFeatureData'],
+  },
+  {
+    source: '@mapconductor/react-vectortile',
+    values: ['VectorTileLayer'],
+  },
+  {
+    source: '@mapconductor/js-vectorstyle',
+    values: ['buildStyleRules', 'LayerRole'],
   },
   {
     source: '@mapconductor/react-kml',
@@ -210,11 +237,14 @@ const IMPORT_DEFINITIONS: readonly ImportDefinition[] = [
   {
     source: '@mapconductor/react-marker-clustering',
     values: ['MarkerClusterGroup'],
+    types: ['MarkerCluster'],
   },
 ];
 
 function usesIdentifier(code: string, identifier: string): boolean {
-  return new RegExp(`\\b${identifier}\\b`).test(code);
+  // Names in comments and data (e.g. GeoJSON's type: 'Polygon') are not imports.
+  const source = code.replace(/\/\*[\s\S]*?\*\/|\/\/[^\n]*|'(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*"|`(?:\\.|[^`\\])*`/g, '');
+  return new RegExp(`\\b${identifier}\\b`).test(source);
 }
 
 function formatImport(definition: ImportDefinition, code: string): string | null {
@@ -238,6 +268,13 @@ function importCode(code: string): string {
   if (usesIdentifier(code, 'THREE')) {
     imports.splice(1, 0, "import * as THREE from 'three';");
   }
+  for (const definition of PROVIDER_IMPORTS) {
+    if (['maplibre', 'mapbox', 'leaflet', 'openlayers', 'maptiler', 'azuremaps', 'cesium']
+      .some(name => definition.source === `@mapconductor/react-for-${name}`)
+      && definition.values.some(name => usesIdentifier(code, name))) {
+      imports.push(`import '${definition.source}/style.css';`);
+    }
+  }
   return imports.join('\n');
 }
 
@@ -247,20 +284,25 @@ export function getSampleDocumentation(
   language: SupportedLanguage = 'en',
 ): SamplePageDoc {
   const documentation = DOCUMENTATION[page ?? ''] ?? FALLBACK;
-  const provider = providerCode(providerName);
+  const provider = providerCode(providerName, documentation.camera);
   const providerSetup = page === 'camera-sync'
-    ? initialCameraCode()
+    ? initialCameraCode(documentation.camera)
     : provider.stateSetup;
   const comments = SECTION_COMMENTS[language];
   const stateSection = documentation.state
-    ? [`// (2) ${comments.state}`, documentation.state].join('\n')
+    ? [`// (2) ${comments.state}`, adaptProviderView(documentation.state, provider)].join('\n')
     : '';
-  const mainCode = [
+  const body = [
     `// (1) ${comments.map}`,
     providerSetup,
     stateSection,
     `// (${documentation.state ? 3 : 2}) ${comments.render}`,
-    adaptProviderView(documentation.code, provider),
+    `return (\n  <div style={{ height: 500, position: 'relative', display: 'flex', flexDirection: 'column' }}>\n${adaptProviderView(documentation.code, provider).split('\n').map(line => `    ${line}`).join('\n')}\n  </div>\n);`,
+  ].filter(Boolean).join('\n\n');
+  const mainCode = [
+    page === 'camera-sync' ? undefined : provider.prerequisites,
+    documentation.helpers,
+    `export default function App() {\n${body.split('\n').map(line => line ? `  ${line}` : '').join('\n')}\n}`,
   ].filter(Boolean).join('\n\n');
   return {
     ...documentation,

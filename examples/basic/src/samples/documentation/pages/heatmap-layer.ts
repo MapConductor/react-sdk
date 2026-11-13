@@ -6,47 +6,40 @@ const doc: SamplePageDoc = {
     <HeatmapPoints states={heatmapPoints} />
   </HeatmapOverlay>
 </MapViewContainer>`,
-  state: `const [heatmapPoints, setHeatmapPoints] = useState<HeatmapPointState[]>([]);
-useEffect(() => {
-  fetch('/postoffice/postoffices.json')
-    .then(response => response.json() as Promise<[number, number][]>)
-    .then(data => setHeatmapPoints(data.map(([latitude, longitude], index) =>
-      new HeatmapPointState({
-        id: \`post-office-\${index}\`,
-        position: createGeoPoint({ latitude, longitude }),
-      }),
-    )));
-}, []);`,
+  state: `// Inline points work without the example app's public data files.
+const heatmapPoints = useMemo(() => Array.from({ length: 100 }, (_, index) =>
+  new HeatmapPointState({
+    id: \`point-\${index}\`,
+    position: createGeoPoint({
+      latitude: 35.68 + Math.sin(index * 2.4) * (index % 10) * 0.001,
+      longitude: 139.77 + Math.cos(index * 2.4) * (index % 10) * 0.001,
+    }),
+  }),
+), []);`,
   explanation: {
-    en: [
-      'Compose weighted geographic points inside the heatmap extension overlay.',
-      'A useEffect fetches postoffices.json and maps each coordinate into a HeatmapPointState kept in React state.',
-      'The <HeatmapPoints> inside <HeatmapOverlay> composes the whole set at once, and the extension renders the density map on any provider.',
+    'en': [
+      'HeatmapOverlay renders the density of geographic points.',
+      'useMemo creates 100 sample HeatmapPointState objects without an external file. HeatmapPoints submits them together to the overlay.',
     ],
-    ja: [
-      '重みを持つ地理座標の点群を、ヒートマップ拡張オーバーレイ内で一括構成します。',
-      'useEffect が postoffices.json を取得し、各座標を HeatmapPointState へ変換して React の state に保持します。',
-      '<HeatmapOverlay> 内の <HeatmapPoints> が点群をまとめて構成し、拡張がどのプロバイダーでも密度マップを描画します。',
+    'ja': [
+      'HeatmapOverlay は地理座標の点群を密度マップとして描画します。',
+      'この短い例は外部ファイルを使わず、useMemo で説明用の HeatmapPointState を100件生成します。HeatmapPoints が点群をまとめてオーバーレイへ渡します。',
     ],
     'es-419': [
-      'Compone puntos geográficos ponderados dentro de la superposición de la extensión de mapa de calor.',
-      'Un useEffect obtiene postoffices.json y convierte cada coordenada en un HeatmapPointState guardado en el estado de React.',
-      'El <HeatmapPoints> dentro de <HeatmapOverlay> compone todo el conjunto de una vez, y la extensión dibuja el mapa de densidad en cualquier proveedor.',
+      'HeatmapOverlay dibuja la densidad de puntos geográficos.',
+      'useMemo crea 100 objetos HeatmapPointState de ejemplo sin archivos externos. HeatmapPoints los envía juntos a la capa.',
     ],
-    de: [
-      'Gewichtete geografische Punkte im Heatmap-Erweiterungs-Overlay zusammensetzen.',
-      'Ein useEffect holt postoffices.json und bildet jede Koordinate auf einen HeatmapPointState im React-State ab.',
-      'Das <HeatmapPoints> innerhalb von <HeatmapOverlay> setzt den ganzen Satz auf einmal zusammen, und die Erweiterung zeichnet die Dichtekarte bei jedem Anbieter.',
+    'de': [
+      'HeatmapOverlay zeichnet die Dichte geografischer Punkte.',
+      'useMemo erzeugt 100 HeatmapPointState-Beispielpunkte ohne externe Datei. HeatmapPoints übergibt sie gemeinsam an das Overlay.',
     ],
-    th: [
-      'ประกอบจุดภูมิศาสตร์แบบถ่วงน้ำหนักไว้ในโอเวอร์เลย์ส่วนขยายฮีตแมป',
-      'useEffect ดึง postoffices.json แล้วแปลงแต่ละพิกัดเป็น HeatmapPointState ที่เก็บไว้ในสถานะของ React',
-      '<HeatmapPoints> ภายใน <HeatmapOverlay> ประกอบชุดข้อมูลทั้งหมดในคราวเดียว และส่วนขยายจะเรนเดอร์แผนที่ความหนาแน่นได้บนผู้ให้บริการทุกเจ้า',
+    'th': [
+      'HeatmapOverlay แสดงความหนาแน่นของจุดภูมิศาสตร์',
+      'useMemo สร้าง HeatmapPointState ตัวอย่าง 100 จุดโดยไม่ใช้ไฟล์ภายนอก และ HeatmapPoints ส่งจุดทั้งหมดให้โอเวอร์เลย์พร้อมกัน',
     ],
-    hi: [
-      'भारित भौगोलिक बिंदुओं को हीटमैप एक्सटेंशन के ओवरले के भीतर जोड़ें।',
-      'एक useEffect postoffices.json लाता है और हर निर्देशांक को React स्टेट में रखे HeatmapPointState में बदल देता है।',
-      '<HeatmapOverlay> के भीतर का <HeatmapPoints> पूरा सेट एक साथ जोड़ता है, और एक्सटेंशन घनत्व का मैप किसी भी प्रोवाइडर पर रेंडर कर देता है।',
+    'hi': [
+      'HeatmapOverlay भौगोलिक बिंदुओं का घनत्व दिखाता है।',
+      'useMemo बाहरी फ़ाइल के बिना 100 उदाहरण HeatmapPointState बनाता है। HeatmapPoints उन्हें एक साथ ओवरले को देता है।',
     ],
   },
 };

@@ -12,6 +12,7 @@ import {
 import { CircleIcon, FlagIcon, PhotoCardPinIcon, RightTailInfoBubbleIcon, RoundInfoBubbleIcon, RoundedSquarePinIcon, TeardropPinIcon, ThumbnailPinIcon } from '@mapconductor/react-icons';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 0.014, lng: 0.008, zoom: 15 };
 
@@ -68,7 +69,7 @@ interface MarkerDefinition {
 }
 
 export function MarkerIconsPage() {
-  const weatherImage = useLoadedImage(WEATHER_ICON_URL);
+  const loading = useLoadingOverlay();
   const humanImage = useLoadedImage(HUMAN_ICON_URL);
   const launcherImage = useLoadedImage(LAUNCHER_ICON_URL);
   const weatherPngUrl = useRasterizedDataUrl(WEATHER_ICON_URL);
@@ -282,19 +283,18 @@ export function MarkerIconsPage() {
       });
     }
 
-    if (weatherImage) {
-      definitions.splice(9, 0, {
-        id: 'image-weather',
-        lat: 0.01,
-        lng: 0.009,
-        icon: new ImageIcon(weatherImage, { debug: true, anchor: { x: 0.5, y: 1 } }),
-        extra: `ImageIcon(
+    // ImageIcon には画像の URL をそのまま渡せる。読み終えたら SDK が描き直す。
+    definitions.splice(9, 0, {
+      id: 'image-weather',
+      lat: 0.01,
+      lng: 0.009,
+      icon: new ImageIcon(WEATHER_ICON_URL, { debug: true, anchor: { x: 0.5, y: 1 } }),
+      extra: `ImageIcon(
   drawable = icon,
   debug = true,
   anchor = PointF(0.5, 1.0),
 )`,
-      });
-    }
+    });
 
     if (labelImage) {
       definitions.splice(10, 0, {
@@ -310,7 +310,7 @@ export function MarkerIconsPage() {
     }
 
     return definitions;
-  }, [defaultMarkerPngUrl, humanImage, labelImage, launcherImage, thumbnailPngUrl, weatherImage, weatherPngUrl]);
+  }, [defaultMarkerPngUrl, humanImage, labelImage, launcherImage, thumbnailPngUrl, weatherPngUrl]);
 
   const markers = useMemo(
     () =>
@@ -328,7 +328,8 @@ export function MarkerIconsPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelected(null)}>
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {typeof selected?.extra === 'string' && (
         <InfoBubble marker={selected} bubbleColor="#ffffff">
           <pre className="marker-icon-info-bubble">{selected.extra}</pre>

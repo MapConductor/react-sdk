@@ -52,8 +52,14 @@ dist/*
 *.mjs
 # 雛形の適合テストはバージョン管理する（外部の作者がコピーする出発点なので）。
 !react-for-template/test/*.mjs
+# サンプルの単体テスト（node --test）。
+!examples/basic/test/*.mjs
 !examples/basic/server.mjs
 !examples/basic/scripts/generate-static.mjs
+!examples/basic/scripts/check-snippets.mjs
+!examples/basic/scripts/snippet-interactions.mjs
+!examples/basic/scripts/vite-maplibre-registry.mjs
+!examples/basic/scripts/vite-maplibre-registry.test.mjs
 # scripts/ はソースしか置かないので丸ごと追跡する。1 本ずつ negation を足す運用だと
 # 足し忘れたスクリプトが `git add -A` で無言のまま無視され、CI のチェックアウトにだけ
 # 存在しない状態になる（unlink-local-workspaces.mjs で実際に踏んだ）。

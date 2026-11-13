@@ -7,6 +7,9 @@ buildscript {
     // メタデータ前方互換があるため 2.3 で 2.4.0 メタデータを読める。RN 既定 (2.1.x) のままだと
     // "Module was compiled with an incompatible version of Kotlin" で落ちる。
     kotlinVersion = '2.3.20'
+    // NDK は GitHub の ubuntu ランナーに入っている版に合わせる。RN 既定の 27.0.12077973 は
+    // ランナーに無く、CI が毎回ダウンロードしていた（途中で通信が切れて落ちたことがある）。
+    ndkVersion = '27.1.12297006'
   }
   repositories {
     google()
@@ -16,6 +19,21 @@ buildscript {
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+
+    // AGP などビルド用プラグインが引き込む古い版に既知の脆弱性がある（Dependabot）。
+    // ビルド時にだけ使われアプリには入らないが、修正版へ引き上げておく。
+    constraints {
+      ['netty-codec', 'netty-codec-http', 'netty-codec-http2', 'netty-common', 'netty-handler', 'netty-handler-proxy'].each {
+        classpath("io.netty:$it:4.1.140.Final")
+      }
+      classpath('org.bouncycastle:bcprov-jdk18on:1.87')
+      classpath('org.bouncycastle:bcpkix-jdk18on:1.87')
+      classpath('org.bouncycastle:bcutil-jdk18on:1.87')
+      classpath('org.apache.commons:commons-compress:1.28.0')
+      classpath('org.bitbucket.b_c:jose4j:0.9.6')
+      classpath('org.jdom:jdom2:2.0.6.1')
+      classpath('com.google.guava:guava:33.7.2-jre')
+    }
   }
 }
 

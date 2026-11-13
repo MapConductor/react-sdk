@@ -33,6 +33,16 @@ test('every overlay kind is reachable from the Capable facade and the cascade', 
     MapDriverConformance.checkOverlaySlots(controller.overlayControllers);
 });
 
+/**
+ * `clearOverlays()` は自分の 6 つだけでなく、拡張が登録したマーカーのコントローラ
+ * （クラスタリングの `StrategyMarkerController` など）も clear すること。
+ * `clearOverlayControllers()` を通さないと、ここで落ちる。
+ */
+test('clearOverlays() reaches the marker controllers extensions register', async () => {
+    const controller = new TemplateMapViewController(new TemplateMap());
+    await MapDriverConformance.checkClearOverlaysReachesExtensions(controller);
+});
+
 test('zoom converter round-trips, is monotonic and clamps', () => {
     const controller = new TemplateMapViewController(new TemplateMap());
     MapDriverConformance.checkZoomConverter(controller.zoomConverter);
@@ -82,14 +92,14 @@ test('camera round-trips and carries a visible region', async () => {
     const controller = new TemplateMapViewController(new TemplateMap());
     await controller.moveCamera({
         position: createGeoPoint({ latitude: 35.681, longitude: 139.767 }),
-        center: createGeoPoint({ latitude: 35.681, longitude: 139.767 }),
         zoom: 14.5,
         bearing: 30,
         tilt: 45,
     });
 
     const read = controller.readNativeCamera();
-    assert.ok(Math.abs(read.center.latitude - 35.681) < 1e-9);
+    assert.ok(Math.abs(read.position.latitude - 35.681) < 1e-9);
+    assert.ok(Math.abs(read.position.longitude - 139.767) < 1e-9);
     assert.ok(Math.abs(read.zoom - 14.5) < 1e-9);
     assert.equal(read.bearing, 30);
     assert.equal(read.tilt, 45);

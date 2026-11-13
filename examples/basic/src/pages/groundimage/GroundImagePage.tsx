@@ -14,11 +14,13 @@ import { ControlPanel, SliderControl } from '../../components/ControlPanel';
 import { Toast, useToast } from '../../components/Toast';
 import { MapViewContainer } from '../../MapViewContainer';
 import { useSampleI18n } from '../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: -26.479235, lng: 31.306239, zoom: 15 };
 const GROUND_IMAGE_URL = `${import.meta.env.BASE_URL}university_of_eswatini.png`;
 
 export function GroundImagePage() { 
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const { messages, showToast, dismissToast } = useToast();
   const [southWest, setSouthWest] = useState(createGeoPoint({ latitude: -26.484901389754125, longitude: 31.2995982170105 }));
@@ -110,7 +112,8 @@ export function GroundImagePage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <GroundImage state={image} />
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <Polyline state={polylineState} />
       <ControlPanel title={t(
         {

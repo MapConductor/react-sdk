@@ -1,3 +1,4 @@
+import { CircleTilingOptions, PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { MapKitMapView, type MapKitViewStateInterface } from '@mapconductor/react-for-mapkit';
 import type { SingletonMapContent } from './types';
@@ -12,6 +13,8 @@ export default function MapKitSingletonView({ state, content }: {
       cameraRestriction={content?.cameraRestriction}
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
+      polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
+      circleTilingOptions={content?.circleTilingOptions ?? CircleTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

@@ -263,17 +263,35 @@
     width: 100%;
   }
 
+  /* Two maps share a phone screen: keep only the selector and the numbers,
+     so most of each map stays in view. */
   .camera-sync-provider {
-    width: min(86%, 300px);
+    top: 6px;
+    left: 6px;
+    width: auto;
+    max-width: calc(100% - 12px);
+    padding: 3px;
+    gap: 0;
+    font-size: 0;
+  }
+
+  .camera-sync-provider select {
+    min-height: 28px;
+    font-size: 0.8rem;
   }
 
   .camera-sync-info {
-    max-width: calc(100% - 20px);
+    left: 6px;
+    bottom: 6px;
+    min-width: 0;
+    max-width: calc(100% - 12px);
+    padding: 4px 7px;
     grid-template-columns: repeat(2, minmax(0, auto));
     column-gap: 10px;
+    font-size: 0.68rem;
   }
 
   .camera-sync-info strong {
-    grid-column: 1 / -1;
+    display: none;
   }
 }

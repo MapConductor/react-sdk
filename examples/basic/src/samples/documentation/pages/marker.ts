@@ -5,11 +5,18 @@ const doc: SamplePageDoc = {
   <Markers states={markers} />
   {selected && <InfoBubble marker={selected}>{selected.extra as string}</InfoBubble>}
 </MapViewContainer>`,
-  state: `const [selected, setSelected] = useState<MarkerState | null>(null);
+  state: `const markerData = useMemo(() => [
+  { id: 'red', label: 'Red pin', position: { latitude: 35.6812, longitude: 139.7671 },
+    icon: new DefaultMarkerIcon({ fillColor: '#ef4444' }) },
+  { id: 'blue', label: 'Blue pin', position: { latitude: 35.6862, longitude: 139.7771 },
+    icon: new ColorDefaultIcon({ fillColor: '#2563eb', label: 'Tokyo' }) },
+], []);
+const [selected, setSelected] = useState<MarkerState | null>(null);
 const markers = useMemo(() => markerData.map(item => createMarkerState({
   id: item.id,
   position: createGeoPoint(item.position),
   icon: item.icon,
+  extra: item.label,
   onClick: markerState => setSelected(markerState),
 })), [markerData]);`,
   explanation: {

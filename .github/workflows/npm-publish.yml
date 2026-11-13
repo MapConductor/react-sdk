@@ -44,13 +44,13 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v6
         with:
-          node-version: 22
+          node-version: 24
           registry-url: https://registry.npmjs.org
           # cache: npm
 
       # Trusted publishing needs npm 11.5.1 or later; Node 22 ships npm 10.
       - name: Update npm
-        run: npm install -g npm@^11.5.1
+        run: npm install -g npm@^12.2.2
 
       # Internal packages may not exist in the npm registry yet. Normalize
       # their dependency specs temporarily so npm links every dependency from
@@ -119,12 +119,19 @@ jobs:
             echo "::group::${package}"
 
             # Skip previewing when the local version is already on the registry.
-            local_version="$(npm pkg get version --workspace "${package}" | node -e '
+            local_version="$(npm pkg get version --workspace "${package}" --json | node -e '
               let input = "";
               process.stdin.on("data", chunk => input += chunk);
               process.stdin.on("end", () => {
+                // npm 11 prints {"<name>": "<version>"}; npm 12 needs --json and
+                // prints {"<name>": {"version": "<version>"}}. Accept both.
                 const parsed = JSON.parse(input);
-                const version = typeof parsed === "string" ? parsed : Object.values(parsed)[0];
+                let version = typeof parsed === "string" ? parsed : Object.values(parsed)[0];
+                if (version && typeof version === "object") version = version.version;
+                if (typeof version !== "string" || !version) {
+                  console.error(`Could not read the version from: ${input}`);
+                  process.exit(1);
+                }
                 process.stdout.write(version);
               });
             ')"
@@ -164,12 +171,19 @@ jobs:
             echo "::group::${package}"
 
             # Skip publishing when the local version is already on the registry.
-            local_version="$(npm pkg get version --workspace "${package}" | node -e '
+            local_version="$(npm pkg get version --workspace "${package}" --json | node -e '
               let input = "";
               process.stdin.on("data", chunk => input += chunk);
               process.stdin.on("end", () => {
+                // npm 11 prints {"<name>": "<version>"}; npm 12 needs --json and
+                // prints {"<name>": {"version": "<version>"}}. Accept both.
                 const parsed = JSON.parse(input);
-                const version = typeof parsed === "string" ? parsed : Object.values(parsed)[0];
+                let version = typeof parsed === "string" ? parsed : Object.values(parsed)[0];
+                if (version && typeof version === "object") version = version.version;
+                if (typeof version !== "string" || !version) {
+                  console.error(`Could not read the version from: ${input}`);
+                  process.exit(1);
+                }
                 process.stdout.write(version);
               });
             ')"

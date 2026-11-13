@@ -1,6 +1,14 @@
 import type { SamplePageDoc } from '../types';
 
 const doc: SamplePageDoc = {
+  helpers: `function VisibleRegionValues({ region }: { region: VisibleRegion | null }) {
+  if (!region) return <p>Move the map to read its visible region.</p>;
+  return <pre>{JSON.stringify({
+    bounds: region.bounds.toString(),
+    nearLeft: region.nearLeft?.toUrlValue(5), nearRight: region.nearRight?.toUrlValue(5),
+    farLeft: region.farLeft?.toUrlValue(5), farRight: region.farRight?.toUrlValue(5),
+  }, null, 2)}</pre>;
+}`,
   code: `<MapViewContainer
   state={mapViewState}
   onCameraMove={camera => setRegion(camera.visibleRegion)}

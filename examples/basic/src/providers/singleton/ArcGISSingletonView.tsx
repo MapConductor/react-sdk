@@ -1,3 +1,4 @@
+import { CircleTilingOptions, PolylineTilingOptions } from '@mapconductor/js-sdk-core';
 import { Fragment } from 'react';
 import { ArcGISMapView, ArcGISMapView2D, type ArcGISMapViewStateInterface } from '@mapconductor/react-for-arcgis';
 import type { SingletonMapContent } from './types';
@@ -14,6 +15,8 @@ export default function ArcGISSingletonView({ state, content, useSceneView }: {
       cameraRestriction={content?.cameraRestriction}
       mapStyle={content?.mapStyle}
       onStyleDiagnostics={content?.onStyleDiagnostics}
+      polylineTilingOptions={content?.polylineTilingOptions ?? PolylineTilingOptions.Default}
+      circleTilingOptions={content?.circleTilingOptions ?? CircleTilingOptions.Default}
       onMapClick={content?.onMapClick}
       onCameraMoveStart={content?.onCameraMoveStart}
       onCameraMove={content?.onCameraMove}

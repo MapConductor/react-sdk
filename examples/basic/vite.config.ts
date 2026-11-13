@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import mkcert from 'vite-plugin-mkcert';
 import { cpSync, existsSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, resolve } from 'node:path';
+import { isolateMapLibreRegistry } from './scripts/vite-maplibre-registry.mjs';
 
 const cesiumSource = resolve(__dirname, '../../node_modules/cesium/Build/Cesium');
 const basePath = process.env.VITE_BASE_PATH ?? '/';
@@ -92,7 +93,7 @@ export default defineConfig({
   // worker format (iife) cannot code-split. Only the production build trips
   // on this — dev serves module workers natively.
   worker: { format: 'es' },
-  plugins: [react(), cesiumStaticAssets(), mapconductorTileServiceWorker(), ...(useHttps ? [mkcert()] : [])],
+  plugins: [isolateMapLibreRegistry(), react(), cesiumStaticAssets(), mapconductorTileServiceWorker(), ...(useHttps ? [mkcert()] : [])],
   resolve: {
     dedupe: ['react', 'react-dom', '@mapconductor/js-sdk-core'],
   },

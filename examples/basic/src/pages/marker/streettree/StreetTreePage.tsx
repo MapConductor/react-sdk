@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   MarkerTilingOptions,
   type MapDesignTypeInterface,
@@ -13,8 +13,21 @@ import { useSampleI18n } from '../../../samples/i18n';
 import { StreetTreeInfoBubble } from './StreetTreeInfoBubble';
 import { browserStreetTreeDataSource } from './streetTreeData';
 import { useStreetTreeMarkers } from './useStreetTreeMarkers';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
-const INIT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 11 };
+const DEFAULT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 11 };
+
+/**
+ * `?camera=lat,lng,zoom` で開く場所を変えられる。ラベルの付き方を同じ場所で見比べるためのもの
+ * （android-sdk のサンプルの `camera` extra と同じ）。
+ */
+function initialCamera(): { lat: number; lng: number; zoom: number } {
+  if (typeof window === 'undefined') return DEFAULT_CAMERA;
+  const value = new URLSearchParams(window.location.search).get('camera');
+  const [lat, lng, zoom] = (value ?? '').split(',').map(Number);
+  if ([lat, lng, zoom].some(n => !Number.isFinite(n))) return DEFAULT_CAMERA;
+  return { lat, lng, zoom };
+}
 
 const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
   ...MarkerTilingOptions.Default,
@@ -27,11 +40,15 @@ const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
 };
 
 export function StreetTreePage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [selected, setSelected] = useState<MarkerState | null>(null);
   const selectMarker = useCallback((marker: MarkerState) => setSelected(marker), []);
-  const { error, markerStates, trees, species, isLoading } =
-    useStreetTreeMarkers(browserStreetTreeDataSource, selectMarker);
+  const mapState = useRef<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
+  const currentCamera = useCallback(() => mapState.current?.cameraPosition ?? null, []);
+  const { error, markerStates, trees, species, isLoading, relabel } =
+    useStreetTreeMarkers(browserStreetTreeDataSource, selectMarker, currentCamera);
+  const [startCamera] = useState(initialCamera);
 
   /**
    * Swaps in a basemap stripped down to what a tree map needs: land, water,
@@ -45,6 +62,7 @@ export function StreetTreePage() {
    */
   const applyTreeStyle = useCallback(
     (state: MapViewStateInterface<MapDesignTypeInterface<unknown>>) => {
+      mapState.current = state;
       const maplibre = state as unknown as { mapDesignType?: unknown };
       if (!('mapDesignType' in maplibre)) return;
       const design = state.mapDesignType as { styleJsonURL?: string } | undefined;
@@ -67,12 +85,14 @@ export function StreetTreePage() {
 
   return (
     <MapViewContainer
-      initialCamera={INIT_CAMERA}
+      initialCamera={startCamera}
       markerTilingOptions={MARKER_TILING_OPTIONS}
       onMapClick={() => setSelected(null)}
+      onCameraMoveEnd={relabel}
       onStateReady={applyTreeStyle}
     >
-      <Markers states={markerStates} />
+      <Markers states={markerStates} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {selected && <StreetTreeInfoBubble marker={selected} />}
       <ControlPanel
         title={t({

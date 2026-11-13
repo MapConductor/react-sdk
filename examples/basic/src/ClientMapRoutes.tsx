@@ -34,6 +34,7 @@ const CameraRestrictionPage = lazy(() => import('./pages/map/camerarestriction/C
 const TiltPage = lazy(() => import('./pages/map/tilt/TiltPage').then(m => ({ default: m.TiltPage })));
 const UISettingsPage = lazy(() => import('./pages/map/uisettings/UISettingsPage').then(m => ({ default: m.UISettingsPage })));
 const VisibleRegionPage = lazy(() => import('./pages/map/visibleregion/VisibleRegionPage').then(m => ({ default: m.VisibleRegionPage })));
+const ProjectedCoordinatesPage = lazy(() => import('./pages/map/projected/ProjectedCoordinatesPage').then(m => ({ default: m.ProjectedCoordinatesPage })));
 const CameraSyncPage = lazy(() => import('./pages/map/camerasync/CameraSyncPage').then(m => ({ default: m.CameraSyncPage })));
 const MarkerLabelPositionPage = lazy(() => import('./pages/marker/labelposition/MarkerLabelPositionPage').then(m => ({ default: m.MarkerLabelPositionPage })));
 const MarkerAnimationPage = lazy(() => import('./pages/marker/animation/MarkerAnimationPage').then(m => ({ default: m.MarkerAnimationPage })));
@@ -43,6 +44,11 @@ const StreetTreePage = lazy(() => import('./pages/marker/streettree/StreetTreePa
 const PolygonClickPage = lazy(() => import('./pages/polygon/click/PolygonClickPage').then(m => ({ default: m.PolygonClickPage })));
 const PolygonGeodesicPage = lazy(() => import('./pages/polygon/geodesic/PolygonGeodesicPage').then(m => ({ default: m.PolygonGeodesicPage })));
 const PolygonHolePage = lazy(() => import('./pages/polygon/hole/PolygonHolePage').then(m => ({ default: m.PolygonHolePage })));
+const PolygonsPage = lazy(() => import('./pages/polygon/collection/PolygonsPage').then(m => ({ default: m.PolygonsPage })));
+const BostonBuildingsPage = lazy(() => import('./pages/polygon/boston/BostonBuildingsPage').then(m => ({ default: m.BostonBuildingsPage })));
+const BostonRoadsPage = lazy(() => import('./pages/polyline/boston/BostonRoadsPage').then(m => ({ default: m.BostonRoadsPage })));
+const AntennaHorizonsPage = lazy(() => import('./pages/circle/antennas/AntennaHorizonsPage').then(m => ({ default: m.AntennaHorizonsPage })));
+const BostonTreesPage = lazy(() => import('./pages/circle/boston/BostonTreesPage').then(m => ({ default: m.BostonTreesPage })));
 const PolylineClickPage = lazy(() => import('./pages/polyline/click/PolylineClickPage').then(m => ({ default: m.PolylineClickPage })));
 const RasterLayerPage = lazy(() => import('./pages/rasterlayer/RasterLayerPage').then(m => ({ default: m.RasterLayerPage })));
 const VectorTileLayerPage = lazy(() => import('./pages/vectortile/VectorTileLayerPage').then(m => ({ default: m.VectorTileLayerPage })));
@@ -86,6 +92,7 @@ function pageContent(page: string | undefined) {
     case 'tilt': return <TiltPage />;
     case 'ui-settings': return <UISettingsPage />;
     case 'visible-region': return <VisibleRegionPage />;
+    case 'projected-coordinates': return <ProjectedCoordinatesPage />;
     case 'camera-sync': return <CameraSyncPage />;
     case 'marker': return <MarkerIconsPage />;
     case 'marker-label-position': return <MarkerLabelPositionPage />;
@@ -98,6 +105,11 @@ function pageContent(page: string | undefined) {
     case 'polygon-click': return <PolygonClickPage />;
     case 'polygon-geodesic': return <PolygonGeodesicPage />;
     case 'polygon-hole': return <PolygonHolePage />;
+    case 'polygons': return <PolygonsPage />;
+    case 'boston-buildings': return <BostonBuildingsPage />;
+    case 'boston-roads': return <BostonRoadsPage />;
+    case 'antenna-horizons': return <AntennaHorizonsPage />;
+    case 'boston-trees': return <BostonTreesPage />;
     case 'ground-image': return <GroundImagePage />;
     case 'raster-layer': return <RasterLayerPage />;
     case 'vector-tile': return <VectorTileLayerPage />;

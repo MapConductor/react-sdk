@@ -5,11 +5,34 @@ interface ControlPanelProps {
   children: ReactNode;
 }
 
+/**
+ * The options of a sample, over the map.
+ *
+ * The title is a button that folds the panel away. Until someone presses it,
+ * the screen width decides (`auto`, in CSS): open beside a desktop map, folded
+ * to its title on a phone, where an open panel would cover most of the map.
+ * Deciding in CSS keeps the server-rendered page and the first paint the same.
+ * Folding only hides the body, so the controls keep their state.
+ */
 export function ControlPanel({ title, children }: ControlPanelProps) {
+  const [open, setOpen] = useState<boolean | null>(null);
+  const toggle = () => {
+    setOpen(current => {
+      if (current !== null) return !current;
+      // Still `auto`: flip whatever the screen width shows now.
+      return typeof window !== 'undefined' && window.matchMedia('(max-width: 760px)').matches;
+    });
+  };
+  const mode = open === null ? 'auto' : open ? 'open' : 'folded';
   return (
-    <div className="control-panel">
-      <h3 className="control-panel-title">{title}</h3>
-      {children}
+    <div className={`control-panel control-panel-${mode}`}>
+      <button type="button" className="control-panel-header" aria-expanded={open ?? undefined} onClick={toggle}>
+        <h3 className="control-panel-title">{title}</h3>
+        <svg className="control-panel-chevron" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+          <path d="M4 10l4-4 4 4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      <div className="control-panel-body">{children}</div>
     </div>
   );
 }

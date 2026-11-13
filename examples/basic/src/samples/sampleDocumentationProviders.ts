@@ -11,6 +11,8 @@ export interface ProviderCode {
   component: string;
   openingProps: string;
   stateSetup: string;
+  designClass: string;
+  prerequisites?: string;
 }
 
 export interface ProviderImport {
@@ -31,6 +33,8 @@ interface ProviderDefinition {
   hookOptions?: readonly string[];
   /** Extra setup appended after the hook call (e.g. the HERE `platform`). */
   extraSetup?: string;
+  /** Host-page setup that cannot be expressed as a React prop. */
+  prerequisites?: string;
   /** The provider package import used by the snippet. */
   import: ProviderImport;
 }
@@ -41,7 +45,7 @@ const CAMERA_CODE = `const initialCamera = createMapCameraPosition({
 });`;
 
 const HERE_PLATFORM_SETUP = `const platform = useMemo(
-  () => new H.service.Platform({ apikey: import.meta.env.VITE_HERE_API_KEY }),
+  () => new H.service.Platform({ apikey: 'YOUR_HERE_API_KEY' }),
   [],
 );`;
 
@@ -65,14 +69,14 @@ const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
     component: 'MapBoxMapView2D',
     hook: 'useMapboxViewState',
     design: 'MapboxDesign.Streets',
-    hookOptions: ['accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN'],
+    hookOptions: ["accessToken: 'YOUR_MAPBOX_ACCESS_TOKEN'"],
     import: { source: '@mapconductor/react-for-mapbox', values: ['MapboxDesign', 'MapBoxMapView2D', 'useMapboxViewState'] },
   },
   'mapbox-3d': {
     component: 'MapBoxMapView',
     hook: 'useMapboxViewState',
     design: 'MapboxDesign.Streets',
-    hookOptions: ['accessToken: import.meta.env.VITE_MAPBOX_ACCESS_TOKEN'],
+    hookOptions: ["accessToken: 'YOUR_MAPBOX_ACCESS_TOKEN'"],
     import: { source: '@mapconductor/react-for-mapbox', values: ['MapboxDesign', 'MapBoxMapView', 'useMapboxViewState'] },
   },
   leaflet: {
@@ -92,7 +96,7 @@ const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
     openingProps: ' mapId="DEMO_MAP_ID"',
     hook: 'useGoogleMapViewState',
     design: 'GoogleMapDesign.Normal',
-    hookOptions: ['apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY'],
+    hookOptions: ["apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'"],
     import: { source: '@mapconductor/react-for-googlemaps', values: ['GoogleMapDesign', 'GoogleMapView2D', 'useGoogleMapViewState'] },
   },
   'google-maps-3d': {
@@ -100,21 +104,21 @@ const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
     openingProps: ' mapId="DEMO_MAP_ID"',
     hook: 'useGoogleMapViewState',
     design: 'GoogleMapDesign.Normal',
-    hookOptions: ['apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY'],
+    hookOptions: ["apiKey: 'YOUR_GOOGLE_MAPS_API_KEY'"],
     import: { source: '@mapconductor/react-for-googlemaps', values: ['GoogleMapDesign', 'GoogleMapView', 'useGoogleMapViewState'] },
   },
   arcgis: {
     component: 'ArcGISMapView2D',
     hook: 'useArcGISViewState',
     design: 'ArcGISDesign.Streets',
-    hookOptions: ['apiKey: import.meta.env.VITE_ARCGIS_API_KEY'],
+    hookOptions: ["apiKey: 'YOUR_ARCGIS_API_KEY'"],
     import: { source: '@mapconductor/react-for-arcgis', values: ['ArcGISDesign', 'ArcGISMapView2D', 'useArcGISViewState'] },
   },
   'arcgis-3d': {
     component: 'ArcGISMapView',
     hook: 'useArcGISViewState',
     design: 'ArcGISDesign.Streets',
-    hookOptions: ['apiKey: import.meta.env.VITE_ARCGIS_API_KEY'],
+    hookOptions: ["apiKey: 'YOUR_ARCGIS_API_KEY'"],
     import: { source: '@mapconductor/react-for-arcgis', values: ['ArcGISDesign', 'ArcGISMapView', 'useArcGISViewState'] },
   },
   cesium: {
@@ -129,36 +133,70 @@ const PROVIDER_DEFINITIONS: Record<string, ProviderDefinition> = {
     hook: 'useHereViewState',
     design: 'HereMapDesign.NormalDay',
     extraSetup: HERE_PLATFORM_SETUP,
+    prerequisites: `// Before mounting App, add these tags to index.html:
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-core.js"></script>
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-service.js"></script>
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-ui.js"></script>
+// <script src="https://js.api.here.com/v3/3.2/mapsjs-mapevents.js"></script>
+// <link rel="stylesheet" href="https://js.api.here.com/v3/3.2/mapsjs-ui.css" />`,
     import: { source: '@mapconductor/react-for-here', values: ['HereMapDesign', 'HereMapView2D', 'useHereViewState'] },
   },
   mapkit: {
     component: 'MapKitMapView',
     hook: 'useMapKitViewState',
     design: 'MapKitMapDesign.Standard',
-    hookOptions: ['token: import.meta.env.VITE_MAPKIT_TOKEN'],
+    hookOptions: ["token: 'YOUR_MAPKIT_TOKEN'"],
     import: { source: '@mapconductor/react-for-mapkit', values: ['MapKitMapDesign', 'MapKitMapView', 'useMapKitViewState'] },
   },
   azuremaps: {
     component: 'AzureMapsMapView',
     hook: 'useAzureMapsViewState',
     design: 'AzureMapsDesign.Road',
-    // NOTE: the env var carries the spelling used in examples/basic/.env.
-    hookOptions: ['subscriptionKey: import.meta.env.VITE_AZURE_MAPS_SUBSCRIOTION_KEY'],
+    hookOptions: ["subscriptionKey: 'YOUR_AZURE_MAPS_SUBSCRIPTION_KEY'"],
     import: { source: '@mapconductor/react-for-azuremaps', values: ['AzureMapsDesign', 'AzureMapsMapView', 'useAzureMapsViewState'] },
+  },
+  tomtom: {
+    component: 'TomTomMapView2D', hook: 'useTomTomViewState', design: 'TomTomDesign.Standard',
+    hookOptions: ["apiKey: 'YOUR_TOMTOM_API_KEY'"],
+    import: { source: '@mapconductor/react-for-tomtom', values: ['TomTomDesign', 'TomTomMapView2D', 'useTomTomViewState'] },
+  },
+  maptiler: {
+    component: 'MapTilerMapView2D', hook: 'useMapTilerViewState', design: 'MapTilerDesign.Streets',
+    hookOptions: ["apiKey: 'YOUR_MAPTILER_API_KEY'"],
+    import: { source: '@mapconductor/react-for-maptiler', values: ['MapTilerDesign', 'MapTilerMapView2D', 'useMapTilerViewState'] },
+  },
+  longdo: {
+    component: 'LongdoMapView2D', hook: 'useLongdoViewState', design: 'LongdoDesign.Normal',
+    hookOptions: ["apiKey: 'YOUR_LONGDO_API_KEY'"],
+    import: { source: '@mapconductor/react-for-longdo', values: ['LongdoDesign', 'LongdoMapView2D', 'useLongdoViewState'] },
+  },
+  mappls: {
+    component: 'MapplsMapView2D', hook: 'useMapplsViewState', design: 'MapplsDesign.Default',
+    hookOptions: ["apiKey: 'YOUR_MAPPLS_API_KEY'"],
+    import: { source: '@mapconductor/react-for-mappls', values: ['MapplsDesign', 'MapplsMapView2D', 'useMapplsViewState'] },
+  },
+  deckgl: {
+    component: 'DeckGLMapView', hook: 'useDeckGLMapViewState', design: 'DeckGLDesign.Standard',
+    import: { source: '@mapconductor/react-for-deckgl', values: ['DeckGLDesign', 'DeckGLMapView', 'useDeckGLMapViewState'] },
   },
 };
 
+export const DOCUMENTATION_PROVIDERS = Object.keys(PROVIDER_DEFINITIONS);
+
 function definitionFor(provider: string | undefined): ProviderDefinition {
+  if (provider === 'google') provider = 'google-maps';
+  if (provider === 'google-3d') provider = 'google-maps-3d';
   return (provider && PROVIDER_DEFINITIONS[provider]) || PROVIDER_DEFINITIONS[DEFAULT_PROVIDER];
 }
 
 /** The `initialCamera` snippet, shared by every provider and by camera-sync. */
-export function initialCameraCode(): string {
-  return CAMERA_CODE;
+export function initialCameraCode(camera?: { latitude: number; longitude: number; zoom: number }): string {
+  if (!camera) return CAMERA_CODE;
+  return `const initialCamera = createMapCameraPosition({\n  position: createGeoPoint({ latitude: ${camera.latitude}, longitude: ${camera.longitude} }),\n  zoom: ${camera.zoom},\n});`;
 }
 
 /** Resolve a provider id to its snippet component, opening props and state setup. */
-export function providerCode(provider: string | undefined): ProviderCode {
+export function providerCode(provider: string | undefined, camera?: { latitude: number; longitude: number; zoom: number }): ProviderCode {
   const definition = definitionFor(provider);
   const options = [
     ...(definition.hookOptions ?? []),
@@ -169,13 +207,15 @@ export function providerCode(provider: string | undefined): ProviderCode {
     .join('\n');
   const hookCall = `const mapViewState = ${definition.hook}({\n${options}\n});`;
   const stateSetup = [
-    CAMERA_CODE,
+    initialCameraCode(camera),
     definition.extraSetup ? `${hookCall}\n${definition.extraSetup}` : hookCall,
   ].join('\n\n');
   return {
     component: definition.component,
     openingProps: definition.openingProps ?? '',
     stateSetup,
+    designClass: definition.design.split('.')[0],
+    prerequisites: definition.prerequisites,
   };
 }
 

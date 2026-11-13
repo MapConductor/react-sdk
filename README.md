@@ -463,3 +463,19 @@ Apache License 2.0. See [`LICENSE`](./LICENSE).
 - [MapConductor Android SDK](https://github.com/MapConductor/android-sdk)
 - [Google Maps JavaScript API](https://developers.google.com/maps/documentation/javascript)
 - [MapLibre](https://maplibre.org/)
+
+## Bulk circles and raster tiles
+
+Use `<Circles states={circleStates} />` from `@mapconductor/js-sdk-react` to register a collection without one React effect per circle. Each collection removes only its own IDs.
+
+Web map providers accept `circleTilingOptions`. Use `CircleTilingOptions.Disabled` from `@mapconductor/js-sdk-core` to keep native rendering. For large web collections, `Circles` also accepts a reusable iterable, as shown by the nationwide example.
+
+By default, raster tiling starts above 2,000 tileable circles. Large collections keep their drawing geometry in a disk-backed cache. Circle radius remains a ground distance in metres and stroke width remains a screen distance. Clicks and `onAdded` use the original states. `onAdded` indicates that the tile layer was handed to the map.
+
+Circles crossing the antimeridian, reaching Mercator's latitude limit, or having invalid radii stay native. Circle tiles stack above polygons and below polylines. Web rendering also falls back to native when the service worker cannot draw tiles.
+
+## US antenna horizons example
+
+Choose **US Antenna Horizons** in the example sidebar. It bundles 723,800 OpenCellID records (MCC 310–314), with carrier filters and US and Alaska camera presets. Each estimated cell position is drawn as a 500 m geodesic circle. The radius is a display setting and does not model signal coverage.
+
+Cell tower data from [OpenCellID](https://opencellid.org) · [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).

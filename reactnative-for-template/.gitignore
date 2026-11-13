@@ -1,3 +1,6 @@
 build/
 node_modules/
 dist/
+
+# node:test のテスト（とその補助）は手書きのソースなので追跡する（親の *.mjs 除外を打ち消す）。
+!test/**/*.mjs
