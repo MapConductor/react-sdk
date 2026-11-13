@@ -217,6 +217,14 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    // 依存先が古い版を引き込み、既知の脆弱性がある（Dependabot）。修正版へ引き上げる。
+    constraints {
+        // expo-file-system が commons-io 1.4 を指定している。
+        implementation("commons-io:commons-io:2.14.0")
+        // TomTom SDK のテレメトリ → Azure IoT クライアントが 0.34.1 を引き込む。
+        implementation("org.apache.qpid:proton-j:0.35.0")
+    }
 }
 
 // MapLibre Android 13.x の AAR は prefab メタデータで「共有ライブラリ + 静的 STL」を
