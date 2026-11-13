@@ -3,7 +3,11 @@ import { SamplePageLayout } from '../components/SamplePageLayout';
 import { getLanguageFromPath } from '../samples/i18n';
 import { DEFAULT_SAMPLE_PAGE, isKnownSamplePage, isSupportedLanguage, resolveProviderForPage, type SupportedLanguage } from '../samples/sampleRegistry';
 
-export type MapProvider = 'maplibre' | 'mapbox' | 'leaflet' | 'openlayers' | 'google' | 'google-3d' | 'arcgis' | 'arcgis-3d' | 'mapkit' | 'azuremaps' | 'cesium' | 'here' | 'tomtom' | 'maptiler' | 'longdo' | 'mappls' | 'deckgl';
+export const MAP_PROVIDERS = [
+  'maplibre', 'mapbox', 'leaflet', 'openlayers', 'google', 'google-3d', 'arcgis', 'arcgis-3d', 'mapkit', 'azuremaps', 'cesium', 'here', 'tomtom', 'maptiler', 'longdo', 'mappls', 'deckgl',
+] as const;
+
+export type MapProvider = typeof MAP_PROVIDERS[number];
 
 const providerByPath = new Map<string, MapProvider>([
   ['maplibre', 'maplibre'], ['maplibre-3d', 'maplibre'], ['mapbox', 'mapbox'],
