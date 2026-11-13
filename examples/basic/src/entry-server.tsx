@@ -1,10 +1,10 @@
 import { renderToString } from 'react-dom/server';
 import { StaticRouter } from 'react-router-dom';
 import App from './App';
+import { MAP_PROVIDERS, providerPath } from './app/appRouting';
 import {
   DEFAULT_SAMPLE_PAGE,
   getSamplePageMetadata,
-  resolveProviderForPage,
   SAMPLE_PAGES,
   SUPPORTED_LANGUAGES,
   type SupportedLanguage,
@@ -36,27 +36,15 @@ export function getDocumentMetadata(url: string): {
 }
 
 export function getStaticPaths(): string[] {
-  const providers = [
-    'mapbox',
-    'leaflet',
-    'openlayers',
-    'arcgis',
-    'arcgis-3d',
-    'mapkit',
-    'azuremaps',
-    'cesium',
-    'here',
-    'google-maps',
-    'google-maps-3d',
-  ];
   const languages: readonly SupportedLanguage[] = SUPPORTED_LANGUAGES;
+  // Every provider's pages are prerendered: a path without its own file falls
+  // back to /index.html (the MapLibre page), and the client then fails to
+  // hydrate it (React #418).
   const providerPages = SAMPLE_PAGES
     .filter(page => page.id !== 'camera-sync')
     .flatMap(page => {
-      const mapLibreProvider = resolveProviderForPage('maplibre', page.id);
-      return [mapLibreProvider, ...providers].flatMap(provider =>
-        languages.map(language => `/${provider}/${page.id}/${language}`),
-      );
+      const paths = new Set(MAP_PROVIDERS.map(provider => providerPath(provider, page.id)));
+      return [...paths].flatMap(path => languages.map(language => `/${path}/${page.id}/${language}`));
     });
   return [
     ...providerPages,
