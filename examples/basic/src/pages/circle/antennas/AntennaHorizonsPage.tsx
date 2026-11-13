@@ -6,7 +6,7 @@ import { ControlPanel } from '../../../components/ControlPanel';
 
 import { decodeAntennas, type Antenna } from './antennaData';
 const CARRIERS = ['AT&T', 'T-Mobile / Sprint', 'Verizon', 'Others'];
-const COLORS = ['37,99,235', '219,39,119', '220,38,38', '100,116,139'];
+const COLORS = ['37,99,235', '219,39,119', '217,119,6', '100,116,139'];
 const STROKE_COLORS = COLORS.map(color => `rgba(${color},0.35)`);
 const FILL_COLORS = COLORS.map(color => `rgba(${color},0.65)`);
 
