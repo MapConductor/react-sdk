@@ -34,20 +34,39 @@ export function AntennaHorizonsPage() {
     }).then(b => setData(decodeAntennas(b))).catch(e => { if (!abort.signal.aborted) setError(String(e)); });
     return () => abort.abort();
   }, []);
-  const allStates = useMemo(() => {
+  // 723,800 states take seconds to make on a phone (each carries its own accessors), so
+  // they are made in slices that leave the page free to draw between them.
+  const [allStates, setAllStates] = useState<CircleState[]>([]);
+  useEffect(() => {
+    if (!data) return;
+    let cancelled = false;
     const onCellClick = (event: CircleEvent) => {
       const id = event.state.extra;
-      if (typeof id === 'string' && id.startsWith('asr-')) setTap(data?.[Number(id.slice(4))] ?? null);
+      if (typeof id === 'string' && id.startsWith('asr-')) setTap(data[Number(id.slice(4))] ?? null);
     };
-    return (data ?? []).map(a => {
-      const id = `asr-${a.registration}`;
-      return createCircleState({
-        id, center: createGeoPoint(a), radiusMeters: 500, geodesic: true, zIndex: a.registration,
-        fillColor: FILL_COLORS[a.carrier], strokeColor: STROKE_COLORS[a.carrier], strokeWidth: 0.5,
-        extra: id, onClick: onCellClick,
-      });
-    });
+    const made: CircleState[] = new Array(data.length);
+    let next = 0;
+    const slice = () => {
+      if (cancelled) return;
+      const until = performance.now() + 12;
+      while (next < data.length && performance.now() < until) {
+        for (const end = Math.min(next + 2_000, data.length); next < end; next++) {
+          const a = data[next];
+          const id = `asr-${a.registration}`;
+          made[next] = createCircleState({
+            id, center: createGeoPoint(a), radiusMeters: 500, geodesic: true, zIndex: a.registration,
+            fillColor: FILL_COLORS[a.carrier], strokeColor: STROKE_COLORS[a.carrier], strokeWidth: 0.5,
+            extra: id, onClick: onCellClick,
+          });
+        }
+      }
+      if (next < data.length) setTimeout(slice, 0);
+      else setAllStates(made);
+    };
+    slice();
+    return () => { cancelled = true; };
   }, [data]);
+  const preparing = data != null && allStates.length !== data.length;
   const counts = useMemo(() => {
     const result = [0, 0, 0, 0];
     for (const row of data ?? []) result[row.carrier]++;
@@ -55,14 +74,14 @@ export function AntennaHorizonsPage() {
   }, [data]);
   const states = useMemo(() => {
     if (carriers.length === CARRIERS.length) return allStates;
-    if (!data || carriers.length === 0) return [];
+    if (!data || carriers.length === 0 || preparing) return [];
     return allStates.filter((_, index) => carriers.includes(data[index].carrier));
   }, [allStates, data, carriers]);
   const selection = useMemo(() => new CircleSelection(states), [states]);
   useEffect(() => { setTap(null); }, [states]);
   return <MapViewContainer key={String(alaska)} initialCamera={alaska ? { lat: 64, lng: -150, zoom: 5 } : { lat: 39, lng: -98, zoom: 4 }} onMapClick={() => setTap(null)}>
     <Circles states={selection} {...loading.bind('circles')} />
-    <LoadingOverlay visible={loading.active} />
+    <LoadingOverlay visible={loading.active || preparing} />
     {tap && <InfoBubble position={createGeoPoint(tap)}><div>{CARRIERS[tap.carrier]}<br />Cell position · Display radius: 500 m</div></InfoBubble>}
     <ControlPanel title="US cell positions (MCC 310–314)">
       <div>{error || (!data ? 'Loading OpenCellID data…' : `${states.length.toLocaleString()} / ${data.length.toLocaleString()} circles`)}</div>
