@@ -16,6 +16,7 @@ import {
 } from './PostOfficeMapProvider';
 import { browserPostOfficeDataSource, type PostOfficeDataSource } from './postOfficeData';
 import { usePostOfficeMarkers } from './usePostOfficeMarkers';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INITIAL_CAMERA = createMapCameraPosition({
   position: createGeoPoint({ latitude: 35.68049, longitude: 139.76669 }),
@@ -36,6 +37,7 @@ function PostOfficeContent({
   renderMapView: PostOfficeMapContentProps['renderMapView'];
   dataSource: PostOfficeDataSource;
 }) {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [selected, setSelected] = useState<MarkerState | null>(null);
   const selectMarker = useCallback((marker: MarkerState) => setSelected(marker), []);
@@ -45,7 +47,8 @@ function PostOfficeContent({
 
   return renderMapView(
     <>
-      <Markers states={markerStates} />
+      <Markers states={markerStates} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {selected && <PostOfficeInfoBubble marker={selected} mapViewState={mapViewState} />}
       <ControlPanel title={t(
         {

@@ -4,6 +4,7 @@ import { Polygons } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const COLUMNS = 10;
 const SPACING = 0.004;
@@ -46,6 +47,7 @@ function buildStates(rows: number, paletteIndex: number): PolygonState[] {
 }
 
 export function PolygonsPage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [paletteIndex, setPaletteIndex] = useState(0);
   const [states, setStates] = useState(() => buildStates(3, 0));
@@ -62,7 +64,8 @@ export function PolygonsPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
-      <Polygons states={states} />
+      <Polygons states={states} {...loading.bind('polygons')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel
         title={t({
           en: `Polygons (${states.length})`,

@@ -13,6 +13,7 @@ import { useSampleI18n } from '../../../samples/i18n';
 import { StreetTreeInfoBubble } from './StreetTreeInfoBubble';
 import { browserStreetTreeDataSource } from './streetTreeData';
 import { useStreetTreeMarkers } from './useStreetTreeMarkers';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const DEFAULT_CAMERA = { lat: 35.6812, lng: 139.7671, zoom: 11 };
 
@@ -39,6 +40,7 @@ const MARKER_TILING_OPTIONS: MarkerTilingOptions = {
 };
 
 export function StreetTreePage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [selected, setSelected] = useState<MarkerState | null>(null);
   const selectMarker = useCallback((marker: MarkerState) => setSelected(marker), []);
@@ -89,7 +91,8 @@ export function StreetTreePage() {
       onCameraMoveEnd={relabel}
       onStateReady={applyTreeStyle}
     >
-      <Markers states={markerStates} />
+      <Markers states={markerStates} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {selected && <StreetTreeInfoBubble marker={selected} />}
       <ControlPanel
         title={t({

@@ -12,6 +12,7 @@ import {
 import { CircleIcon, FlagIcon, PhotoCardPinIcon, RightTailInfoBubbleIcon, RoundInfoBubbleIcon, RoundedSquarePinIcon, TeardropPinIcon, ThumbnailPinIcon } from '@mapconductor/react-icons';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 0.014, lng: 0.008, zoom: 15 };
 
@@ -68,6 +69,7 @@ interface MarkerDefinition {
 }
 
 export function MarkerIconsPage() {
+  const loading = useLoadingOverlay();
   const humanImage = useLoadedImage(HUMAN_ICON_URL);
   const launcherImage = useLoadedImage(LAUNCHER_ICON_URL);
   const weatherPngUrl = useRasterizedDataUrl(WEATHER_ICON_URL);
@@ -326,7 +328,8 @@ export function MarkerIconsPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelected(null)}>
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {typeof selected?.extra === 'string' && (
         <InfoBubble marker={selected} bubbleColor="#ffffff">
           <pre className="marker-icon-info-bubble">{selected.extra}</pre>

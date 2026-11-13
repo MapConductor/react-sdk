@@ -11,6 +11,7 @@ import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../components/ControlPanel';
 import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 15 };
 
@@ -33,6 +34,7 @@ const INITIAL_POINTS: GeoPoint[] = [
 ];
 
 export function PolylinePage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [points, setPoints] = useState<GeoPoint[]>(INITIAL_POINTS);
   const setPointsRef = useRef(setPoints);
@@ -80,7 +82,8 @@ export function PolylinePage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polyline state={polylineState} />
-      <Markers states={wayPointMarkers} />
+      <Markers states={wayPointMarkers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel title={t({ en: 'Description', ja: '説明', 'es-419': 'Descripción', de: 'Beschreibung', th: 'คำอธิบาย', hi: 'विवरण' })}>
         <p className="control-panel-note">
           {t(

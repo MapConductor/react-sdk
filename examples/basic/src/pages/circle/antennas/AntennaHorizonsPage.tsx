@@ -3,6 +3,7 @@ import { createCircleState, createGeoPoint, type CircleEvent, type CircleState }
 import { Circles, InfoBubble } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { ControlPanel } from '../../../components/ControlPanel';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 import { decodeAntennas, type Antenna } from './antennaData';
 const CARRIERS = ['AT&T', 'T-Mobile / Sprint', 'Verizon', 'Others'];
@@ -24,6 +25,7 @@ export function AntennaHorizonsPage() {
   const [carriers, setCarriers] = useState([0, 1, 2, 3]);
   const [alaska, setAlaska] = useState(false);
   const [tap, setTap] = useState<Antenna | null>(null);
+  const loading = useLoadingOverlay();
   useEffect(() => {
     const abort = new AbortController();
     fetch('/antennas/us-antennas.bin', { signal: abort.signal }).then(r => {
@@ -59,7 +61,8 @@ export function AntennaHorizonsPage() {
   const selection = useMemo(() => new CircleSelection(states), [states]);
   useEffect(() => { setTap(null); }, [states]);
   return <MapViewContainer key={String(alaska)} initialCamera={alaska ? { lat: 64, lng: -150, zoom: 5 } : { lat: 39, lng: -98, zoom: 4 }} onMapClick={() => setTap(null)}>
-    <Circles states={selection} />
+    <Circles states={selection} {...loading.bind('circles')} />
+    <LoadingOverlay visible={loading.active} />
     {tap && <InfoBubble position={createGeoPoint(tap)}><div>{CARRIERS[tap.carrier]}<br />Cell position · Display radius: 500 m</div></InfoBubble>}
     <ControlPanel title="US cell positions (MCC 310–314)">
       <div>{error || (!data ? 'Loading OpenCellID data…' : `${states.length.toLocaleString()} / ${data.length.toLocaleString()} circles`)}</div>

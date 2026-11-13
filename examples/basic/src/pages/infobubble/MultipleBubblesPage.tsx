@@ -2,10 +2,12 @@ import { useMemo, useState } from 'react';
 import { ColorDefaultIcon, createGeoPoint, createMarkerState } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../MapViewContainer';
+import { LoadingOverlay, useLoadingOverlay } from '../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 37.7749, lng: -122.4194, zoom: 15, tilt: 45 };
 
 export function MultipleBubblesPage() {
+  const loading = useLoadingOverlay();
   const [selectedMarkerIds, setSelectedMarkerIds] = useState<Set<string>>(
     () => new Set(['marker_0', 'marker_1', 'marker_2'])
   );
@@ -48,7 +50,8 @@ export function MultipleBubblesPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelectedMarkerIds(new Set())}>
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {markers.map(marker =>
         selectedMarkerIds.has(marker.id) ? (
           <InfoBubble key={marker.id} marker={marker} bubbleColor="#ffffff" borderColor="#000000">

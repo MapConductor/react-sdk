@@ -12,6 +12,7 @@ import { Markers, Polyline } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 35.0, lng: 0.0, zoom: 3 };
 
@@ -34,6 +35,7 @@ const CONNECTIONS = [
 ] as const;
 
 function FlyToContent({ mapViewState }: { mapViewState: MapViewStateInterface<MapDesignTypeInterface<unknown>> }) {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [icons, setIcons] = useState<Map<string, ImageIcon> | null>(null);
   const [geodesic, setGeodesic] = useState(false);
@@ -82,7 +84,8 @@ function FlyToContent({ mapViewState }: { mapViewState: MapViewStateInterface<Ma
   return (
     <>
       {polylines.map(polyline => <Polyline key={polyline.id} state={polyline} />)}
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel title={t(
         {
           en: 'Fly To',

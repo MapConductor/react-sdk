@@ -15,6 +15,7 @@ import { Circle, Markers } from '@mapconductor/js-sdk-react';
 import { ControlPanel, SliderControl } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 /**
  * ほとんどのプロバイダは 60 度で頭打ちになるが、ArcGIS だけは 90 度近くまで実際に傾く。
@@ -167,13 +168,15 @@ function TiltContent({ mapViewState }: { mapViewState: MapViewStateInterface<Map
 }
 
 export function TiltPage() {
+  const loading = useLoadingOverlay();
   const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={setMapViewState}>
       {ANCHOR_CIRCLES.map(circle => (
         <Circle key={circle.id} state={circle} />
       ))}
-      <Markers states={TILT_MARKERS} />
+      <Markers states={TILT_MARKERS} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {mapViewState && <TiltContent mapViewState={mapViewState} />}
     </MapViewContainer>
   );
