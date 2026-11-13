@@ -3,6 +3,7 @@ import { createGeoPoint, createMarkerState, type MarkerState } from '@mapconduct
 import { Markers } from '@mapconductor/js-sdk-react';
 import { Toast, useToast } from '../components/Toast';
 import { MapViewContainer } from '../MapViewContainer';
+import { LoadingOverlay, useLoadingOverlay } from '../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 21.2910, lng: -157.8380, zoom: 12 };
 
@@ -13,6 +14,7 @@ const MARKER_DATA = [
 ];
 
 export function MarkerPage() {
+  const loading = useLoadingOverlay();
   const { messages, showToast, dismissToast } = useToast();
   const showToastRef = useRef(showToast);
   showToastRef.current = showToast;
@@ -34,7 +36,8 @@ export function MarkerPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <Toast messages={messages} onDismiss={dismissToast} />
     </MapViewContainer>
   );

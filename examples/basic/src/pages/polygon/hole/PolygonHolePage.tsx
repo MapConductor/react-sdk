@@ -12,6 +12,7 @@ import { Markers, Polygon } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 43.0602, lng: 141.3195, zoom: 11 };
 // A regional mask generously covering the Sapporo area. Cesium cannot
@@ -46,6 +47,7 @@ const INITIAL_HOLES = [
 const HOLE_MARKER_COLORS = ['#2563eb', '#f97316'];
 
 export function PolygonHolePage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [holes, setHoles] = useState<GeoPoint[][]>(() => INITIAL_HOLES.map(hole => [...hole]));
   const setHolesRef = useRef(setHoles);
@@ -101,7 +103,8 @@ export function PolygonHolePage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} restrictBounds={RESTRICT_BOUNDS}>
       <Polygon state={state} />
-      <Markers states={vertexMarkers} />
+      <Markers states={vertexMarkers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel title={t(
         {
           en: 'Polygon with Holes',

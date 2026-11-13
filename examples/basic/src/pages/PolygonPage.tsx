@@ -11,10 +11,12 @@ import { Toast, useToast } from '../components/Toast';
 import { POLYGON_VERTICES } from '../data/storeData';
 import { MapViewContainer } from '../MapViewContainer';
 import { useSampleI18n } from '../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 41.7969, lng: 140.7569, zoom: 16 };
 
 export function PolygonPage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   const [vertices, setVertices] = useState<GeoPoint[]>(POLYGON_VERTICES);
   const [fillOpacity, setFillOpacity] = useState(0.3);
@@ -68,7 +70,8 @@ export function PolygonPage() {
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
       <Polygon state={polygonState} />
-      <Markers states={vertexMarkers} />
+      <Markers states={vertexMarkers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel title={t(
         {
           en: 'Polygon Example',

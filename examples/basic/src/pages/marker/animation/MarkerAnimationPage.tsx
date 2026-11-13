@@ -3,6 +3,7 @@ import { Markers } from '@mapconductor/js-sdk-react';
 import { ControlPanel } from '../../../components/ControlPanel';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { useSampleI18n } from '../../../samples/i18n';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 // android の AnimationPageViewModel.kt / ios の AnimationPageViewModel.swift と同一仕様:
 // Drop / Bounce のラベルを持つ 2 マーカーを表示し、タップすると各マーカーに
@@ -24,10 +25,12 @@ const MARKERS = SPOTS.map(spot =>
 );
 
 export function MarkerAnimationPage() {
+  const loading = useLoadingOverlay();
   const { t } = useSampleI18n();
   return (
     <MapViewContainer initialCamera={INIT_CAMERA}>
-      <Markers states={MARKERS} />
+      <Markers states={MARKERS} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       <ControlPanel title={t(
         {
           en: 'Marker Animation',

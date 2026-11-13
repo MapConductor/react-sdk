@@ -11,6 +11,7 @@ import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { STORES, type StoreInfo } from '../../../data/storeData';
 import { MapViewContainer } from '../../../MapViewContainer';
 import { StoreInfoView } from './StoreInfoView';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 const INIT_CAMERA = { lat: 21.382314, lng: -157.933097, zoom: 10 };
 
@@ -22,6 +23,7 @@ const STORE_ICON_URLS: Record<string, string> = {
 };
 
 export function MapPage() {
+  const loading = useLoadingOverlay();
   // Gets the mapViewState for controll map view.
   const [mapViewState, setMapViewState] = useState<MapViewStateInterface<MapDesignTypeInterface<unknown>> | null>(null);
   // Holds the selected marker state.
@@ -76,7 +78,8 @@ export function MapPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} onStateReady={setMapViewState} onMapClick={() => setSelectedMarker(null)}>
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {selectedMarker && (
         <InfoBubble marker={selectedMarker} bubbleColor="#ffffff">
           <StoreInfoView info={selectedMarker.extra as StoreInfo} />

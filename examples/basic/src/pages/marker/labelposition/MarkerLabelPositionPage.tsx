@@ -7,6 +7,7 @@ import {
 } from '@mapconductor/js-sdk-core';
 import { InfoBubble, Markers } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 // 信州大学（松本キャンパス）周辺に 3 × 3 で並べ、それぞれ違う labelPosition を付ける。
 const CENTER = { latitude: 36.2526, longitude: 137.9828 };
@@ -20,6 +21,7 @@ const POSITIONS: MarkerLabelPosition[][] = [
 ];
 
 export function MarkerLabelPositionPage() {
+  const loading = useLoadingOverlay();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const markers = useMemo(
     () =>
@@ -47,7 +49,8 @@ export function MarkerLabelPositionPage() {
 
   return (
     <MapViewContainer initialCamera={INIT_CAMERA} onMapClick={() => setSelectedId(null)}>
-      <Markers states={markers} />
+      <Markers states={markers} {...loading.bind('markers')} />
+      <LoadingOverlay visible={loading.active} />
       {selected ? (
         <InfoBubble key={selected.id} marker={selected} bubbleColor="#ffffff" borderColor="#000000">
           <code>labelPosition: "{selected.extra as string}"</code>

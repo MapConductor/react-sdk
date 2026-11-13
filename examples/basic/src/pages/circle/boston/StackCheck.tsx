@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { createGeoPoint, createMarkerState, createPolygonState, createPolylineState, type GeoPoint } from '@mapconductor/js-sdk-core';
 import { Marker, Polygons, Polylines } from '@mapconductor/js-sdk-react';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 /** Opaque colours, so a pixel shows which one is on top. */
 export const STACK_SQUARE_COLOR = '#7C3AED';
@@ -21,6 +22,7 @@ const MARKER_BELOW_ROAD = 0.0001;
  * in every cell; the road of the cell at the centre runs across the marker.
  */
 export function StackCheck({ center }: { center: GeoPoint }) {
+  const loading = useLoadingOverlay();
   const { squares, roads } = useMemo(() => {
     const squares = [];
     const roads = [];
@@ -55,8 +57,9 @@ export function StackCheck({ center }: { center: GeoPoint }) {
   }), [center]);
   return (
     <>
-      <Polygons states={squares} />
-      <Polylines states={roads} />
+      <Polygons states={squares} {...loading.bind('polygons')} />
+      <Polylines states={roads} {...loading.bind('polylines')} />
+      <LoadingOverlay visible={loading.active} />
       <Marker state={marker} />
     </>
   );

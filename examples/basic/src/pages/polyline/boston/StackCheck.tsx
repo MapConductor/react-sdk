@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { createCircleState, createGeoPoint, createMarkerState, createPolygonState, type GeoPoint } from '@mapconductor/js-sdk-core';
 import { Circle, Marker, Polygons } from '@mapconductor/js-sdk-react';
+import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 /**
  * `?stack=1` on the roads page: other overlays where the roads are, to see the stack.
@@ -8,6 +9,7 @@ import { Circle, Marker, Polygons } from '@mapconductor/js-sdk-react';
  * the circle < the road tiles < the marker.
  */
 export function StackCheck({ center }: { center: GeoPoint }) {
+  const loading = useLoadingOverlay();
   const squares = useMemo(() => {
     const out = [];
     const step = 0.0004, size = 0.0003;
@@ -33,7 +35,8 @@ export function StackCheck({ center }: { center: GeoPoint }) {
   const marker = useMemo(() => createMarkerState({ id: 'stack-marker', position: center }), [center]);
   return (
     <>
-      <Polygons states={squares} />
+      <Polygons states={squares} {...loading.bind('polygons')} />
+      <LoadingOverlay visible={loading.active} />
       <Circle state={circle} />
       <Marker state={marker} />
     </>
