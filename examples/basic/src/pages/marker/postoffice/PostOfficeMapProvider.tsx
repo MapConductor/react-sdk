@@ -7,9 +7,13 @@ import {
   type MarkerTilingOptions,
 } from '@mapconductor/js-sdk-core';
 import { MapLibreDesign, MapLibreMapView2D, useMapLibreViewState } from '@mapconductor/react-for-maplibre';
+import '@mapconductor/react-for-maplibre/style.css';
 import { MapboxDesign, MapBoxMapView2D, useMapboxViewState } from '@mapconductor/react-for-mapbox';
+import '@mapconductor/react-for-mapbox/style.css';
 import { LeafletDesign, LeafletMapView, useLeafletMapViewState } from '@mapconductor/react-for-leaflet';
+import '@mapconductor/react-for-leaflet/style.css';
 import { OpenLayersDesign, OpenLayersMapView, useOpenLayersMapViewState } from '@mapconductor/react-for-openlayers';
+import '@mapconductor/react-for-openlayers/style.css';
 import { ArcGISDesign, ArcGISMapView, ArcGISMapView2D, useArcGISViewState } from '@mapconductor/react-for-arcgis';
 import { AzureMapsDesign, AzureMapsMapView, useAzureMapsViewState } from '@mapconductor/react-for-azuremaps';
 import '@mapconductor/react-for-azuremaps/style.css';
