@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createCircleState, createGeoPoint, type CircleEvent, type CircleState } from '@mapconductor/js-sdk-core';
 import { Circles, InfoBubble } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { ControlPanel } from '../../../components/ControlPanel';
+import { BelowMapCard } from '../../../components/BelowMapCard';
 import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 import { decodeAntennas, type Antenna } from './antennaData';
@@ -77,11 +77,13 @@ export function AntennaHorizonsPage() {
   }, [allStates, data, carriers]);
   const selection = useMemo(() => new CircleSelection(states), [states]);
   useEffect(() => { setTap(null); }, [states]);
-  return <MapViewContainer key={String(alaska)} initialCamera={alaska ? { lat: 64, lng: -150, zoom: 5 } : { lat: 39, lng: -98, zoom: 4 }} onMapClick={() => setTap(null)}>
-    <Circles states={selection} {...loading.bind('circles')} />
-    <LoadingOverlay visible={loading.active || preparing} />
-    {tap && <InfoBubble position={createGeoPoint(tap)}><div>{CARRIERS[tap.carrier]}<br />Cell position · Display radius: 500 m</div></InfoBubble>}
-    <ControlPanel title="US cell positions (MCC 310–314)">
+  return <>
+    <MapViewContainer key={String(alaska)} initialCamera={alaska ? { lat: 64, lng: -150, zoom: 5 } : { lat: 39, lng: -98, zoom: 4 }} onMapClick={() => setTap(null)}>
+      <Circles states={selection} {...loading.bind('circles')} />
+      <LoadingOverlay visible={loading.active || preparing} />
+      {tap && <InfoBubble position={createGeoPoint(tap)}><div>{CARRIERS[tap.carrier]}<br />Cell position · Display radius: 500 m</div></InfoBubble>}
+    </MapViewContainer>
+    <BelowMapCard title="US cell positions (MCC 310–314)">
       <div>{error || (!data ? 'Loading OpenCellID data…' : `${states.length.toLocaleString()} / ${data.length.toLocaleString()} circles`)}</div>
       <button onClick={() => setAlaska(!alaska)}>{alaska ? 'US overview' : 'Alaska'}</button>
       <div style={{ display: 'flex', gap: 6, margin: '8px 0' }}>
@@ -102,6 +104,6 @@ export function AntennaHorizonsPage() {
       </div>
       <p>Cell positions shown as 500 m radius circles; not signal coverage. Showing all cells for the selected carriers. MCC 310–314; not a complete tower inventory.</p>
       <div>Cell tower data from <a href="https://opencellid.org">OpenCellID</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div>
-    </ControlPanel>
-  </MapViewContainer>;
+    </BelowMapCard>
+  </>;
 }
