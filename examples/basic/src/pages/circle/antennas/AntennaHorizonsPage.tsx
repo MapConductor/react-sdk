@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { createCircleState, createGeoPoint, type CircleEvent, type CircleState } from '@mapconductor/js-sdk-core';
 import { Circles, InfoBubble } from '@mapconductor/js-sdk-react';
 import { MapViewContainer } from '../../../MapViewContainer';
-import { ControlPanel } from '../../../components/ControlPanel';
+import { BelowMapCard } from '../../../components/BelowMapCard';
 import { LoadingOverlay, useLoadingOverlay } from '../../../components/LoadingOverlay';
 
 import { decodeAntennas, type Antenna } from './antennaData';
@@ -10,6 +10,9 @@ const CARRIERS = ['AT&T', 'T-Mobile / Sprint', 'Verizon', 'Others'];
 const COLORS = ['37,99,235', '219,39,119', '217,119,6', '100,116,139'];
 const STROKE_COLORS = COLORS.map(color => `rgba(${color},0.35)`);
 const FILL_COLORS = COLORS.map(color => `rgba(${color},0.65)`);
+// Drawn for this sample in the carrier's circle colour (not the carriers' logos); the
+// Android and iOS samples ship the same drawing.
+const CARRIER_ICONS = ['att', 'tmobile', 'verizon', 'others'].map(name => `/antennas/carrier-${name}.svg`);
 
 // Keep the population out of React's development performance-entry payload.
 class CircleSelection implements Iterable<CircleState> {
@@ -67,11 +70,6 @@ export function AntennaHorizonsPage() {
     return () => { cancelled = true; };
   }, [data]);
   const preparing = data != null && allStates.length !== data.length;
-  const counts = useMemo(() => {
-    const result = [0, 0, 0, 0];
-    for (const row of data ?? []) result[row.carrier]++;
-    return result;
-  }, [data]);
   const states = useMemo(() => {
     if (carriers.length === CARRIERS.length) return allStates;
     if (!data || carriers.length === 0 || preparing) return [];
@@ -79,16 +77,33 @@ export function AntennaHorizonsPage() {
   }, [allStates, data, carriers]);
   const selection = useMemo(() => new CircleSelection(states), [states]);
   useEffect(() => { setTap(null); }, [states]);
-  return <MapViewContainer key={String(alaska)} initialCamera={alaska ? { lat: 64, lng: -150, zoom: 5 } : { lat: 39, lng: -98, zoom: 4 }} onMapClick={() => setTap(null)}>
-    <Circles states={selection} {...loading.bind('circles')} />
-    <LoadingOverlay visible={loading.active || preparing} />
-    {tap && <InfoBubble position={createGeoPoint(tap)}><div>{CARRIERS[tap.carrier]}<br />Cell position · Display radius: 500 m</div></InfoBubble>}
-    <ControlPanel title="US cell positions (MCC 310–314)">
+  return <>
+    <MapViewContainer key={String(alaska)} initialCamera={alaska ? { lat: 64, lng: -150, zoom: 5 } : { lat: 39, lng: -98, zoom: 4 }} onMapClick={() => setTap(null)}>
+      <Circles states={selection} {...loading.bind('circles')} />
+      <LoadingOverlay visible={loading.active || preparing} />
+      {tap && <InfoBubble position={createGeoPoint(tap)}><div>{CARRIERS[tap.carrier]}<br />Cell position · Display radius: 500 m</div></InfoBubble>}
+    </MapViewContainer>
+    <BelowMapCard title="US cell positions (MCC 310–314)">
       <div>{error || (!data ? 'Loading OpenCellID data…' : `${states.length.toLocaleString()} / ${data.length.toLocaleString()} circles`)}</div>
       <button onClick={() => setAlaska(!alaska)}>{alaska ? 'US overview' : 'Alaska'}</button>
-      {CARRIERS.map((name, index) => <label key={name} style={{ display: 'block' }}><input type="checkbox" checked={carriers.includes(index)} onChange={e => setCarriers(current => e.target.checked ? [...current, index] : current.filter(c => c !== index))} />{name} ({counts[index].toLocaleString()})</label>)}
+      <div style={{ display: 'flex', gap: 6, margin: '8px 0' }}>
+        {CARRIERS.map((name, index) => {
+          const on = carriers.includes(index);
+          return <button key={name} type="button" aria-pressed={on} title={name}
+            onClick={() => setCarriers(current => on ? current.filter(c => c !== index) : [...current, index])}
+            style={{
+              flex: '1 1 0', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              padding: '6px 2px', borderRadius: 8, cursor: 'pointer', background: 'transparent',
+              border: `2px solid ${on ? `rgb(${COLORS[index]})` : 'transparent'}`,
+              color: 'inherit', font: 'inherit', fontSize: 12, lineHeight: 1.2, opacity: on ? 1 : 0.45,
+            }}>
+            <img src={CARRIER_ICONS[index]} alt="" width={32} height={32} style={{ filter: on ? undefined : 'grayscale(1)' }} />
+            {name}
+          </button>;
+        })}
+      </div>
       <p>Cell positions shown as 500 m radius circles; not signal coverage. Showing all cells for the selected carriers. MCC 310–314; not a complete tower inventory.</p>
       <div>Cell tower data from <a href="https://opencellid.org">OpenCellID</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></div>
-    </ControlPanel>
-  </MapViewContainer>;
+    </BelowMapCard>
+  </>;
 }
