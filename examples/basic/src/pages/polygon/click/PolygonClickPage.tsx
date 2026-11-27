@@ -92,7 +92,7 @@ export function PolygonClickPage() {
       {polygons.map(polygon => (
         <Polygon
           key={polygon.id}
-          state={polygon.copy({ onClick: event => handlePolygonClick(event.clicked) })}
+          state={polygon.copy({ id: polygon.id, onClick: event => handlePolygonClick(event.clicked) })}
         />
       ))}
       {marker && (

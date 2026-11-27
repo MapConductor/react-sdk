@@ -6,6 +6,7 @@ const doc: SamplePageDoc = {
     <Polygon
       key={polygon.id}
       state={polygon.copy({
+        id: polygon.id,
         onClick: event => showClickedMarker(event.clicked),
       })}
     />
